@@ -28,6 +28,8 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
       - name: Swift version
         run: swift --version
       - name: Run Swift tests
