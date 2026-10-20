@@ -810,30 +810,38 @@ sequenceDiagram
 
 ### 10.1 リポジトリ構成(コンテンツ用)
 
+コンテンツはアプリと同じリポジトリ(モノレポ)の `content/` で管理する。Schema と Swift の `Codable` 定義(`packages/DomainModels/`)を 1 つの PR で同時に変更するためである。
+
 ```
-pca-content/
-├── questions/
-│   ├── domain1/*.yaml
-│   └── …
-├── flashcards/*.yaml
-├── docs/*.md
-├── cases/*.yaml
-├── exam-sets.yaml          # 模試ごとの問題 ID とケースの割り当て
-├── weights.yaml            # ドメイン比重
-├── scripts/
-│   ├── validate.py         # CI-01〜CI-08
-│   ├── build_pack.py       # YAML → JSON、検索インデックス生成
-│   └── sign_manifest.py
+(リポジトリのルート)
+├── content/
+│   ├── schemas/                # JSON Schema(Draft 2020-12)
+│   ├── questions/
+│   │   ├── domain1/*.yaml
+│   │   └── …
+│   ├── flashcards/*.yaml
+│   ├── docs/*.md
+│   ├── cases/*.yaml
+│   ├── exam-sets.yaml          # 模試ごとの問題 ID とケースの割り当て
+│   ├── weights.yaml            # ドメイン比重
+│   ├── validation.yaml         # 検証の閾値
+│   └── scripts/
+│       ├── validate.py         # CI-01〜CI-11
+│       ├── build_pack.py       # YAML → JSON、検索インデックス生成(未実装)
+│       └── sign_manifest.py    # (未実装)
+├── packages/DomainModels/      # Schema に対応する Swift の値型
 └── .github/workflows/
-    ├── validate.yml        # PR ごとに実行
-    └── release.yml         # タグで実行 → 署名 → Cloud Storage へアップロード
+    ├── content-validate.yml    # PR ごとに実行
+    ├── domainmodels-test.yml   # Schema・DomainModels の変更時に swift test
+    ├── content-link-check.yml  # 週 1 回のリンク切れ確認
+    └── release.yml             # content-vX.Y.Z タグで実行 → 署名 → Cloud Storage へアップロード(未実装)
 ```
 
 ### 10.2 パイプライン
 
 ```mermaid
 flowchart LR
-    PR["PR 作成"] --> V["validate.yml<br/>CI-01〜08"]
+    PR["PR 作成"] --> V["content-validate.yml<br/>CI-01〜11"]
     V --> RV["人手レビュー<br/>(作成者以外)"]
     RV --> M["main へマージ"]
     M --> T["バージョンタグ"]
