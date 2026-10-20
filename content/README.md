@@ -1,52 +1,58 @@
-# pca-content
+# content — 学習コンテンツ
 
-Google Cloud Professional Cloud Architect(PCA)試験対策 iOS アプリの学習コンテンツを管理するリポジトリです。
+Google Cloud Professional Cloud Architect(PCA)試験対策 iOS アプリの学習コンテンツです。
 問題、フラッシュカード、ケーススタディなどを YAML / Markdown で管理し、CI で検証してから JSON に変換して配信します。
+モノレポ全体の構成は [ルートの README](../README.md) を参照してください。
 
-このリポジトリで定める **JSON Schema と検証ルール** は、iOS アプリ側の Swift `Codable` 定義(`swift/DomainModels/`)と CI の両方の基準になります。
+ここで定める **JSON Schema と検証ルール** は、Swift の `Codable` 定義(`packages/DomainModels/`)と CI の両方の基準になります。
 
 > [!IMPORTANT]
-> **運用ルール: Schema を変更したら Swift 側も更新し、両方のテストを通すこと。**
-> `schemas/*.schema.json` を変更したときは、次の作業を同じ PR で行ってください。
-> 1. `swift/DomainModels/Sources/` の型を更新する
-> 2. 必要に応じて `tests/fixtures/generate.py` を更新し、fixture を再生成する
-> 3. `scripts/export_json.py` で Swift 用 JSON を再生成する
+> **運用ルール: Schema を変更したら `packages/DomainModels` も同じ PR で更新し、両方のテストを通すこと。**
+> `content/schemas/*.schema.json` を変更したときは、次の作業を同じ PR で行ってください。
+> 1. `packages/DomainModels/Sources/` の型を更新する
+> 2. 必要に応じて `content/tests/fixtures/generate.py` を更新し、fixture を再生成する
+> 3. `content/scripts/export_json.py` で Swift 用 JSON(`content/tests/fixtures/valid-json/`)を再生成する
 > 4. `pytest` と `swift test` の両方が通ることを確認する
 >
-> CI(`validate.yml`)はこの両方を実行します。
+> CI では `content-validate.yml`(pytest + validate.py)と `domainmodels-test.yml`(swift test)が実行されます。
 
 ## ローカルでの実行
 
+ルートのディレクトリ名にスペースが含まれるため、パスは必ずクォートしてください。
+以下のコマンドは、リポジトリのルートから実行する前提です。
+
 ```sh
-# Python 3.14(pyenv の例)
+cd "/path/to/Google Cloud Professional Cloud Architect"
+
+# Python 3.14(pyenv の例)。仮想環境は content/.venv に作る
 pyenv install -s 3.14.7
-python3.14 -m venv .venv
-.venv/bin/pip install -r requirements.txt
+python3.14 -m venv content/.venv
+content/.venv/bin/pip install -r content/requirements.txt
 
-# コンテンツの検証
-.venv/bin/python scripts/validate.py                    # リポジトリ直下を検証
-.venv/bin/python scripts/validate.py --check-links      # リンク切れ確認(CI-06)も行う
-.venv/bin/python scripts/validate.py --only CI-02,CI-03 --format json
+# コンテンツの検証(--root を省略すると content/ が対象。どのディレクトリから実行しても結果は同じ)
+content/.venv/bin/python content/scripts/validate.py
+content/.venv/bin/python content/scripts/validate.py --check-links      # リンク切れ確認(CI-06)も行う
+content/.venv/bin/python content/scripts/validate.py --only CI-02,CI-03 --format json
 
-# テスト
-.venv/bin/pytest
+# テスト(pyproject.toml がある content/ で実行する)
+(cd content && .venv/bin/pytest)
 
 # fixture と Swift 用 JSON の再生成(コミット対象)
-.venv/bin/python tests/fixtures/generate.py
-.venv/bin/python scripts/export_json.py
+content/.venv/bin/python content/tests/fixtures/generate.py
+content/.venv/bin/python content/scripts/export_json.py
 
 # Swift のテスト
-cd swift/DomainModels && swift test
+swift test --package-path packages/DomainModels
 ```
 
 `swift test` が `plugin for module 'TestingMacros' not found` で失敗する場合は、Command Line Tools ではなく Xcode のツールチェーンを使ってください。
-例: `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test`
+例: `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --package-path packages/DomainModels`
 
 ### validate.py
 
 ```
-python scripts/validate.py [--root .] [--config validation.yaml] [--check-links] [--strict]
-                           [--format text|json|github] [--only CI-02,CI-03]
+python content/scripts/validate.py [--root content] [--config validation.yaml] [--check-links] [--strict]
+                                   [--format text|json|github] [--only CI-02,CI-03]
 ```
 
 | 項目 | 仕様 |
@@ -54,12 +60,13 @@ python scripts/validate.py [--root .] [--config validation.yaml] [--check-links]
 | 終了コード | `0` = error なし / `1` = error あり(`--strict` では warning も含む)/ `2` = 引数や設定の不備 |
 | `--format text` | `path:line: [CI-xx] severity: message`。最後に件数の集計とルール別の内訳を出す |
 | `--format json` | `[{"rule","severity","file","line","message"}]`。`file` は `--root` からの相対パス |
-| `--format github` | `::error file=...,line=...,title=CI-xx::message`。`file` はカレントディレクトリからの相対パス |
+| `--format github` | `::error file=...,line=...,title=CI-xx::message`。`file` はリポジトリルート(`GITHUB_WORKSPACE`、なければカレントディレクトリ)からの相対パス |
 | `--only` | 指定したルールだけを報告する。Schema 検証そのものは常に行う(後述) |
 | `--strict` | warning を error に昇格する。出力の深刻度と終了コードの両方に反映される |
-| `--config` | 省略時は `<root>/validation.yaml` を使い、なければリポジトリの `validation.yaml` を使う |
+| `--root` | 省略時は、スクリプトの位置から見た `content/` を使う(実行場所に依存しない) |
+| `--config` | 省略時は `<root>/validation.yaml` を使い、なければ `content/validation.yaml` を使う |
 
-## ディレクトリ構成
+## ディレクトリ構成(`content/` 配下)
 
 ```
 schemas/                  JSON Schema(Draft 2020-12)
@@ -73,9 +80,8 @@ decisions/*.yaml          ディシジョンツリー(1ファイル1ツリー)
 drills/keywords.yaml      キーワード反射ドリル({ drills: [...] })
 docs/*.md                 YAML フロントマター + Markdown 本文
 scripts/validate.py       検証 CLI(実装は scripts/pcavalidate/)
-scripts/export_json.py    YAML → JSON 変換(Swift テスト用 fixture の生成)
-tests/                    pytest と fixture
-swift/DomainModels/       Schema に対応する Swift の Codable 定義(SwiftPM)
+scripts/export_json.py    YAML → JSON 変換(tests/fixtures/valid-json/ の生成)
+tests/                    pytest と fixture(valid-json/ は Swift テストが直接参照する)
 ```
 
 ## Schema
@@ -152,17 +158,19 @@ swift/DomainModels/       Schema に対応する Swift の Codable 定義(SwiftP
 | `tests/test_cli.py` | 終了コード、3種類の出力形式、エスケープ、引数エラー |
 | `tests/test_schemas.py` | Schema 自体の妥当性、manifest や QuestionType などの正例と負例 |
 | `tests/test_perf.py` | 問題 500 件で 10 秒以内に終わること |
-| `tests/test_generated.py` | コミット済みの fixture と Swift 用 JSON が、生成スクリプトの出力と一致すること |
-| `swift/DomainModels/Tests/` | Swift Testing。valid fixture の JSON のデコード、`QuestionType` などのカスタムデコード、エンコードと再デコードの往復 |
+| `tests/fixtures/valid-json/` | valid を JSON に変換したもの。`packages/DomainModels` のテストが `../../content/tests/fixtures/valid-json` として直接読む(パッケージ内にはコピーしない) |
+| `tests/test_generated.py` | コミット済みの fixture と valid-json が、生成スクリプトの出力と一致すること |
+| `packages/DomainModels/Tests/` | Swift Testing。valid fixture の JSON のデコード、`QuestionType` などのカスタムデコード、エンコードと再デコードの往復 |
 
 fixture は `tests/fixtures/generate.py` が固定 seed で決定論的に生成します。手で編集せず、生成スクリプトを変更してから再生成してください。
 
-## CI
+## CI(ルートの `.github/` に配置)
 
 | ワークフロー | トリガー | 内容 |
 |---|---|---|
-| `validate.yml` | `pull_request`、`main` への push | Python 3.14 で `pytest` と `validate.py --format github` を実行する。macOS で `swift test` を実行する |
-| `link-check.yml` | 毎週月曜 00:00 UTC、手動実行 | `validate.py --only CI-06 --check-links --strict --format github` を実行する(リンク切れがあればジョブが失敗する) |
+| `content-validate.yml` | `pull_request`、`main` への push(`content/**`、`packages/DomainModels/**` の変更時) | Python 3.14 で `pytest` と `validate.py --format github` を実行する |
+| `domainmodels-test.yml` | `pull_request`、`main` への push(`packages/DomainModels/**`、`content/schemas/**`、`content/tests/fixtures/**` の変更時) | macOS で `swift test --package-path packages/DomainModels` を実行する |
+| `content-link-check.yml` | 毎週月曜 00:00 UTC、手動実行 | `validate.py --only CI-06 --check-links --strict --format github` を実行する(リンク切れがあればジョブが失敗する) |
 | `dependabot.yml` | 毎週 | pip と GitHub Actions のバージョン更新 PR を作る |
 
 ## 前提と判断

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""pca-content のコンテンツ検証(CI-01〜CI-11)。
+"""学習コンテンツの検証(CI-01〜CI-11)。
 
 使い方:
-    python scripts/validate.py [--root .] [--check-links] [--strict]
-                               [--format text|json|github] [--only CI-02,CI-03]
+    python content/scripts/validate.py [--root content] [--check-links] [--strict]
+                                       [--format text|json|github] [--only CI-02,CI-03]
 
 終了コード: 0 = error なし / 1 = error あり(--strict では warning も含む)/ 2 = 引数・設定の不備
 """
@@ -23,6 +23,9 @@ from pcavalidate.engine import exit_code, run  # noqa: E402
 from pcavalidate.report import format_github, format_json, format_text  # noqa: E402
 from pcavalidate.rules import RULE_IDS  # noqa: E402
 
+# 既定のコンテンツルート(このスクリプトから見た content/)。実行場所に依存しない
+DEFAULT_ROOT = Path(__file__).resolve().parents[1]
+
 
 def _parse_only(value: str) -> frozenset[str]:
     ids = frozenset(v.strip().upper() for v in value.split(",") if v.strip())
@@ -34,7 +37,7 @@ def _parse_only(value: str) -> frozenset[str]:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="pca-content のコンテンツを検証する")
-    parser.add_argument("--root", type=Path, default=Path("."), help="コンテンツのルート(既定: .)")
+    parser.add_argument("--root", type=Path, default=DEFAULT_ROOT, help="コンテンツのルート(既定: このスクリプトの親の content/)")
     parser.add_argument("--config", type=Path, default=None, help="設定ファイル(既定: <root>/validation.yaml)")
     parser.add_argument("--check-links", action="store_true", help="CI-06(リンク切れ確認)を実行する")
     parser.add_argument("--strict", action="store_true", help="warning も error として扱う")
@@ -60,7 +63,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.format == "json":
         sys.stdout.write(format_json(issues))
     elif args.format == "github":
-        prefix = os.path.relpath(root.resolve(), Path.cwd())
+        # アノテーションの file はリポジトリルート基準。CI では GITHUB_WORKSPACE、ローカルではカレントディレクトリ
+        base = Path(os.environ.get("GITHUB_WORKSPACE") or Path.cwd())
+        prefix = os.path.relpath(root.resolve(), base.resolve())
         sys.stdout.write(format_github(issues, "" if prefix == "." else f"{Path(prefix).as_posix()}/"))
     else:
         sys.stdout.write(format_text(issues))

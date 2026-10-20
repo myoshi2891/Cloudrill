@@ -12,8 +12,8 @@ import yaml
 
 from pcavalidate.config import Config, load_config
 
-REPO = Path(__file__).resolve().parents[1]
-FIXTURES = REPO / "tests" / "fixtures"
+CONTENT_ROOT = Path(__file__).resolve().parents[1]
+FIXTURES = CONTENT_ROOT / "tests" / "fixtures"
 VALID = FIXTURES / "valid"
 INVALID = FIXTURES / "invalid"
 _META_FILES = frozenset({"expected.yaml", "_delete.txt"})
@@ -61,7 +61,7 @@ def link_handler(request: httpx.Request) -> httpx.Response:
 
 @pytest.fixture(scope="session")
 def config() -> Config:
-    return load_config(REPO / "validation.yaml")
+    return load_config(CONTENT_ROOT / "validation.yaml")
 
 
 @pytest.fixture

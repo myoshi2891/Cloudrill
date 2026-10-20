@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from conftest import REPO, VALID, materialize
+from conftest import CONTENT_ROOT, VALID, materialize
 from pcavalidate.model import Issue, Severity
 from pcavalidate.report import format_github
 from validate import main
@@ -88,7 +88,7 @@ def test_broken_config_exits_two(tmp_path: Path) -> None:
 def test_script_runs_as_subprocess() -> None:
     result = subprocess.run(
         [sys.executable, "scripts/validate.py", "--root", "tests/fixtures/valid", "--format", "github"],
-        cwd=REPO, capture_output=True, text=True, check=False,
+        cwd=CONTENT_ROOT, capture_output=True, text=True, check=False,
     )
     assert result.returncode == 0, result.stderr
     assert result.stdout == ""
@@ -96,4 +96,25 @@ def test_script_runs_as_subprocess() -> None:
 
 def test_repository_content_has_no_errors(capsys: pytest.CaptureFixture[str]) -> None:
     # リポジトリ直下のサンプルコンテンツ(draft の模試の warning は許容)
-    assert main(["--root", str(REPO)]) == 0
+    assert main(["--root", str(CONTENT_ROOT)]) == 0
+
+
+def test_default_root_is_content_dir_regardless_of_cwd(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # 無関係なディレクトリから実行しても、既定の --root は content/ になる
+    monkeypatch.chdir(tmp_path)
+    assert main(["--format", "json"]) == 0
+    files = {issue["file"] for issue in json.loads(capsys.readouterr().out)}
+    assert files <= {"exam-sets.yaml"}
+
+
+def test_github_paths_are_relative_to_workspace(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # CI では working-directory が content/ でも、アノテーションはリポジトリルート基準にする
+    monkeypatch.setenv("GITHUB_WORKSPACE", str(CONTENT_ROOT.parent))
+    monkeypatch.chdir(CONTENT_ROOT)
+    main(["--format", "github"])
+    lines = capsys.readouterr().out.splitlines()
+    assert lines and all("file=content/" in line for line in lines)

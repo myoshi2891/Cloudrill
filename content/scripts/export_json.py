@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """YAML コンテンツを JSON に変換する(Swift の Codable テスト用 fixture の生成)。
 
-    python scripts/export_json.py [--src tests/fixtures/valid]
-                                  [--out swift/DomainModels/Tests/DomainModelsTests/Fixtures/valid]
+    python content/scripts/export_json.py [--src content/tests/fixtures/valid]
+                                          [--out content/tests/fixtures/valid-json]
+
+出力は packages/DomainModels の Swift テストが直接参照する(パッケージ内にはコピーしない)。
 
 YAML は validate.py と同じ読み込み処理(キーの文字列化など)で JSON 相当にしてから書き出す。
 docs/*.md は Swift 側にモデルがないため対象外。
@@ -21,9 +23,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from pcavalidate.loader import YamlLoadError, parse_yaml  # noqa: E402
 
-REPO = Path(__file__).resolve().parents[1]
-DEFAULT_SRC = REPO / "tests/fixtures/valid"
-DEFAULT_OUT = REPO / "swift/DomainModels/Tests/DomainModelsTests/Fixtures/valid"
+CONTENT_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_SRC = CONTENT_ROOT / "tests/fixtures/valid"
+DEFAULT_OUT = CONTENT_ROOT / "tests/fixtures/valid-json"
 
 
 def export(src: Path, out: Path) -> list[Path]:

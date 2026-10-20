@@ -1,4 +1,4 @@
-name: link-check
+name: content-link-check
 
 on:
   schedule:
@@ -7,6 +7,10 @@ on:
 
 permissions:
   contents: read
+
+defaults:
+  run:
+    working-directory: content
 
 jobs:
   link-check:
@@ -17,6 +21,7 @@ jobs:
         with:
           python-version: "3.14"
           cache: pip
+          cache-dependency-path: content/requirements.txt
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Check links

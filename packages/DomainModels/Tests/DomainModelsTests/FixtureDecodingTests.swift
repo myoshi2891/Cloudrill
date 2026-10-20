@@ -2,15 +2,21 @@ import Foundation
 import Testing
 @testable import DomainModels
 
-/// tests/fixtures/valid を JSON に変換したもの(scripts/export_json.py で生成)をデコードできること。
+/// content/tests/fixtures/valid を JSON に変換したもの(content/scripts/export_json.py で生成)をデコードできること。
 @Suite("valid fixture のデコード")
 struct FixtureDecodingTests {
     let root: URL
     let decoder = ContentDecoder.make()
 
     init() throws {
-        let fixtures = try #require(Bundle.module.url(forResource: "Fixtures", withExtension: nil))
-        root = fixtures.appending(path: "valid")
+        // このファイル(packages/DomainModels/Tests/DomainModelsTests/)から見たパッケージのルート
+        let packageRoot = URL(filePath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        root = packageRoot.appending(path: "../../content/tests/fixtures/valid-json").standardized
+        let exists = FileManager.default.fileExists(atPath: root.appending(path: "exam-sets.json").path)
+        try #require(exists, "フィクスチャがありません: \(root.path)。content/scripts/export_json.py を実行してください")
     }
 
     private func jsonFiles(in directory: String) throws -> [URL] {
