@@ -70,6 +70,16 @@ def _int(section: dict[str, Any], key: str, where: str) -> int:
     return value
 
 
+def _int_key(key: object, where: str) -> int:
+    """YAML のキー("1" または 1)を整数に変換する。"""
+    if isinstance(key, bool):
+        raise ConfigError(f"validation.yaml: {where} のキー '{key}' は整数で指定してください")
+    try:
+        return int(str(key).strip())
+    except ValueError as e:
+        raise ConfigError(f"validation.yaml: {where} のキー '{key}' は整数で指定してください") from e
+
+
 def _parse_domains(key: object) -> tuple[int, ...]:
     parts = str(key).split("+")
     try:
@@ -100,17 +110,22 @@ def load_config(path: Path) -> Config:
     dist_raw = exam.get("domainDistribution")
     if not isinstance(dist_raw, dict):
         raise ConfigError("validation.yaml: examSet.domainDistribution がありません")
-    distribution = tuple((_parse_domains(k), int(v)) for k, v in dist_raw.items())
+    distribution = tuple((_parse_domains(k), _int(dist_raw, k, "examSet.domainDistribution")) for k in dist_raw)
 
     case = exam.get("caseQuestions")
     if not isinstance(case, dict):
         raise ConfigError("validation.yaml: examSet.caseQuestions がありません")
 
     assignments: dict[int, DefaultAssignment] = {}
-    for key, value in (exam.get("defaultAssignments") or {}).items():
+    assignments_raw = exam.get("defaultAssignments") or {}
+    if not isinstance(assignments_raw, dict):
+        raise ConfigError("validation.yaml: examSet.defaultAssignments の形式が不正です")
+    for key, value in assignments_raw.items():
         if not isinstance(value, dict) or not isinstance(value.get("caseStudies"), list):
             raise ConfigError(f"validation.yaml: defaultAssignments.{key} の形式が不正です")
-        assignments[int(key)] = DefaultAssignment(frozenset(value["caseStudies"]), str(value.get("level")))
+        assignments[_int_key(key, "examSet.defaultAssignments")] = DefaultAssignment(
+            frozenset(value["caseStudies"]), str(value.get("level"))
+        )
 
     stats = _section(raw, "statistics")
     pos = _section(raw, "answerPosition")
@@ -122,6 +137,10 @@ def load_config(path: Path) -> Config:
     subs = guide.get("subObjectives")
     if not isinstance(subs, list) or not subs:
         raise ConfigError("validation.yaml: examGuide.subObjectives がありません")
+    retry_raw = links.get("retryWithGetOn", [405])
+    if not isinstance(retry_raw, list):
+        raise ConfigError("validation.yaml: links.retryWithGetOn はリストで指定してください")
+    retry_get_on = frozenset(_int({"retryWithGetOn": s}, "retryWithGetOn", "links") for s in retry_raw)
 
     return Config(
         question_count=_int(exam, "questionCount", "examSet"),
@@ -142,6 +161,6 @@ def load_config(path: Path) -> Config:
         link_timeout=_num(links, "timeoutSeconds", "links"),
         link_concurrency=_int(links, "concurrency", "links"),
         link_user_agent=str(links.get("userAgent", "pca-content-link-check")),
-        link_retry_get_on=frozenset(int(s) for s in links.get("retryWithGetOn", [405])),
+        link_retry_get_on=retry_get_on,
         sub_objectives=frozenset(str(s) for s in subs),
     )

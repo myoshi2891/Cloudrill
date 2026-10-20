@@ -99,20 +99,26 @@ def set_questions(ctx: Context, exam_set: dict[str, Any]) -> list[SourceDoc]:
 
 # ---- Schema 検証 ------------------------------------------------------------
 
-# Schema では CI-01 として報告せず、専用ルールに委ねるパス
-_DELEGATED: tuple[tuple[re.Pattern[str], str], ...] = ((re.compile(r"^choices\[\d+\]\.rationale(\.|$)"), "CI-05"),)
+# Schema では CI-01 として報告せず、CI-05 に委ねるエラーの位置
+# (rationale / rationale.ja の欠落と rationale.ja の値の不備のみ。en の型違いや余分なキーは CI-01 のまま)
+_CHOICE_PATH = re.compile(r"^choices\[\d+\]$")
+_RATIONALE_PATH = re.compile(r"^choices\[\d+\]\.rationale$")
+_RATIONALE_JA_PATH = re.compile(r"^choices\[\d+\]\.rationale\.ja$")
 
 
 def _delegated_rule(kind: Kind, error: ValidationError) -> str | None:
     if kind is not Kind.QUESTION:
         return None
     path = format_path(tuple(error.absolute_path))
-    # rationale 自体の欠落は choices[n] の required エラーとして出る
-    if error.validator == "required" and error.message.startswith("'rationale'"):
-        path = f"{path}.rationale"
-    for pattern, rule in _DELEGATED:
-        if pattern.match(path):
-            return rule
+    if error.validator == "required":
+        # 欠落は親オブジェクトの required エラーとして出る
+        if _CHOICE_PATH.match(path) and error.message.startswith("'rationale'"):
+            return "CI-05"
+        if _RATIONALE_PATH.match(path) and error.message.startswith("'ja'"):
+            return "CI-05"
+        return None
+    if _RATIONALE_JA_PATH.match(path):
+        return "CI-05"
     return None
 
 
