@@ -18,11 +18,10 @@ Google Cloud Professional Cloud Architect(PCA)試験対策 iOS アプリの学�
 
 ## ローカルでの実行
 
-ルートのディレクトリ名にスペースが含まれるため、パスは必ずクォートしてください。
 以下のコマンドは、リポジトリのルートから実行する前提です。
 
 ```sh
-cd "/path/to/Google Cloud Professional Cloud Architect"
+cd /path/to/google-cloud-professional-cloud-architect
 
 # Python 3.14(pyenv の例)。仮想環境は content/.venv に作る
 pyenv install -s 3.14.7

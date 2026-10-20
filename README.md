@@ -6,9 +6,9 @@ PCA 試験対策 iOS アプリと、その学習コンテンツを1つのリポ�
 ## ディレクトリ構成
 
 ```
-Google Cloud Professional Cloud Architect/
-├── Google Cloud Professional Cloud Architect/       # iOS アプリのソース
-├── Google Cloud Professional Cloud Architect.xcodeproj
+google-cloud-professional-cloud-architect/
+├── PCAApp/                                          # iOS アプリのソース
+├── PCAApp.xcodeproj                                 # DomainModels をローカルパッケージとして参照
 ├── Documentation.docc/                              # 要件定義書(RDD.md)、基本設計書(BDD.md)
 ├── packages/
 │   └── DomainModels/                                # コンテンツの値型(SwiftPM、Swift Testing)
@@ -27,7 +27,7 @@ Google Cloud Professional Cloud Architect/
 
 | ディレクトリ | 役割 |
 |---|---|
-| `Google Cloud Professional Cloud Architect/` と `.xcodeproj` | iOS アプリ本体。Xcode の参照パスや署名設定を壊さないよう、ルート直下に置いたままにしています |
+| `PCAApp/` と `PCAApp.xcodeproj` | iOS アプリ本体。ホーム画面の表示名は「PCA 試験対策」(`INFOPLIST_KEY_CFBundleDisplayName`) |
 | `Documentation.docc/` | 要件定義書と基本設計書 |
 | `packages/DomainModels/` | `content/schemas` に対応する Swift の値型(`Question`、`Choice`、`Flashcard`、`CaseStudy` など) |
 | `content/` | 学習コンテンツ(YAML / Markdown)、JSON Schema、検証スクリプト。詳細は [content/README.md](content/README.md) |
@@ -35,10 +35,8 @@ Google Cloud Professional Cloud Architect/
 
 ## ローカルでの検証
 
-ルートのディレクトリ名にスペースが含まれるため、パスは必ずクォートしてください。
-
 ```sh
-cd "/path/to/Google Cloud Professional Cloud Architect"
+cd /path/to/google-cloud-professional-cloud-architect
 
 # 初回のみ: Python 3.14 の仮想環境を作る
 python3.14 -m venv content/.venv
@@ -86,14 +84,19 @@ swift test --package-path packages/DomainModels
 > 3. fixture と JSON を再生成する(`content/tests/fixtures/generate.py`、`content/scripts/export_json.py`)
 > 4. `pytest` と `swift test` の両方が通ることを確認する
 
-## アプリから DomainModels を使う(Xcode での設定)
+## アプリから DomainModels を使う
 
-`project.pbxproj` は手で編集せず、Xcode から追加してください。
+`PCAApp.xcodeproj` には、`packages/DomainModels` がローカルパッケージとして登録済みです(PCAApp ターゲットにリンク済み)。
+アプリのソースで `import DomainModels` と書けば使えます。Xcode のナビゲーターでは **Package Dependencies** の下に表示されます。
 
-1. `Google Cloud Professional Cloud Architect.xcodeproj` を Xcode で開く
-2. メニューの **File > Add Package Dependencies…** を選ぶ
-3. ダイアログ左下の **Add Local…** をクリックし、`packages/DomainModels` フォルダを選ぶ
-4. 追加先のターゲットに **Google Cloud Professional Cloud Architect**(アプリ)を選び、**Add Package** をクリックする
-5. ソースで `import DomainModels` と書いてビルドできることを確認する
+パッケージはリポジトリ内の相対パス(`relativePath = packages/DomainModels`)で参照されるため、クローンした場所に関係なく動作します。
+別のパッケージを追加する場合は、`project.pbxproj` を手で編集せず、Xcode の **File > Add Package Dependencies… > Add Local…** から追加してください。
 
-パッケージはリポジトリ内の相対パスで参照されるため、クローンした場所に関係なく動作します。
+## 命名規則
+
+| 対象 | 規則 | 例 |
+|---|---|---|
+| リポジトリのフォルダ | 小文字の kebab-case(GitHub のリポジトリ名に対応) | `google-cloud-professional-cloud-architect` |
+| Xcode のプロジェクト・ターゲット・ソースフォルダ | PascalCase、スペースや記号なし | `PCAApp` |
+| Swift パッケージ | PascalCase | `DomainModels` |
+| 利用者に見せるアプリ名 | `INFOPLIST_KEY_CFBundleDisplayName` で設定(日本語・スペース可) | `PCA 試験対策` |
