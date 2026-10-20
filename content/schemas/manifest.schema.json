@@ -8,7 +8,12 @@
     "packVersion": { "$ref": "common.schema.json#/$defs/SemVer" },
     "examGuideVersion": { "$ref": "common.schema.json#/$defs/ExamGuideVersion" },
     "minAppVersion": { "$ref": "common.schema.json#/$defs/SemVer" },
-    "createdAt": { "type": "string", "format": "date-time" },
+    "createdAt": {
+      "description": "秒精度・小数秒なしの RFC 3339(DomainModels の .iso8601 デコードに合わせる)。",
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(Z|[+-]\\d{2}:\\d{2})$"
+    },
     "files": {
       "type": "array",
       "items": { "$ref": "#/$defs/FileEntry" },
