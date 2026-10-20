@@ -1,0 +1,92 @@
+{
+  "id": "Q-1.4-0009",
+  "revision": 1,
+  "examGuideVersion": "6.1",
+  "domain": 1,
+  "subObjective": "1.4",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 5,
+  "wafPillars": [
+    "costOptimization"
+  ],
+  "keywords": [
+    "ダミー",
+    "羅針盤"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】雪原・鍾乳石・火山・製本・渓流に関する設問。",
+    "en": "Dummy question stem for Q-1.4-0009."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "石畳時計塔竹林滝壺陶器鍾",
+        "en": "Dummy choice A of Q-1.4-0009"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "opsOverhead"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "噴水笛吹惑星舞台噴水惑星灯",
+        "en": "Dummy choice B of Q-1.4-0009"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Bが正しい理由(ダミー)",
+        "en": "Why choice B is correct (dummy)"
+      }
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "帆船宿場化石楽譜潮汐石畳峡谷星座月面望遠鏡灯台",
+        "en": "Dummy choice C of Q-1.4-0009"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "scalability"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "舞台山脈織機樹氷草原星座蜂蜜月面画廊風車滝壺蜂蜜洞窟",
+        "en": "Dummy choice D of Q-1.4-0009"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Dが誤り理由(ダミー)",
+        "en": "Why choice D is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "availability"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

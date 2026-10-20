@@ -1,0 +1,5 @@
+description: 問題文がほぼ同一
+expect:
+  CI-07:
+  - warning
+options: {}

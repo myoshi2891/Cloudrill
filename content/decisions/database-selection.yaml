@@ -1,0 +1,62 @@
+id: database-selection
+title:
+  ja: データベースの選び方
+  en: Choosing a database
+rootNodeID: relational
+nodes:
+  - id: relational
+    question:
+      ja: リレーショナルモデル(SQL・トランザクション)が必要か?
+      en: Do you need a relational model (SQL and transactions)?
+    options:
+      - label: { ja: はい, en: "Yes" }
+        next: global-scale
+      - label: { ja: いいえ, en: "No" }
+        next: workload
+  - id: global-scale
+    question:
+      ja: 複数リージョンからの書き込みや、書き込みの水平スケールが必要か?
+      en: Do you need multi-region writes or horizontally scalable writes?
+    options:
+      - label: { ja: はい, en: "Yes" }
+        result:
+          service: Spanner
+          rationale:
+            ja: 強整合性を保ったまま、リージョンをまたいで水平にスケールできる。
+            en: Scales horizontally across regions while keeping strong consistency.
+      - label: { ja: いいえ, en: "No" }
+        result:
+          service: Cloud SQL
+          rationale:
+            ja: 既存の MySQL / PostgreSQL / SQL Server をそのまま使え、移行が容易。
+            en: Runs existing MySQL, PostgreSQL, or SQL Server workloads with easy migration.
+  - id: workload
+    question:
+      ja: 主な用途は大量データの分析か?
+      en: Is the main workload large-scale analytics?
+    options:
+      - label: { ja: はい, en: "Yes" }
+        result:
+          service: BigQuery
+          rationale:
+            ja: サーバーレスのデータ ウェアハウスで、SQL によるペタバイト規模の分析ができる。
+            en: A serverless data warehouse for petabyte-scale SQL analytics.
+      - label: { ja: いいえ, en: "No" }
+        next: latency
+  - id: latency
+    question:
+      ja: 高スループット・低レイテンシで大量の時系列やキー値を扱うか?
+      en: Do you handle huge volumes of time-series or key-value data with high throughput and low latency?
+    options:
+      - label: { ja: はい, en: "Yes" }
+        result:
+          service: Bigtable
+          rationale:
+            ja: ワイドカラム型で、大量の読み書きを一桁ミリ秒のレイテンシで処理できる。
+            en: A wide-column store that handles massive reads and writes with single-digit millisecond latency.
+      - label: { ja: いいえ, en: "No" }
+        result:
+          service: Firestore
+          rationale:
+            ja: モバイルや Web アプリ向けのサーバーレスなドキュメント データベース。
+            en: A serverless document database for mobile and web apps.

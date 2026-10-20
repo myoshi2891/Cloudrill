@@ -1,0 +1,92 @@
+{
+  "id": "Q-1.3-0008",
+  "revision": 1,
+  "examGuideVersion": "6.1",
+  "domain": 1,
+  "subObjective": "1.3",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 4,
+  "wafPillars": [
+    "reliability"
+  ],
+  "keywords": [
+    "ダミー",
+    "望遠鏡"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】雪原・望遠鏡・竹林・草原・羅針盤に関する設問。",
+    "en": "Dummy question stem for Q-1.3-0008."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "砂丘彫刻流星木版画流星劇場雪原茶室蜂蜜化石茶室",
+        "en": "Dummy choice A of Q-1.3-0008"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "cost"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "噴水月面笛吹砂丘海溝惑星蜂蜜樹氷",
+        "en": "Dummy choice B of Q-1.3-0008"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "opsOverhead"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "時計塔銀河流星惑星太鼓琥珀宿場劇場噴水画廊琥珀鍾乳石惑星笛",
+        "en": "Dummy choice C of Q-1.3-0008"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Cが正しい理由(ダミー)",
+        "en": "Why choice C is correct (dummy)"
+      }
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "温室時計塔珊瑚果樹園峡谷製本峡",
+        "en": "Dummy choice D of Q-1.3-0008"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Dが誤り理由(ダミー)",
+        "en": "Why choice D is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "scalability"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

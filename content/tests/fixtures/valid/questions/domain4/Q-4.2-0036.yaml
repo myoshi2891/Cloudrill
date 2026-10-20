@@ -1,0 +1,62 @@
+id: Q-4.2-0036
+revision: 1
+examGuideVersion: '6.1'
+domain: 4
+subObjective: '4.2'
+caseStudy: null
+type:
+  kind: single
+difficulty: 2
+wafPillars:
+- operationalExcellence
+keywords:
+- ダミー
+- 潮汐
+examSets:
+- 1
+stem:
+  ja: 【ダミー】刺繍・宿場・渡り鳥・庭園・水路に関する設問。
+  en: Dummy question stem for Q-4.2-0036.
+choices:
+- id: a
+  text:
+    ja: 笛吹火山鐘楼鍾乳石潮汐海溝染物流星山脈風車渡り鳥温
+    en: Dummy choice A of Q-4.2-0036
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - availability
+- id: b
+  text:
+    ja: 羅針盤鍾乳石彗星鐘楼雪原鐘楼樹氷劇場風車樹氷
+    en: Dummy choice B of Q-4.2-0036
+  isCorrect: false
+  rationale:
+    ja: 選択肢Bが誤り理由(ダミー)
+    en: Why choice B is incorrect (dummy)
+  mistakeTags:
+  - latency
+- id: c
+  text:
+    ja: 火山琥珀竹林鍵盤火山滝壺洞窟流星笛吹帆船陶
+    en: Dummy choice C of Q-4.2-0036
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - requirementMismatch
+- id: d
+  text:
+    ja: 潮汐竹林陶器湿原望遠鏡湿原湿原灯台帆船渡り鳥温室火山画廊製本
+    en: Dummy choice D of Q-4.2-0036
+  isCorrect: true
+  rationale:
+    ja: 選択肢Dが正しい理由(ダミー)
+    en: Why choice D is correct (dummy)
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

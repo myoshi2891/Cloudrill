@@ -1,0 +1,64 @@
+id: Q-2.1-0001
+revision: 1
+examGuideVersion: "6.1"
+domain: 2
+subObjective: "2.1"
+caseStudy: null
+type:
+  kind: multiple
+  count: 2
+difficulty: 3
+wafPillars: [reliability, security]
+keywords: [Dedicated Interconnect, Cloud Router, ハイブリッド接続]
+examSets: []
+stem:
+  ja: オンプレミスのデータセンターと Google Cloud の VPC ネットワークを接続する。10 Gbps 以上の帯域が必要で、通信をパブリック インターネットに流したくない。また、接続経路に単一障害点を作りたくない。行うべきことを 2 つ選べ。
+  en: You need to connect an on-premises data center to a Google Cloud VPC network with at least 10 Gbps of bandwidth, without sending traffic over the public internet and without a single point of failure. Which two actions should you take?
+choices:
+  - id: a
+    text:
+      ja: Dedicated Interconnect の接続を、同じ都市圏の異なるエッジ可用性ドメインに 2 本用意する
+      en: Provision two Dedicated Interconnect connections in different edge availability domains in the same metro
+    isCorrect: true
+    rationale:
+      ja: Dedicated Interconnect はインターネットを経由しない専用の物理接続で、10 Gbps 以上の帯域を確保できる。異なるエッジ可用性ドメインに 2 本用意することで単一障害点をなくせる。
+      en: Dedicated Interconnect is a private physical connection that bypasses the internet and supports 10 Gbps or more. Two connections in different edge availability domains remove the single point of failure.
+  - id: b
+    text:
+      ja: Cloud Router を構成し、BGP で経路を動的に交換する
+      en: Configure Cloud Router to exchange routes dynamically over BGP
+    isCorrect: true
+    rationale:
+      ja: Interconnect の VLAN アタッチメントは Cloud Router と BGP セッションを張って経路を交換する。障害時の経路切り替えも BGP で自動的に行われる。
+      en: Interconnect VLAN attachments use Cloud Router BGP sessions to exchange routes, which also enables automatic failover.
+  - id: c
+    text:
+      ja: HA VPN のトンネルを 2 本構成する
+      en: Configure two HA VPN tunnels
+    isCorrect: false
+    rationale:
+      ja: HA VPN は冗長化できるが、通信はパブリック インターネット上の暗号化トンネルを通るため、インターネットを経由させないという要件を満たさない。
+      en: HA VPN can be redundant, but its encrypted tunnels traverse the public internet, which violates the requirement.
+    mistakeTags: [requirementMismatch]
+  - id: d
+    text:
+      ja: Classic VPN のトンネルを 1 本構成する
+      en: Configure a single Classic VPN tunnel
+    isCorrect: false
+    rationale:
+      ja: インターネットを経由するうえ、トンネルが 1 本では単一障害点になる。帯域も要件に届かない。
+      en: It uses the internet, a single tunnel is a single point of failure, and the bandwidth is insufficient.
+    mistakeTags: [availability, requirementMismatch]
+  - id: e
+    text:
+      ja: オンプレミスから VM の外部 IP アドレスに直接接続する
+      en: Connect directly from on-premises to the external IP addresses of the VMs
+    isCorrect: false
+    rationale:
+      ja: 通信がパブリック インターネットを経由し、VM を外部に公開することにもなるため、要件とセキュリティの両面で不適切。
+      en: Traffic would cross the public internet and the VMs would be exposed externally, which is unsuitable for both the requirement and security.
+    mistakeTags: [compliance, requirementMismatch]
+references:
+  - title: Dedicated Interconnect の概要
+    url: https://cloud.google.com/network-connectivity/docs/interconnect/concepts/dedicated-overview
+    license: CC-BY-4.0

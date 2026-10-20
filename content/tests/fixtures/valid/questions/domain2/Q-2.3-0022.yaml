@@ -1,0 +1,62 @@
+id: Q-2.3-0022
+revision: 1
+examGuideVersion: '6.1'
+domain: 2
+subObjective: '2.3'
+caseStudy: null
+type:
+  kind: single
+difficulty: 3
+wafPillars:
+- performance
+keywords:
+- ダミー
+- 噴水
+examSets:
+- 1
+stem:
+  ja: 【ダミー】合唱・渓流・峡谷・庭園・製本に関する設問。
+  en: Dummy question stem for Q-2.3-0022.
+choices:
+- id: a
+  text:
+    ja: 製本茶室画廊合唱太鼓噴水流星火山陶器温室温室時計塔木
+    en: Dummy choice A of Q-2.3-0022
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - requirementMismatch
+- id: b
+  text:
+    ja: 月面砂丘渡り鳥木版画宿場望遠鏡陶器舞台洞窟草原竹林茶室
+    en: Dummy choice B of Q-2.3-0022
+  isCorrect: true
+  rationale:
+    ja: 選択肢Bが正しい理由(ダミー)
+    en: Why choice B is correct (dummy)
+- id: c
+  text:
+    ja: 鍵盤樹氷渡り鳥滝壺羅針盤流星
+    en: Dummy choice C of Q-2.3-0022
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - cost
+- id: d
+  text:
+    ja: 月面羅針盤石畳陶器琥珀風車草原樹氷草原笛吹合唱月面灯籠蜂蜜海溝
+    en: Dummy choice D of Q-2.3-0022
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - opsOverhead
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

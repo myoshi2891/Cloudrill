@@ -1,0 +1,58 @@
+id: Q-2.1-0907
+revision: 1
+examGuideVersion: '6.1'
+domain: 2
+subObjective: '2.1'
+caseStudy: null
+type:
+  kind: single
+difficulty: 3
+wafPillars:
+- security
+keywords:
+- ダミー
+- 風車
+examSets: []
+stem:
+  ja: 【ダミー】山脈・雪原・宿場・樹氷・銀河に関する設問。
+  en: Dummy question stem for Q-2.1-0907.
+choices:
+- id: a
+  text:
+    ja: 鐘楼洞窟月面宿場化石湿原峡谷竹林海溝銀河合唱果樹園蜂
+    en: Dummy choice A of Q-2.1-0907
+  isCorrect: false
+  rationale:
+    ja: '   '
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - scalability
+- id: b
+  text:
+    ja: 洞窟渓流噴水青銅砂丘化石合唱
+    en: Dummy choice B of Q-2.1-0907
+  isCorrect: true
+  rationale:
+    ja: 選択肢Bが正しい理由(ダミー)
+    en: Why choice B is correct (dummy)
+- id: c
+  text:
+    ja: 刺繍製本渡り鳥洞窟峡谷火山噴水織機氷
+    en: Dummy choice C of Q-2.1-0907
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - latency
+- id: d
+  text:
+    ja: 草原果樹園劇場渓流灯籠鐘楼蜂蜜石畳笛吹風車
+    en: Dummy choice D of Q-2.1-0907
+  isCorrect: false
+  mistakeTags:
+  - requirementMismatch
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

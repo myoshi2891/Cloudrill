@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pca-content.invalid/schemas/question.schema.json",
+  "title": "問題(1ファイル1問)",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/QuestionID" },
+    "revision": { "type": "integer", "minimum": 1 },
+    "examGuideVersion": { "$ref": "common.schema.json#/$defs/ExamGuideVersion" },
+    "domain": { "$ref": "common.schema.json#/$defs/Domain" },
+    "subObjective": { "$ref": "common.schema.json#/$defs/SubObjective" },
+    "caseStudy": {
+      "anyOf": [
+        { "$ref": "common.schema.json#/$defs/CaseStudyID" },
+        { "type": "null" }
+      ]
+    },
+    "type": { "$ref": "#/$defs/QuestionType" },
+    "difficulty": { "type": "integer", "minimum": 1, "maximum": 5 },
+    "wafPillars": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/WAFPillar" },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "keywords": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/NonEmptyString" },
+      "uniqueItems": true
+    },
+    "examSets": {
+      "description": "収録先の模試番号。練習専用なら空配列。",
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/ExamSetNumber" },
+      "uniqueItems": true
+    },
+    "stem": { "$ref": "common.schema.json#/$defs/LocalizedText" },
+    "choices": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Choice" },
+      "minItems": 4,
+      "maxItems": 6
+    },
+    "references": { "$ref": "common.schema.json#/$defs/References" }
+  },
+  "required": [
+    "id",
+    "revision",
+    "examGuideVersion",
+    "domain",
+    "subObjective",
+    "caseStudy",
+    "type",
+    "difficulty",
+    "wafPillars",
+    "keywords",
+    "examSets",
+    "stem",
+    "choices",
+    "references"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "QuestionType": {
+      "description": "single は count を持たない。multiple は 2 以上の count が必須。",
+      "type": "object",
+      "properties": {
+        "kind": { "type": "string", "enum": ["single", "multiple"] },
+        "count": { "type": "integer", "minimum": 2 }
+      },
+      "required": ["kind"],
+      "additionalProperties": false,
+      "if": { "properties": { "kind": { "const": "multiple" } } },
+      "then": { "required": ["count"] },
+      "else": { "not": { "required": ["count"] } }
+    },
+    "Choice": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-f]$" },
+        "text": { "$ref": "common.schema.json#/$defs/LocalizedText" },
+        "isCorrect": { "type": "boolean" },
+        "rationale": { "$ref": "common.schema.json#/$defs/LocalizedText" },
+        "mistakeTags": {
+          "type": "array",
+          "items": { "$ref": "common.schema.json#/$defs/MistakeTag" },
+          "uniqueItems": true
+        }
+      },
+      "required": ["id", "text", "isCorrect", "rationale"],
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,61 @@
+id: Q-2.1-0908
+revision: 1
+examGuideVersion: '6.1'
+domain: 2
+subObjective: '2.1'
+caseStudy: null
+type:
+  kind: single
+difficulty: 4
+wafPillars:
+- reliability
+keywords:
+- ダミー
+- 望遠鏡
+examSets: []
+stem:
+  ja: 【ダミー】琥珀・雪原・鐘楼・流星・灯台に関する設問。
+  en: Dummy question stem for Q-2.1-0908.
+choices:
+- id: a
+  text:
+    ja: 銀河陶器鍾乳石月面宿場竹林海溝陶器琥珀陶器渓流湿原画廊灯台渡り
+    en: Dummy choice A of Q-2.1-0908
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - availability
+- id: b
+  text:
+    ja: 水路流星山脈化石山脈草原笛吹彫刻雪原笛吹流星流星山
+    en: Dummy choice B of Q-2.1-0908
+  isCorrect: true
+  rationale:
+    ja: 選択肢Bが正しい理由(ダミー)
+    en: Why choice B is correct (dummy)
+- id: c
+  text:
+    ja: 珊瑚樹氷雪原渡り鳥珊瑚砂丘蜂蜜製本惑星織機灯籠木版画鍾
+    en: Dummy choice C of Q-2.1-0908
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - requirementMismatch
+- id: d
+  text:
+    ja: 鍾乳石彫刻庭園石畳山脈月面茶室温室製本山脈洞窟
+    en: Dummy choice D of Q-2.1-0908
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - deprecated
+references:
+- title: 存在しないページ
+  url: https://broken.invalid/missing
+  license: link-only

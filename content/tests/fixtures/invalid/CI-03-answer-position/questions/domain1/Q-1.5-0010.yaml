@@ -1,0 +1,62 @@
+id: Q-1.5-0010
+revision: 1
+examGuideVersion: '6.1'
+domain: 1
+subObjective: '1.5'
+caseStudy: ehr
+type:
+  kind: single
+difficulty: 1
+wafPillars:
+- performance
+keywords:
+- ダミー
+- 時計塔
+examSets:
+- 1
+stem:
+  ja: 【ダミー】温室・鐘楼・舞台・羅針盤・灯台に関する設問。
+  en: Dummy question stem for Q-1.5-0010.
+choices:
+- id: a
+  text:
+    ja: 潮汐火山宿場青銅峡谷砂丘珊瑚水路石畳舞台惑星鍵盤太鼓彗星噴水劇
+    en: Dummy choice B of Q-1.5-0010
+  isCorrect: true
+  rationale:
+    ja: 選択肢Bが正しい理由(ダミー)
+    en: Why choice B is correct (dummy)
+- id: b
+  text:
+    ja: 化石琥珀茶室灯台画廊時計塔彫刻
+    en: Dummy choice A of Q-1.5-0010
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - compliance
+- id: c
+  text:
+    ja: 蜂蜜滝壺渓流火山舞台水路棚田樹氷惑星洞窟鍵盤灯籠樹氷画廊
+    en: Dummy choice C of Q-1.5-0010
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - availability
+- id: d
+  text:
+    ja: 水路陶器化石鐘楼灯台琥珀帆船帆船流星刺繍灯籠
+    en: Dummy choice D of Q-1.5-0010
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - latency
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

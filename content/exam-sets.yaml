@@ -1,0 +1,9 @@
+# 模試ごとの問題 ID とケースの割り当て。既定の割り当ては validation.yaml の examSet.defaultAssignments を参照
+examSets:
+  - id: 1
+    status: draft          # 55 問がそろったら complete にする(complete では CI-02〜04 が error になる)
+    level: basic
+    caseStudies: [ehr, altostrat]
+    questionIDs:
+      - Q-1.3-0001
+      - Q-3.2-0001

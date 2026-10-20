@@ -1,0 +1,92 @@
+{
+  "id": "Q-1.2-0012",
+  "revision": 1,
+  "examGuideVersion": "6.1",
+  "domain": 1,
+  "subObjective": "1.2",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 3,
+  "wafPillars": [
+    "operationalExcellence"
+  ],
+  "keywords": [
+    "ダミー",
+    "製本"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】舞台・珊瑚・渡り鳥・石畳・青銅に関する設問。",
+    "en": "Dummy question stem for Q-1.2-0012."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "画廊楽譜茶室湿原温室化石織機時計",
+        "en": "Dummy choice A of Q-1.2-0012"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "availability"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "宿場湿原渡り鳥青銅琥珀潮汐織機合唱洞窟山脈星座海溝染物草",
+        "en": "Dummy choice B of Q-1.2-0012"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "latency"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "宿場灯籠帆船灯籠風車洞窟風車湿原海溝",
+        "en": "Dummy choice C of Q-1.2-0012"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Cが正しい理由(ダミー)",
+        "en": "Why choice C is correct (dummy)"
+      }
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "石畳果樹園樹氷刺繍舞台彫刻木版画太鼓温室石畳山脈化石",
+        "en": "Dummy choice D of Q-1.2-0012"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Dが誤り理由(ダミー)",
+        "en": "Why choice D is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "deprecated"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

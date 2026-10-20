@@ -1,0 +1,92 @@
+{
+  "id": "Q-3.1-0027",
+  "revision": 1,
+  "examGuideVersion": "6.1",
+  "domain": 3,
+  "subObjective": "3.1",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 3,
+  "wafPillars": [
+    "costOptimization"
+  ],
+  "keywords": [
+    "ダミー",
+    "灯籠"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】湿原・太鼓・渡り鳥・製本・珊瑚に関する設問。",
+    "en": "Dummy question stem for Q-3.1-0027."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "果樹園湿原彗星石畳山脈樹氷化石星座月面珊瑚",
+        "en": "Dummy choice A of Q-3.1-0027"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Aが正しい理由(ダミー)",
+        "en": "Why choice A is correct (dummy)"
+      }
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "鍾乳石製本山脈樹氷山脈青銅灯籠果樹園雪原青銅水路果",
+        "en": "Dummy choice B of Q-3.1-0027"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "availability"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "惑星竹林棚田木版画砂丘竹",
+        "en": "Dummy choice C of Q-3.1-0027"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "latency"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "劇場楽譜合唱庭園染物砂丘庭園",
+        "en": "Dummy choice D of Q-3.1-0027"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Dが誤り理由(ダミー)",
+        "en": "Why choice D is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "requirementMismatch"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

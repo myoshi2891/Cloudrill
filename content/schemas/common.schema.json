@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pca-content.invalid/schemas/common.schema.json",
+  "title": "共通定義",
+  "description": "各コンテンツ Schema から $ref で参照する共通定義。",
+  "$defs": {
+    "NonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "LocalizedText": {
+      "description": "多言語テキスト。ja は必須・空文字不可。en の欠落は validate.py が CI-11 として警告する。",
+      "type": "object",
+      "properties": {
+        "ja": { "$ref": "#/$defs/NonEmptyString" },
+        "en": { "type": "string" }
+      },
+      "required": ["ja"],
+      "additionalProperties": false
+    },
+    "Domain": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 6
+    },
+    "SubObjective": {
+      "description": "試験ガイドのサブ目標(例: 3.2)。",
+      "type": "string",
+      "pattern": "^[1-6]\\.[0-9]+$"
+    },
+    "QuestionID": {
+      "type": "string",
+      "pattern": "^Q-[1-6]\\.[0-9]+-[0-9]{4}$"
+    },
+    "CardID": {
+      "type": "string",
+      "pattern": "^C-[1-6]\\.[0-9]+-[0-9]{4}$"
+    },
+    "ExamSetNumber": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 6
+    },
+    "ExamGuideVersion": {
+      "description": "試験ガイドのバージョン(例: \"6.1\")。YAML では数値にならないよう引用符で囲む。",
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$"
+    },
+    "SemVer": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?(\\+[0-9A-Za-z.-]+)?$"
+    },
+    "HttpsURL": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://[^\\s/$.?#][^\\s]*$"
+    },
+    "Identifier": {
+      "description": "ディシジョンツリーやドリルなどで使う汎用 ID。",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "CaseStudyID": {
+      "type": "string",
+      "enum": ["ehr", "altostrat", "cymbal", "knightMotives"]
+    },
+    "WAFPillar": {
+      "type": "string",
+      "enum": [
+        "operationalExcellence",
+        "security",
+        "reliability",
+        "costOptimization",
+        "performance",
+        "sustainability"
+      ]
+    },
+    "MistakeTag": {
+      "type": "string",
+      "enum": [
+        "cost",
+        "opsOverhead",
+        "compliance",
+        "scalability",
+        "availability",
+        "latency",
+        "requirementMismatch",
+        "deprecated"
+      ]
+    },
+    "License": {
+      "type": "string",
+      "enum": ["CC-BY-4.0", "Apache-2.0", "link-only"]
+    },
+    "Reference": {
+      "type": "object",
+      "properties": {
+        "title": { "$ref": "#/$defs/NonEmptyString" },
+        "url": { "$ref": "#/$defs/HttpsURL" },
+        "license": { "$ref": "#/$defs/License" }
+      },
+      "required": ["title", "url", "license"],
+      "additionalProperties": false
+    },
+    "References": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Reference" },
+      "minItems": 1
+    }
+  }
+}

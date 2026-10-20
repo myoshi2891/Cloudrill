@@ -1,0 +1,9 @@
+[project]
+name = "pca-content"
+version = "0.1.0"
+description = "PCA 試験対策アプリの学習コンテンツと検証ツール"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+pythonpath = ["scripts", "tests/fixtures"]
+testpaths = ["tests"]

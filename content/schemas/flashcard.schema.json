@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pca-content.invalid/schemas/flashcard.schema.json",
+  "title": "フラッシュカード(1ファイルに複数枚)",
+  "type": "object",
+  "properties": {
+    "cards": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Flashcard" },
+      "minItems": 1
+    }
+  },
+  "required": ["cards"],
+  "additionalProperties": false,
+  "$defs": {
+    "Flashcard": {
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/CardID" },
+        "domain": { "$ref": "common.schema.json#/$defs/Domain" },
+        "subObjective": { "$ref": "common.schema.json#/$defs/SubObjective" },
+        "front": { "$ref": "common.schema.json#/$defs/LocalizedText" },
+        "back": { "$ref": "common.schema.json#/$defs/LocalizedText" },
+        "relatedQuestionIDs": {
+          "type": "array",
+          "items": { "$ref": "common.schema.json#/$defs/QuestionID" },
+          "uniqueItems": true
+        }
+      },
+      "required": ["id", "domain", "subObjective", "front", "back", "relatedQuestionIDs"],
+      "additionalProperties": false
+    }
+  }
+}

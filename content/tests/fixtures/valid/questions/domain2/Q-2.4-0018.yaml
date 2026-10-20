@@ -1,0 +1,62 @@
+id: Q-2.4-0018
+revision: 1
+examGuideVersion: '6.1'
+domain: 2
+subObjective: '2.4'
+caseStudy: null
+type:
+  kind: single
+difficulty: 4
+wafPillars:
+- operationalExcellence
+keywords:
+- ダミー
+- 渡り鳥
+examSets:
+- 1
+stem:
+  ja: 【ダミー】噴水・石畳・流星・樹氷・鐘楼に関する設問。
+  en: Dummy question stem for Q-2.4-0018.
+choices:
+- id: a
+  text:
+    ja: 山脈洞窟彫刻銀河染物染物笛吹湿原石畳潮汐惑星惑星噴水刺繍
+    en: Dummy choice A of Q-2.4-0018
+  isCorrect: true
+  rationale:
+    ja: 選択肢Aが正しい理由(ダミー)
+    en: Why choice A is correct (dummy)
+- id: b
+  text:
+    ja: 雪原時計塔彗星灯台流星木版
+    en: Dummy choice B of Q-2.4-0018
+  isCorrect: false
+  rationale:
+    ja: 選択肢Bが誤り理由(ダミー)
+    en: Why choice B is incorrect (dummy)
+  mistakeTags:
+  - scalability
+- id: c
+  text:
+    ja: 風車温室惑星噴水鐘楼峡谷星座湿原渡り
+    en: Dummy choice C of Q-2.4-0018
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - availability
+- id: d
+  text:
+    ja: 染物滝壺帆船彫刻染物笛吹望遠鏡樹氷化石合唱青銅銀河流星
+    en: Dummy choice D of Q-2.4-0018
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - latency
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

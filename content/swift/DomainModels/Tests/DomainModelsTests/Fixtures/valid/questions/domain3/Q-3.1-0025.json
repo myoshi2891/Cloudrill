@@ -1,0 +1,92 @@
+{
+  "id": "Q-3.1-0025",
+  "revision": 1,
+  "examGuideVersion": "6.1",
+  "domain": 3,
+  "subObjective": "3.1",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 1,
+  "wafPillars": [
+    "security"
+  ],
+  "keywords": [
+    "ダミー",
+    "棚田"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】星座・月面・鍾乳石・庭園・灯台に関する設問。",
+    "en": "Dummy question stem for Q-3.1-0025."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "灯籠灯籠望遠鏡帆船木版画鍾乳石棚田織機海溝舞台洞",
+        "en": "Dummy choice A of Q-3.1-0025"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Aが正しい理由(ダミー)",
+        "en": "Why choice A is correct (dummy)"
+      }
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "製本宿場庭園竹林木版画望遠",
+        "en": "Dummy choice B of Q-3.1-0025"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "compliance"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "太鼓灯籠宿場峡谷化石氷河合唱温室噴水棚田化石峡谷彫刻温",
+        "en": "Dummy choice C of Q-3.1-0025"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "scalability"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "灯籠庭園滝壺彗星刺繍染物",
+        "en": "Dummy choice D of Q-3.1-0025"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Dが誤り理由(ダミー)",
+        "en": "Why choice D is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "availability"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

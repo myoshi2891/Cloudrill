@@ -1,0 +1,55 @@
+id: Q-5.2-0001
+revision: 1
+examGuideVersion: "6.1"
+domain: 5
+subObjective: "5.2"
+caseStudy: null
+type:
+  kind: single
+difficulty: 2
+wafPillars: [operationalExcellence]
+keywords: [Terraform, state, Cloud Storage]
+examSets: []
+stem:
+  ja: 複数の開発者が Terraform を使って同じ Google Cloud 環境を管理している。state ファイルの同時更新による競合と、state の紛失を防ぎたい。最も適切な方法はどれか。
+  en: Several developers manage the same Google Cloud environment with Terraform. You want to prevent conflicts from concurrent state updates and avoid losing the state. What should you do?
+choices:
+  - id: a
+    text:
+      ja: state を各開発者のローカルに置き、作業後に共有ドライブへコピーする
+      en: Keep state locally and copy it to a shared drive after each change
+    isCorrect: false
+    rationale:
+      ja: 同時に作業したときの競合を防げず、コピーし忘れによる state の不整合も起きやすい。手作業が増えて運用負荷も大きい。
+      en: It cannot prevent concurrent conflicts, forgotten copies cause drift, and the manual steps add overhead.
+    mistakeTags: [opsOverhead]
+  - id: b
+    text:
+      ja: Cloud Storage バケットを backend に設定し、オブジェクトのバージョニングを有効にする
+      en: Use a Cloud Storage bucket as the backend and enable object versioning
+    isCorrect: true
+    rationale:
+      ja: Cloud Storage backend は state のロックに対応しており、同時更新を防げる。バージョニングを有効にすれば、誤って上書きや削除をしても以前の state に戻せる。
+      en: The Cloud Storage backend supports state locking to prevent concurrent updates, and versioning lets you restore earlier state after mistakes.
+  - id: c
+    text:
+      ja: state ファイルを Git リポジトリにコミットして共有する
+      en: Commit the state file to the Git repository
+    isCorrect: false
+    rationale:
+      ja: Git にはロックの仕組みがなく競合を防げない。state には機密値が含まれることがあり、リポジトリに置くと漏えいのリスクがある。
+      en: Git provides no locking, and state can contain sensitive values that would leak through the repository.
+    mistakeTags: [compliance]
+  - id: d
+    text:
+      ja: apply のたびに state を削除し、既存リソースを import し直す
+      en: Delete the state before each apply and re-import existing resources
+    isCorrect: false
+    rationale:
+      ja: import の手間が大きく、取り込み漏れがあるとリソースの重複作成や削除を招く。
+      en: Re-importing is laborious, and missed resources can be duplicated or destroyed.
+    mistakeTags: [opsOverhead]
+references:
+  - title: Cloud Storage に Terraform の状態を保存する
+    url: https://cloud.google.com/docs/terraform/resource-management/store-state
+    license: CC-BY-4.0

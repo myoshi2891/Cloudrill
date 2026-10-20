@@ -1,0 +1,55 @@
+id: Q-1.3-0001
+revision: 1
+examGuideVersion: "6.1"
+domain: 1
+subObjective: "1.3"
+caseStudy: null
+type:
+  kind: single
+difficulty: 2
+wafPillars: [reliability, performance]
+keywords: [Spanner, 強整合性, マルチリージョン]
+examSets: [1]
+stem:
+  ja: 世界各地の倉庫から在庫数を更新する業務アプリを構築する。複数リージョンから同時に書き込みがあり、在庫数は常に強整合性で読み取れる必要がある。データはリレーショナルモデルで扱い、将来の書き込み増加には水平スケールで対応したい。どのデータベースを選ぶべきか。
+  en: You are building an inventory app that warehouses worldwide update concurrently from multiple regions. Stock counts must always be read with strong consistency, the data is relational, and write growth must be handled by scaling out. Which database should you choose?
+choices:
+  - id: a
+    text:
+      ja: Cloud SQL for PostgreSQL を 1 リージョンに置き、他リージョンにリードレプリカを追加する
+      en: Deploy Cloud SQL for PostgreSQL in one region and add cross-region read replicas
+    isCorrect: false
+    rationale:
+      ja: 書き込みはプライマリの 1 インスタンスに集中し、水平方向に書き込み性能を伸ばせない。レプリカの読み取りは非同期複製のため強整合性も保証されない。
+      en: All writes go to a single primary, so write throughput cannot scale out, and replica reads are asynchronous, so strong consistency is not guaranteed.
+    mistakeTags: [scalability, requirementMismatch]
+  - id: b
+    text:
+      ja: Spanner をマルチリージョン構成で使う
+      en: Use Spanner with a multi-region configuration
+    isCorrect: true
+    rationale:
+      ja: Spanner はリレーショナルモデルと外部整合性(強整合性)を備え、ノード追加で書き込みも水平にスケールする。マルチリージョン構成で複数リージョンからの利用と高可用性も満たせる。
+      en: Spanner offers a relational model with external (strong) consistency, scales writes horizontally by adding capacity, and its multi-region configurations provide high availability across regions.
+  - id: c
+    text:
+      ja: Bigtable のインスタンスを複数クラスタで構成し、レプリケーションを有効にする
+      en: Configure a Bigtable instance with multiple clusters and replication
+    isCorrect: false
+    rationale:
+      ja: Bigtable はワイドカラム型の NoSQL で、リレーショナルモデルや複数行トランザクションを提供しない。クラスタ間の複製は結果整合性になる。
+      en: Bigtable is a wide-column NoSQL store without a relational model or multi-row transactions, and replication between clusters is eventually consistent.
+    mistakeTags: [requirementMismatch]
+  - id: d
+    text:
+      ja: Firestore のマルチリージョン ロケーションを使う
+      en: Use a Firestore multi-region location
+    isCorrect: false
+    rationale:
+      ja: Firestore はドキュメント型データベースで、リレーショナルモデルでの設計や SQL による結合を前提とする要件に合わない。
+      en: Firestore is a document database and does not fit a requirement for a relational model with SQL joins.
+    mistakeTags: [requirementMismatch]
+references:
+  - title: Spanner のインスタンス構成
+    url: https://cloud.google.com/spanner/docs/instance-configurations
+    license: CC-BY-4.0

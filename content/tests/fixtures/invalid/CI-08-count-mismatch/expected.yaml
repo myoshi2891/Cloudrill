@@ -1,0 +1,5 @@
+description: count 2 に対して正解 3
+expect:
+  CI-08:
+  - error
+options: {}

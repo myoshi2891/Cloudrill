@@ -1,0 +1,59 @@
+id: Q-2.1-0903
+revision: 1
+examGuideVersion: '6.1'
+domain: 2
+subObjective: '2.1'
+caseStudy: null
+type:
+  kind: single
+difficulty: 4
+wafPillars:
+- costOptimization
+keywords:
+- ダミー
+- 水路
+examSets: []
+stem:
+  ja: 【ダミー】舞台・珊瑚・果樹園・楽譜・潮汐に関する設問。
+  en: Dummy question stem for Q-2.1-0903.
+choices:
+- id: a
+  text:
+    ja: 湿原砂丘楽譜星座石畳温室灯籠樹氷時計塔羅針盤彫刻温
+    en: Dummy choice A of Q-2.1-0903
+  isCorrect: true
+  rationale:
+    ja: 選択肢Aが正しい理由(ダミー)
+    en: Why choice A is correct (dummy)
+- id: b
+  text:
+    ja: 宿場青銅樹氷砂丘太鼓太鼓海溝画廊草原
+    en: Dummy choice B of Q-2.1-0903
+  isCorrect: true
+  rationale:
+    ja: 選択肢Bが正しい理由(ダミー)
+    en: Why choice B is correct (dummy)
+- id: c
+  text:
+    ja: 製本樹氷陶器灯籠星座月面刺繍染物染物彫刻
+    en: Dummy choice C of Q-2.1-0903
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - opsOverhead
+- id: d
+  text:
+    ja: 温室青銅星座鍵盤潮汐製本化石樹氷茶室太鼓珊瑚噴水温室
+    en: Dummy choice D of Q-2.1-0903
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - compliance
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

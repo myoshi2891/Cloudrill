@@ -1,0 +1,103 @@
+{
+  "id": "Q-6.2-0103",
+  "revision": 1,
+  "examGuideVersion": "6.1",
+  "domain": 6,
+  "subObjective": "6.2",
+  "caseStudy": null,
+  "type": {
+    "kind": "multiple",
+    "count": 2
+  },
+  "difficulty": 4,
+  "wafPillars": [
+    "security"
+  ],
+  "keywords": [
+    "ダミー",
+    "草原"
+  ],
+  "examSets": [],
+  "stem": {
+    "ja": "【ダミー】草原・茶室・木版画・銀河・陶器に関する設問。",
+    "en": "Dummy question stem for Q-6.2-0103."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "茶室流星山脈青銅峡谷渡り鳥琥珀庭園織機海溝洞窟時計塔",
+        "en": "Dummy choice A of Q-6.2-0103"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Aが正しい理由(ダミー)",
+        "en": "Why choice A is correct (dummy)"
+      }
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "染物噴水蜂蜜時計塔灯籠青銅温室舞",
+        "en": "Dummy choice B of Q-6.2-0103"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "cost"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "製本灯籠笛吹竹林楽譜潮汐星座灯台渡り鳥笛吹温室氷",
+        "en": "Dummy choice C of Q-6.2-0103"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "opsOverhead"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "木版画製本水路琥珀笛吹氷",
+        "en": "Dummy choice D of Q-6.2-0103"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Dが正しい理由(ダミー)",
+        "en": "Why choice D is correct (dummy)"
+      }
+    },
+    {
+      "id": "e",
+      "text": {
+        "ja": "鍾乳石惑星火山果樹園鍵盤鍾乳石彗星画廊洞窟彗星織機庭園水路星",
+        "en": "Dummy choice E of Q-6.2-0103"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Eが誤り理由(ダミー)",
+        "en": "Why choice E is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "scalability"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

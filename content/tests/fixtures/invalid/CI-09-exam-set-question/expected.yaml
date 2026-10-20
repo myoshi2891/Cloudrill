@@ -1,0 +1,7 @@
+description: questionIDs が存在しない(draft の模試のため CI-02 の warning も出る)
+expect:
+  CI-09:
+  - error
+  CI-02:
+  - warning
+options: {}

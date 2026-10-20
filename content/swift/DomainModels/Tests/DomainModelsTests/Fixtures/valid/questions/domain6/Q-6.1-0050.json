@@ -1,0 +1,105 @@
+{
+  "id": "Q-6.1-0050",
+  "revision": 1,
+  "examGuideVersion": "6.1",
+  "domain": 6,
+  "subObjective": "6.1",
+  "caseStudy": null,
+  "type": {
+    "kind": "multiple",
+    "count": 2
+  },
+  "difficulty": 1,
+  "wafPillars": [
+    "reliability"
+  ],
+  "keywords": [
+    "ダミー",
+    "楽譜"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】果樹園・蜂蜜・製本・鍾乳石・流星に関する設問。",
+    "en": "Dummy question stem for Q-6.1-0050."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "染物合唱風車蜂蜜蜂蜜陶器刺繍刺繍月面雪原",
+        "en": "Dummy choice A of Q-6.1-0050"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "compliance"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "樹氷水路陶器鍵盤画廊星座画廊風車化石鍾乳石織機織機鍵",
+        "en": "Dummy choice B of Q-6.1-0050"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "scalability"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "製本竹林帆船水路銀河水路劇場果樹園惑星",
+        "en": "Dummy choice C of Q-6.1-0050"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Cが正しい理由(ダミー)",
+        "en": "Why choice C is correct (dummy)"
+      }
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "刺繍鐘楼庭園合唱彗星渡り鳥渓流雪原温室月面庭園彗星",
+        "en": "Dummy choice D of Q-6.1-0050"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Dが正しい理由(ダミー)",
+        "en": "Why choice D is correct (dummy)"
+      }
+    },
+    {
+      "id": "e",
+      "text": {
+        "ja": "織機画廊月面笛吹樹氷陶器",
+        "en": "Dummy choice E of Q-6.1-0050"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Eが誤り理由(ダミー)",
+        "en": "Why choice E is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "requirementMismatch"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+description: 参照 URL が 404
+expect:
+  CI-06:
+  - warning
+options:
+  checkLinks: true

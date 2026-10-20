@@ -1,0 +1,92 @@
+{
+  "id": "Q-4.1-0041",
+  "revision": 1,
+  "examGuideVersion": "6.1",
+  "domain": 4,
+  "subObjective": "4.1",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 2,
+  "wafPillars": [
+    "sustainability"
+  ],
+  "keywords": [
+    "ダミー",
+    "雪原"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】時計塔・庭園・珊瑚・滝壺・刺繍に関する設問。",
+    "en": "Dummy question stem for Q-4.1-0041."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "海溝刺繍楽譜水路灯台笛吹湿原果樹",
+        "en": "Dummy choice A of Q-4.1-0041"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "opsOverhead"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "樹氷望遠鏡銀河望遠鏡刺繍雪原時計塔洞窟青銅湿原鐘",
+        "en": "Dummy choice B of Q-4.1-0041"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "compliance"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "羅針盤流星鐘楼海溝月面帆船石畳",
+        "en": "Dummy choice C of Q-4.1-0041"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "scalability"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "風車織機星座月面庭園風車草原鐘楼宿場彫刻彫刻琥珀楽譜棚田渓流画",
+        "en": "Dummy choice D of Q-4.1-0041"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Dが正しい理由(ダミー)",
+        "en": "Why choice D is correct (dummy)"
+      }
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+description: subObjective と domain の不一致
+expect:
+  CI-01:
+  - error
+options: {}

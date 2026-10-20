@@ -1,0 +1,92 @@
+{
+  "id": "Q-5.1-0045",
+  "revision": 1,
+  "examGuideVersion": "6.1",
+  "domain": 5,
+  "subObjective": "5.1",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 1,
+  "wafPillars": [
+    "costOptimization"
+  ],
+  "keywords": [
+    "ダミー",
+    "滝壺"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】帆船・銀河・峡谷・青銅・鐘楼に関する設問。",
+    "en": "Dummy question stem for Q-5.1-0045."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "洞窟渓流潮汐染物織機鐘楼渓流果樹",
+        "en": "Dummy choice A of Q-5.1-0045"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "latency"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "樹氷滝壺峡谷陶器水路氷河望遠鏡茶室洞窟峡谷劇場砂丘",
+        "en": "Dummy choice B of Q-5.1-0045"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "requirementMismatch"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "火山青銅彗星月面石畳渓流茶室鍵盤蜂",
+        "en": "Dummy choice C of Q-5.1-0045"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "deprecated"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "彫刻茶室蜂蜜鍾乳石雪原時計塔蜂",
+        "en": "Dummy choice D of Q-5.1-0045"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Dが正しい理由(ダミー)",
+        "en": "Why choice D is correct (dummy)"
+      }
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

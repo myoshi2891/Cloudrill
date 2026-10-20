@@ -1,0 +1,5 @@
+description: difficulty が範囲外
+expect:
+  CI-01:
+  - error
+options: {}

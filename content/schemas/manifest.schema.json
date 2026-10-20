@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pca-content.invalid/schemas/manifest.schema.json",
+  "title": "配信パックのマニフェスト(manifest.json)",
+  "description": "生成と署名は build_pack.py / sign_manifest.py の責務(本リポジトリでは未実装)。",
+  "type": "object",
+  "properties": {
+    "packVersion": { "$ref": "common.schema.json#/$defs/SemVer" },
+    "examGuideVersion": { "$ref": "common.schema.json#/$defs/ExamGuideVersion" },
+    "minAppVersion": { "$ref": "common.schema.json#/$defs/SemVer" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "files": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/FileEntry" },
+      "minItems": 1
+    },
+    "signature": {
+      "description": "Ed25519 署名の Base64 表現。",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+    }
+  },
+  "required": ["packVersion", "examGuideVersion", "minAppVersion", "createdAt", "files", "signature"],
+  "additionalProperties": false,
+  "$defs": {
+    "FileEntry": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^(?!/)(?!.*\\.\\./)[A-Za-z0-9._/-]+$"
+        },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "size": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["path", "sha256", "size"],
+      "additionalProperties": false
+    }
+  }
+}

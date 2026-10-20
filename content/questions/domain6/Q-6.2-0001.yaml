@@ -1,0 +1,55 @@
+id: Q-6.2-0001
+revision: 1
+examGuideVersion: "6.1"
+domain: 6
+subObjective: "6.2"
+caseStudy: null
+type:
+  kind: single
+difficulty: 1
+wafPillars: [operationalExcellence, reliability]
+keywords: [Cloud Monitoring, 稼働時間チェック, アラート]
+examSets: []
+stem:
+  ja: インターネットに公開している Web サービスについて、利用者から見て応答しているかを外部から監視し、応答しなくなったらオンコール担当者に通知したい。運用負荷を最小にするにはどうすべきか。
+  en: You want to monitor a public web service from outside, as users see it, and notify the on-call engineer when it stops responding, with minimal operational overhead. What should you do?
+choices:
+  - id: a
+    text:
+      ja: 監視用の VM を作成し、cron で定期的に curl を実行して、失敗したらメールを送る
+      en: Create a monitoring VM that runs curl via cron and emails on failure
+    isCorrect: false
+    rationale:
+      ja: 監視用 VM の保守や冗長化を自前で行う必要があり、その VM 自体が単一障害点になる。
+      en: You must maintain and make the monitoring VM redundant yourself, and it becomes a single point of failure.
+    mistakeTags: [opsOverhead]
+  - id: b
+    text:
+      ja: Cloud Monitoring で稼働時間チェックを作成し、それを条件とするアラート ポリシーを設定する
+      en: Create a Cloud Monitoring uptime check and an alerting policy based on it
+    isCorrect: true
+    rationale:
+      ja: 稼働時間チェックは複数の地点から外部の URL を定期的に確認するマネージド機能で、失敗をアラート ポリシーで通知できる。
+      en: Uptime checks are a managed feature that probes the URL from multiple locations, and alerting policies notify on failures.
+  - id: c
+    text:
+      ja: Cloud Logging でアクセスログを毎朝確認する
+      en: Review access logs in Cloud Logging every morning
+    isCorrect: false
+    rationale:
+      ja: 人手による定期確認では停止の検知が遅れ、即時の通知もできない。
+      en: Manual daily reviews detect outages late and cannot notify immediately.
+    mistakeTags: [availability]
+  - id: d
+    text:
+      ja: Cloud Trace でリクエストのレイテンシを分析する
+      en: Analyze request latency with Cloud Trace
+    isCorrect: false
+    rationale:
+      ja: Cloud Trace は処理のどこで時間がかかっているかを分析するためのもので、外部からの死活監視と通知には向かない。
+      en: Cloud Trace analyzes where time is spent in requests; it is not designed for external availability checks and alerting.
+    mistakeTags: [requirementMismatch]
+references:
+  - title: 稼働時間チェックの作成
+    url: https://cloud.google.com/monitoring/uptime-checks
+    license: CC-BY-4.0

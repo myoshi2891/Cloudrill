@@ -1,0 +1,5 @@
+description: stem.en の欠落
+expect:
+  CI-11:
+  - warning
+options: {}

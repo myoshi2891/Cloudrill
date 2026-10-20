@@ -1,0 +1,5 @@
+description: 模試のケース外の caseStudy
+expect:
+  CI-02:
+  - error
+options: {}

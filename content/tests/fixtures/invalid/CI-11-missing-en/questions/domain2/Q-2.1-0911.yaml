@@ -1,0 +1,60 @@
+id: Q-2.1-0911
+revision: 1
+examGuideVersion: '6.1'
+domain: 2
+subObjective: '2.1'
+caseStudy: null
+type:
+  kind: single
+difficulty: 2
+wafPillars:
+- sustainability
+keywords:
+- ダミー
+- 果樹園
+examSets: []
+stem:
+  ja: 【ダミー】月面・劇場・雪原・合唱・庭園に関する設問。
+choices:
+- id: a
+  text:
+    ja: 月面洞窟蜂蜜織機鍵盤棚田刺繍望遠鏡灯籠棚田
+    en: Dummy choice A of Q-2.1-0911
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - deprecated
+- id: b
+  text:
+    ja: 月面温室樹氷鍵盤潮汐彫刻渓流滝壺染物
+    en: Dummy choice B of Q-2.1-0911
+  isCorrect: true
+  rationale:
+    ja: 選択肢Bが正しい理由(ダミー)
+    en: Why choice B is correct (dummy)
+- id: c
+  text:
+    ja: 劇場砂丘湿原彗星雪原彫刻羅
+    en: Dummy choice C of Q-2.1-0911
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - opsOverhead
+- id: d
+  text:
+    ja: 鐘楼彗星水路織機劇場銀河渡り鳥竹林琥珀木
+    en: Dummy choice D of Q-2.1-0911
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - compliance
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

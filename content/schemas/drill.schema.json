@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pca-content.invalid/schemas/drill.schema.json",
+  "title": "キーワード反射ドリル(1ファイルに複数問)",
+  "type": "object",
+  "properties": {
+    "drills": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/KeywordDrill" },
+      "minItems": 1
+    }
+  },
+  "required": ["drills"],
+  "additionalProperties": false,
+  "$defs": {
+    "KeywordDrill": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^K-[0-9]{4}$" },
+        "phrase": { "$ref": "common.schema.json#/$defs/LocalizedText" },
+        "correct": { "$ref": "common.schema.json#/$defs/NonEmptyString" },
+        "distractor": { "$ref": "common.schema.json#/$defs/NonEmptyString" },
+        "explanation": { "$ref": "common.schema.json#/$defs/LocalizedText" }
+      },
+      "required": ["id", "phrase", "correct", "distractor", "explanation"],
+      "additionalProperties": false
+    }
+  }
+}

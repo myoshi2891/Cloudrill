@@ -1,0 +1,5 @@
+description: ツリーの next が存在しない
+expect:
+  CI-09:
+  - error
+options: {}

@@ -1,0 +1,92 @@
+{
+  "id": "Q-1.1-0011",
+  "revision": 1,
+  "examGuideVersion": "6.1",
+  "domain": 1,
+  "subObjective": "1.1",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 2,
+  "wafPillars": [
+    "sustainability"
+  ],
+  "keywords": [
+    "ダミー",
+    "果樹園"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】笛吹・草原・宿場・海溝・彗星に関する設問。",
+    "en": "Dummy question stem for Q-1.1-0011."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "水路湿原帆船織機蜂蜜舞台",
+        "en": "Dummy choice A of Q-1.1-0011"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "scalability"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "砂丘水路海溝製本合唱洞窟彗星",
+        "en": "Dummy choice B of Q-1.1-0011"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "availability"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "灯台望遠鏡珊瑚琥珀青銅渡り鳥流星滝壺竹林画廊流星刺繍",
+        "en": "Dummy choice C of Q-1.1-0011"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Cが正しい理由(ダミー)",
+        "en": "Why choice C is correct (dummy)"
+      }
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "水路化石灯籠合唱染物渡り鳥竹林鐘楼灯",
+        "en": "Dummy choice D of Q-1.1-0011"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Dが誤り理由(ダミー)",
+        "en": "Why choice D is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "requirementMismatch"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

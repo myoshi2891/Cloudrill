@@ -1,0 +1,90 @@
+{
+  "id": "Q-2.2-0101",
+  "revision": 1,
+  "examGuideVersion": "6.1",
+  "domain": 2,
+  "subObjective": "2.2",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 2,
+  "wafPillars": [
+    "sustainability"
+  ],
+  "keywords": [
+    "ダミー",
+    "雪原"
+  ],
+  "examSets": [],
+  "stem": {
+    "ja": "【ダミー】渓流・潮汐・石畳・月面・惑星に関する設問。",
+    "en": "Dummy question stem for Q-2.2-0101."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "庭園竹林棚田青銅彗星石畳風車火山",
+        "en": "Dummy choice A of Q-2.2-0101"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "latency"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "噴水滝壺珊瑚製本渡り鳥銀",
+        "en": "Dummy choice B of Q-2.2-0101"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Bが正しい理由(ダミー)",
+        "en": "Why choice B is correct (dummy)"
+      }
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "峡谷風車月面鍾乳石化石陶器湿原望遠鏡織機笛",
+        "en": "Dummy choice C of Q-2.2-0101"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "deprecated"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "湿原木版画雪原月面製本果樹園青銅星座琥珀琥珀果樹園渓",
+        "en": "Dummy choice D of Q-2.2-0101"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Dが誤り理由(ダミー)",
+        "en": "Why choice D is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "cost"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

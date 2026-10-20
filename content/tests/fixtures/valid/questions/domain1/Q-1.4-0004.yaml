@@ -1,0 +1,62 @@
+id: Q-1.4-0004
+revision: 1
+examGuideVersion: '6.1'
+domain: 1
+subObjective: '1.4'
+caseStudy: altostrat
+type:
+  kind: single
+difficulty: 5
+wafPillars:
+- performance
+keywords:
+- ダミー
+- 鍵盤
+examSets:
+- 1
+stem:
+  ja: 【ダミー】彗星・風車・洞窟・湿原・刺繍に関する設問。
+  en: Dummy question stem for Q-1.4-0004.
+choices:
+- id: a
+  text:
+    ja: 羅針盤温室鍵盤彗星楽譜海溝鍵盤青銅灯台楽譜惑
+    en: Dummy choice A of Q-1.4-0004
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - availability
+- id: b
+  text:
+    ja: 織機画廊望遠鏡珊瑚珊瑚渡り鳥湿原噴
+    en: Dummy choice B of Q-1.4-0004
+  isCorrect: false
+  rationale:
+    ja: 選択肢Bが誤り理由(ダミー)
+    en: Why choice B is incorrect (dummy)
+  mistakeTags:
+  - latency
+- id: c
+  text:
+    ja: 琥珀画廊風車渓流風車湿原刺繍刺繍画廊氷河灯台石畳染
+    en: Dummy choice C of Q-1.4-0004
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - requirementMismatch
+- id: d
+  text:
+    ja: 刺繍温室果樹園水路竹林楽譜太鼓水路洞窟湿原渓流石畳湿原洞
+    en: Dummy choice D of Q-1.4-0004
+  isCorrect: true
+  rationale:
+    ja: 選択肢Dが正しい理由(ダミー)
+    en: Why choice D is correct (dummy)
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

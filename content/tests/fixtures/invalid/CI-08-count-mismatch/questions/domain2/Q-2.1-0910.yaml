@@ -1,0 +1,68 @@
+id: Q-2.1-0910
+revision: 1
+examGuideVersion: '6.1'
+domain: 2
+subObjective: '2.1'
+caseStudy: null
+type:
+  kind: multiple
+  count: 2
+difficulty: 1
+wafPillars:
+- performance
+keywords:
+- ダミー
+- 時計塔
+examSets: []
+stem:
+  ja: 【ダミー】棚田・流星・灯台・渓流・化石に関する設問。
+  en: Dummy question stem for Q-2.1-0910.
+choices:
+- id: a
+  text:
+    ja: 太鼓合唱琥珀染物羅針盤鍵
+    en: Dummy choice A of Q-2.1-0910
+  isCorrect: true
+  rationale:
+    ja: 選択肢Aが正しい理由(ダミー)
+    en: Why choice A is correct (dummy)
+- id: b
+  text:
+    ja: 製本渓流火山流星渡り鳥時計塔笛吹灯台峡谷棚田陶器火山渡り
+    en: Dummy choice B of Q-2.1-0910
+  isCorrect: true
+  rationale:
+    ja: 選択肢Bが正しい理由(ダミー)
+    en: Why choice B is correct (dummy)
+- id: c
+  text:
+    ja: 流星山脈茶室竹林合唱棚田月面温室舞台琥珀銀河月
+    en: Dummy choice C of Q-2.1-0910
+  isCorrect: true
+  rationale:
+    ja: 選択肢Cが正しい理由(ダミー)
+    en: Why choice C is correct (dummy)
+- id: d
+  text:
+    ja: 氷河鍾乳石棚田帆船木版画望遠鏡渓流
+    en: Dummy choice D of Q-2.1-0910
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - opsOverhead
+- id: e
+  text:
+    ja: 羅針盤灯台滝壺峡谷彫刻楽譜火山茶室草原鍾乳石流星化石染物陶器樹
+    en: Dummy choice E of Q-2.1-0910
+  isCorrect: false
+  rationale:
+    ja: 選択肢Eが誤り理由(ダミー)
+    en: Why choice E is incorrect (dummy)
+  mistakeTags:
+  - compliance
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

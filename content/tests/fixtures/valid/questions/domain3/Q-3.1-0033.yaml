@@ -1,0 +1,62 @@
+id: Q-3.1-0033
+revision: 1
+examGuideVersion: '6.1'
+domain: 3
+subObjective: '3.1'
+caseStudy: ehr
+type:
+  kind: single
+difficulty: 4
+wafPillars:
+- costOptimization
+keywords:
+- ダミー
+- 彗星
+examSets:
+- 1
+stem:
+  ja: 【ダミー】渡り鳥・洞窟・樹氷・潮汐・彫刻に関する設問。
+  en: Dummy question stem for Q-3.1-0033.
+choices:
+- id: a
+  text:
+    ja: 砂丘刺繍庭園惑星星座竹林製本楽譜合唱
+    en: Dummy choice A of Q-3.1-0033
+  isCorrect: true
+  rationale:
+    ja: 選択肢Aが正しい理由(ダミー)
+    en: Why choice A is correct (dummy)
+- id: b
+  text:
+    ja: 化石化石潮汐湿原珊瑚火山月面氷河彫刻化石木版画洞窟染物
+    en: Dummy choice B of Q-3.1-0033
+  isCorrect: false
+  rationale:
+    ja: 選択肢Bが誤り理由(ダミー)
+    en: Why choice B is incorrect (dummy)
+  mistakeTags:
+  - compliance
+- id: c
+  text:
+    ja: 渓流劇場陶器山脈果樹園宿場珊瑚氷河草原彗星彗星水路帆
+    en: Dummy choice C of Q-3.1-0033
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - scalability
+- id: d
+  text:
+    ja: 化石峡谷海溝舞台流星惑星惑星流星風車珊瑚
+    en: Dummy choice D of Q-3.1-0033
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - availability
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

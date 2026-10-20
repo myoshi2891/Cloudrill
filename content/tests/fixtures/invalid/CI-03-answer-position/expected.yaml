@@ -1,0 +1,5 @@
+description: 正解位置が A に偏る
+expect:
+  CI-03:
+  - error
+options: {}

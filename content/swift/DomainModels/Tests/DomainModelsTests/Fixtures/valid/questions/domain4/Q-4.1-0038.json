@@ -1,0 +1,92 @@
+{
+  "id": "Q-4.1-0038",
+  "revision": 1,
+  "examGuideVersion": "6.1",
+  "domain": 4,
+  "subObjective": "4.1",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 4,
+  "wafPillars": [
+    "reliability"
+  ],
+  "keywords": [
+    "ダミー",
+    "海溝"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】製本・羅針盤・星座・水路・鐘楼に関する設問。",
+    "en": "Dummy question stem for Q-4.1-0038."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "琥珀画廊鍾乳石湿原舞台温室木版画草原陶",
+        "en": "Dummy choice A of Q-4.1-0038"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "requirementMismatch"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "石畳噴水化石劇場噴水滝壺鍾乳石琥珀滝壺楽譜星座果樹",
+        "en": "Dummy choice B of Q-4.1-0038"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "deprecated"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "渓流峡谷洞窟蜂蜜製本星座風",
+        "en": "Dummy choice C of Q-4.1-0038"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "cost"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "雪原雪原樹氷氷河珊瑚水路砂丘帆船彫刻石畳棚田湿原",
+        "en": "Dummy choice D of Q-4.1-0038"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Dが正しい理由(ダミー)",
+        "en": "Why choice D is correct (dummy)"
+      }
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

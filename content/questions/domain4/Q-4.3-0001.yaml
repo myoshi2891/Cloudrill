@@ -1,0 +1,55 @@
+id: Q-4.3-0001
+revision: 1
+examGuideVersion: "6.1"
+domain: 4
+subObjective: "4.3"
+caseStudy: null
+type:
+  kind: single
+difficulty: 2
+wafPillars: [reliability, operationalExcellence]
+keywords: [SLO, エラーバジェット, SRE]
+examSets: []
+stem:
+  ja: 可用性の SLO を 99.9% と定めたサービスで、今月のエラーバジェットを月半ばで使い切った。プロダクト チームは予定どおり新機能をリリースしたいと考えている。SRE の考え方に沿った対応はどれか。
+  en: A service with a 99.9% availability SLO has exhausted its monthly error budget by mid-month, and the product team wants to ship new features as planned. What is the SRE-aligned response?
+choices:
+  - id: a
+    text:
+      ja: SLO を 99% に下げ、今月のリリースを予定どおり続ける
+      en: Lower the SLO to 99% and continue releasing as planned
+    isCorrect: false
+    rationale:
+      ja: SLO は利用者の期待にもとづいて決めるもので、予算を使い切ったからといって場当たり的に下げると、信頼性の目標が意味を失う。
+      en: SLOs reflect user expectations; lowering them ad hoc when the budget runs out defeats the purpose of the target.
+    mistakeTags: [requirementMismatch]
+  - id: b
+    text:
+      ja: 新機能のリリースを一時的に止め、信頼性を改善する作業を優先する
+      en: Temporarily freeze feature releases and prioritize reliability work
+    isCorrect: true
+    rationale:
+      ja: エラーバジェットを使い切ったら、変更によるリスクを抑えるためにリリースを止め、信頼性の改善に注力するのが SRE の基本的な運用方針である。
+      en: When the error budget is spent, SRE practice is to halt risky changes and focus on reliability improvements.
+  - id: c
+    text:
+      ja: エラーバジェットは目安にすぎないので、気にせずリリースを続ける
+      en: Ignore the budget since it is only a guideline and keep releasing
+    isCorrect: false
+    rationale:
+      ja: エラーバジェットは開発速度と信頼性のバランスをとるための合意であり、無視すると利用者への影響が拡大する。
+      en: The error budget is an agreement that balances velocity and reliability; ignoring it increases user impact.
+    mistakeTags: [availability]
+  - id: d
+    text:
+      ja: オンコールの負担を減らすため、アラートをすべて無効にしてからリリースする
+      en: Disable all alerts to reduce on-call load and then release
+    isCorrect: false
+    rationale:
+      ja: アラートを止めると障害の検知が遅れ、可用性がさらに下がる。問題の解決にもならない。
+      en: Disabling alerts delays incident detection and further reduces availability without solving the problem.
+    mistakeTags: [availability, opsOverhead]
+references:
+  - title: Site Reliability Engineering - Embracing Risk
+    url: https://sre.google/sre-book/embracing-risk/
+    license: link-only

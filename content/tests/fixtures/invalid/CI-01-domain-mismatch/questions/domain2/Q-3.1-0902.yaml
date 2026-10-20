@@ -1,0 +1,61 @@
+id: Q-3.1-0902
+revision: 1
+examGuideVersion: '6.1'
+domain: 2
+subObjective: '3.1'
+caseStudy: null
+type:
+  kind: single
+difficulty: 3
+wafPillars:
+- reliability
+keywords:
+- ダミー
+- 山脈
+examSets: []
+stem:
+  ja: 【ダミー】太鼓・灯籠・湿原・滝壺・彗星に関する設問。
+  en: Dummy question stem for Q-3.1-0902.
+choices:
+- id: a
+  text:
+    ja: 劇場滝壺太鼓時計塔化石渓流惑星砂丘雪原潮汐庭園風車潮汐羅針盤合
+    en: Dummy choice A of Q-3.1-0902
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - requirementMismatch
+- id: b
+  text:
+    ja: 木版画茶室庭園笛吹湿原温室
+    en: Dummy choice B of Q-3.1-0902
+  isCorrect: true
+  rationale:
+    ja: 選択肢Bが正しい理由(ダミー)
+    en: Why choice B is correct (dummy)
+- id: c
+  text:
+    ja: 樹氷舞台望遠鏡彗星石畳画廊帆船楽譜化石織機月面彗星刺繍劇場画
+    en: Dummy choice C of Q-3.1-0902
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - cost
+- id: d
+  text:
+    ja: 庭園帆船雪原灯籠鍾乳石珊瑚鍵盤鍵盤製本太鼓銀河
+    en: Dummy choice D of Q-3.1-0902
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - opsOverhead
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

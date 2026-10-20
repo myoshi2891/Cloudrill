@@ -1,0 +1,62 @@
+id: Q-6.3-0052
+revision: 1
+examGuideVersion: '6.1'
+domain: 6
+subObjective: '6.3'
+caseStudy: null
+type:
+  kind: single
+difficulty: 3
+wafPillars:
+- performance
+keywords:
+- ダミー
+- 太鼓
+examSets:
+- 1
+stem:
+  ja: 【ダミー】流星・鐘楼・温室・刺繍・織機に関する設問。
+  en: Dummy question stem for Q-6.3-0052.
+choices:
+- id: a
+  text:
+    ja: 製本滝壺風車温室竹林合唱木版画染物楽譜羅
+    en: Dummy choice A of Q-6.3-0052
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - availability
+- id: b
+  text:
+    ja: 木版画木版画渡り鳥珊瑚湿原彫刻刺繍楽譜染物竹
+    en: Dummy choice B of Q-6.3-0052
+  isCorrect: true
+  rationale:
+    ja: 選択肢Bが正しい理由(ダミー)
+    en: Why choice B is correct (dummy)
+- id: c
+  text:
+    ja: 水路時計塔星座庭園彫刻水路舞台湿原火山笛吹
+    en: Dummy choice C of Q-6.3-0052
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - requirementMismatch
+- id: d
+  text:
+    ja: 銀河木版画蜂蜜石畳劇場滝壺竹林湿原月面合唱砂丘青銅砂丘刺繍湿原
+    en: Dummy choice D of Q-6.3-0052
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - deprecated
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

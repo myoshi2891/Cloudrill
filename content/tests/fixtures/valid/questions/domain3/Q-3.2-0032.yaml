@@ -1,0 +1,62 @@
+id: Q-3.2-0032
+revision: 1
+examGuideVersion: '6.1'
+domain: 3
+subObjective: '3.2'
+caseStudy: altostrat
+type:
+  kind: single
+difficulty: 3
+wafPillars:
+- reliability
+keywords:
+- ダミー
+- 惑星
+examSets:
+- 1
+stem:
+  ja: 【ダミー】琥珀・渓流・棚田・製本・鍵盤に関する設問。
+  en: Dummy question stem for Q-3.2-0032.
+choices:
+- id: a
+  text:
+    ja: 珊瑚銀河滝壺望遠鏡劇場庭
+    en: Dummy choice A of Q-3.2-0032
+  isCorrect: true
+  rationale:
+    ja: 選択肢Aが正しい理由(ダミー)
+    en: Why choice A is correct (dummy)
+- id: b
+  text:
+    ja: 製本棚田水路噴水望遠鏡火山劇場海溝画廊
+    en: Dummy choice B of Q-3.2-0032
+  isCorrect: false
+  rationale:
+    ja: 選択肢Bが誤り理由(ダミー)
+    en: Why choice B is incorrect (dummy)
+  mistakeTags:
+  - opsOverhead
+- id: c
+  text:
+    ja: 鍵盤竹林月面灯台合唱鐘楼棚
+    en: Dummy choice C of Q-3.2-0032
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - compliance
+- id: d
+  text:
+    ja: 太鼓青銅太鼓灯籠鐘楼彗星鍵盤洞窟鍾乳石果樹園洞窟竹林滝
+    en: Dummy choice D of Q-3.2-0032
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - scalability
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

@@ -1,0 +1,5 @@
+description: docs の subObjective が一覧にない
+expect:
+  CI-09:
+  - error
+options: {}

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pca-content.invalid/schemas/weights.schema.json",
+  "title": "ドメイン比重(weights.yaml)",
+  "description": "YAML の整数キー 1〜6 は、JSON 相当に変換する際に文字列キーになる。合計値の検証は validate.py(CI-10)が行う。",
+  "type": "object",
+  "properties": {
+    "examGuideVersion": { "$ref": "common.schema.json#/$defs/ExamGuideVersion" },
+    "weights": {
+      "type": "object",
+      "propertyNames": { "pattern": "^[1-6]$" },
+      "additionalProperties": { "type": "number", "minimum": 0, "maximum": 1 },
+      "required": ["1", "2", "3", "4", "5", "6"]
+    }
+  },
+  "required": ["examGuideVersion", "weights"],
+  "additionalProperties": false
+}

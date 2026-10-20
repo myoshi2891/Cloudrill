@@ -1,0 +1,90 @@
+{
+  "id": "Q-4.1-0102",
+  "revision": 1,
+  "examGuideVersion": "6.1",
+  "domain": 4,
+  "subObjective": "4.1",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 3,
+  "wafPillars": [
+    "operationalExcellence"
+  ],
+  "keywords": [
+    "ダミー",
+    "湿原"
+  ],
+  "examSets": [],
+  "stem": {
+    "ja": "【ダミー】彫刻・製本・惑星・舞台・石畳に関する設問。",
+    "en": "Dummy question stem for Q-4.1-0102."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "楽譜陶器帆船刺繍笛吹望遠鏡山脈彗星陶器渓流木版画太鼓",
+        "en": "Dummy choice A of Q-4.1-0102"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "requirementMismatch"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "合唱望遠鏡草原舞台画廊滝壺",
+        "en": "Dummy choice B of Q-4.1-0102"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "deprecated"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "草原笛吹月面化石棚田渡り",
+        "en": "Dummy choice C of Q-4.1-0102"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Cが正しい理由(ダミー)",
+        "en": "Why choice C is correct (dummy)"
+      }
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "製本氷河羅針盤山脈海溝帆船琥珀茶室舞",
+        "en": "Dummy choice D of Q-4.1-0102"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Dが誤り理由(ダミー)",
+        "en": "Why choice D is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "opsOverhead"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

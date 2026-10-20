@@ -1,0 +1,24 @@
+name: link-check
+
+on:
+  schedule:
+    - cron: "0 0 * * 1" # 毎週月曜 09:00 JST
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  link-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+          cache: pip
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Check links
+        # CI-06 は warning なので、--strict でリンク切れがあればジョブを失敗させる
+        run: python scripts/validate.py --only CI-06 --check-links --strict --format github

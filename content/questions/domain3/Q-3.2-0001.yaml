@@ -1,0 +1,55 @@
+id: Q-3.2-0001
+revision: 1
+examGuideVersion: "6.1"
+domain: 3
+subObjective: "3.2"
+caseStudy: ehr
+type:
+  kind: single
+difficulty: 3
+wafPillars: [security]
+keywords: [CMEK, Cloud KMS, 規制対応]
+examSets: [1]
+stem:
+  ja: 医療系のソフトウェア企業が、患者に関するデータを Cloud Storage に保存する。規制対応のため、暗号鍵のローテーション周期を自社で決め、必要なときに鍵を無効化してデータへのアクセスを止められるようにしたい。運用負荷はできるだけ小さくしたい。最も適切な方法はどれか。
+  en: A healthcare software company stores patient-related data in Cloud Storage. For compliance, it must control the key rotation schedule and be able to disable the key to stop access to the data, with minimal operational overhead. What should it do?
+choices:
+  - id: a
+    text:
+      ja: Google が管理するデフォルトの暗号化をそのまま使う
+      en: Keep the default Google-managed encryption
+    isCorrect: false
+    rationale:
+      ja: データは暗号化されるが、鍵のローテーション周期や無効化を顧客が制御できないため、要件を満たさない。
+      en: Data is encrypted, but the customer cannot control rotation or disable the key, so the requirement is not met.
+    mistakeTags: [compliance]
+  - id: b
+    text:
+      ja: Cloud KMS で鍵を作成し、バケットのデフォルトの鍵として設定する(CMEK)
+      en: Create a key in Cloud KMS and set it as the bucket's default key (CMEK)
+    isCorrect: true
+    rationale:
+      ja: CMEK では鍵を Cloud KMS で管理するため、ローテーション周期の設定や鍵の無効化を顧客が行える。鍵の保管や可用性は Google のマネージド サービスが担うので運用負荷も小さい。
+      en: With CMEK, the customer controls rotation and can disable the key in Cloud KMS, while key storage and availability are handled by a managed service.
+  - id: c
+    text:
+      ja: アプリケーション側で暗号化してから保存し、鍵は Compute Engine 上に構築した自前の鍵管理サーバーで保管する
+      en: Encrypt data in the application before upload and keep keys on a self-built key server on Compute Engine
+    isCorrect: false
+    rationale:
+      ja: 鍵の制御はできるが、鍵管理サーバーの構築、冗長化、パッチ適用などを自社で担うことになり、運用負荷が大きい。
+      en: It gives key control, but building, replicating, and patching the key server adds significant operational overhead.
+    mistakeTags: [opsOverhead]
+  - id: d
+    text:
+      ja: 顧客指定の暗号鍵(CSEK)をリクエストごとに渡す
+      en: Supply customer-supplied encryption keys (CSEK) with each request
+    isCorrect: false
+    rationale:
+      ja: 鍵の保管と、リクエストのたびに鍵を渡す処理を自社で実装する必要があり、鍵を紛失するとデータを復号できなくなる。運用負荷とリスクが大きい。
+      en: The company must store keys and pass them on every request, and losing a key makes the data unrecoverable, which adds overhead and risk.
+    mistakeTags: [opsOverhead]
+references:
+  - title: 顧客管理の暗号鍵(CMEK)
+    url: https://cloud.google.com/kms/docs/cmek
+    license: CC-BY-4.0

@@ -1,0 +1,92 @@
+{
+  "id": "Q-6.5-0054",
+  "revision": 1,
+  "examGuideVersion": "6.1",
+  "domain": 6,
+  "subObjective": "6.5",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 5,
+  "wafPillars": [
+    "operationalExcellence"
+  ],
+  "keywords": [
+    "ダミー",
+    "舞台"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】舞台・笛吹・鐘楼・渓流・果樹園に関する設問。",
+    "en": "Dummy question stem for Q-6.5-0054."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "染物刺繍刺繍製本氷河珊瑚舞台山脈灯",
+        "en": "Dummy choice A of Q-6.5-0054"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "requirementMismatch"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "果樹園滝壺鍾乳石樹氷織機峡谷竹林灯籠棚田",
+        "en": "Dummy choice B of Q-6.5-0054"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "deprecated"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "海溝織機月面琥珀草原陶器樹",
+        "en": "Dummy choice C of Q-6.5-0054"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Cが正しい理由(ダミー)",
+        "en": "Why choice C is correct (dummy)"
+      }
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "琥珀灯台鐘楼劇場鐘楼陶器草原氷河峡谷合唱刺繍青",
+        "en": "Dummy choice D of Q-6.5-0054"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Dが誤り理由(ダミー)",
+        "en": "Why choice D is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "opsOverhead"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

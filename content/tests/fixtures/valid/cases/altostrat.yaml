@@ -1,0 +1,31 @@
+id: altostrat
+name:
+  ja: ダミーケース altostrat
+  en: Dummy case altostrat
+summary:
+  ja: ダミーの概要
+  en: Dummy summary
+businessRequirements:
+- ja: ダミーのビジネス要件
+  en: Dummy business requirement
+technicalRequirements:
+- ja: ダミーの技術要件
+  en: Dummy technical requirement
+existingEnvironment:
+  ja: ダミーの既存環境
+  en: Dummy existing environment
+officialURL: https://cloud.google.com/learn/certification/cloud-architect
+requirementMappings:
+- requirement:
+    ja: ダミーの要件
+    en: Dummy requirement
+  recommendedServices:
+  - Cloud Run
+  rationale:
+    ja: ダミーの理由
+    en: Dummy rationale
+  rejectedOptions:
+  - service: Compute Engine
+    reason:
+      ja: ダミーの不採用理由
+      en: Dummy reason

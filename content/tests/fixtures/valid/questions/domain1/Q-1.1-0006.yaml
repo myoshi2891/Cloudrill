@@ -1,0 +1,62 @@
+id: Q-1.1-0006
+revision: 1
+examGuideVersion: '6.1'
+domain: 1
+subObjective: '1.1'
+caseStudy: altostrat
+type:
+  kind: single
+difficulty: 2
+wafPillars:
+- operationalExcellence
+keywords:
+- ダミー
+- 温室
+examSets:
+- 1
+stem:
+  ja: 【ダミー】笛吹・樹氷・鐘楼・果樹園・染物に関する設問。
+  en: Dummy question stem for Q-1.1-0006.
+choices:
+- id: a
+  text:
+    ja: 温室彗星渡り鳥木版画海溝渡り鳥珊瑚竹林鐘楼滝壺琥珀琥珀蜂蜜琥
+    en: Dummy choice A of Q-1.1-0006
+  isCorrect: true
+  rationale:
+    ja: 選択肢Aが正しい理由(ダミー)
+    en: Why choice A is correct (dummy)
+- id: b
+  text:
+    ja: 茶室製本温室海溝染物刺繍果樹園惑星
+    en: Dummy choice B of Q-1.1-0006
+  isCorrect: false
+  rationale:
+    ja: 選択肢Bが誤り理由(ダミー)
+    en: Why choice B is incorrect (dummy)
+  mistakeTags:
+  - deprecated
+- id: c
+  text:
+    ja: 峡谷竹林太鼓笛吹果樹園湿原潮汐化石蜂蜜鐘楼
+    en: Dummy choice C of Q-1.1-0006
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - cost
+- id: d
+  text:
+    ja: 合唱洞窟草原銀河果樹園珊瑚噴水帆
+    en: Dummy choice D of Q-1.1-0006
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - opsOverhead
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

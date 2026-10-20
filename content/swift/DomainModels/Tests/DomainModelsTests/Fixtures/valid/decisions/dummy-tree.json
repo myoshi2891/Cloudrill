@@ -1,0 +1,74 @@
+{
+  "id": "dummy-tree",
+  "title": {
+    "ja": "ダミーのツリー",
+    "en": "Dummy tree"
+  },
+  "rootNodeID": "root",
+  "nodes": [
+    {
+      "id": "root",
+      "question": {
+        "ja": "ダミーの質問 1",
+        "en": "Dummy question 1"
+      },
+      "options": [
+        {
+          "label": {
+            "ja": "はい",
+            "en": "Yes"
+          },
+          "next": "second"
+        },
+        {
+          "label": {
+            "ja": "いいえ",
+            "en": "No"
+          },
+          "result": {
+            "service": "Cloud Run",
+            "rationale": {
+              "ja": "ダミー",
+              "en": "Dummy"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "second",
+      "question": {
+        "ja": "ダミーの質問 2",
+        "en": "Dummy question 2"
+      },
+      "options": [
+        {
+          "label": {
+            "ja": "はい",
+            "en": "Yes"
+          },
+          "result": {
+            "service": "GKE",
+            "rationale": {
+              "ja": "ダミー",
+              "en": "Dummy"
+            }
+          }
+        },
+        {
+          "label": {
+            "ja": "いいえ",
+            "en": "No"
+          },
+          "result": {
+            "service": "Compute Engine",
+            "rationale": {
+              "ja": "ダミー",
+              "en": "Dummy"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

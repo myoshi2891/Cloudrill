@@ -1,0 +1,71 @@
+id: Q-5.2-0048
+revision: 1
+examGuideVersion: '6.1'
+domain: 5
+subObjective: '5.2'
+caseStudy: null
+type:
+  kind: multiple
+  count: 2
+difficulty: 4
+wafPillars:
+- operationalExcellence
+keywords:
+- ダミー
+- 化石
+examSets:
+- 1
+stem:
+  ja: 【ダミー】羅針盤・琥珀・洞窟・化石・噴水に関する設問。
+  en: Dummy question stem for Q-5.2-0048.
+choices:
+- id: a
+  text:
+    ja: 刺繍流星時計塔彗星灯台楽譜滝壺噴水時計塔
+    en: Dummy choice A of Q-5.2-0048
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - cost
+- id: b
+  text:
+    ja: 画廊洞窟潮汐時計塔灯台望遠鏡灯台果樹園時計塔火山竹
+    en: Dummy choice B of Q-5.2-0048
+  isCorrect: false
+  rationale:
+    ja: 選択肢Bが誤り理由(ダミー)
+    en: Why choice B is incorrect (dummy)
+  mistakeTags:
+  - opsOverhead
+- id: c
+  text:
+    ja: 棚田楽譜琥珀鐘楼惑星青銅
+    en: Dummy choice C of Q-5.2-0048
+  isCorrect: true
+  rationale:
+    ja: 選択肢Cが正しい理由(ダミー)
+    en: Why choice C is correct (dummy)
+- id: d
+  text:
+    ja: 羅針盤果樹園鍵盤竹林樹氷彗星彫刻惑
+    en: Dummy choice D of Q-5.2-0048
+  isCorrect: true
+  rationale:
+    ja: 選択肢Dが正しい理由(ダミー)
+    en: Why choice D is correct (dummy)
+- id: e
+  text:
+    ja: 鐘楼劇場合唱珊瑚製本彗星染物流星月面星座木版
+    en: Dummy choice E of Q-5.2-0048
+  isCorrect: false
+  rationale:
+    ja: 選択肢Eが誤り理由(ダミー)
+    en: Why choice E is incorrect (dummy)
+  mistakeTags:
+  - availability
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only
