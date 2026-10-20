@@ -866,6 +866,9 @@ flowchart LR
 | CI-06 | 参照 URL に HEAD リクエストを送り、リンク切れを検出する(週1回の定期実行も行う) |
 | CI-07 | 問題 ID の重複を確認する。問題文の類似度(文字 n-gram の Jaccard 係数)が 0.8 を超える組を警告する |
 | CI-08 | 複数選択の問題で、`count` と正解の数が一致するか確認する |
+| CI-09 | 問題 ID・ノード ID・`subObjective` の参照先が実在するか確認する |
+| CI-10 | `weights.yaml` のドメイン比重の合計が 1.0 か確認する |
+| CI-11 | 多言語テキストの `en` の欠落を警告する |
 
 ---
 
@@ -879,7 +882,7 @@ flowchart LR
 | 結合テスト | リポジトリと SwiftData(インメモリ)、ContentKit の差分更新 | Swift Testing | PR ごと |
 | スナップショットテスト | 主要画面(ライト・ダーク・Dynamic Type 最大) | swift-snapshot-testing | PR ごと |
 | UI テスト | 模試の通し受験、中断と再開、オフライン動作 | XCUITest | main へのマージ時 |
-| コンテンツテスト | CI-01〜08 | Python | コンテンツの PR ごと |
+| コンテンツテスト | CI-01〜11 | Python | コンテンツの PR ごと |
 | 手動テスト | VoiceOver、iPad の Split View、iCloud 同期 | 実機 | リリース前 |
 
 ### 11.2 受け入れ基準との対応
