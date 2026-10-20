@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# CodeRabbit の設定。レビュー対象のファイル数を上限(100)以内に収めるため、
+# 人がレビューする必要のない生成物を除外する。
+reviews:
+  path_filters:
+    # ---- テスト用フィクスチャ(生成物) ----
+    # content/tests/fixtures/generate.py と content/scripts/export_json.py が決定論的に生成する。
+    # 生成スクリプトの出力と一致することは content/tests/test_generated.py が CI で検証するため、
+    # レビューは生成スクリプト側(generate.py / export_json.py)で行う。
+    - "!content/tests/fixtures/valid/**"
+    - "!content/tests/fixtures/invalid/**"
+    - "!content/tests/fixtures/valid-json/**"
+
+    # ---- Xcode が自動生成・管理するファイル ----
+    - "!**/xcuserdata/**"
+    - "!**/*.xcodeproj/project.xcworkspace/**"
+    - "!**/*.xcassets/**"
