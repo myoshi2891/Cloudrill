@@ -19,7 +19,7 @@ technicalRequirements:
 existingEnvironment:
   ja: 複数のコロケーション施設でアプリケーションとデータベースを運用している(詳細は公式ケーススタディを参照)。
   en: Applications and databases run in multiple colocation facilities (see the official case study for details).
-officialURL: https://cloud.google.com/learn/certification/cloud-architect
+officialURL: https://services.google.com/fh/files/blogs/master_case_study_ehr_healthcare.pdf
 requirementMappings:
   - requirement:
       ja: 医療データに関する規制に準拠すること

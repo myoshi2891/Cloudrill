@@ -25,12 +25,12 @@ choices:
       en: Dedicated Interconnect is a private physical connection that bypasses the internet and supports 10 Gbps or more. Two connections in different edge availability domains remove the single point of failure.
   - id: b
     text:
-      ja: Cloud Router を構成し、BGP で経路を動的に交換する
-      en: Configure Cloud Router to exchange routes dynamically over BGP
+      ja: 各 Dedicated Interconnect 接続に VLAN アタッチメントと BGP セッションを 1 つずつ作成し、Cloud Router で経路を動的に交換する
+      en: Create one VLAN attachment and BGP session for each Dedicated Interconnect connection, and configure Cloud Router to exchange routes dynamically
     isCorrect: true
     rationale:
-      ja: Interconnect の VLAN アタッチメントは Cloud Router と BGP セッションを張って経路を交換する。障害時の経路切り替えも BGP で自動的に行われる。
-      en: Interconnect VLAN attachments use Cloud Router BGP sessions to exchange routes, which also enables automatic failover.
+      ja: VPC と通信するには、接続ごとに VLAN アタッチメントを作成し、Cloud Router と BGP セッションを張って経路を交換する必要がある。両方の接続にアタッチメントがあるため、片方の障害時も BGP によって経路が自動的に切り替わる。
+      en: To reach the VPC, each connection needs its own VLAN attachment with a Cloud Router BGP session to exchange routes. With an attachment on both connections, BGP automatically fails over when one of them goes down.
   - id: c
     text:
       ja: HA VPN のトンネルを 2 本構成する
