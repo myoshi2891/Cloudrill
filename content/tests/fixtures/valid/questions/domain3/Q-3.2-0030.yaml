@@ -1,0 +1,71 @@
+id: Q-3.2-0030
+revision: 1
+examGuideVersion: '6.1'
+domain: 3
+subObjective: '3.2'
+caseStudy: null
+type:
+  kind: multiple
+  count: 2
+difficulty: 1
+wafPillars:
+- operationalExcellence
+keywords:
+- ダミー
+- 銀河
+examSets:
+- 1
+stem:
+  ja: 【ダミー】画廊・茶室・星座・砂丘・山脈に関する設問。
+  en: Dummy question stem for Q-3.2-0030.
+choices:
+- id: a
+  text:
+    ja: 製本竹林舞台草原宿場木版画月面
+    en: Dummy choice A of Q-3.2-0030
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - requirementMismatch
+- id: b
+  text:
+    ja: 滝壺砂丘温室山脈宿場楽譜樹氷風車木版画青
+    en: Dummy choice B of Q-3.2-0030
+  isCorrect: false
+  rationale:
+    ja: 選択肢Bが誤り理由(ダミー)
+    en: Why choice B is incorrect (dummy)
+  mistakeTags:
+  - deprecated
+- id: c
+  text:
+    ja: 月面洞窟彗星彗星草原望遠鏡灯
+    en: Dummy choice C of Q-3.2-0030
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - cost
+- id: d
+  text:
+    ja: 舞台滝壺渡り鳥陶器製本山脈氷河化
+    en: Dummy choice D of Q-3.2-0030
+  isCorrect: true
+  rationale:
+    ja: 選択肢Dが正しい理由(ダミー)
+    en: Why choice D is correct (dummy)
+- id: e
+  text:
+    ja: 染物海溝湿原鐘楼樹氷鍵盤峡谷惑星湿原
+    en: Dummy choice E of Q-3.2-0030
+  isCorrect: true
+  rationale:
+    ja: 選択肢Eが正しい理由(ダミー)
+    en: Why choice E is correct (dummy)
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

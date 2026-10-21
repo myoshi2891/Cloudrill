@@ -1,0 +1,62 @@
+id: Q-3.1-0031
+revision: 1
+examGuideVersion: '6.1'
+domain: 3
+subObjective: '3.1'
+caseStudy: ehr
+type:
+  kind: single
+difficulty: 2
+wafPillars:
+- security
+keywords:
+- ダミー
+- 流星
+examSets:
+- 1
+stem:
+  ja: 【ダミー】庭園・楽譜・草原・合唱・鍾乳石に関する設問。
+  en: Dummy question stem for Q-3.1-0031.
+choices:
+- id: a
+  text:
+    ja: 星座楽譜庭園楽譜望遠鏡砂丘月面羅針盤
+    en: Dummy choice A of Q-3.1-0031
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - deprecated
+- id: b
+  text:
+    ja: 氷河水路望遠鏡洞窟洞窟帆船流星灯籠庭園竹
+    en: Dummy choice B of Q-3.1-0031
+  isCorrect: true
+  rationale:
+    ja: 選択肢Bが正しい理由(ダミー)
+    en: Why choice B is correct (dummy)
+- id: c
+  text:
+    ja: 舞台蜂蜜帆船樹氷蜂蜜雪原琥珀蜂蜜潮汐鐘楼砂丘笛吹笛吹刺繍
+    en: Dummy choice C of Q-3.1-0031
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - opsOverhead
+- id: d
+  text:
+    ja: 笛吹潮汐劇場彗星珊瑚流星茶室青銅草
+    en: Dummy choice D of Q-3.1-0031
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - compliance
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

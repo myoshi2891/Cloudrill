@@ -1,0 +1,62 @@
+id: Q-6.6-0055
+revision: 1
+examGuideVersion: '6.1'
+domain: 6
+subObjective: '6.6'
+caseStudy: null
+type:
+  kind: single
+difficulty: 1
+wafPillars:
+- security
+keywords:
+- ダミー
+- 劇場
+examSets:
+- 1
+stem:
+  ja: 【ダミー】星座・潮汐・宿場・舞台・氷河に関する設問。
+  en: Dummy question stem for Q-6.6-0055.
+choices:
+- id: a
+  text:
+    ja: 石畳滝壺灯台鐘楼洞窟樹氷舞台水路織機風車銀
+    en: Dummy choice A of Q-6.6-0055
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - deprecated
+- id: b
+  text:
+    ja: 染物楽譜潮汐灯籠太鼓染物火山樹氷渓流彫刻化石製本
+    en: Dummy choice B of Q-6.6-0055
+  isCorrect: false
+  rationale:
+    ja: 選択肢Bが誤り理由(ダミー)
+    en: Why choice B is incorrect (dummy)
+  mistakeTags:
+  - cost
+- id: c
+  text:
+    ja: 琥珀雪原星座織機鐘楼滝壺彫刻
+    en: Dummy choice C of Q-6.6-0055
+  isCorrect: true
+  rationale:
+    ja: 選択肢Cが正しい理由(ダミー)
+    en: Why choice C is correct (dummy)
+- id: d
+  text:
+    ja: 滝壺潮汐洞窟彗星鍾乳石洞窟渓流鍾乳石合唱木版画木版
+    en: Dummy choice D of Q-6.6-0055
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - compliance
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

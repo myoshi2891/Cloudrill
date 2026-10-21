@@ -1,0 +1,62 @@
+id: Q-3.2-0028
+revision: 1
+examGuideVersion: '6.1'
+domain: 3
+subObjective: '3.2'
+caseStudy: null
+type:
+  kind: single
+difficulty: 4
+wafPillars:
+- performance
+keywords:
+- ダミー
+- 茶室
+examSets:
+- 1
+stem:
+  ja: 【ダミー】灯台・洞窟・珊瑚・水路・化石に関する設問。
+  en: Dummy question stem for Q-3.2-0028.
+choices:
+- id: a
+  text:
+    ja: 彗星温室羅針盤望遠鏡月面笛吹雪原石畳羅針盤滝壺洞窟灯台雪
+    en: Dummy choice A of Q-3.2-0028
+  isCorrect: true
+  rationale:
+    ja: 選択肢Aが正しい理由(ダミー)
+    en: Why choice A is correct (dummy)
+- id: b
+  text:
+    ja: 草原帆船風車蜂蜜渡り鳥銀河石畳染
+    en: Dummy choice B of Q-3.2-0028
+  isCorrect: false
+  rationale:
+    ja: 選択肢Bが誤り理由(ダミー)
+    en: Why choice B is incorrect (dummy)
+  mistakeTags:
+  - latency
+- id: c
+  text:
+    ja: 湿原笛吹劇場惑星蜂蜜時計塔茶室合唱画廊琥珀
+    en: Dummy choice C of Q-3.2-0028
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - requirementMismatch
+- id: d
+  text:
+    ja: 灯台琥珀星座月面洞窟刺繍風車時計塔琥
+    en: Dummy choice D of Q-3.2-0028
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - deprecated
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

@@ -1,0 +1,107 @@
+{
+  "id": "Q-2.2-0021",
+  "revision": 1,
+  "examGuideVersion": "6.1",
+  "domain": 2,
+  "subObjective": "2.2",
+  "caseStudy": "altostrat",
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 2,
+  "wafPillars": [
+    "costOptimization"
+  ],
+  "keywords": [
+    "ダミー",
+    "石畳"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】渡り鳥・灯籠・刺繍・灯台・惑星に関する設問。",
+    "en": "Dummy question stem for Q-2.2-0021."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "火山青銅宿場笛吹青銅鍾乳石",
+        "en": "Dummy choice A of Q-2.2-0021"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "latency"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "灯籠樹氷蜂蜜茶室樹氷彗星鍵盤灯籠草原彫刻草原峡谷流",
+        "en": "Dummy choice B of Q-2.2-0021"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Bが正しい理由(ダミー)",
+        "en": "Why choice B is correct (dummy)"
+      }
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "噴水山脈水路滝壺惑星湿原染物鍵盤峡",
+        "en": "Dummy choice C of Q-2.2-0021"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "deprecated"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "太鼓砂丘木版画星座潮汐蜂",
+        "en": "Dummy choice D of Q-2.2-0021"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Dが誤り理由(ダミー)",
+        "en": "Why choice D is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "cost"
+      ]
+    },
+    {
+      "id": "e",
+      "text": {
+        "ja": "風車洞窟山脈灯籠樹氷彫刻劇場竹林棚田琥珀火山青銅茶室",
+        "en": "Dummy choice E of Q-2.2-0021"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Eが誤り理由(ダミー)",
+        "en": "Why choice E is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "opsOverhead"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

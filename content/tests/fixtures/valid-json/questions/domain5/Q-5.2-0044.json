@@ -1,0 +1,92 @@
+{
+  "id": "Q-5.2-0044",
+  "revision": 1,
+  "examGuideVersion": "6.1",
+  "domain": 5,
+  "subObjective": "5.2",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 5,
+  "wafPillars": [
+    "reliability"
+  ],
+  "keywords": [
+    "ダミー",
+    "渓流"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】砂丘・雪原・琥珀・彗星・画廊に関する設問。",
+    "en": "Dummy question stem for Q-5.2-0044."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "舞台時計塔石畳彫刻画廊琥珀湿",
+        "en": "Dummy choice A of Q-5.2-0044"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "availability"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "渡り鳥笛吹星座噴水楽譜茶室噴水鍵盤彫刻木版画蜂蜜滝",
+        "en": "Dummy choice B of Q-5.2-0044"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "latency"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "山脈湿原風車帆船棚田樹氷",
+        "en": "Dummy choice C of Q-5.2-0044"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "requirementMismatch"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "潮汐潮汐潮汐珊瑚舞台劇場風車棚田笛吹",
+        "en": "Dummy choice D of Q-5.2-0044"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Dが正しい理由(ダミー)",
+        "en": "Why choice D is correct (dummy)"
+      }
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+description: rationale.ja が空文字
+expect:
+  CI-05:
+  - error
+options: {}

@@ -1,0 +1,62 @@
+id: Q-1.2-0002
+revision: 1
+examGuideVersion: '6.1'
+domain: 1
+subObjective: '1.2'
+caseStudy: null
+type:
+  kind: single
+difficulty: 3
+wafPillars:
+- reliability
+keywords:
+- ダミー
+- 山脈
+examSets:
+- 1
+stem:
+  ja: 【ダミー】海溝・望遠鏡・鍵盤・製本・樹氷に関する設問。
+  en: Dummy question stem for Q-1.2-0002.
+choices:
+- id: a
+  text:
+    ja: 峡谷刺繍化石染物銀河流星風車湿原砂丘竹林月面洞窟
+    en: Dummy choice A of Q-1.2-0002
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - compliance
+- id: b
+  text:
+    ja: 竹林珊瑚竹林灯台織機画廊茶室彫刻望遠鏡火山青銅灯籠蜂蜜
+    en: Dummy choice B of Q-1.2-0002
+  isCorrect: false
+  rationale:
+    ja: 選択肢Bが誤り理由(ダミー)
+    en: Why choice B is incorrect (dummy)
+  mistakeTags:
+  - scalability
+- id: c
+  text:
+    ja: 流星楽譜雪原流星竹林劇場合唱山脈宿場石
+    en: Dummy choice C of Q-1.2-0002
+  isCorrect: true
+  rationale:
+    ja: 選択肢Cが正しい理由(ダミー)
+    en: Why choice C is correct (dummy)
+- id: d
+  text:
+    ja: 水路化石彗星渡り鳥宿場惑星珊瑚劇場銀河合唱劇
+    en: Dummy choice D of Q-1.2-0002
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - latency
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

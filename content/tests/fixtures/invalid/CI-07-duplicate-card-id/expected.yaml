@@ -1,0 +1,5 @@
+description: カード ID の重複
+expect:
+  CI-07:
+  - error
+options: {}

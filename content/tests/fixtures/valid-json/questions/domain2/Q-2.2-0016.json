@@ -1,0 +1,92 @@
+{
+  "id": "Q-2.2-0016",
+  "revision": 1,
+  "examGuideVersion": "6.1",
+  "domain": 2,
+  "subObjective": "2.2",
+  "caseStudy": "ehr",
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 2,
+  "wafPillars": [
+    "performance"
+  ],
+  "keywords": [
+    "ダミー",
+    "氷河"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】棚田・染物・果樹園・鐘楼・渡り鳥に関する設問。",
+    "en": "Dummy question stem for Q-2.2-0016."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "笛吹劇場茶室噴水棚田星座洞窟楽譜刺繍",
+        "en": "Dummy choice A of Q-2.2-0016"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "cost"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "笛吹銀河棚田樹氷合唱湿原陶器風車化石鍵盤",
+        "en": "Dummy choice B of Q-2.2-0016"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Bが正しい理由(ダミー)",
+        "en": "Why choice B is correct (dummy)"
+      }
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "合唱羅針盤海溝太鼓銀河風",
+        "en": "Dummy choice C of Q-2.2-0016"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "compliance"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "砂丘砂丘時計塔珊瑚渓流鍾乳石灯台時計塔羅針盤鍵",
+        "en": "Dummy choice D of Q-2.2-0016"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Dが誤り理由(ダミー)",
+        "en": "Why choice D is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "scalability"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

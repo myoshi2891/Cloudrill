@@ -1,0 +1,6 @@
+description: 問題 ID の重複(同一内容のため類似警告も出る)
+expect:
+  CI-07:
+  - error
+  - warning
+options: {}

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pca-content.invalid/schemas/decision.schema.json",
+  "title": "ディシジョンツリー(1ファイル1ツリー)",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/Identifier" },
+    "title": { "$ref": "common.schema.json#/$defs/LocalizedText" },
+    "rootNodeID": { "$ref": "common.schema.json#/$defs/Identifier" },
+    "nodes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Node" },
+      "minItems": 1
+    }
+  },
+  "required": ["id", "title", "rootNodeID", "nodes"],
+  "additionalProperties": false,
+  "$defs": {
+    "Node": {
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/Identifier" },
+        "question": { "$ref": "common.schema.json#/$defs/LocalizedText" },
+        "options": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Option" },
+          "minItems": 2
+        }
+      },
+      "required": ["id", "question", "options"],
+      "additionalProperties": false
+    },
+    "Option": {
+      "description": "next(遷移先ノード ID)と result(結論)のどちらか一方だけを持つ。",
+      "type": "object",
+      "properties": {
+        "label": { "$ref": "common.schema.json#/$defs/LocalizedText" },
+        "next": { "$ref": "common.schema.json#/$defs/Identifier" },
+        "result": { "$ref": "#/$defs/Result" }
+      },
+      "required": ["label"],
+      "additionalProperties": false,
+      "oneOf": [
+        { "required": ["next"] },
+        { "required": ["result"] }
+      ]
+    },
+    "Result": {
+      "type": "object",
+      "properties": {
+        "service": { "$ref": "common.schema.json#/$defs/NonEmptyString" },
+        "rationale": { "$ref": "common.schema.json#/$defs/LocalizedText" }
+      },
+      "required": ["service", "rationale"],
+      "additionalProperties": false
+    }
+  }
+}

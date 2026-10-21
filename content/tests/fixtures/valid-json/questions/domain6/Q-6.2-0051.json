@@ -1,0 +1,92 @@
+{
+  "id": "Q-6.2-0051",
+  "revision": 1,
+  "examGuideVersion": "6.1",
+  "domain": 6,
+  "subObjective": "6.2",
+  "caseStudy": "ehr",
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 2,
+  "wafPillars": [
+    "costOptimization"
+  ],
+  "keywords": [
+    "ダミー",
+    "合唱"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】画廊・鐘楼・太鼓・琥珀・鍵盤に関する設問。",
+    "en": "Dummy question stem for Q-6.2-0051."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "棚田鍵盤珊瑚織機鐘楼珊瑚草原",
+        "en": "Dummy choice A of Q-6.2-0051"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "scalability"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "蜂蜜竹林竹林合唱潮汐合唱刺繍笛吹火山竹林風車木版画画廊化石樹氷",
+        "en": "Dummy choice B of Q-6.2-0051"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "availability"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "渡り鳥茶室湿原羅針盤惑星渓流彫刻峡谷蜂蜜舞台月面舞台太鼓",
+        "en": "Dummy choice C of Q-6.2-0051"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "latency"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "石畳草原噴水染物流星風車青銅果",
+        "en": "Dummy choice D of Q-6.2-0051"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Dが正しい理由(ダミー)",
+        "en": "Why choice D is correct (dummy)"
+      }
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

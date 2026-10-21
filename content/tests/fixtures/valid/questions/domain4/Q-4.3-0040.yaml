@@ -1,0 +1,62 @@
+id: Q-4.3-0040
+revision: 1
+examGuideVersion: '6.1'
+domain: 4
+subObjective: '4.3'
+caseStudy: null
+type:
+  kind: single
+difficulty: 1
+wafPillars:
+- performance
+keywords:
+- ダミー
+- 樹氷
+examSets:
+- 1
+stem:
+  ja: 【ダミー】織機・彗星・雪原・湿原・彫刻に関する設問。
+  en: Dummy question stem for Q-4.3-0040.
+choices:
+- id: a
+  text:
+    ja: 庭園火山流星渡り鳥火山草原宿場織機草原楽譜雪原帆
+    en: Dummy choice A of Q-4.3-0040
+  isCorrect: true
+  rationale:
+    ja: 選択肢Aが正しい理由(ダミー)
+    en: Why choice A is correct (dummy)
+- id: b
+  text:
+    ja: 楽譜舞台蜂蜜竹林望遠鏡山脈山脈舞台合唱草
+    en: Dummy choice B of Q-4.3-0040
+  isCorrect: false
+  rationale:
+    ja: 選択肢Bが誤り理由(ダミー)
+    en: Why choice B is incorrect (dummy)
+  mistakeTags:
+  - opsOverhead
+- id: c
+  text:
+    ja: 湿原海溝陶器湿原潮汐温室洞窟竹林氷河火山噴水
+    en: Dummy choice C of Q-4.3-0040
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - compliance
+- id: d
+  text:
+    ja: 蜂蜜噴水洞窟茶室陶器彗星水路鐘楼潮汐銀河舞台火山惑
+    en: Dummy choice D of Q-4.3-0040
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - scalability
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

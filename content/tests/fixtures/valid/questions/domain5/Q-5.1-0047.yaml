@@ -1,0 +1,62 @@
+id: Q-5.1-0047
+revision: 1
+examGuideVersion: '6.1'
+domain: 5
+subObjective: '5.1'
+caseStudy: null
+type:
+  kind: single
+difficulty: 3
+wafPillars:
+- sustainability
+keywords:
+- ダミー
+- 鍾乳石
+examSets:
+- 1
+stem:
+  ja: 【ダミー】鍾乳石・蜂蜜・鐘楼・灯籠・鍵盤に関する設問。
+  en: Dummy question stem for Q-5.1-0047.
+choices:
+- id: a
+  text:
+    ja: 彫刻帆船珊瑚渡り鳥砂丘潮汐滝壺石畳星座洞窟蜂蜜舞台彗
+    en: Dummy choice A of Q-5.1-0047
+  isCorrect: true
+  rationale:
+    ja: 選択肢Aが正しい理由(ダミー)
+    en: Why choice A is correct (dummy)
+- id: b
+  text:
+    ja: 木版画氷河渓流惑星氷河砂丘
+    en: Dummy choice B of Q-5.1-0047
+  isCorrect: false
+  rationale:
+    ja: 選択肢Bが誤り理由(ダミー)
+    en: Why choice B is incorrect (dummy)
+  mistakeTags:
+  - cost
+- id: c
+  text:
+    ja: 流星彫刻樹氷青銅織機草原渡り鳥蜂蜜帆船温室
+    en: Dummy choice C of Q-5.1-0047
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - opsOverhead
+- id: d
+  text:
+    ja: 惑星渡り鳥合唱宿場灯台笛吹織機蜂蜜木版画星座雪原潮汐銀河
+    en: Dummy choice D of Q-5.1-0047
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - compliance
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

@@ -1,0 +1,92 @@
+{
+  "id": "Q-2.1-0015",
+  "revision": 1,
+  "examGuideVersion": "6.1",
+  "domain": 2,
+  "subObjective": "2.1",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 1,
+  "wafPillars": [
+    "costOptimization"
+  ],
+  "keywords": [
+    "ダミー",
+    "帆船"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】渓流・銀河・温室・竹林・雪原に関する設問。",
+    "en": "Dummy question stem for Q-2.1-0015."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "流星渓流星座青銅砂丘庭園鍾乳石合唱蜂",
+        "en": "Dummy choice A of Q-2.1-0015"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "deprecated"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "刺繍砂丘灯籠星座灯台灯台時計塔庭園山脈氷河水路",
+        "en": "Dummy choice B of Q-2.1-0015"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "cost"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "琥珀鍾乳石月面刺繍惑星化石笛吹山脈砂丘氷河果樹園渓",
+        "en": "Dummy choice C of Q-2.1-0015"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Cが正しい理由(ダミー)",
+        "en": "Why choice C is correct (dummy)"
+      }
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "青銅雪原彗星渡り鳥潮汐木版画青",
+        "en": "Dummy choice D of Q-2.1-0015"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Dが誤り理由(ダミー)",
+        "en": "Why choice D is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "compliance"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

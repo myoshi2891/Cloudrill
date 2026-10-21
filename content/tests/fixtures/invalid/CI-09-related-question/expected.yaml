@@ -1,0 +1,5 @@
+description: カードの relatedQuestionIDs が存在しない
+expect:
+  CI-09:
+  - error
+options: {}

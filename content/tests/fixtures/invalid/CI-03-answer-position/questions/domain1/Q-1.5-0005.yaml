@@ -1,0 +1,62 @@
+id: Q-1.5-0005
+revision: 1
+examGuideVersion: '6.1'
+domain: 1
+subObjective: '1.5'
+caseStudy: ehr
+type:
+  kind: single
+difficulty: 1
+wafPillars:
+- sustainability
+keywords:
+- ダミー
+- 砂丘
+examSets:
+- 1
+stem:
+  ja: 【ダミー】帆船・鍵盤・砂丘・噴水・蜂蜜に関する設問。
+  en: Dummy question stem for Q-1.5-0005.
+choices:
+- id: a
+  text:
+    ja: 果樹園灯台風車鐘楼果樹園峡谷鍾
+    en: Dummy choice B of Q-1.5-0005
+  isCorrect: true
+  rationale:
+    ja: 選択肢Bが正しい理由(ダミー)
+    en: Why choice B is correct (dummy)
+- id: b
+  text:
+    ja: 合唱棚田舞台洞窟棚田灯台琥珀灯籠海溝
+    en: Dummy choice A of Q-1.5-0005
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - latency
+- id: c
+  text:
+    ja: 灯台鐘楼楽譜珊瑚火山笛吹蜂蜜棚田火山灯籠帆船
+    en: Dummy choice C of Q-1.5-0005
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - deprecated
+- id: d
+  text:
+    ja: 合唱潮汐彗星風車化石鐘楼蜂蜜潮汐洞窟鍾
+    en: Dummy choice D of Q-1.5-0005
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - cost
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

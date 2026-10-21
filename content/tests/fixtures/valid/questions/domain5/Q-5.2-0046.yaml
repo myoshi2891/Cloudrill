@@ -1,0 +1,62 @@
+id: Q-5.2-0046
+revision: 1
+examGuideVersion: '6.1'
+domain: 5
+subObjective: '5.2'
+caseStudy: null
+type:
+  kind: single
+difficulty: 2
+wafPillars:
+- performance
+keywords:
+- ダミー
+- 洞窟
+examSets:
+- 1
+stem:
+  ja: 【ダミー】山脈・琥珀・彫刻・画廊・果樹園に関する設問。
+  en: Dummy question stem for Q-5.2-0046.
+choices:
+- id: a
+  text:
+    ja: 温室彗星樹氷製本潮汐時計塔製本楽譜風車茶室噴水滝壺宿場海溝
+    en: Dummy choice A of Q-5.2-0046
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - requirementMismatch
+- id: b
+  text:
+    ja: 風車製本鍾乳石雪原温室笛吹望遠鏡山脈月面噴水
+    en: Dummy choice B of Q-5.2-0046
+  isCorrect: true
+  rationale:
+    ja: 選択肢Bが正しい理由(ダミー)
+    en: Why choice B is correct (dummy)
+- id: c
+  text:
+    ja: 果樹園渡り鳥灯台鍾乳石望遠鏡風
+    en: Dummy choice C of Q-5.2-0046
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - cost
+- id: d
+  text:
+    ja: 琥珀時計塔羅針盤茶室劇場珊瑚噴水鍾乳石染物太鼓画廊山脈果樹園水
+    en: Dummy choice D of Q-5.2-0046
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - opsOverhead
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

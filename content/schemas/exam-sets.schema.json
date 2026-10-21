@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pca-content.invalid/schemas/exam-sets.schema.json",
+  "title": "模試の構成(exam-sets.yaml)",
+  "type": "object",
+  "properties": {
+    "examSets": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/ExamSet" },
+      "minItems": 1
+    }
+  },
+  "required": ["examSets"],
+  "additionalProperties": false,
+  "$defs": {
+    "ExamSet": {
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/ExamSetNumber" },
+        "status": { "type": "string", "enum": ["draft", "complete"] },
+        "level": { "type": "string", "enum": ["basic", "standard", "advanced"] },
+        "caseStudies": {
+          "type": "array",
+          "items": { "$ref": "common.schema.json#/$defs/CaseStudyID" },
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true
+        },
+        "questionIDs": {
+          "type": "array",
+          "items": { "$ref": "common.schema.json#/$defs/QuestionID" },
+          "uniqueItems": true
+        }
+      },
+      "required": ["id", "status", "level", "caseStudies", "questionIDs"],
+      "additionalProperties": false
+    }
+  }
+}

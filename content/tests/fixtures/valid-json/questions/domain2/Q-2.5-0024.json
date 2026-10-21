@@ -1,0 +1,92 @@
+{
+  "id": "Q-2.5-0024",
+  "revision": 1,
+  "examGuideVersion": "6.1",
+  "domain": 2,
+  "subObjective": "2.5",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 5,
+  "wafPillars": [
+    "operationalExcellence"
+  ],
+  "keywords": [
+    "ダミー",
+    "竹林"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】果樹園・青銅・化石・惑星・石畳に関する設問。",
+    "en": "Dummy question stem for Q-2.5-0024."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "海溝彫刻宿場渡り鳥茶室山",
+        "en": "Dummy choice A of Q-2.5-0024"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "cost"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "渡り鳥樹氷棚田温室山脈羅針盤月面氷河滝",
+        "en": "Dummy choice B of Q-2.5-0024"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "opsOverhead"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "銀河渓流画廊滝壺果樹園染物竹林鐘楼鍵盤化石惑星海溝水路海",
+        "en": "Dummy choice C of Q-2.5-0024"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "compliance"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "織機蜂蜜製本鐘楼鍾乳石果樹園潮",
+        "en": "Dummy choice D of Q-2.5-0024"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Dが正しい理由(ダミー)",
+        "en": "Why choice D is correct (dummy)"
+      }
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

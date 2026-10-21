@@ -1,0 +1,5 @@
+description: draft の模試で既定と異なる level
+expect:
+  CI-02:
+  - warning
+options: {}

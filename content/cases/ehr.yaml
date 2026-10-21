@@ -1,0 +1,47 @@
+# 要約は学習用のオリジナル文章。正確な記述は officialURL の公式ケーススタディを参照すること
+id: ehr
+name:
+  ja: EHR Healthcare
+  en: EHR Healthcare
+summary:
+  ja: 医療機関向けに電子カルテのソフトウェアを SaaS で提供する企業。事業の拡大に伴い、データセンターの契約更新を機に Google Cloud への移行を検討している。
+  en: A company that provides electronic health record software to healthcare organizations as SaaS. As it grows, it is considering a move to Google Cloud when its data center contracts come up for renewal.
+businessRequirements:
+  - ja: 新しい顧客をすばやく受け入れられること
+    en: Onboard new customers quickly
+  - ja: 医療データに関する規制に準拠すること
+    en: Comply with regulations for healthcare data
+technicalRequirements:
+  - ja: コンテナ化されたアプリケーションを一貫した方法で運用できること
+    en: Operate containerized applications in a consistent way
+  - ja: ログと監視を一元化し、問題を早期に検知できること
+    en: Centralize logging and monitoring to detect issues early
+existingEnvironment:
+  ja: 複数のコロケーション施設でアプリケーションとデータベースを運用している(詳細は公式ケーススタディを参照)。
+  en: Applications and databases run in multiple colocation facilities (see the official case study for details).
+officialURL: https://services.google.com/fh/files/blogs/master_case_study_ehr_healthcare.pdf
+requirementMappings:
+  - requirement:
+      ja: 医療データに関する規制に準拠すること
+      en: Comply with regulations for healthcare data
+    recommendedServices: [Cloud KMS, Assured Workloads]
+    rationale:
+      ja: 顧客管理の暗号鍵(CMEK)で鍵を制御し、規制要件に応じた管理策をワークロード単位で適用できる。
+      en: CMEK provides key control, and compliance controls can be applied per workload.
+    rejectedOptions:
+      - service: 自前の鍵管理サーバー
+        reason:
+          ja: 鍵管理基盤の構築と運用を自社で担う必要があり、運用負荷が大きい。
+          en: Building and operating your own key management adds significant overhead.
+  - requirement:
+      ja: コンテナ化されたアプリケーションを一貫した方法で運用できること
+      en: Operate containerized applications in a consistent way
+    recommendedServices: [Google Kubernetes Engine]
+    rationale:
+      ja: Kubernetes を使い続けながら、コントロール プレーンの運用を Google に任せられる。
+      en: Teams can keep using Kubernetes while Google operates the control plane.
+    rejectedOptions:
+      - service: Compute Engine 上の自前 Kubernetes
+        reason:
+          ja: コントロール プレーンのアップグレードや可用性の確保を自社で行う必要がある。
+          en: You would have to upgrade and keep the control plane available yourself.

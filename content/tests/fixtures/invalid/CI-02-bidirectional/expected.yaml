@@ -1,0 +1,5 @@
+description: 問題の examSets にあるが questionIDs にない
+expect:
+  CI-02:
+  - error
+options: {}

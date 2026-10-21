@@ -1,0 +1,21 @@
+cards:
+  - id: C-3.2-0001
+    domain: 3
+    subObjective: "3.2"
+    front:
+      ja: CMEK と CSEK の違いは?
+      en: What is the difference between CMEK and CSEK?
+    back:
+      ja: CMEK は鍵を Cloud KMS で顧客が管理する方式で、ローテーションや無効化を制御できる。CSEK は顧客が鍵そのものを保持してリクエストごとに渡す方式で、鍵を紛失すると復号できない。
+      en: With CMEK, the customer manages keys in Cloud KMS and controls rotation and disabling. With CSEK, the customer holds the raw key and supplies it with each request; losing it makes data unrecoverable.
+    relatedQuestionIDs: [Q-3.2-0001]
+  - id: C-3.2-0002
+    domain: 3
+    subObjective: "3.2"
+    front:
+      ja: Google のデフォルト暗号化で満たせない典型的な要件は?
+      en: Which typical requirement cannot be met by Google's default encryption?
+    back:
+      ja: 鍵のローテーション周期を自社で決める、鍵を無効化してアクセスを止める、といった「顧客による鍵の制御」が求められる場合。
+      en: Requirements for customer control of keys, such as setting the rotation schedule or disabling a key to cut off access.
+    relatedQuestionIDs: [Q-3.2-0001]

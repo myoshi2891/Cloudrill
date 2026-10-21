@@ -1,0 +1,19 @@
+drills:
+- id: K-0001
+  phrase:
+    ja: ダミーのフレーズ 1
+    en: Dummy phrase 1
+  correct: Cloud Spanner
+  distractor: Cloud SQL
+  explanation:
+    ja: ダミーの解説 1
+    en: Dummy explanation 1
+- id: K-0002
+  phrase:
+    ja: ダミーのフレーズ 2
+    en: Dummy phrase 2
+  correct: BigQuery
+  distractor: Bigtable
+  explanation:
+    ja: ダミーの解説 2
+    en: Dummy explanation 2

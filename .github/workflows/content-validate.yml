@@ -1,0 +1,47 @@
+name: content-validate
+
+on:
+  pull_request:
+    paths:
+      - "content/**"
+      - "packages/DomainModels/**"
+      - ".github/workflows/content-validate.yml"
+  push:
+    branches: [main]
+    paths:
+      - "content/**"
+      - "packages/DomainModels/**"
+      - ".github/workflows/content-validate.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: content-validate-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: content
+
+jobs:
+  python:
+    name: pytest + validate.py
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: content/requirements.txt
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run tests
+        run: pytest -q
+      - name: Validate content
+        # テストが失敗しても、コンテンツのアノテーションは出す
+        if: success() || failure()
+        run: python scripts/validate.py --format github

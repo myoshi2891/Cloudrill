@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pca-content.invalid/schemas/case.schema.json",
+  "title": "ケーススタディ(1ファイル1ケース)",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/CaseStudyID" },
+    "name": { "$ref": "common.schema.json#/$defs/LocalizedText" },
+    "summary": { "$ref": "common.schema.json#/$defs/LocalizedText" },
+    "businessRequirements": { "$ref": "#/$defs/RequirementList" },
+    "technicalRequirements": { "$ref": "#/$defs/RequirementList" },
+    "existingEnvironment": { "$ref": "common.schema.json#/$defs/LocalizedText" },
+    "officialURL": { "$ref": "common.schema.json#/$defs/HttpsURL" },
+    "requirementMappings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/RequirementMapping" }
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "summary",
+    "businessRequirements",
+    "technicalRequirements",
+    "existingEnvironment",
+    "officialURL",
+    "requirementMappings"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "RequirementList": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/LocalizedText" },
+      "minItems": 1
+    },
+    "RequirementMapping": {
+      "type": "object",
+      "properties": {
+        "requirement": { "$ref": "common.schema.json#/$defs/LocalizedText" },
+        "recommendedServices": {
+          "type": "array",
+          "items": { "$ref": "common.schema.json#/$defs/NonEmptyString" },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "rationale": { "$ref": "common.schema.json#/$defs/LocalizedText" },
+        "rejectedOptions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/RejectedOption" }
+        }
+      },
+      "required": ["requirement", "recommendedServices", "rationale", "rejectedOptions"],
+      "additionalProperties": false
+    },
+    "RejectedOption": {
+      "type": "object",
+      "properties": {
+        "service": { "$ref": "common.schema.json#/$defs/NonEmptyString" },
+        "reason": { "$ref": "common.schema.json#/$defs/LocalizedText" }
+      },
+      "required": ["service", "reason"],
+      "additionalProperties": false
+    }
+  }
+}

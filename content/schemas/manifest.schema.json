@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pca-content.invalid/schemas/manifest.schema.json",
+  "title": "配信パックのマニフェスト(manifest.json)",
+  "description": "生成と署名は build_pack.py / sign_manifest.py の責務(本リポジトリでは未実装)。",
+  "type": "object",
+  "properties": {
+    "packVersion": { "$ref": "common.schema.json#/$defs/SemVer" },
+    "examGuideVersion": { "$ref": "common.schema.json#/$defs/ExamGuideVersion" },
+    "minAppVersion": { "$ref": "common.schema.json#/$defs/SemVer" },
+    "createdAt": {
+      "description": "秒精度・小数秒なしの RFC 3339(DomainModels の .iso8601 デコードに合わせる)。",
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "files": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/FileEntry" },
+      "minItems": 1
+    },
+    "signature": {
+      "description": "Ed25519 署名の Base64 表現。",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+    }
+  },
+  "required": ["packVersion", "examGuideVersion", "minAppVersion", "createdAt", "files", "signature"],
+  "additionalProperties": false,
+  "$defs": {
+    "FileEntry": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "description": "パック内の相対パス。先頭の / と、セグメントとしての ..(先頭・途中・末尾)を禁止する。",
+          "type": "string",
+          "pattern": "^(?!/)(?!(?:.*/)?\\.\\.(?:/|$))[A-Za-z0-9._/-]+$"
+        },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "size": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["path", "sha256", "size"],
+      "additionalProperties": false
+    }
+  }
+}

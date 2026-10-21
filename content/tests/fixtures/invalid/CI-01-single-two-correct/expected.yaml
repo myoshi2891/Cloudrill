@@ -1,0 +1,5 @@
+description: single なのに正解が 2 つ
+expect:
+  CI-01:
+  - error
+options: {}

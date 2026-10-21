@@ -1,0 +1,92 @@
+{
+  "id": "Q-2.1-0020",
+  "revision": 1,
+  "examGuideVersion": "6.1",
+  "domain": 2,
+  "subObjective": "2.1",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 1,
+  "wafPillars": [
+    "reliability"
+  ],
+  "keywords": [
+    "ダミー",
+    "木版画"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】鐘楼・画廊・珊瑚・渡り鳥・海溝に関する設問。",
+    "en": "Dummy question stem for Q-2.1-0020."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "青銅鍵盤茶室時計塔彫刻舞台海溝風車鐘楼茶室宿",
+        "en": "Dummy choice A of Q-2.1-0020"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "availability"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "鍾乳石羅針盤太鼓流星灯籠山脈彗星水路劇",
+        "en": "Dummy choice B of Q-2.1-0020"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Bが正しい理由(ダミー)",
+        "en": "Why choice B is correct (dummy)"
+      }
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "羅針盤滝壺渡り鳥舞台氷河海",
+        "en": "Dummy choice C of Q-2.1-0020"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "requirementMismatch"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "火山彫刻噴水染物潮汐惑星鍵盤竹",
+        "en": "Dummy choice D of Q-2.1-0020"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Dが誤り理由(ダミー)",
+        "en": "Why choice D is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "deprecated"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

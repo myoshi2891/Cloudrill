@@ -1,0 +1,5 @@
+description: 最長の選択肢が正解の割合が 35% 超
+expect:
+  CI-04:
+  - error
+options: {}

@@ -1,0 +1,92 @@
+{
+  "id": "Q-4.2-0039",
+  "revision": 1,
+  "examGuideVersion": "6.1",
+  "domain": 4,
+  "subObjective": "4.2",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 5,
+  "wafPillars": [
+    "costOptimization"
+  ],
+  "keywords": [
+    "ダミー",
+    "火山"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】銀河・洞窟・惑星・舞台・染物に関する設問。",
+    "en": "Dummy question stem for Q-4.2-0039."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "笛吹化石草原渓流渡り鳥惑星木版画帆船灯籠風車劇場海溝",
+        "en": "Dummy choice A of Q-4.2-0039"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "deprecated"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "灯籠灯台風車雪原織機陶器楽譜砂丘劇場渓流灯籠果樹園流星",
+        "en": "Dummy choice B of Q-4.2-0039"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "cost"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "笛吹画廊望遠鏡鐘楼石畳渡り",
+        "en": "Dummy choice C of Q-4.2-0039"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Cが正しい理由(ダミー)",
+        "en": "Why choice C is correct (dummy)"
+      }
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "宿場彫刻陶器望遠鏡石畳劇場合唱鍾乳",
+        "en": "Dummy choice D of Q-4.2-0039"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Dが誤り理由(ダミー)",
+        "en": "Why choice D is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "compliance"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

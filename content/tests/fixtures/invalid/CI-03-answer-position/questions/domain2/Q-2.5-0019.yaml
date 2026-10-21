@@ -1,0 +1,62 @@
+id: Q-2.5-0019
+revision: 1
+examGuideVersion: '6.1'
+domain: 2
+subObjective: '2.5'
+caseStudy: null
+type:
+  kind: single
+difficulty: 5
+wafPillars:
+- security
+keywords:
+- ダミー
+- 蜂蜜
+examSets:
+- 1
+stem:
+  ja: 【ダミー】噴水・石畳・時計塔・帆船・合唱に関する設問。
+  en: Dummy question stem for Q-2.5-0019.
+choices:
+- id: a
+  text:
+    ja: 流星宿場海溝惑星製本織機滝壺珊
+    en: Dummy choice B of Q-2.5-0019
+  isCorrect: true
+  rationale:
+    ja: 選択肢Bが正しい理由(ダミー)
+    en: Why choice B is correct (dummy)
+- id: b
+  text:
+    ja: 草原流星陶器水路宿場化石蜂蜜海溝草原山
+    en: Dummy choice A of Q-2.5-0019
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - scalability
+- id: c
+  text:
+    ja: 棚田洞窟草原灯台竹林滝壺木版画鍾乳石惑星氷河温室彫刻宿場木
+    en: Dummy choice C of Q-2.5-0019
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - latency
+- id: d
+  text:
+    ja: 青銅棚田彫刻彗星化石雪原画廊刺繍鍾乳石温
+    en: Dummy choice D of Q-2.5-0019
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - requirementMismatch
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

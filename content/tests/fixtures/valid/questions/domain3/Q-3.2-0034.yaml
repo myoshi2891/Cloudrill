@@ -1,0 +1,62 @@
+id: Q-3.2-0034
+revision: 1
+examGuideVersion: '6.1'
+domain: 3
+subObjective: '3.2'
+caseStudy: null
+type:
+  kind: single
+difficulty: 5
+wafPillars:
+- performance
+keywords:
+- ダミー
+- 星座
+examSets:
+- 1
+stem:
+  ja: 【ダミー】石畳・織機・湿原・蜂蜜・風車に関する設問。
+  en: Dummy question stem for Q-3.2-0034.
+choices:
+- id: a
+  text:
+    ja: 竹林楽譜月面雪原珊瑚風車織機羅針盤惑星棚田洞窟月面
+    en: Dummy choice A of Q-3.2-0034
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - compliance
+- id: b
+  text:
+    ja: 鐘楼樹氷棚田噴水樹氷羅針盤温室灯籠竹林鐘楼果樹園星座果樹園
+    en: Dummy choice B of Q-3.2-0034
+  isCorrect: false
+  rationale:
+    ja: 選択肢Bが誤り理由(ダミー)
+    en: Why choice B is incorrect (dummy)
+  mistakeTags:
+  - scalability
+- id: c
+  text:
+    ja: 太鼓氷河果樹園洞窟月面滝
+    en: Dummy choice C of Q-3.2-0034
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - availability
+- id: d
+  text:
+    ja: 化石峡谷氷河庭園木版画陶器太鼓竹林劇場灯籠灯籠峡谷果樹園鍵盤青
+    en: Dummy choice D of Q-3.2-0034
+  isCorrect: true
+  rationale:
+    ja: 選択肢Dが正しい理由(ダミー)
+    en: Why choice D is correct (dummy)
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

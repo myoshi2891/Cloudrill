@@ -1,0 +1,5 @@
+description: rationale.ja が空白のみ・rationale なし
+expect:
+  CI-05:
+  - error
+options: {}

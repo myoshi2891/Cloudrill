@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pca-content.invalid/schemas/docs-frontmatter.schema.json",
+  "title": "docs/*.md の YAML フロントマター",
+  "type": "object",
+  "properties": {
+    "title": { "$ref": "common.schema.json#/$defs/NonEmptyString" },
+    "subObjective": { "$ref": "common.schema.json#/$defs/SubObjective" },
+    "references": { "$ref": "common.schema.json#/$defs/References" }
+  },
+  "required": ["title", "subObjective", "references"],
+  "additionalProperties": false
+}

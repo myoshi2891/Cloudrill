@@ -1,0 +1,61 @@
+id: Q-2.1-0909
+revision: 1
+examGuideVersion: '6.1'
+domain: 2
+subObjective: '2.1'
+caseStudy: null
+type:
+  kind: single
+difficulty: 5
+wafPillars:
+- costOptimization
+keywords:
+- ダミー
+- 羅針盤
+examSets: []
+stem:
+  ja: 【ダミー】渓流・潮汐・石畳・月面・惑星に関する設問です。
+  en: Dummy question stem for Q-2.1-0909.
+choices:
+- id: a
+  text:
+    ja: 画廊風車製本太鼓竹林望遠鏡
+    en: Dummy choice A of Q-2.1-0909
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - latency
+- id: b
+  text:
+    ja: 画廊湿原月面草原青銅笛吹鍾乳石太鼓化石
+    en: Dummy choice B of Q-2.1-0909
+  isCorrect: true
+  rationale:
+    ja: 選択肢Bが正しい理由(ダミー)
+    en: Why choice B is correct (dummy)
+- id: c
+  text:
+    ja: 火山灯台蜂蜜竹林石畳鐘楼雪原星座銀河鐘楼劇場噴水樹氷湿原琥珀
+    en: Dummy choice C of Q-2.1-0909
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - deprecated
+- id: d
+  text:
+    ja: 石畳鍵盤潮汐織機陶器竹林染物惑星宿場滝壺銀河渡り鳥化
+    en: Dummy choice D of Q-2.1-0909
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - cost
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

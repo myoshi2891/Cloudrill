@@ -1,0 +1,34 @@
+{
+  "cards": [
+    {
+      "id": "C-1.1-0001",
+      "domain": 1,
+      "subObjective": "1.1",
+      "front": {
+        "ja": "ダミーカード 1 の表",
+        "en": "Dummy card 1 front"
+      },
+      "back": {
+        "ja": "ダミーカード 1 の裏",
+        "en": "Dummy card 1 back"
+      },
+      "relatedQuestionIDs": [
+        "Q-1.1-0001"
+      ]
+    },
+    {
+      "id": "C-1.2-0002",
+      "domain": 1,
+      "subObjective": "1.2",
+      "front": {
+        "ja": "ダミーカード 2 の表",
+        "en": "Dummy card 2 front"
+      },
+      "back": {
+        "ja": "ダミーカード 2 の裏",
+        "en": "Dummy card 2 back"
+      },
+      "relatedQuestionIDs": []
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+id: Q-1.3-0013
+revision: 1
+examGuideVersion: '6.1'
+domain: 1
+subObjective: '1.3'
+caseStudy: null
+type:
+  kind: single
+difficulty: 4
+wafPillars:
+- security
+keywords:
+- ダミー
+- 陶器
+examSets:
+- 1
+stem:
+  ja: 【ダミー】羅針盤・樹氷・果樹園・織機・海溝に関する設問。
+  en: Dummy question stem for Q-1.3-0013.
+choices:
+- id: a
+  text:
+    ja: 雪原陶器楽譜山脈山脈鍵盤風車宿場劇場鍾乳石庭園
+    en: Dummy choice A of Q-1.3-0013
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - latency
+- id: b
+  text:
+    ja: 灯台火山鐘楼山脈銀河太鼓果樹園温室鍵盤楽
+    en: Dummy choice B of Q-1.3-0013
+  isCorrect: false
+  rationale:
+    ja: 選択肢Bが誤り理由(ダミー)
+    en: Why choice B is incorrect (dummy)
+  mistakeTags:
+  - requirementMismatch
+- id: c
+  text:
+    ja: 草原雪原灯台望遠鏡銀河楽譜惑星帆船合唱舞台陶
+    en: Dummy choice C of Q-1.3-0013
+  isCorrect: true
+  rationale:
+    ja: 選択肢Cが正しい理由(ダミー)
+    en: Why choice C is correct (dummy)
+- id: d
+  text:
+    ja: 青銅氷河刺繍陶器陶器棚田火山劇場雪原星座鐘楼舞台滝壺帆船
+    en: Dummy choice D of Q-1.3-0013
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - cost
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

@@ -1,0 +1,28 @@
+drills:
+  - id: K-0001
+    phrase:
+      ja: グローバル・強整合性・リレーショナル
+      en: Global, strongly consistent, relational
+    correct: Spanner
+    distractor: Cloud SQL
+    explanation:
+      ja: 複数リージョンにまたがる強整合なリレーショナル DB は Spanner。Cloud SQL は単一リージョンのプライマリに書き込みが集中する。
+      en: Spanner is the strongly consistent relational database across regions; Cloud SQL writes go to a single regional primary.
+  - id: K-0002
+    phrase:
+      ja: ペタバイト級の分析・サーバーレス SQL
+      en: Petabyte-scale analytics, serverless SQL
+    correct: BigQuery
+    distractor: Bigtable
+    explanation:
+      ja: SQL で大規模な分析を行うなら BigQuery。Bigtable は低レイテンシの読み書き向けで、分析用の SQL エンジンではない。
+      en: BigQuery is for large-scale SQL analytics; Bigtable targets low-latency reads and writes, not analytical SQL.
+  - id: K-0003
+    phrase:
+      ja: オンプレミス接続・10 Gbps 以上・インターネット非経由
+      en: On-premises connectivity, 10 Gbps or more, no internet
+    correct: Dedicated Interconnect
+    distractor: HA VPN
+    explanation:
+      ja: インターネットを経由しない大容量の専用接続は Dedicated Interconnect。HA VPN はインターネット上の暗号化トンネルを使う。
+      en: Dedicated Interconnect provides high-capacity private connectivity; HA VPN uses encrypted tunnels over the internet.

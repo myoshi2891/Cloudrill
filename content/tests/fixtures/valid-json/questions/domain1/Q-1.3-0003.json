@@ -1,0 +1,92 @@
+{
+  "id": "Q-1.3-0003",
+  "revision": 1,
+  "examGuideVersion": "6.1",
+  "domain": 1,
+  "subObjective": "1.3",
+  "caseStudy": "ehr",
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 4,
+  "wafPillars": [
+    "costOptimization"
+  ],
+  "keywords": [
+    "ダミー",
+    "水路"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】棚田・噴水・洞窟・庭園・山脈に関する設問。",
+    "en": "Dummy question stem for Q-1.3-0003."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "水路惑星滝壺刺繍樹氷噴水滝壺灯籠温室時計塔星",
+        "en": "Dummy choice A of Q-1.3-0003"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "scalability"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "蜂蜜刺繍温室羅針盤渡り鳥舞",
+        "en": "Dummy choice B of Q-1.3-0003"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "availability"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "雪原茶室時計塔石畳刺繍雪原庭園舞台草原噴水山脈劇場陶器鍾乳石",
+        "en": "Dummy choice C of Q-1.3-0003"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Cが正しい理由(ダミー)",
+        "en": "Why choice C is correct (dummy)"
+      }
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "湿原銀河宿場洞窟陶器砂丘庭園峡谷楽譜",
+        "en": "Dummy choice D of Q-1.3-0003"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Dが誤り理由(ダミー)",
+        "en": "Why choice D is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "requirementMismatch"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

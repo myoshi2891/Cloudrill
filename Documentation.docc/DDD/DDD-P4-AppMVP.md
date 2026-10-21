@@ -1,0 +1,664 @@
+# Cloudrill 詳細設計書 P4: アプリ MVP
+
+| 項目 | 内容 |
+|---|---|
+| 文書バージョン | 0.1(初版ドラフト) |
+| 作成日 | 2026-10-21 |
+| 上位文書 | [詳細設計書(索引・共通設計)](../DDD.md) |
+| 対象 | `ExamPrepApp`(アプリ本体)、`packages/Presentation`、`ExamPrepAppUITests` |
+| ステータス | レビュー待ち |
+
+---
+
+## 目次
+
+1. [目的とスコープ](#1-目的とスコープ)
+2. [前提](#2-前提)
+3. [設計](#3-設計)
+4. [ステップ](#4-ステップ)
+5. [フェーズの完了条件](#5-フェーズの完了条件)
+6. [申し送り](#6-申し送り)
+
+---
+
+## 1. 目的とスコープ
+
+P1〜P3 の部品を組み合わせて、MVP(RDD 12 章)の画面を作る。画面の振る舞いは ViewModel のテストで、画面の流れは UI テストで先に Red を作る([DDD 7.5](../DDD.md#75-tdd-を適用しにくい対象))。
+
+| 区分 | 内容 |
+|---|---|
+| スコープ内 | アプリの骨格(Composition root、試験の選択、画面遷移)、デザインシステム、MVP の画面(BDD 4.2 の SCR-001・002・010〜015・020〜022・030〜032・040〜044・050・090・091)、UI テスト |
+| スコープ外 | 差分配信と誤り報告の送信(P5。本フェーズでは送信キューまで作る)、v1.1 以降の機能(P6) |
+
+---
+
+## 2. 前提
+
+- P2 と P3 が完了している。
+- 外部依存 `swift-snapshot-testing` と `swift-markdown` の採否を確認済みである([DDD 8 章](../DDD.md#8-外部依存の候補))。
+- TBD-10(試験の切り替え UI の位置)を決めてある。本書では「ホームのナビゲーションバーの試験名をタップしてシートで選ぶ」方式を前提にする。
+- ブランチは、機能ごとに `feat/p4-<機能>` を作る。
+
+---
+
+## 3. 設計
+
+### 3.1 アプリの骨格
+
+```mermaid
+flowchart TB
+    APP["ExamPrepApp(@main)"] --> ENV["AppEnvironment.live()<br/>Composition root"]
+    ENV --> BOOT["ContentBootstrapper.bootstrap()"]
+    ENV --> REPO["Persistence のリポジトリ"]
+    ENV --> REG["AnswerEvaluatorRegistry<br/>QuestionRendererRegistry<br/>LearnModuleRegistry"]
+    APP --> ROOT["RootView"]
+    ROOT --> PICK{"選択中の試験が<br/>使えるか"}
+    PICK -- いいえ --> SEL["ExamPickerView"]
+    PICK -- はい --> TABS["MainTabView<br/>(ActiveExamContext を Environment に置く)"]
+    TABS --> H["ホーム"] & X["試験"] & C["カード"] & L["学ぶ"] & A["分析"]
+```
+
+| 型 | 置き場所 | 役割 |
+|---|---|---|
+| `AppDependencies` | AppCore | プロトコル型の依存(リポジトリ、`TimeSource`、登録表、乱数の種の供給)をまとめた struct。`@Entry` で `EnvironmentValues` に置く |
+| `AppEnvironment` | アプリ本体 | `live()`(本番)と `uiTesting(arguments:)`(UI テスト)で `AppDependencies` を組み立てる。DEBUG 構成でだけ `uiTesting` をコンパイルする |
+| `ActiveExamContext` | AppCore | `@MainActor @Observable`。選択中の試験の `ExamContentProvider` と `ExamPreference` を持つ。`switchExam(to:)` で切り替える |
+| `AppRouter` | AppCore | タブの選択と、タブごとの `NavigationStack` の path を持つ。画面をまたぐ遷移は `Route` を受け取って処理する |
+| `QuestionRendererRegistry` | ExamFeature | 出題形式ごとの View を返す([DDD 4.9](../DDD.md#49-アプリ内の拡張点)) |
+| `LearnModuleRegistry` | LearnFeature | `ExamFeatures` に応じて「学ぶ」タブの項目を返す |
+
+**試験を切り替えたとき**: `MainTabView` に `.id(activeExam.examID)` を付け、画面の状態と ViewModel をすべて作り直す。進行中の模試がある場合は、切り替える前に中断する(`suspend`)。
+
+### 3.2 ViewModel の規約
+
+| 項目 | 規約 |
+|---|---|
+| 型 | `@MainActor @Observable final class <画面>ViewModel` |
+| 依存 | 初期化子で `AppDependencies` と `ActiveExamContext` から必要なものだけを受け取る |
+| 状態 | 画面に出す値は `private(set) var state: <画面>State`(値型)にまとめる。テストは `state` を比べる |
+| 操作 | 利用者の操作 1 つにつき、メソッドを 1 つ用意する(`select(choiceID:)`、`submitTapped()` など) |
+| 非同期 | `async` のメソッドにして、テストでは `await` で完了を待つ。`Task { }` を ViewModel の中で作らない(作るのは View の `.task` だけ) |
+| エラー | 利用者に見せるエラーは `state.alert`(BDD 9 章の文言)にする。ログは `os.Logger` に出す |
+| 文言 | 画面の文言は String Catalog に置く。テストでは文言のキーで比べる |
+
+### 3.3 UI テストの起動引数
+
+| 引数 | 意味 |
+|---|---|
+| `-ui-testing` | `AppEnvironment.uiTesting` を使う |
+| `-fixed-now 2026-11-01T09:00:00Z` | `ManualTimeSource` をこの時刻で作る |
+| `-advance-on-launch 7200` | 起動時に時計を指定の秒数だけ進める(時間切れの再現) |
+| `-content-fixture test-alpha` | 同梱パックの代わりに、テスト用のパック(`packs/valid/test-alpha/1.0.0`)を使う |
+| `-store-in-memory` / `-store-path <path>` | インメモリのストア / 指定したファイルのストア(強制終了後の復元の確認用) |
+| `-network offline` | ネットワークを常に失敗させる |
+
+---
+
+## 4. ステップ
+
+画面のステップは、次の順で進める。
+
+1. ViewModel のテスト(Red)
+2. ViewModel の実装(Green)
+3. View の実装と Preview での確認
+4. 必要なら UI テスト
+
+各ステップの表には、ViewModel のテストだけを載せる。
+
+### P4-S01 アプリの設定と Composition root
+
+| 項目 | 内容 |
+|---|---|
+| 対応要件 | [DDD 3 章](../DDD.md#3-名称)、C-14、[DDD 5.4](../DDD.md#54-ci-のワークフロー) |
+| 前提 | P2、P3 |
+| 成果物 | `packages/Presentation/Package.swift`、`Sources/AppCore/AppDependencies.swift`、`ExamPrepApp/AppEnvironment.swift`、`ExamPrepApp/Resources/Packs/`、`.github/workflows/app-test.yml` |
+
+**Xcode の設定**(Build Settings で変更する。`project.pbxproj` は手で編集しない):
+
+| 設定 | 現在 | 変更後 |
+|---|---|---|
+| `IPHONEOS_DEPLOYMENT_TARGET` | 27.0 | 18.0 |
+| `SUPPORTED_PLATFORMS` | iphoneos、iphonesimulator、macosx、xros、xrsimulator | iphoneos、iphonesimulator |
+| `TARGETED_DEVICE_FAMILY` | 1,2,7 | 1,2 |
+| `SWIFT_VERSION` | 5.0 | 6.0 |
+| `PRODUCT_BUNDLE_IDENTIFIER` | 仮の値 | `<逆ドメイン>.examprep`(TBD-04 の確定後) |
+| App Groups(Signing & Capabilities) | なし | `group.<逆ドメイン>.examprep` |
+
+ローカルパッケージ `packages/Domain`、`packages/Data`、`packages/Presentation` は、**File > Add Package Dependencies… > Add Local…** から追加する(CLAUDE.md)。
+
+**Red**:
+
+| テスト | 条件(Arrange) | 期待(Assert) |
+|---|---|---|
+| `AppEnvironmentTests.uiTestingParsesArguments` | [3.3](#33-ui-テストの起動引数) の引数 | `TimeSource.now()` が指定の時刻。ストアがインメモリ |
+| `AppEnvironmentTests.liveUsesSystemTime` | `live()` | `TimeSource` が `SystemTimeSource` |
+| `AppEnvironmentTests.supportedKindsMatchRegistry` | `live()` | `ContentIntegrityChecker` に渡す対応形式が、`AnswerEvaluatorRegistry.standard` と `QuestionRendererRegistry.standard` の両方で対応している形式と一致する(片方だけに登録された形式を検出する) |
+| `BundledPacksResourceTests.packsArePresent` | アプリのバンドル | `Packs/catalog.json` と、カタログの `available` の試験のパックがある |
+
+**Green**: `AppDependencies`、`AppEnvironment` を実装する。同梱パックは、ビルドの前に `build_pack.py` と `sign_manifest.py` で作り、`ExamPrepApp/Resources/Packs/` にコピーするスクリプト `scripts/bundle_packs.sh` を用意する(本番のビルドでは本番の鍵で署名したパックを使い、ローカルの開発ではテスト用の鍵を使う)。
+
+**Refactor**: 依存の組み立てを、層ごとの関数(`makeContent()`、`makePersistence()`)に分ける。
+
+**完了条件**: `xcodebuild test -scheme ExamPrepApp -destination 'platform=iOS Simulator,name=iPhone 16'` が通る。`app-test.yml` が PR で通る。
+
+---
+
+### P4-S02 選択中の試験と切り替え(ActiveExamContext)
+
+| 項目 | 内容 |
+|---|---|
+| 対応要件 | [DDD 4.1 X-02](../DDD.md#41-拡張性の設計方針)、TBD-10、E-01 |
+| 前提 | P4-S01 |
+| 成果物 | `Sources/AppCore/ActiveExamContext.swift`、`Sources/HomeFeature/ExamPickerViewModel.swift`、テスト |
+
+**Red**:
+
+| テスト | 条件(Arrange) | 期待(Assert) |
+|---|---|---|
+| `restoresLastExam` | 設定の `currentExamID == test-beta`、2 試験とも利用可能 | `test-beta` が選択される |
+| `singleExamAutoSelected` | 利用可能な試験が 1 つ、設定なし | その試験が選択され、選択画面は出ない |
+| `multipleExamsShowPicker` | 利用可能な試験が 2 つ、設定なし | `needsSelection == true` |
+| `lastExamUnavailable` | 設定の試験が `failures` にある | 選択画面を出し、「この試験のデータを読み込めませんでした」を表示する |
+| `noExamAvailable` | 全試験が読めない | `state.fatal == .contentLoadFailed`(E-01) |
+| `switchSavesSetting` | `test-alpha` から `test-beta` に切り替える | 設定の `currentExamID` が更新される |
+| `switchSuspendsRunningExam` | `test-alpha` の模試が進行中 | 切り替えの前に、その受験のスナップショットが中断の状態で保存される |
+| `pickerShowsCatalogStatus` | カタログに `comingSoon` の試験 | 一覧に「近日公開」として出るが、選べない |
+| `pickerShowsTrademarkNotice` | 選択中の試験のベンダー | `vendor.trademarkNotice` が表示用の状態に入る(LG-04) |
+
+**Green**: `ActiveExamContext` と `ExamPickerViewModel` を実装する。
+
+**Refactor**: 起動時の判定(どの試験を選ぶか)を純粋関数にする。
+
+**完了条件**: `swift test --package-path packages/Presentation --filter ActiveExamContextTests` と `ExamPickerViewModelTests` が通る。
+
+---
+
+### P4-S03 画面遷移(AppRouter)
+
+| 項目 | 内容 |
+|---|---|
+| 対応要件 | BDD 3.3、BDD 4.3、[DDD 5.3 R-04](../DDD.md#53-依存のルール) |
+| 前提 | P4-S02 |
+| 成果物 | `Sources/AppCore/AppRouter.swift`、`Route.swift`、テスト |
+
+```swift
+public enum Tab: Hashable, Sendable { case home, exam, cards, learn, analytics }
+
+public enum Route: Hashable, Sendable {
+    case examStart(examSet: Int)
+    case examSession(attemptID: UUID)
+    case examReview(attemptID: UUID)
+    case examResult(attemptID: UUID)
+    case explanation(attemptID: UUID?, questionID: String)
+    case practiceSetup(PracticePreset?)
+    case practiceSession(PracticeSessionID)
+    case practiceResult(PracticeSessionID)
+    case deck(DeckID)
+    case cardSession(DeckID)
+    case docsIndex(domain: Int?)
+    case doc(subObjective: String)
+    case caseList
+    case caseDetail(CaseStudyID)
+    case analyticsDomain(Int)
+}
+```
+
+**Red**:
+
+| テスト | 条件(Arrange) | 期待(Assert) |
+|---|---|---|
+| `openSwitchesTab` | ホームで `open(.practiceSetup(.domain(4)))` | `selectedTab == .exam`、試験タブの path の末尾がその Route |
+| `pathsArePerTab` | 試験タブで 2 画面進み、カードタブに移る | 試験タブの path は 2 件のまま |
+| `submitReplacesStack` | 模試の解答 → 見直し → 提出 | path が `[examResult]` だけになる(戻るボタンで解答画面に戻れない) |
+| `resetOnExamSwitch` | 試験を切り替える | 全タブの path が空になる |
+| `routeTabMapping`(表形式) | 全 Route | それぞれ決まったタブに属する |
+
+**Green**: `AppRouter` を実装する。
+
+**Refactor**: Route とタブの対応を、`Route.tab` の computed property にまとめる。
+
+**完了条件**: `swift test --package-path packages/Presentation --filter AppRouterTests` が通る。
+
+---
+
+### P4-S04 デザインシステム
+
+| 項目 | 内容 |
+|---|---|
+| 対応要件 | NFR-06、NFR-07、BDD 4.5、[DDD 4.9](../DDD.md#49-アプリ内の拡張点) の `DomainPalette` |
+| 前提 | P4-S01 |
+| 成果物 | `Sources/DesignSystem/` の各ファイル、テスト |
+
+**Red**:
+
+| テスト | 条件(Arrange) | 期待(Assert) |
+|---|---|---|
+| `paletteAssignsByIndex` | ドメインの並び順 0〜5 | 6 色がすべて異なる |
+| `paletteHandlesMoreDomains` | 並び順 6〜11 | 色を循環させ、同じ色のドメインには異なる記号(●▲■…)を組み合わせる。(色, 記号) の組がすべて異なる |
+| `paletteContrast`(表形式) | 各色のライト・ダーク | 背景色とのコントラスト比が 4.5 以上(WCAG 2.1 AA。比は相対輝度の式で計算する) |
+| `choiceRowAccessibilityLabel` | 選択肢 B、選択済み | 「選択肢B、選択済み」(BDD 8.4) |
+| `resultBadgeNotColorOnly` | 正解・不正解のバッジ | アイコン名(✅/❌ に対応する SF Symbols)と文言を持つ |
+| `timerLabelAccessibility` | 残り 87 分 42 秒 | 読み上げ用の文言は「残り 87 分」(1 分単位。BDD 8.4) |
+
+共通コンポーネントは、BDD 4.5 の `ChoiceRow`、`DomainBadge`、`CaseBadge`、`TimerLabel`、`MistakeTagChip`、`ReferenceLink`、`MarkdownView` である。`MarkdownView` は P4-S12 で作る。
+
+**Green**: 色(セマンティックカラー)、文字のスタイル(Dynamic Type)、共通コンポーネントを実装する。アクセシビリティの文言は、コンポーネントから切り出した関数(`ChoiceRow.accessibilityLabel(for:)` など)にして、テストする。
+
+**Refactor**: コンポーネントごとに Preview を、ライト・ダーク・最大の文字サイズの 3 種類で用意する。
+
+**完了条件**: `swift test --package-path packages/Presentation --filter DesignSystemTests` が通る。
+
+---
+
+### P4-S05 ホーム(SCR-001)
+
+| 項目 | 内容 |
+|---|---|
+| 対応要件 | SCR-001(MVP では今日の学習、弱点、復習期限のカード数) |
+| 前提 | P4-S04 |
+| 成果物 | `Sources/HomeFeature/HomeViewModel.swift`、`HomeView.swift`、テスト |
+
+**Red**:
+
+| テスト | 条件(Arrange) | 期待(Assert) |
+|---|---|---|
+| `showsExamName` | 選択中の試験 `test-beta` | ナビゲーションのタイトルが `shortName` |
+| `dueCardCount` | 期限切れのカード 42 枚 | `state.dueCards == 42` |
+| `weakestDomain` | ドメイン別の正答率(ドメイン 4 が最低) | `state.weakDomain == 4`。ボタンの Route は `.practiceSetup(.domain(4))` |
+| `noDataYet` | 解答 0 件 | 弱点の欄に「まず練習を始めましょう」を出す |
+| `resumeBanner` | 進行中の模試がある | 「模試を再開する」のバナーを出す |
+
+準備度とカウントダウンは P6(v1.2、v2.0)で追加する。
+
+**Green**: `HomeViewModel` と `HomeView` を実装する。
+
+**Refactor**: 集計(ドメイン別の正答率)は、分析画面(P4-S14)と共有する `AccuracySummary` に切り出す。
+
+**完了条件**: `swift test --package-path packages/Presentation --filter HomeViewModelTests` が通る。
+
+---
+
+### P4-S06 試験トップと模試の開始(SCR-010、SCR-011)
+
+| 項目 | 内容 |
+|---|---|
+| 対応要件 | FR-EXAM-01 |
+| 前提 | P4-S05 |
+| 成果物 | `Sources/ExamFeature/ExamTopViewModel.swift`、`ExamStartViewModel.swift`、View、テスト |
+
+**Red**:
+
+| テスト | 条件(Arrange) | 期待(Assert) |
+|---|---|---|
+| `listsCompleteExamSets` | `complete` の模試 1 つ、`draft` 1 つ | `complete` だけを表示する(`draft` は DEBUG 構成でのみ表示) |
+| `examSetCountFromDefinition` | `test-beta`(`setCount: 2`) | 表示する模試は最大 2 回 |
+| `startShowsFormat` | `test-beta` | 開始確認に「40 問・90 分」(`ExamDefinition` から) |
+| `startShowsCases` | `test-alpha` の模試 1 | ケース名 2 件を表示する |
+| `startCreatesAttemptAndPins` | 開始をタップ | `ExamAttemptRepository.start` と `PackStore.pin` が呼ばれ、Route が `.examSession` |
+| `startBlockedWhenInProgress` | 同じ試験で別の模試が進行中 | 「進行中の模試があります」と、再開または破棄の選択肢を出す |
+| `abandonUnpins` | 進行中の模試を破棄する | `abandon` と `unpin` が呼ばれる |
+
+**Green**: ViewModel と View を実装する。出題順は `ExamOrderBuilder.make` で作り、乱数の種は `AppDependencies.seedProvider` から得る。
+
+**Refactor**: なし。
+
+**完了条件**: 該当する ViewModel のテストが通る。
+
+---
+
+### P4-S07 模試の解答(SCR-012、SCR-091)
+
+| 項目 | 内容 |
+|---|---|
+| 対応要件 | FR-EXAM-02、03、04、06、07、11、12、NFR-02、NFR-04、E-06、E-07 |
+| 前提 | P4-S06 |
+| 成果物 | `Sources/ExamFeature/ExamSessionViewModel.swift`、`ExamSessionView.swift`、`QuestionRendererRegistry.swift`、`ChoiceQuestionRenderer.swift`、`CaseSheetView.swift`、テスト |
+
+**Red**:
+
+| テスト | 条件(Arrange) | 期待(Assert) |
+|---|---|---|
+| `loadsAllQuestionsAtStart` | 55 問の模試を開く | `questions(ids:)` を 1 回だけ呼び、以後の問題の切り替えでは読み込まない(NFR-02) |
+| `noCorrectnessShown` | 解答を選ぶ | `state` に正誤の情報がない(FR-EXAM-03) |
+| `selectPersistsImmediately` | 選択肢を選ぶ | `record` と `save(snapshot:)` が、選ぶたびに呼ばれる(NFR-04) |
+| `multipleShowsRequiredCount` | multiple(2) の問題 | 「2つ選択」と表示する |
+| `multipleRejectsExtraSelection` | multiple(2) で 2 つ選んだ後に 3 つ目を選ぶ | 3 つ目は選択されず、選択済みの 2 つはそのまま。「選択できるのは 2 つまでです」を表示する |
+| `flagToggle` | 見直しフラグを切り替える | スナップショットに反映される |
+| `timerTicks` | `ManualTimeSource` を 61 秒進めて `tick()` | 残り時間の表示が 1 分減る |
+| `warningAtTenMinutes` | 残り 10:01 から 9:59 に進める | `state.warning == .tenMinutes`、触覚フィードバックの要求が 1 回 |
+| `autoSubmitOnExpiry` | 期限を過ぎて `tick()` | `finalize(reason: .timeExpired)` が呼ばれ、Route が `.examResult`(E-06) |
+| `suspendOnBackground` | `scenePhaseChanged(.background)` | 状態が `suspended` で保存される |
+| `resumeAfterExpiry` | 中断中に期限を過ぎ、`scenePhaseChanged(.active)` | 自動で提出し、「制限時間を過ぎたため提出しました」を表示する(E-06) |
+| `restoresFromSnapshot` | 保存済みのスナップショットで開く | 現在の問題、解答、フラグ、残り時間が復元される(AC-02) |
+| `caseSheetOnlyForCaseQuestions` | ケース問題とそれ以外 | ケース問題でだけ「ケースを見る」を出す(FR-EXAM-11) |
+| `shuffleSettingApplied` | 設定 `shuffleChoices: true` で開始した模試 | 表示順が `QuestionOrder` の順(FR-EXAM-12) |
+| `usesPinnedPack` | 1.0.0 で開始し、その後 1.1.0 が有効になった | 1.0.0 の問題を表示し続ける(E-07) |
+| `rendererRegistryCoversKinds` | `QuestionRendererRegistry.standard` | `QuestionKind.allCases` のすべてに対応している |
+
+**Green**: ViewModel、View、`QuestionRendererRegistry`、ケース文のシートを実装する。タイマーの表示は `TimelineView(.periodic(by: 1))` で、各回に `tick()` を呼ぶ。
+
+**Refactor**: 解答の保存とタイマーの処理を、ViewModel から `ExamSessionController`(View に依存しない)に切り出し、ViewModel は表示用の変換だけにする。
+
+**完了条件**: `ExamSessionViewModelTests` が通る。
+
+---
+
+### P4-S08 見直しと提出(SCR-013)
+
+| 項目 | 内容 |
+|---|---|
+| 対応要件 | FR-EXAM-05、BDD 6.4 |
+| 前提 | P4-S07 |
+| 成果物 | `Sources/ExamFeature/ExamReviewViewModel.swift`、View、テスト |
+
+**Red**:
+
+| テスト | 条件(Arrange) | 期待(Assert) |
+|---|---|---|
+| `listsUnansweredAndFlagged` | 未解答 3 問、フラグ 2 問 | 一覧に件数と問題番号が出る |
+| `jumpToQuestion` | 一覧の問題 12 をタップ | `closeReview` の後に、問題 12 に移動する |
+| `submitAsksConfirmation` | 未解答がある状態で提出をタップ | 確認ダイアログに「未解答 3 問、見直し 2 問」 |
+| `confirmSubmitScores` | 確認する | `ScoringPolicy.score` → `finalize(reason: .user)` → `unpin` の順に呼ばれ、Route が `.examResult` |
+| `autoCardFromMistakes` | 設定 ON、誤答 4 問 | `addCardFromQuestion` が 4 回呼ばれる(FR-CARD-04) |
+| `autoCardDisabled` | 設定 OFF | 呼ばれない |
+| `expiryWhileReviewing` | 見直し中に期限を過ぎる | 自動で提出する(C-10) |
+
+**Green**: ViewModel と View を実装する。
+
+**Refactor**: 提出の処理(採点、保存、カード化)を `ExamSubmission` にまとめ、時間切れの自動提出(P4-S07)と共有する。
+
+**完了条件**: `ExamReviewViewModelTests` が通る。
+
+---
+
+### P4-S09 結果と解説(SCR-014、SCR-015)
+
+| 項目 | 内容 |
+|---|---|
+| 対応要件 | FR-EXAM-08、FR-EXAM-09、FR-PRAC-05、FR-PRAC-06、FR-PRAC-08、FR-CARD-04、LG-02 |
+| 前提 | P4-S08 |
+| 成果物 | `Sources/ExamFeature/ExamResultViewModel.swift`、`ExplanationViewModel.swift`、View、テスト |
+
+**Red**:
+
+| テスト | 条件(Arrange) | 期待(Assert) |
+|---|---|---|
+| `showsTotals` | 55 問中 40 問正解、所要時間 98 分 | 「40 / 55(73%)」「98 分」 |
+| `domainBreakdownUsesDefinitionNames` | `test-beta` | ドメイン名が `exam.json` の名前で、4 行 |
+| `caseBreakdownHiddenWhenDisabled` | `test-beta` | ケース別の欄を出さない |
+| `explanationShowsAllRationales` | 解説を開く | 全選択肢の「なぜ正しいか / なぜ誤りか」が出る(FR-PRAC-05) |
+| `mistakeTagsOnWrongChoices` | 誤答の選択肢 | 誤答タグを表示する(FR-PRAC-06) |
+| `referencesShowLicense` | `license: CC-BY-4.0` と `link-only` | 前者には「CC BY 4.0」の表示、後者にはリンクだけを出す(LG-02) |
+| `addToCards` | 「カードに追加」をタップ | `addCardFromQuestion` が呼ばれ、ボタンが「追加済み」になる |
+| `reportOpensSheet` | 「誤りを報告」をタップ | 誤り報告のシート(SCR-090)を、問題 ID と版を渡して開く |
+| `relatedDocLink` | 問題のサブ項目 3.2 に docs がある | 「関連ドキュメント 3.2」の Route が `.doc(subObjective: "3.2")` |
+
+**Green**: ViewModel と View を実装する。
+
+**Refactor**: 解説の View は、練習(P4-S10)と共有する。
+
+**完了条件**: `ExamResultViewModelTests`、`ExplanationViewModelTests` が通る。
+
+---
+
+### P4-S10 練習モード(SCR-020〜022)
+
+| 項目 | 内容 |
+|---|---|
+| 対応要件 | FR-PRAC-01〜05、FR-CASE-03 |
+| 前提 | P4-S09 |
+| 成果物 | `Sources/PracticeFeature/` の各 ViewModel と View、テスト |
+
+**Red**:
+
+| テスト | 条件(Arrange) | 期待(Assert) |
+|---|---|---|
+| `filterOptionsFromDefinition` | `test-beta` | ドメイン 4 つ、サブ項目は `exam.json` の一覧。ケースの絞り込みは出さない |
+| `caseFilterWhenEnabled` | `test-alpha` | ケース 4 件を選べる(FR-CASE-03) |
+| `countOptions` | 条件設定 | 5、10、20、すべて(FR-PRAC-04) |
+| `emptyResult` | 該当なし | 「該当する問題がありません」 |
+| `startUsesSelector` | 条件を指定して開始 | `QuestionSelector.select` に条件と履歴が渡され、`markServed` が呼ばれる |
+| `immediateFeedback` | 解答する | すぐに正誤と解説が出る(FR-PRAC-02) |
+| `recordsPracticeAnswer` | 解答する | `AnswerHistoryRepository.record` が `mode: .practice` で呼ばれる |
+| `resultSummary` | 10 問を終える | 正答数とドメイン別の内訳 |
+
+**Green**: ViewModel と View を実装する。
+
+**Refactor**: 解答の画面は、`QuestionRendererRegistry` を模試と共有する。
+
+**完了条件**: `PracticeFeature` のテストが通る。
+
+---
+
+### P4-S11 フラッシュカード(SCR-030〜032)
+
+| 項目 | 内容 |
+|---|---|
+| 対応要件 | FR-CARD-01、FR-CARD-02、FR-CARD-03 |
+| 前提 | P4-S10 |
+| 成果物 | `Sources/FlashcardFeature/` の各 ViewModel と View、テスト |
+
+**Red**:
+
+| テスト | 条件(Arrange) | 期待(Assert) |
+|---|---|---|
+| `decksByDomainAndSubObjective` | カードのあるドメイン | ドメイン別とサブ項目別のデッキ。「間違えた問題」のデッキ(`Q:` で始まるカード)も出す |
+| `hiddenWhenFeatureDisabled` | `features.flashcards: false` の試験 | カードのタブに「この試験にはカードがありません」を出す |
+| `queueFromDailyBuilder` | 復習 3 枚、新規 5 枚 | `DailyQueueBuilder` の順に出す |
+| `flipThenRate` | 表 → 裏 → Good | `FSRSScheduler.review` → `CardStateRepository.apply` |
+| `ratingButtonsShowIntervals` | 裏を表示した状態 | 4 つのボタンに次の間隔(例: 「10分」「1日」「3日」「8日」)を出す |
+| `finishShowsSummary` | キューを終える | 学習完了画面(SCR-032)に枚数を出す |
+
+**Green**: ViewModel と View を実装する。
+
+**Refactor**: なし。
+
+**完了条件**: `FlashcardFeature` のテストが通る。
+
+---
+
+### P4-S12 ドキュメント(SCR-040〜042)
+
+| 項目 | 内容 |
+|---|---|
+| 対応要件 | FR-DOCS-01、FR-DOCS-02、FR-DOCS-06、LG-02、[DDD 4.9](../DDD.md#49-アプリ内の拡張点) の `LearnModuleRegistry` |
+| 前提 | P4-S04 |
+| 成果物 | `Sources/LearnFeature/LearnModuleRegistry.swift`、`DocsIndexViewModel.swift`、`DocViewModel.swift`、`Sources/DesignSystem/MarkdownView.swift`、テスト |
+
+**Red**:
+
+| テスト | 条件(Arrange) | 期待(Assert) |
+|---|---|---|
+| `learnModulesFollowFeatures`(表形式) | `test-alpha` / `test-beta` | alpha: ドキュメント、ケース(要約のみ)。beta: ドキュメントだけ(ツリーとドリルは P6 で登録する) |
+| `docsGroupedByDomain` | `docsIndex` | ドメインの順に、サブ項目の順で並ぶ |
+| `missingDocsShown` | 定義にあるがドキュメントのないサブ項目 | 「準備中」として表示する |
+| `docShowsReferences` | ドキュメントを開く | 出典の一覧と、ライセンスの表示(FR-DOCS-06) |
+| `markdownBlocks`(表形式) | 見出し、段落、箇条書き、表、コードブロック、画像 | それぞれ対応するブロックの種類に変換される(FR-DOCS-02。`MarkdownView` が描画に使う中間表現をテストする) |
+| `unsupportedMarkdownFallsBack` | HTML のブロック | 段落の文字列として表示し、落ちない |
+| `imagesFromPackAssets` | `![](assets/x.svg)` | パックの `assets/x.svg` の URL に解決される。パックの外を指すパスは表示しない |
+
+**Green**: `LearnModuleRegistry`、ViewModel、`MarkdownView` を実装する。
+
+**Refactor**: Markdown の中間表現への変換(`MarkdownDocument`)を、描画と分ける。
+
+**完了条件**: `LearnFeature` と `DesignSystem` のテストが通る。
+
+---
+
+### P4-S13 ケーススタディの要約(SCR-043、SCR-044)
+
+| 項目 | 内容 |
+|---|---|
+| 対応要件 | FR-CASE-01、LG-03 |
+| 前提 | P4-S12 |
+| 成果物 | `Sources/LearnFeature/CaseListViewModel.swift`、`CaseDetailViewModel.swift`、View、テスト |
+
+**Red**:
+
+| テスト | 条件(Arrange) | 期待(Assert) |
+|---|---|---|
+| `casesInDefinitionOrder` | `exam.json` の `caseStudies` の順 | その順に並ぶ |
+| `detailShowsSummarySections` | ケースを開く | 要約、ビジネス要件、技術要件、既存環境 |
+| `officialLinkShown` | 同上 | 公式ページへのリンクを出す(全文は転載しない。LG-03) |
+| `practiceForCase` | 「このケースの問題を解く」 | Route が `.practiceSetup(.caseStudy(id))` |
+| `notRegisteredWhenDisabled` | `test-beta` | 「学ぶ」タブに項目が出ない |
+
+要件マッピング(FR-CASE-02)は P6-S06 で追加する。
+
+**Green**: ViewModel と View を実装する。
+
+**Refactor**: なし。
+
+**完了条件**: 該当するテストが通る。
+
+---
+
+### P4-S14 基本の分析(SCR-050)
+
+| 項目 | 内容 |
+|---|---|
+| 対応要件 | FR-ANLY-01 |
+| 前提 | P4-S05 |
+| 成果物 | `Sources/AnalyticsFeature/AnalyticsViewModel.swift`、View、テスト |
+
+**Red**:
+
+| テスト | 条件(Arrange) | 期待(Assert) |
+|---|---|---|
+| `accuracyByDomain` | ドメイン 1 で 10 問中 7 問正解 | 70% |
+| `accuracyBySubObjective` | サブ項目別 | 解答のあるサブ項目だけを出す |
+| `noAnswersDomain` | 解答 0 件のドメイン | 「—」(0% と区別する) |
+| `domainNamesFromDefinition` | `test-beta` | 4 行、`exam.json` の名前 |
+| `perExamOnly` | 2 試験の解答 | 選択中の試験の解答だけを集計する |
+
+**Green**: ViewModel と View を実装する。グラフは Swift Charts を使う。
+
+**Refactor**: 集計は P4-S05 の `AccuracySummary` を使う。
+
+**完了条件**: `AnalyticsFeature` のテストが通る。
+
+---
+
+### P4-S15 誤り報告のシートと送信キュー(SCR-090)
+
+| 項目 | 内容 |
+|---|---|
+| 対応要件 | FR-CONT-03、E-08、BDD 7.2 |
+| 前提 | P4-S09 |
+| 成果物 | `Sources/SettingsFeature/ReportSheetViewModel.swift`(共通のシート)、`DomainInterfaces/ReportQueue.swift`、`packages/Data/Sources/Persistence/SwiftDataReportQueue.swift`、テスト |
+
+送信キューは、報告を端末に保存しておき、P5-S06 の `ReportClient` が送信する。本フェーズでは、送信の部分を Fake にする。
+
+**Red**:
+
+| テスト | 条件(Arrange) | 期待(Assert) |
+|---|---|---|
+| `reasonsAreSelectable` | シートを開く | BDD 7.2 の 6 種類の理由 |
+| `commentLimit` | 501 文字のコメント | 送信できない。残りの文字数を表示する |
+| `privacyNoticeShown` | シートを開く | 「氏名・メールアドレスなどの個人情報は書かないでください」(BDD 7.2) |
+| `enqueueContainsContext` | 送信する | キューの項目に `examID`、`questionID`、`questionRevision`、`packVersion`、`appVersion`、`locale` が入る(C-11) |
+| `offlineMessage` | `-network offline` 相当の Fake | 「オフラインのため、あとで送信します」(E-08) |
+| `queuePersists` | キューに入れてから、新しいコンテナで開き直す | 項目が残っている |
+
+**Green**: ViewModel、キューのモデル(`PendingReport`。SwiftData に追加するので、P3 の `SchemaV1` に含める。P3 の完了後に追加する場合は `SchemaV2` にする)を実装する。
+
+**Refactor**: なし。
+
+**完了条件**: 該当するテストが通る。
+
+---
+
+### P4-S16 設定(SCR-002)
+
+| 項目 | 内容 |
+|---|---|
+| 対応要件 | FR-CARD-05、FR-EXAM-12、FR-ACCT-03、LG-04 |
+| 前提 | P4-S02 |
+| 成果物 | `Sources/SettingsFeature/SettingsViewModel.swift`、View、テスト |
+
+**Red**:
+
+| テスト | 条件(Arrange) | 期待(Assert) |
+|---|---|---|
+| `editsExamPreference` | 新規カードの上限を 30 にする | 選択中の試験の `ExamPreference` だけが変わる |
+| `shuffleSetting` | シャッフルを ON にする | 以後に開始する模試に反映される(進行中の模試は変わらない) |
+| `exportData` | 「データを書き出す」 | `DataManagementRepository.export` の結果を、共有シートに渡すファイルとして作る |
+| `deleteRequiresConfirmation` | 「すべて削除」 | 確認ダイアログを出し、確定したときだけ `deleteAll` を呼ぶ |
+| `aboutShowsNotices` | 「このアプリについて」 | 全ベンダーの `trademarkNotice` と、「非公式」「合格を保証するものではありません」の文言(LG-04、LG-05) |
+
+**Green**: ViewModel と View を実装する。
+
+**Refactor**: なし。
+
+**完了条件**: `SettingsFeature` のテストが通る。
+
+---
+
+### P4-S17 UI テスト(受け入れ基準)
+
+| 項目 | 内容 |
+|---|---|
+| 対応要件 | AC-01、AC-02、AC-04、NFR-01、NFR-03 |
+| 前提 | P4-S16 |
+| 成果物 | `ExamPrepAppUITests/ExamFlowUITests.swift`、`ResumeUITests.swift`、`OfflineUITests.swift`、`LaunchPerformanceTests.swift` |
+
+**Red**(XCUITest。それぞれ、対応する画面を作る前に書いて失敗を確認してもよいし、P4-S06 以降の各ステップで少しずつ追加してもよい):
+
+| テスト | 手順 | 期待 |
+|---|---|---|
+| `testCompleteExamAndSubmit`(AC-01) | `test-alpha` の模試を開始し、全問に解答し、見直しから提出する | 結果画面が出る |
+| `testAutoSubmitOnTimeout`(AC-01) | 開始後、`-advance-on-launch` 付きで起動し直す | 「制限時間を過ぎたため提出しました」と結果画面 |
+| `testResumeAfterTermination`(AC-02) | `-store-path` を指定して 5 問解答し、`app.terminate()` → 同じ引数で起動 | 5 問の解答と、残り時間(終了中に経過した分を引いた値)が復元される |
+| `testAllFeaturesOffline`(AC-04) | `-network offline` で、模試、練習、カード、ドキュメントを順に開く | すべて利用できる |
+| `testBetaExamHasNoCaseUI` | `-content-fixture test-beta` | 「学ぶ」タブにケースがなく、模試の開始確認が「40 問・90 分」 |
+| `testLaunchPerformance`(NFR-01) | `XCTApplicationLaunchMetric` | 記録する(2 秒以内かは実機で確認する) |
+
+**Green**: 失敗した箇所の画面やアクセシビリティ識別子を直す。
+
+**Refactor**: 画面の操作を Page Object(`ExamScreen`、`ReviewScreen`)にまとめる。
+
+**完了条件**: `xcodebuild test -scheme ExamPrepApp -only-testing:ExamPrepAppUITests` が通る。
+
+---
+
+### P4-S18 アクセシビリティとスナップショット
+
+| 項目 | 内容 |
+|---|---|
+| 対応要件 | NFR-06、NFR-07、AC-07 |
+| 前提 | P4-S17 |
+| 成果物 | `packages/Presentation/Tests/SnapshotTests/`、手動テストの記録(`Documentation.docc/` には置かず、PR に添付する) |
+
+TDD の対象外(見た目の回帰の検出と、手動の確認)。
+
+**検証手順**:
+
+1. 主要な画面(SCR-001、012、014、015、031、042)のスナップショットを、ライト、ダーク、最大の文字サイズの 3 条件で記録する。
+2. Xcode の Accessibility Inspector の監査を、上の画面で実行し、警告を 0 件にする。
+3. 実機の VoiceOver で、模試を開始から提出まで操作する(AC-07)。確認項目は BDD 8.4 の表とする。
+4. 「視差効果を減らす」を ON にして、画面遷移のアニメーションが簡略化されることを確認する。
+
+**完了条件**: スナップショットテストが通り、手動テストの記録が PR にある。
+
+---
+
+## 5. フェーズの完了条件
+
+[DDD 7.8](../DDD.md#78-フェーズの完了条件共通) の共通条件に加えて、次を満たすこと。
+
+| No. | 条件 | 確認方法 |
+|---|---|---|
+| 1 | AC-01、02、04 の UI テストが通る | P4-S17 |
+| 2 | `test-beta` でも、すべての画面が開けて、無効な機能の UI が出ない | `testBetaExamHasNoCaseUI` と手動の確認 |
+| 3 | Presentation が Data を import していない | `git grep -n -e 'import ContentKit' -e 'import Persistence' -- packages/Presentation` が 0 件 |
+| 4 | AC-07 の手動テストを実施した | PR の記録 |
+
+---
+
+## 6. 申し送り
+
+| 宛先 | 内容 |
+|---|---|
+| P5 | 誤り報告は `ReportQueue` に溜まっている。`ReportClient` は、起動時とオンライン復帰時にキューを送信する |
+| P5 | `PackUpdater` は、`ActiveExamContext` に「模試の受験中か」を問い合わせ、受験中なら `activate` を遅らせる |
+| P6 | 「学ぶ」タブの新しい機能は、`LearnModuleRegistry` に登録する。ホームの準備度とカウントダウンは、`HomeViewModel` の状態に追加する |

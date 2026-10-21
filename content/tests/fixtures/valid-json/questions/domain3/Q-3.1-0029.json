@@ -1,0 +1,92 @@
+{
+  "id": "Q-3.1-0029",
+  "revision": 1,
+  "examGuideVersion": "6.1",
+  "domain": 3,
+  "subObjective": "3.1",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 5,
+  "wafPillars": [
+    "sustainability"
+  ],
+  "keywords": [
+    "ダミー",
+    "庭園"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】帆船・舞台・星座・峡谷・砂丘に関する設問。",
+    "en": "Dummy question stem for Q-3.1-0029."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "画廊果樹園染物水路織機茶室合唱合唱笛吹鍵盤氷河樹氷氷河惑星",
+        "en": "Dummy choice A of Q-3.1-0029"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "latency"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "石畳水路時計塔雪原果樹園琥珀琥珀樹氷琥珀",
+        "en": "Dummy choice B of Q-3.1-0029"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Bが正しい理由(ダミー)",
+        "en": "Why choice B is correct (dummy)"
+      }
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "帆船蜂蜜鐘楼蜂蜜砂丘灯台潮汐惑星果樹園",
+        "en": "Dummy choice C of Q-3.1-0029"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "deprecated"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "宿場樹氷劇場青銅木版画彫刻染物潮汐峡谷滝壺草原月面琥珀",
+        "en": "Dummy choice D of Q-3.1-0029"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Dが誤り理由(ダミー)",
+        "en": "Why choice D is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "cost"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

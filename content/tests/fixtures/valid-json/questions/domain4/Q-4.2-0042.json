@@ -1,0 +1,105 @@
+{
+  "id": "Q-4.2-0042",
+  "revision": 1,
+  "examGuideVersion": "6.1",
+  "domain": 4,
+  "subObjective": "4.2",
+  "caseStudy": "altostrat",
+  "type": {
+    "kind": "multiple",
+    "count": 2
+  },
+  "difficulty": 3,
+  "wafPillars": [
+    "operationalExcellence"
+  ],
+  "keywords": [
+    "ダミー",
+    "湿原"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】舞台・羅針盤・鐘楼・染物・滝壺に関する設問。",
+    "en": "Dummy question stem for Q-4.2-0042."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "果樹園青銅茶室峡谷風車渓流木版",
+        "en": "Dummy choice A of Q-4.2-0042"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "compliance"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "月面太鼓望遠鏡鍾乳石水路星座羅針盤彫刻草原彫刻水",
+        "en": "Dummy choice B of Q-4.2-0042"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Bが正しい理由(ダミー)",
+        "en": "Why choice B is correct (dummy)"
+      }
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "舞台劇場羅針盤青銅風車染物蜂蜜帆船鍾乳石峡谷温室銀河化石",
+        "en": "Dummy choice C of Q-4.2-0042"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "availability"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "望遠鏡渡り鳥羅針盤銀河灯台山脈噴水",
+        "en": "Dummy choice D of Q-4.2-0042"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Dが正しい理由(ダミー)",
+        "en": "Why choice D is correct (dummy)"
+      }
+    },
+    {
+      "id": "e",
+      "text": {
+        "ja": "鍵盤太鼓石畳彗星樹氷鐘楼灯台惑星流星笛吹渡り鳥噴水滝壺合唱",
+        "en": "Dummy choice E of Q-4.2-0042"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Eが誤り理由(ダミー)",
+        "en": "Why choice E is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "requirementMismatch"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

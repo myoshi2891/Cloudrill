@@ -1,0 +1,107 @@
+{
+  "id": "Q-1.4-0014",
+  "revision": 1,
+  "examGuideVersion": "6.1",
+  "domain": 1,
+  "subObjective": "1.4",
+  "caseStudy": "altostrat",
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 5,
+  "wafPillars": [
+    "reliability"
+  ],
+  "keywords": [
+    "ダミー",
+    "織機"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】潮汐・舞台・月面・雪原・噴水に関する設問。",
+    "en": "Dummy question stem for Q-1.4-0014."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "草原月面蜂蜜潮汐劇場樹氷珊瑚石畳山脈刺繍製本太鼓氷河海",
+        "en": "Dummy choice A of Q-1.4-0014"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "requirementMismatch"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "火山製本染物潮汐月面温室青",
+        "en": "Dummy choice B of Q-1.4-0014"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "deprecated"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "灯籠合唱灯台楽譜彫刻彗星彗星蜂蜜水路山脈彗星温室宿場",
+        "en": "Dummy choice C of Q-1.4-0014"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "cost"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "棚田青銅製本笛吹笛吹渡り鳥温室琥珀石畳風車灯台楽譜彗星羅針盤羅",
+        "en": "Dummy choice D of Q-1.4-0014"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Dが正しい理由(ダミー)",
+        "en": "Why choice D is correct (dummy)"
+      }
+    },
+    {
+      "id": "e",
+      "text": {
+        "ja": "洞窟竹林鐘楼茶室彗星宿場渓流温室樹氷温室草原笛吹",
+        "en": "Dummy choice E of Q-1.4-0014"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Eが誤り理由(ダミー)",
+        "en": "Why choice E is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "compliance"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

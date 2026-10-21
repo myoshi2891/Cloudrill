@@ -1,0 +1,61 @@
+id: Q-2.1-0901
+revision: 1
+examGuideVersion: '6.1'
+domain: 2
+subObjective: '2.1'
+caseStudy: null
+type:
+  kind: single
+difficulty: 9
+wafPillars:
+- security
+keywords:
+- ダミー
+- 灯台
+examSets: []
+stem:
+  ja: 【ダミー】時計塔・彗星・星座・氷河・滝壺に関する設問。
+  en: Dummy question stem for Q-2.1-0901.
+choices:
+- id: a
+  text:
+    ja: 劇場月面青銅蜂蜜月面渓流洞窟帆船青銅製本火山潮汐
+    en: Dummy choice A of Q-2.1-0901
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - latency
+- id: b
+  text:
+    ja: 湿原銀河舞台茶室銀河帆船望
+    en: Dummy choice B of Q-2.1-0901
+  isCorrect: true
+  rationale:
+    ja: 選択肢Bが正しい理由(ダミー)
+    en: Why choice B is correct (dummy)
+- id: c
+  text:
+    ja: 水路画廊時計塔鍾乳石太鼓海溝蜂蜜彫刻草原海溝
+    en: Dummy choice C of Q-2.1-0901
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - deprecated
+- id: d
+  text:
+    ja: 羅針盤水路画廊洞窟楽譜木版画惑
+    en: Dummy choice D of Q-2.1-0901
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - cost
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

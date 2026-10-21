@@ -1,0 +1,5 @@
+description: 正解に mistakeTags、誤答に mistakeTags なし
+expect:
+  CI-01:
+  - error
+options: {}

@@ -1,0 +1,5 @@
+description: YAML の構文エラー
+expect:
+  CI-01:
+  - error
+options: {}
