@@ -81,6 +81,43 @@ struct FixtureDecodingTests {
         #expect(drills.map(\.id) == ["K-0001", "K-0002"])
     }
 
+    @Test("試験定義をデコードでき、入れ子の構造が保たれる")
+    func exam() throws {
+        // Arrange
+        let url = root.appending(path: "exam.json")
+        // Act
+        let exam = try decode(Exam.self, url)
+        // Assert
+        #expect(exam.id == "test-alpha")
+        #expect(exam.vendor == "google-cloud")
+        #expect(exam.guideVersion == "6.1")
+        #expect(exam.guideURL.scheme == "https")
+        #expect(exam.format.officialQuestionCount.min <= exam.format.officialQuestionCount.max)
+        #expect(exam.format.questionKinds == [.single, .multiple])
+        #expect(exam.format.mockExam.setCount == 6)
+        #expect(exam.scoring.policy == .allOrNothing)
+        #expect(exam.domains.map(\.id) == Array(1...6))
+        #expect(abs(exam.domains.map(\.weight).reduce(0, +) - 1.0) < 0.001)
+        #expect(exam.domains.allSatisfy { !$0.subObjectives.isEmpty })
+        #expect(exam.features.keywordDrills)
+        #expect(exam.taxonomies.wafPillars.map(\.id) == WAFPillar.allCases)
+        #expect(exam.caseStudies == [.ehr, .altostrat])
+    }
+
+    @Test("ベンダー定義をデコードでき、試験の vendor が実在する")
+    func vendors() throws {
+        // Arrange: vendors.json は exams/<examID>/ の 2 階層上にある
+        let url = root.deletingLastPathComponent().deletingLastPathComponent().appending(path: "vendors.json")
+        // Act
+        let vendors = try decode(VendorsFile.self, url).vendors
+        let exam = try decode(Exam.self, root.appending(path: "exam.json"))
+        // Assert
+        let vendor = try #require(vendors.first { $0.id == exam.vendor })
+        #expect(vendor.name == "Google Cloud")
+        #expect(!vendor.trademarkNotice.ja.isEmpty)
+        #expect(vendor.defaultReferenceLicense == .ccBy40)
+    }
+
     @Test("エンコードして再デコードしても同じ値になる")
     func roundTrip() throws {
         let original = try jsonFiles(in: "questions").map { try decode(Question.self, $0) }
