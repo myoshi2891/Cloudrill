@@ -724,6 +724,15 @@ public enum ExamOrderBuilder {
 
 **完了条件**: `swift test --package-path packages/Domain --filter ForgettingCurveTests` が通る。
 
+**実装メモ**(実装時に本書と変えた点):
+
+- 間隔は2つの関数に分けた。`rawInterval(desiredRetention:stability:)` は丸める前の日数を返す。`interval(desiredRetention:stability:maximumInterval:)` は、それを日単位に丸め、1 日以上・上限以下にする。上限は引数で受け取る。
+- 丸めは偶数への丸め(`.toNearestOrEven`)にした。リファレンス実装は Python の `round`(2.5 → 2、3.5 → 4)を使うので、Swift の既定の `.rounded()`(0 から遠い方へ丸める)では一致しない。これを確かめるテスト `intervalRoundsHalfToEven` を追加した。
+- `FSRSParameters.init` は、目標保持率の範囲(0.80〜0.95)に加えて、重みの個数(21)も確かめる(`FSRSError.invalidWeightCount`)。`ForgettingCurve(parameters:)` が `w[20]` を読むときにクラッシュしないようにするため。
+- `FSRSParameters` の init は、すべての引数に既定値(py-fsrs 6.3.2 の既定値)を持つ。既定値がテストベクタと一致することを `defaultsMatchVectors` で確かめる。
+- `ForgettingCurve.fsrs5`(DECAY = −0.5)も用意し、FSRS-5 と FSRS-6 の両方で `R(S, S) = 0.9` になることを確かめた。
+- Refactor: 日数の計算を `ElapsedDays`(internal)にまとめた。`whole` は py-fsrs の `timedelta.days` と同じく、-∞ 方向への切り捨て。`FSRSScheduler.retrievability` での使用は P1-S08c で行う。
+
 ---
 
 ### P1-S08c FSRS: 初回の評価
