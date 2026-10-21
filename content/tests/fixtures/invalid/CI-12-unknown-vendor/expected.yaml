@@ -1,0 +1,5 @@
+description: vendors.yaml にないベンダー
+expect:
+  CI-12:
+  - error
+options: {}

@@ -1,0 +1,5 @@
+description: exam.yaml の caseStudies にないケースのファイル
+expect:
+  CI-12:
+  - error
+options: {}

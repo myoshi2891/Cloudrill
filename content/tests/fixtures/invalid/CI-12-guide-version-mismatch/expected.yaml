@@ -1,0 +1,5 @@
+description: 問題の examGuideVersion が exam.yaml の guideVersion と異なる
+expect:
+  CI-12:
+  - warning
+options: {}

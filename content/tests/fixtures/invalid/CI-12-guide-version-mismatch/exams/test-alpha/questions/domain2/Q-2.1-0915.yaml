@@ -1,0 +1,61 @@
+id: Q-2.1-0915
+revision: 1
+examGuideVersion: '6.0'
+domain: 2
+subObjective: '2.1'
+caseStudy: null
+type:
+  kind: single
+difficulty: 1
+wafPillars:
+- costOptimization
+keywords:
+- ダミー
+- 帆船
+examSets: []
+stem:
+  ja: 【ダミー】風車・笛吹・劇場・峡谷・樹氷に関する設問。
+  en: Dummy question stem for Q-2.1-0915.
+choices:
+- id: a
+  text:
+    ja: 時計塔灯台星座鍵盤果樹園青銅鍾乳石庭園楽譜石
+    en: Dummy choice A of Q-2.1-0915
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - scalability
+- id: b
+  text:
+    ja: 石畳砂丘笛吹湿原染物製本茶室
+    en: Dummy choice B of Q-2.1-0915
+  isCorrect: true
+  rationale:
+    ja: 選択肢Bが正しい理由(ダミー)
+    en: Why choice B is correct (dummy)
+- id: c
+  text:
+    ja: 湿原草原羅針盤流星彗星望
+    en: Dummy choice C of Q-2.1-0915
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - latency
+- id: d
+  text:
+    ja: 時計塔月面茶室木版画水路刺繍琥珀惑星温室帆船時計塔海溝木版
+    en: Dummy choice D of Q-2.1-0915
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - requirementMismatch
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only
