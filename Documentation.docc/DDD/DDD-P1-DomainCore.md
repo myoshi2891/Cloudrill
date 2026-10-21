@@ -306,6 +306,13 @@ public struct QuestionOrder: Codable, Hashable, Sendable {
 
 **完了条件**: `swift test --package-path packages/Domain --filter StudyModelsTests` が通る。
 
+**実装メモ**(実装時に本書と変えた点):
+
+- `QuestionOrderError` は `unsupportedVersion(Int)` と `invalidData(underlying: any Error)` の2つにした。デコードのエラーは握りつぶさず、元のエラーを保持する。このため、テスト `QuestionOrderTests.rejectsCorruptedData` を追加した。
+- `decode(from:)` は、`version` だけを先に読んで版を確かめ、その後で全体を読む。未来の版で `items` の形が変わっていても、デコードエラーではなく `unsupportedVersion` として報告するため。
+- `QuestionOrder.init(items:)` は、`version` に `currentVersion` を入れる。ほかの型には public な init を追加した(memberwise init は `internal` のため)。
+- `StudyMode` は `String` の raw value と `Codable` を持たせ、`AnswerFact.swift` に置いた。`AnswerFact` を Codable にするかどうかは、保存の形を決める P3 で判断する。
+
 ---
 
 ### P1-S03 解答の判定(AnswerEvaluator)
