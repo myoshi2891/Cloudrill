@@ -127,6 +127,26 @@ def test_exam_config_rejects_bool_as_number(tmp_path: Path) -> None:
         load_exam_config(_global(tmp_path), exam_dir)
 
 
+@pytest.mark.parametrize(
+    "exam_set",
+    [
+        {**EXAM_SET, "caseQuestions": {"min": True, "max": 15}},  # _int
+        {**EXAM_SET, "caseQuestions": None},  # caseQuestions がない
+        {**EXAM_SET, "domainDistribution": {"1": "14"}},  # _int(配分の値)
+        {**EXAM_SET, "domainDistribution": {"a": 14}},  # _parse_domains
+        {**EXAM_SET, "domainDistribution": {"0": 14}},  # _parse_domains(1 未満)
+        {**EXAM_SET, "defaultAssignments": {"x": {"caseStudies": [], "level": "basic"}}},  # _int_key
+        {**EXAM_SET, "defaultAssignments": {"1": "basic"}},  # defaultAssignments の形式
+    ],
+)
+def test_exam_set_errors_name_the_exam_config(tmp_path: Path, exam_set: dict[str, Any]) -> None:
+    # Arrange
+    exam_dir = _exam_dir(tmp_path, {"examSet": exam_set})
+    # Act / Assert: examSet の誤りも、どの試験の validation.yaml かを示す
+    with pytest.raises(ConfigError, match=re.escape(str(exam_dir / "validation.yaml"))):
+        load_exam_config(_global(tmp_path), exam_dir)
+
+
 @pytest.mark.parametrize(("key", "message"), [("examGuide", "exam.yaml"), ("examSet", "試験ごと")])
 def test_global_config_rejects_exam_sections(tmp_path: Path, key: str, message: str) -> None:
     with pytest.raises(ConfigError, match=message):

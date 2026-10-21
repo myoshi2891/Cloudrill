@@ -113,25 +113,26 @@ def _int(section: Mapping[str, Any], key: str, where: str, source: str = DEFAULT
     return value
 
 
-def _int_key(key: object, where: str) -> int:
-    """YAML のキー("1" または 1)を整数に変換する。"""
+def _int_key(key: object, where: str, source: str = DEFAULT_CONFIG_NAME) -> int:
+    """YAML のキー("1" または 1)を整数に変換する。source はエラーメッセージに出すファイル名。"""
     if isinstance(key, bool):
-        raise ConfigError(f"validation.yaml: {where} のキー '{key}' は整数で指定してください")
+        raise ConfigError(f"{source}: {where} のキー '{key}' は整数で指定してください")
     try:
         return int(str(key).strip())
     except ValueError as e:
-        raise ConfigError(f"validation.yaml: {where} のキー '{key}' は整数で指定してください") from e
+        raise ConfigError(f"{source}: {where} のキー '{key}' は整数で指定してください") from e
 
 
-def _parse_domains(key: object) -> tuple[int, ...]:
+def _parse_domains(key: object, source: str = DEFAULT_CONFIG_NAME) -> tuple[int, ...]:
+    """source はエラーメッセージに出すファイル名。"""
     parts = str(key).split("+")
     try:
         domains = tuple(int(p.strip()) for p in parts)
     except ValueError as e:
-        raise ConfigError(f"validation.yaml: domainDistribution のキー '{key}' が不正です") from e
+        raise ConfigError(f"{source}: domainDistribution のキー '{key}' が不正です") from e
     # 上限は試験ごとに異なるので固定しない(exam.yaml の domains との照合はルール側で行う)
     if not all(d >= 1 for d in domains):
-        raise ConfigError(f"validation.yaml: domainDistribution のキー '{key}' に 1 未満のドメインがあります")
+        raise ConfigError(f"{source}: domainDistribution のキー '{key}' に 1 未満のドメインがあります")
     return domains
 
 
@@ -208,31 +209,34 @@ def _thresholds(raw: Mapping[str, Any], where: str) -> Thresholds:
     )
 
 
-def _exam_set_policy(exam: Mapping[str, Any]) -> ExamSetPolicy:
+def _exam_set_policy(exam: Mapping[str, Any], where: str) -> ExamSetPolicy:
+    """where はエラーメッセージに出す、試験ごとの validation.yaml のパス。"""
     dist_raw = exam.get("domainDistribution")
     if not isinstance(dist_raw, dict):
-        raise ConfigError("validation.yaml: examSet.domainDistribution がありません")
-    distribution = tuple((_parse_domains(k), _int(dist_raw, k, "examSet.domainDistribution")) for k in dist_raw)
+        raise ConfigError(f"{where}: examSet.domainDistribution がありません")
+    distribution = tuple(
+        (_parse_domains(k, where), _int(dist_raw, k, "examSet.domainDistribution", where)) for k in dist_raw
+    )
 
     case = exam.get("caseQuestions")
     if not isinstance(case, dict):
-        raise ConfigError("validation.yaml: examSet.caseQuestions がありません")
+        raise ConfigError(f"{where}: examSet.caseQuestions がありません")
 
     assignments: dict[int, DefaultAssignment] = {}
     assignments_raw = exam.get("defaultAssignments") or {}
     if not isinstance(assignments_raw, dict):
-        raise ConfigError("validation.yaml: examSet.defaultAssignments の形式が不正です")
+        raise ConfigError(f"{where}: examSet.defaultAssignments の形式が不正です")
     for key, value in assignments_raw.items():
         if not isinstance(value, dict) or not isinstance(value.get("caseStudies"), list):
-            raise ConfigError(f"validation.yaml: defaultAssignments.{key} の形式が不正です")
-        assignments[_int_key(key, "examSet.defaultAssignments")] = DefaultAssignment(
+            raise ConfigError(f"{where}: examSet.defaultAssignments.{key} の形式が不正です")
+        assignments[_int_key(key, "examSet.defaultAssignments", where)] = DefaultAssignment(
             frozenset(value["caseStudies"]), str(value.get("level"))
         )
 
     return ExamSetPolicy(
         domain_distribution=distribution,
-        case_min=_int(case, "min", "examSet.caseQuestions"),
-        case_max=_int(case, "max", "examSet.caseQuestions"),
+        case_min=_int(case, "min", "examSet.caseQuestions", where),
+        case_max=_int(case, "max", "examSet.caseQuestions", where),
         default_assignments=assignments,
     )
 
@@ -263,5 +267,5 @@ def load_exam_config(global_config: GlobalConfig, exam_dir: Path) -> ExamConfig:
     return ExamConfig(
         exam_id=exam_dir.name,
         thresholds=_thresholds(merged, where),
-        exam_set_policy=_exam_set_policy(exam_set) if isinstance(exam_set, dict) else None,
+        exam_set_policy=_exam_set_policy(exam_set, where) if isinstance(exam_set, dict) else None,
     )
