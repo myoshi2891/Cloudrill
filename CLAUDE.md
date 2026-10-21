@@ -86,7 +86,7 @@ validate.py の終了コード: `0` = error なし / `1` = error あり(`--stric
 変更されたパスに応じて、必要なワークフローだけが動く。
 
 - `content-validate.yml` — `pytest -q` と `validate.py --format github`(Ubuntu、`content/` で実行)
-- `domainmodels-test.yml` — `swift test`(macOS。`packages/DomainModels/**`、`content/schemas/**`、`content/tests/fixtures/**` の変更時)
+- `domainmodels-test.yml` — `swift test --package-path packages/DomainModels` と `swift test --package-path packages/Domain`(macOS。`packages/DomainModels/**`、`packages/Domain/**`、`content/schemas/**`、`content/tests/fixtures/**` の変更時。Domain は DomainModels に依存するので、どの変更でも両方を実行する)
 - `content-link-check.yml` — 毎週、`--only CI-06 --check-links --strict`
 
 ## 命名とリリース
