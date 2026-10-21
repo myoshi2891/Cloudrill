@@ -365,6 +365,13 @@ public struct AnswerEvaluatorRegistry: Sendable {
 
 **完了条件**: `swift test --package-path packages/Domain --filter AnswerEvaluatorTests` が通る。
 
+**実装メモ**(実装時に本書と変えた点):
+
+- `QuestionKind` は P0-S09 の時点で `CaseIterable` だったので、DomainModels は変更していない。
+- `standard` は、重複を確かめない private な init で作る(`try!` を避けるため)。全形式に対応していることは `registryCoversAllKinds` で確かめる。
+- Refactor: single と multiple の判定を、`AnswerSelection.matchesExactly(_:)`(選択の集合と正解の集合の一致)にまとめた。single は正解が1つなので、2つ選ぶと自動的に不一致になる。型は本書のとおり別のまま残した。
+- Package.swift に `ExamEngine` と `ExamEngineTests` を追加した。
+
 ---
 
 ### P1-S04 採点(ScoringPolicy)
