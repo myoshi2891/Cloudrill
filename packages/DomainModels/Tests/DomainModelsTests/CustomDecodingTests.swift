@@ -60,16 +60,33 @@ struct CustomDecodingTests {
         #expect(throws: DecodingError.self) { try decode(CaseStudyID.self, #""mountkirk""#) }
     }
 
-    @Test("Manifest: createdAt を ISO 8601 でデコードする")
-    func manifest() throws {
-        let json = """
-        {"packVersion":"1.2.0","examGuideVersion":"6.1","minAppVersion":"1.0.0",
+    private func manifestJSON(examID: String? = "gcp-pca") -> String {
+        let examIDField = examID.map { #""examID":"\#($0)","# } ?? ""
+        return """
+        {"formatVersion":1,\(examIDField)"keyID":"content-2026",
+         "packVersion":"1.2.0","examGuideVersion":"6.1","minAppVersion":"1.0.0",
          "createdAt":"2026-11-01T00:00:00Z",
-         "files":[{"path":"questions/domain1.json","sha256":"\(String(repeating: "a", count: 64))","size":10}],
-         "signature":"c2ln"}
+         "files":[{"path":"questions/domain1.json","sha256":"\(String(repeating: "a", count: 64))","size":10}]}
         """
-        let manifest = try decode(Manifest.self, json)
+    }
+
+    @Test("Manifest: createdAt を ISO 8601 でデコードし、formatVersion・examID・keyID を読める")
+    func manifest() throws {
+        let manifest = try decode(Manifest.self, manifestJSON())
         #expect(manifest.createdAt == Date(timeIntervalSince1970: 1_793_491_200))
         #expect(manifest.files.first?.size == 10)
+        #expect(manifest.formatVersion == 1)
+        #expect(manifest.examID == "gcp-pca")
+        #expect(manifest.keyID == "content-2026")
+    }
+
+    @Test("Manifest: examID がなければデコードエラー")
+    func manifestRequiresExamID() {
+        #expect {
+            try decode(Manifest.self, manifestJSON(examID: nil))
+        } throws: { error in
+            guard case DecodingError.keyNotFound(let key, _) = error else { return false }
+            return key.stringValue == "examID"
+        }
     }
 }
