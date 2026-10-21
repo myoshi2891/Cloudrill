@@ -2,35 +2,99 @@ import Foundation
 import Testing
 @testable import DomainModels
 
-/// content/tests/fixtures/valid を JSON に変換したもの(content/scripts/export_json.py で生成)をデコードできること。
-@Suite("valid fixture のデコード")
-struct FixtureDecodingTests {
-    let root: URL
-    let decoder = ContentDecoder.make()
+/// content/tests/fixtures/valid を JSON に変換したもの(content/scripts/export_json.py で生成)の場所。
+enum FixturePaths {
+    /// valid-json/(このファイル packages/DomainModels/Tests/DomainModelsTests/ から見て ../../../../content/…)
+    static let validJSON: URL = URL(filePath: #filePath)
+        .deletingLastPathComponent()
+        .deletingLastPathComponent()
+        .deletingLastPathComponent()
+        .appending(path: "../../content/tests/fixtures/valid-json")
+        .standardized
 
-    init() throws {
-        // このファイル(packages/DomainModels/Tests/DomainModelsTests/)から見たパッケージのルート
-        let packageRoot = URL(filePath: #filePath)
-            .deletingLastPathComponent()
-            .deletingLastPathComponent()
-            .deletingLastPathComponent()
-        // 試験ごとのディレクトリの列挙は P0-S09 で行う。それまでは test-alpha だけを読む
-        root = packageRoot.appending(path: "../../content/tests/fixtures/valid-json/exams/test-alpha").standardized
-        let exists = FileManager.default.fileExists(atPath: root.appending(path: "exam-sets.json").path)
-        try #require(exists, "フィクスチャがありません: \(root.path)。content/scripts/export_json.py を実行してください")
+    /// valid-json/exams/ の直下の試験 ID(名前順)
+    static let examIDs: [String] = {
+        let exams = validJSON.appending(path: "exams")
+        let names = (try? FileManager.default.contentsOfDirectory(atPath: exams.path)) ?? []
+        return names.filter { !$0.hasPrefix(".") }.sorted()
+    }()
+
+    static func examRoot(_ examID: String) -> URL {
+        validJSON.appending(path: "exams/\(examID)")
     }
 
-    private func jsonFiles(in directory: String) throws -> [URL] {
-        let base = root.appending(path: directory)
-        let enumerator = try #require(FileManager.default.enumerator(at: base, includingPropertiesForKeys: nil))
+    static func jsonFiles(under base: URL) -> [URL] {
+        guard let enumerator = FileManager.default.enumerator(at: base, includingPropertiesForKeys: nil) else { return [] }
         return enumerator
             .compactMap { $0 as? URL }
             .filter { $0.pathExtension == "json" }
             .sorted { $0.path < $1.path }
     }
+}
+
+/// valid fixture の JSON をデコードできること。
+@Suite("valid fixture のデコード")
+struct FixtureDecodingTests {
+    /// 試験固有の値を確かめるテストは、PCA と同じ形の test-alpha を使う
+    let root: URL
+    let decoder = ContentDecoder.make()
+
+    init() throws {
+        root = FixturePaths.examRoot("test-alpha")
+        let exists = FileManager.default.fileExists(atPath: root.appending(path: "exam-sets.json").path)
+        try #require(exists, "フィクスチャがありません: \(root.path)。content/scripts/export_json.py を実行してください")
+    }
+
+    private func jsonFiles(in directory: String) throws -> [URL] {
+        FixturePaths.jsonFiles(under: root.appending(path: directory))
+    }
 
     private func decode<T: Decodable>(_ type: T.Type, _ url: URL) throws -> T {
         try decoder.decode(type, from: Data(contentsOf: url))
+    }
+
+    /// 試験ディレクトリのファイルを、置き場所に応じた型でデコードする
+    private func decodeExamFile(_ url: URL, examRoot: URL) throws {
+        let relative = url.path.replacingOccurrences(of: examRoot.path + "/", with: "")
+        switch relative.split(separator: "/").first.map(String.init) {
+        case "exam.json": _ = try decode(ExamDefinition.self, url)
+        case "exam-sets.json": _ = try decode(ExamSetsFile.self, url)
+        case "questions": _ = try decode(Question.self, url)
+        case "flashcards": _ = try decode(FlashcardFile.self, url)
+        case "cases": _ = try decode(CaseStudy.self, url)
+        case "decisions": _ = try decode(DecisionTree.self, url)
+        case "drills": _ = try decode(KeywordDrillFile.self, url)
+        default: Issue.record("対応する型がないファイル: \(relative)")
+        }
+    }
+
+    @Test("valid-json に形の違う 2 つの試験がある")
+    func examDirectories() {
+        #expect(FixturePaths.examIDs == ["test-alpha", "test-beta"])
+    }
+
+    @Test("試験ごとに、すべてのファイルをデコードできる", arguments: FixturePaths.examIDs)
+    func allFilesDecode(examID: String) throws {
+        // Arrange
+        let examRoot = FixturePaths.examRoot(examID)
+        let files = FixturePaths.jsonFiles(under: examRoot)
+        try #require(!files.isEmpty)
+        // Act / Assert
+        for file in files {
+            #expect(throws: Never.self, "\(file.lastPathComponent)") { try decodeExamFile(file, examRoot: examRoot) }
+        }
+    }
+
+    @Test("exam.json の id がディレクトリ名と等しい", arguments: FixturePaths.examIDs)
+    func examDefinitionMatchesDirectory(examID: String) throws {
+        let definition = try decode(ExamDefinition.self, FixturePaths.examRoot(examID).appending(path: "exam.json"))
+        #expect(definition.id.rawValue == examID)
+    }
+
+    @Test("vendors.json に 2 つのベンダーがある")
+    func vendorsDecode() throws {
+        let vendors = try decode(VendorsFile.self, FixturePaths.validJSON.appending(path: "vendors.json")).vendors
+        #expect(Set(vendors.map(\.id)).isSuperset(of: ["google-cloud", "example-cloud"]))
     }
 
     @Test("全問題をデコードでき、模試 1 の 55 問がそろう")
@@ -79,7 +143,7 @@ struct FixtureDecodingTests {
         // Arrange
         let url = root.appending(path: "exam.json")
         // Act
-        let exam = try decode(Exam.self, url)
+        let exam = try decode(ExamDefinition.self, url)
         // Assert
         #expect(exam.id == "test-alpha")
         #expect(exam.vendor == "google-cloud")
@@ -101,11 +165,11 @@ struct FixtureDecodingTests {
 
     @Test("ベンダー定義をデコードでき、試験の vendor が実在する")
     func vendors() throws {
-        // Arrange: vendors.json は exams/<examID>/ の 2 階層上にある
-        let url = root.deletingLastPathComponent().deletingLastPathComponent().appending(path: "vendors.json")
+        // Arrange
+        let url = FixturePaths.validJSON.appending(path: "vendors.json")
         // Act
         let vendors = try decode(VendorsFile.self, url).vendors
-        let exam = try decode(Exam.self, root.appending(path: "exam.json"))
+        let exam = try decode(ExamDefinition.self, root.appending(path: "exam.json"))
         // Assert
         let vendor = try #require(vendors.first { $0.id == exam.vendor })
         #expect(vendor.name == "Google Cloud")

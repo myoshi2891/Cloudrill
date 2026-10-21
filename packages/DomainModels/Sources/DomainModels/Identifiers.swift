@@ -26,7 +26,7 @@ extension StringIdentifier {
     }
 }
 
-/// 試験の ID(例: gcp-pca)。exams/<examID>/ のディレクトリ名と一致する
+/// 試験の ID(<ベンダー略称>-<試験略称> を推奨)。exams/<examID>/ のディレクトリ名と一致する
 public struct ExamID: StringIdentifier {
     public let rawValue: String
     public init(rawValue: String) { self.rawValue = rawValue }

@@ -16,7 +16,7 @@ public struct ExamSet: Codable, Hashable, Sendable, Identifiable {
     public var id: Int
     public var status: ExamSetStatus
     public var level: ExamLevel
-    /// ちょうど 2 つ
+    /// exam.yaml の format.mockExam.caseStudiesPerSet 個(ケースのない試験では空)
     public var caseStudies: [CaseStudyID]
     public var questionIDs: [String]
 }

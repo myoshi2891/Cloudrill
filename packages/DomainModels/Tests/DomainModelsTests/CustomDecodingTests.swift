@@ -28,6 +28,14 @@ struct CustomDecodingTests {
         #expect(throws: DecodingError.self) { try decode(QuestionType.self, json) }
     }
 
+    @Test("QuestionType: 出題形式(QuestionKind)を取り出せる", arguments: [
+        (#"{"kind":"single"}"#, QuestionKind.single),
+        (#"{"kind":"multiple","count":2}"#, QuestionKind.multiple),
+    ])
+    func questionKindIsExposed(json: String, expected: QuestionKind) throws {
+        #expect(try decode(QuestionType.self, json).kind == expected)
+    }
+
     @Test("QuestionType: エンコード結果が Schema の形になる")
     func questionTypeEncoding() throws {
         let encoder = JSONEncoder()

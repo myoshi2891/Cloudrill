@@ -24,6 +24,12 @@ public struct Question: Codable, Hashable, Sendable, Identifiable {
     }
 }
 
+/// common.schema.json#/$defs/QuestionKind(構造語彙。未知の値はデコードエラー)
+public enum QuestionKind: String, Codable, Hashable, Sendable, CaseIterable {
+    case single
+    case multiple
+}
+
 /// question.schema.json#/$defs/QuestionType
 /// JSON の `kind` で分岐する: `{"kind":"single"}` / `{"kind":"multiple","count":2}`
 public enum QuestionType: Hashable, Sendable {
@@ -36,6 +42,14 @@ public enum QuestionType: Hashable, Sendable {
         case let .multiple(count): count
         }
     }
+
+    /// 出題形式(exam.yaml の format.questionKinds と照合する)
+    public var kind: QuestionKind {
+        switch self {
+        case .single: .single
+        case .multiple: .multiple
+        }
+    }
 }
 
 extension QuestionType: Codable {
@@ -44,14 +58,9 @@ extension QuestionType: Codable {
         case count
     }
 
-    private enum Kind: String, Codable {
-        case single
-        case multiple
-    }
-
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        let kind = try container.decode(Kind.self, forKey: .kind)
+        let kind = try container.decode(QuestionKind.self, forKey: .kind)
         switch kind {
         case .single:
             // Schema と同じく、single に count があればエラーにする
@@ -76,9 +85,9 @@ extension QuestionType: Codable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         switch self {
         case .single:
-            try container.encode(Kind.single, forKey: .kind)
+            try container.encode(QuestionKind.single, forKey: .kind)
         case let .multiple(count):
-            try container.encode(Kind.multiple, forKey: .kind)
+            try container.encode(QuestionKind.multiple, forKey: .kind)
             try container.encode(count, forKey: .count)
         }
     }
