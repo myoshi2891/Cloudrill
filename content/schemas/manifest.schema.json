@@ -1,10 +1,20 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://pca-content.invalid/schemas/manifest.schema.json",
+  "$id": "https://examprep-content.invalid/schemas/manifest.schema.json",
   "title": "配信パックのマニフェスト(manifest.json)",
   "description": "生成と署名は build_pack.py / sign_manifest.py の責務(本リポジトリでは未実装)。",
   "type": "object",
   "properties": {
+    "formatVersion": {
+      "description": "パックの構造の版。アプリが解釈できない版のパックは取り込まない(DDD X-05)。",
+      "type": "integer",
+      "minimum": 1
+    },
+    "examID": { "$ref": "common.schema.json#/$defs/ExamID" },
+    "keyID": {
+      "description": "署名に使った鍵の ID(鍵のローテーションに備える)。署名そのものは manifest.sig に置く。",
+      "$ref": "common.schema.json#/$defs/NonEmptyString"
+    },
     "packVersion": { "$ref": "common.schema.json#/$defs/SemVer" },
     "examGuideVersion": { "$ref": "common.schema.json#/$defs/ExamGuideVersion" },
     "minAppVersion": { "$ref": "common.schema.json#/$defs/SemVer" },
@@ -18,14 +28,9 @@
       "type": "array",
       "items": { "$ref": "#/$defs/FileEntry" },
       "minItems": 1
-    },
-    "signature": {
-      "description": "Ed25519 署名の Base64 表現。",
-      "type": "string",
-      "pattern": "^[A-Za-z0-9+/]+={0,2}$"
     }
   },
-  "required": ["packVersion", "examGuideVersion", "minAppVersion", "createdAt", "files", "signature"],
+  "required": ["formatVersion", "examID", "keyID", "packVersion", "examGuideVersion", "minAppVersion", "createdAt", "files"],
   "additionalProperties": false,
   "$defs": {
     "FileEntry": {
