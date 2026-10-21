@@ -35,8 +35,13 @@ content/.venv/bin/python content/scripts/validate.py --check-links   # CI-06(ネ
 content/.venv/bin/python content/tests/fixtures/generate.py
 content/.venv/bin/python content/scripts/export_json.py
 
+# FSRS のテストベクタの再生成(開発時のみ。py-fsrs は依存グループ fsrs。生成物はコミット対象)
+uv sync --project content --group fsrs
+content/.venv/bin/python content/scripts/fsrs_vectors.py --out packages/Domain/Tests/FSRSTests/Vectors/fsrs-vectors.json
+
 # Swift テスト
 swift test --package-path packages/DomainModels
+swift test --package-path packages/Domain
 swift test --package-path packages/DomainModels --filter FixtureDecodingTests   # 単一テスト
 ```
 

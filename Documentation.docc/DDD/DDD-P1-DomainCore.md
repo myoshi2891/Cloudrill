@@ -678,6 +678,18 @@ public enum ExamOrderBuilder {
 - `python3 scripts/fsrs_vectors.py --out packages/Domain/Tests/FSRSTests/Vectors/fsrs-vectors.json` を2回実行し、結果が同じであること(決定論)。
 - `swift test --package-path packages/Domain --filter FSRSVectorTests` が「既知の問題」として報告されること。
 
+**実装メモ**(2026-10-21 にユーザーの確認を取って決めた点と、本書と変えた点):
+
+- 決めたこと: `fsrs`(py-fsrs)**6.3.2**(FSRS-6、MIT、2026-08-09 公開)を採用した。パラメータは既定値(21 個)、目標保持率 0.90、学習ステップは既定値(learning 1 分・10 分、relearning 10 分)、最大間隔 36500 日、fuzz は無効。
+- 依存の置き場所: `scripts/requirements-dev.txt` ではなく、`content/pyproject.toml` の uv 依存グループ `fsrs` にした(既存の Python の依存管理に合わせる)。既定の `uv sync` には含まれないので、CI には入らない。スクリプトは `content/scripts/fsrs_vectors.py` に置いた。
+  - 再生成: `uv sync --project content --group fsrs` の後に `content/.venv/bin/python content/scripts/fsrs_vectors.py --out packages/Domain/Tests/FSRSTests/Vectors/fsrs-vectors.json`
+- ベクタは 15 ケース(4 種類の初回評価、Good・Easy・Hard の連続、忘却 3 系列、早い復習と遅い復習、同じ日の2回目、評価の混在)。期待値には、本書の形式に加えて学習ステップの位置 `step` を含めた。2回生成して一致することを確認した。
+- py-fsrs 6 には new の段階がなく、新規カードは learning の step 0 から始まる。`CardPhase.new` はアプリ側だけの段階として残し、ベクタの期待値には現れない。
+- py-fsrs の `get_card_retrievability` は、経過日数を整数(`timedelta.days`、切り捨て)で数える。P1-S08b の `ForgettingCurve` を `retrievabilityAtDue` と一致させるときに注意する。
+- Red は2段階で確認した。仮の実装がない状態でコンパイルエラーになること。仮の実装(カードを変えずに返す)では、`withKnownIssue` を一時的に外すと assertion で失敗すること。
+- 仮の型(`Rating`、`CardPhase`、`FSRSCard`、`ReviewOutcome`、`FSRSParameters`、`FSRSError`、`FSRSScheduler`)は、P1-S08b・c の定義の形で置いた。`FSRSParameters.init` は `throws(FSRSError)` だが、範囲の確認は P1-S08b で実装する。
+- ベクタが読めることと、必要な系列があることを確かめるテスト `vectorsAreWellFormed` を追加した(このステップで通る)。
+
 ---
 
 ### P1-S08b FSRS: 記憶保持率と間隔
