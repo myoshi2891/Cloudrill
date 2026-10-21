@@ -71,7 +71,7 @@
 			packageProductDependencies = (
 				0000000000000000000000A1 /* DomainModels */,
 			);
-			productName = PCAApp;
+			productName = ExamPrepApp;
 			productReference = 000000000000000000000120 /* ExamPrepApp.app */;
 			productType = "com.apple.product-type.application";
 		};
