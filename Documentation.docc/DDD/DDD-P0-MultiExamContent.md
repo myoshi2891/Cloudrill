@@ -680,6 +680,15 @@ FEATURE_KINDS: dict[str, Kind] = {
 
 **完了条件**: `(cd content && .venv/bin/pytest)` が通る。`git diff --stat` で、`contentvalidate/` の変更が「値をコードから定義へ移す」ものだけであることをレビューで確認する。
 
+**実装メモ**(実装時に本書と変えた点):
+
+- `test-beta` は、検証ツールのコードを変えずに valid のまま全ルールを 0 件で通った。`contentvalidate/` の変更は、CI-12 の条件 6〜8 と `FEATURE_KINDS` の追加だけ。
+- Refactor は Green と同時に行った。`generate.py` に試験の仕様 `ExamSpec`(`ALPHA_SPEC`、`BETA_SPEC`)を置き、`build_exam_files(spec)` が両方の試験を作る。`test-alpha` の生成結果は変わっていない(バイト単位で同じ)。
+- `test-beta` の上の invalid ケースは `BETA_INVALID_CASES` に分けた(overlay の基準が `test-beta` のファイルになるため)。
+- `test_same_id_in_other_exam_is_allowed` は、valid の2試験に同じ問題 ID(例: `Q-1.1-0001`)が自然にあるので、valid をそのまま使って確かめる形にした。P0-S05 で追加した同じ趣旨のテストは削除した。2つ目の試験を複製するテスト(`--exam`、リンク確認)は、複製先を `test-gamma` に変えた。
+- `test-beta` の `guideVersion` は `1.0`、`guideURL` は `https://example.com/certification/beta`(架空)。
+- `features.caseStudies: false` の試験に `cases/*.yaml` があると、条件 5(`caseStudies` との不一致)と条件 7(無効な機能のファイル)の両方が報告される。どちらも CI-12 なので、まとめていない。
+
 ---
 
 ### P0-S08 Swift 用 JSON の出力の対応

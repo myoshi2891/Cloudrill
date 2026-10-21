@@ -146,7 +146,7 @@ tests/                    pytest と fixture(valid-json/ は Swift テストが�
 | CI-09 | `relatedQuestionIDs`、`questionIDs`、ツリーの `rootNodeID` と `next`、docs・問題・カードの `subObjective` が実在する。問題・カードの `domain`、問題の `caseStudy` と `wafPillars` が exam.yaml にある | error | exam.yaml の `domains`、`caseStudies`、`taxonomies.wafPillars` |
 | CI-10 | exam.yaml の `domains[*].weight` の合計が 1.0 ± 0.001 | error | `weights.*` |
 | CI-11 | `LocalizedText` の `en` の欠落(空文字を含む) | warning | — |
-| CI-12 | 試験定義の整合: `exam.yaml` の `id` がディレクトリ名と一致する、`vendor` が `vendors.yaml` にある、`domains[*].id` が 1 から始まる連番、サブ項目 ID が試験内で一意、`caseStudies` と `cases/*.yaml` の id の集合が一致する | error | — |
+| CI-12 | 試験定義の整合: `exam.yaml` の `id` がディレクトリ名と一致する、`vendor` が `vendors.yaml` にある、`domains[*].id` が 1 から始まる連番、サブ項目 ID が試験内で一意、`caseStudies` と `cases/*.yaml` の id の集合が一致する、無効な機能(`features.*: false`)のファイルがない(ケースが無効なら、問題の `caseStudy` と模試の `caseStudies` も空)、問題の `type.kind` が `format.questionKinds` に含まれる | error | — |
 | CI-12 | 問題の `examGuideVersion` が `exam.yaml` の `guideVersion` と一致する。試験ガイドの改訂時は、`guideVersion` を上げてから `--exam <examID> --only CI-12` を実行すると、見直しが必要な問題の一覧が得られる | warning | — |
 
 ### ルールの追加方法
@@ -155,7 +155,7 @@ tests/                    pytest と fixture(valid-json/ は Swift テストが�
    - 試験ごとのルール(既定): `check(ctx: ExamContext) -> Iterable[Issue]` と `RULE = Rule("CI-NN", "名前", check)`。試験の数だけ実行される
    - 全体のルール(CI-01、CI-06、CI-11): `check(ctx: GlobalContext)` と `RULE = Rule("CI-NN", "名前", check_global=check)`。1回だけ実行される
 2. `scripts/contentvalidate/rules/__init__.py` の `ALL_RULES` に1行追加する
-3. `tests/fixtures/generate.py` の `INVALID_CASES` に違反ケースを追加し、fixture を再生成する
+3. `tests/fixtures/generate.py` の `INVALID_CASES`(`test-beta` の上で作るケースは `BETA_INVALID_CASES`)に違反ケースを追加し、fixture を再生成する
 
 `ExamContext` からは、その試験のコンテンツ(`ctx.docs`、`ctx.questions`、`ctx.question_by_id`、`ctx.exam_sets`)、試験ごとの設定(`ctx.config`)、試験定義(`ctx.definition`。`exam.yaml` が Schema 違反なら `None` で、その場合は何も報告しない)を利用できます。ルールは `exam.yaml` の生データを直接読まず、`ctx.definition`(`ExamDefinitionView`)を使います。`GlobalContext` は全ファイル(`ctx.docs`)と各試験のコンテキスト(`ctx.exam(exam_id)`)を持ちます。行番号は `doc.issue(..., path)` で付きます。
 
@@ -163,12 +163,13 @@ tests/                    pytest と fixture(valid-json/ は Swift テストが�
 
 | ファイル | 内容 |
 |---|---|
-| `tests/fixtures/valid/` | 全ルールを error・warning ゼロで通過する一式。complete の模試 1 回分(55 問: D1=14、D2=10、D3=10、D4=8、D5+D6=13、ケース問題 13、うち multiple 4 問)と、練習用の問題、カード、ケース、ツリー、ドリル、docs |
+| `tests/fixtures/valid/` | 全ルールを error・warning ゼロで通過する一式。形の違う 2 つの試験を持つ。`test-beta` はケースなし・single のみ・ドメイン 4・サブ項目 `NET.1` など(拡張性の確認用)。以下は `test-alpha` の内容: complete の模試 1 回分(55 問: D1=14、D2=10、D3=10、D4=8、D5+D6=13、ケース問題 13、うち multiple 4 問)と、練習用の問題、カード、ケース、ツリー、ドリル、docs |
 | `tests/fixtures/invalid/<ケース名>/` | valid に対する差分(overlay)。`expected.yaml` に、検出されるべきルール ID と深刻度を書く。`_delete.txt` があれば、そこに列挙したファイルを valid から削除する |
 | `tests/test_rules.py` | valid が 0 件であること、各 invalid ケースで期待するルールだけが検出されること、`--only`、`--strict`、行番号、リンク確認(モック) |
 | `tests/test_cli.py` | 終了コード、3種類の出力形式、エスケープ、引数エラー |
 | `tests/test_schemas.py` | Schema 自体の妥当性、manifest や QuestionType などの正例と負例 |
 | `tests/test_perf.py` | 問題 500 件で 10 秒以内に終わること |
+| `tests/test_extensibility.py` | 各試験を `--exam` で1つずつ検証できること、検証ツールのコードに試験固有の値(`gcp-pca`、ケース ID など)がないこと、試験が異なれば同じ ID を使えること |
 | `tests/fixtures/valid-json/` | valid を JSON に変換したもの。`packages/DomainModels` のテストが `../../content/tests/fixtures/valid-json` として直接読む(パッケージ内にはコピーしない) |
 | `tests/test_generated.py` | コミット済みの fixture と valid-json が、生成スクリプトの出力と一致すること |
 | `packages/DomainModels/Tests/` | Swift Testing。valid fixture の JSON のデコード、`QuestionType` などのカスタムデコード、エンコードと再デコードの往復 |
@@ -224,5 +225,4 @@ fixture は `tests/fixtures/generate.py` が固定 seed で決定論的に生成
 - docs のフロントマターに対応する Swift モデル(アプリ側で Markdown と一緒に扱う想定)
 - `exam.yaml` のサブ項目と公式試験ガイドの照合、ドメイン 5・6 の比重の確定
 - gcp-pca のケーススタディ `altostrat`・`cymbal`・`knightMotives` の作成(作成したら `exam.yaml` の `caseStudies` にも加える。現在は `ehr` のみ)
-- CI-12 の機能フラグとコンテンツの整合(無効な機能のファイルがないこと)と、`type.kind` が `format.questionKinds` に含まれることの確認(P0-S07 で追加予定)
 - GitHub Actions のアクションを SHA で固定すること(現在はメジャーバージョンのタグを指定し、Dependabot で更新)

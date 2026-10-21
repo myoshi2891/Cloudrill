@@ -62,7 +62,8 @@ validate.py の終了コード: `0` = error なし / `1` = error あり(`--stric
 - 役割分担: 1ファイル内の構造は Schema が担当する。Schema で表しにくい条件と、ファイル間の整合(模試の構成、統計、重複、参照)はルール CI-01〜CI-12 が担当する(CI-12 は試験定義と、ディレクトリ名・vendors.yaml・試験のコンテンツとの整合)。閾値は `content/validation.yaml`(全体)に置き、試験ごとの `exams/<examID>/validation.yaml` を深いマージで重ねる(模試の構成 `examSet` は試験側にだけ書ける。サブ項目と模試の問題数は `exam.yaml` が正)。
 - Schema に違反したファイルは、ファイル間ルールの対象から外す(違反の連鎖を防ぐため)。`--only` で CI-01 を外しても、Schema 検証自体は常に行う。
 - 例外として、`choices[*].rationale` に関する Schema 違反は CI-01 では報告せず、CI-05 だけが報告する。
-- ルールを追加する手順: `rules/ciNN_xxx.py` に `check(ctx) -> Iterable[Issue]` と `RULE = Rule("CI-NN", ..., check)`(全体のルールは `check_global=check`)を定義する → `rules/__init__.py` の `ALL_RULES` に追加する → `generate.py` の `INVALID_CASES` に違反ケースを追加し、fixture を再生成する。
+- ルールを追加する手順: `rules/ciNN_xxx.py` に `check(ctx) -> Iterable[Issue]` と `RULE = Rule("CI-NN", ..., check)`(全体のルールは `check_global=check`)を定義する → `rules/__init__.py` の `ALL_RULES` に追加する → `generate.py` の `INVALID_CASES`(`test-beta` の上で作るケースは `BETA_INVALID_CASES`)に違反ケースを追加し、fixture を再生成する。
+- valid fixture は形の違う2試験(`test-alpha` は PCA と同じ形、`test-beta` はケースなし・single のみ・ドメイン 4)を持つ。試験ごとの値は `generate.py` の `ExamSpec` に置く。検証ツールに試験ごとの分岐や試験固有の値を書かない(`test_extensibility.py` が確認する)。
 - invalid fixture は valid に対する差分(overlay)。`expected.yaml` に、検出されるべきルール ID と深刻度を書く。`_delete.txt` に列挙したファイルは valid から削除される。
 
 ## コンテンツの規約
