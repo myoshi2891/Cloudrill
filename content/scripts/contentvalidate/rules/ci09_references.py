@@ -26,7 +26,7 @@ def _domain(definition: ExamDefinitionView, doc: SourceDoc, obj: object, path: J
 
 
 def _vocabulary(ctx: ExamContext) -> Iterator[Issue]:
-    """domain・caseStudy・wafPillars(試験語彙)が exam.yaml にあること。"""
+    """domain・caseStudy・wafPillars・模試の caseStudies(試験語彙)が exam.yaml にあること。"""
     definition = ctx.definition
     if definition is None:
         return
@@ -43,6 +43,15 @@ def _vocabulary(ctx: ExamContext) -> Iterator[Issue]:
     for doc in ctx.of_kind(Kind.FLASHCARD):
         for i, card in enumerate(get_list(doc.data, "cards")):
             yield from _domain(definition, doc, card, ("cards", i))
+    for doc, exam_sets in ctx.exam_sets:
+        for i, exam_set in exam_sets:
+            for j, case in enumerate(get_list(exam_set, "caseStudies")):
+                if case not in definition.case_study_ids:
+                    yield doc.issue(
+                        RULE_ID, Severity.ERROR,
+                        f"模試 {exam_set.get('id')} の caseStudies の '{case}' は exam.yaml の caseStudies にありません",
+                        ("examSets", i, "caseStudies", j),
+                    )
 
 
 def _flashcards(ctx: ExamContext) -> Iterator[Issue]:

@@ -65,6 +65,6 @@ examSets:
   status: draft
   level: basic
   caseStudies:
-  - cymbal
-  - knightMotives
+  - ehr
+  - altostrat
   questionIDs: []

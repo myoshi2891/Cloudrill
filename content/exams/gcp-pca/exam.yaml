@@ -15,7 +15,8 @@ format:
   mockExam:
     questionCount: 55
     setCount: 6
-    caseStudiesPerSet: 2
+    # 本来は 2。cases/ にケースが ehr しかない間の暫定値(ケースを追加したら 2 に戻す)
+    caseStudiesPerSet: 1
 scoring:
   policy: allOrNothing
 # 比重は旧 weights.yaml の値。合計が 1.0(誤差 ±0.001)であること(CI-10)

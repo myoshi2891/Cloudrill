@@ -16,7 +16,8 @@ examSet:
     max: 15
   # 既定のケース割り当てと難易度(違反は warning)
   defaultAssignments:
-    "1": { caseStudies: [ehr, altostrat], level: basic }
+    # 模試 1 は本来 [ehr, altostrat]。altostrat を cases/ に追加したら戻す(exam.yaml の caseStudiesPerSet も 2 に戻す)
+    "1": { caseStudies: [ehr], level: basic }
     "2": { caseStudies: [cymbal, knightMotives], level: basic }
     "3": { caseStudies: [ehr, cymbal], level: standard }
     "4": { caseStudies: [altostrat, knightMotives], level: standard }

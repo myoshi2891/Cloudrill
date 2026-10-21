@@ -560,8 +560,9 @@ def ov_ci02_set_count(valid: dict[str, Any]) -> dict[str, Any]:
     exam = copy.deepcopy(valid["exam.yaml"])
     exam["format"]["mockExam"]["setCount"] = 1
     sets = copy.deepcopy(valid["exam-sets.yaml"])
+    # ケースは exam.yaml にあるものを使う(CI-09 を出さず、setCount の超過だけを確かめる)
     sets["examSets"].append(
-        {"id": 2, "status": "draft", "level": "basic", "caseStudies": ["cymbal", "knightMotives"], "questionIDs": []}
+        {"id": 2, "status": "draft", "level": "basic", "caseStudies": list(SET1_CASES), "questionIDs": []}
     )
     return {"exam.yaml": exam, "exam-sets.yaml": sets}
 
