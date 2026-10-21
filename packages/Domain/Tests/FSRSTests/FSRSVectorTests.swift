@@ -113,12 +113,9 @@ struct FSRSVectorTests {
         // Arrange
         let vectors = try VectorFile.load()
         let scheduler = FSRSScheduler(parameters: try vectors.makeParameters())
-        // P1-S08d で FSRSScheduler を実装したら withKnownIssue を外す
-        withKnownIssue("2回目以降の評価は P1-S08d で実装する") {
-            for vectorCase in vectors.cases {
-                // Act / Assert
-                try replay(vectorCase, with: scheduler)
-            }
+        for vectorCase in vectors.cases {
+            // Act / Assert
+            try replay(vectorCase, with: scheduler)
         }
     }
 }
