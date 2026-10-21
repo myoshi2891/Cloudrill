@@ -10,6 +10,7 @@ let package = Package(
         .library(name: "StudyModels", targets: ["StudyModels"]),
         .library(name: "ExamEngine", targets: ["ExamEngine"]),
         .library(name: "FSRS", targets: ["FSRS"]),
+        .library(name: "Readiness", targets: ["Readiness"]),
         .library(name: "DomainTestSupport", targets: ["DomainTestSupport"]),
     ],
     dependencies: [
@@ -20,10 +21,12 @@ let package = Package(
         .target(name: "ExamEngine", dependencies: ["StudyModels", "DomainModels"]),
         // FSRS は学習内容に依存しないアルゴリズムなので、DomainModels にも依存させない
         .target(name: "FSRS"),
+        .target(name: "Readiness", dependencies: ["StudyModels", "DomainModels"]),
         .target(name: "DomainTestSupport", dependencies: ["StudyModels", "DomainModels"]),
         .testTarget(name: "StudyModelsTests", dependencies: ["StudyModels", "DomainTestSupport"]),
         .testTarget(name: "ExamEngineTests", dependencies: ["ExamEngine", "DomainTestSupport"]),
         .testTarget(name: "FSRSTests", dependencies: ["FSRS"], resources: [.process("Vectors")]),
+        .testTarget(name: "ReadinessTests", dependencies: ["Readiness", "DomainTestSupport"]),
         .testTarget(name: "DomainTestSupportTests", dependencies: ["DomainTestSupport"]),
     ],
     swiftLanguageModes: [.v6]
