@@ -69,6 +69,23 @@ func relativelyEqual(_ actual: Double, _ expected: Double, tolerance: Double = 1
     abs(actual - expected) <= tolerance * max(abs(expected), .leastNormalMagnitude)
 }
 
+/// ケースの評価を順に当て、各評価の後のカードを期待値と比べる
+func replay(_ vectorCase: VectorFile.Case, with scheduler: FSRSScheduler) throws {
+    var card = FSRSCard.new(at: vectorCase.start)
+    for (index, (review, expected)) in zip(vectorCase.reviews, vectorCase.expected).enumerated() {
+        let label = "\(vectorCase.name)[\(index)]"
+        let rating = try #require(Rating(rawValue: review.rating), "\(label): 評価 \(review.rating)")
+        card = scheduler.review(card, rating: rating, at: review.at).card
+        #expect(card.phase == CardPhase(rawValue: expected.phase), "\(label): phase")
+        #expect(card.step == expected.step, "\(label): step")
+        #expect(relativelyEqual(card.stability, expected.stability), "\(label): stability \(card.stability) ≠ \(expected.stability)")
+        #expect(relativelyEqual(card.difficulty, expected.difficulty), "\(label): difficulty \(card.difficulty) ≠ \(expected.difficulty)")
+        #expect(abs(card.due.timeIntervalSince(expected.due)) <= 1, "\(label): due \(card.due) ≠ \(expected.due)")
+        let retrievability = scheduler.retrievability(of: card, at: card.due)
+        #expect(relativelyEqual(retrievability, expected.retrievabilityAtDue), "\(label): retrievability \(retrievability) ≠ \(expected.retrievabilityAtDue)")
+    }
+}
+
 @Suite("FSRS のテストベクタ")
 struct FSRSVectorTests {
     @Test("ベクタは固定した版から生成され、必要な系列を含む")
@@ -97,23 +114,10 @@ struct FSRSVectorTests {
         let vectors = try VectorFile.load()
         let scheduler = FSRSScheduler(parameters: try vectors.makeParameters())
         // P1-S08d で FSRSScheduler を実装したら withKnownIssue を外す
-        withKnownIssue("FSRSScheduler は仮の実装(P1-S08b〜d で実装する)") {
+        withKnownIssue("2回目以降の評価は P1-S08d で実装する") {
             for vectorCase in vectors.cases {
-                var card = FSRSCard.new(at: vectorCase.start)
-                for (index, (review, expected)) in zip(vectorCase.reviews, vectorCase.expected).enumerated() {
-                    let label = "\(vectorCase.name)[\(index)]"
-                    let rating = try #require(Rating(rawValue: review.rating), "\(label): 評価 \(review.rating)")
-                    // Act
-                    card = scheduler.review(card, rating: rating, at: review.at).card
-                    // Assert
-                    #expect(card.phase == CardPhase(rawValue: expected.phase), "\(label): phase")
-                    #expect(card.step == expected.step, "\(label): step")
-                    #expect(relativelyEqual(card.stability, expected.stability), "\(label): stability \(card.stability) ≠ \(expected.stability)")
-                    #expect(relativelyEqual(card.difficulty, expected.difficulty), "\(label): difficulty \(card.difficulty) ≠ \(expected.difficulty)")
-                    #expect(abs(card.due.timeIntervalSince(expected.due)) <= 1, "\(label): due \(card.due) ≠ \(expected.due)")
-                    let retrievability = scheduler.retrievability(of: card, at: card.due)
-                    #expect(relativelyEqual(retrievability, expected.retrievabilityAtDue), "\(label): retrievability \(retrievability) ≠ \(expected.retrievabilityAtDue)")
-                }
+                // Act / Assert
+                try replay(vectorCase, with: scheduler)
             }
         }
     }

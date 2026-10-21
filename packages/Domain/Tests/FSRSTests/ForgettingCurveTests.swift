@@ -48,7 +48,10 @@ struct ForgettingCurveTests {
     func intervalForNinetyPercentIsStability(stability: Double) {
         // Act / Assert
         #expect(relativelyEqual(fsrs6.rawInterval(desiredRetention: 0.9, stability: stability), stability))
-        #expect(fsrs6.interval(desiredRetention: 0.9, stability: 42, maximumInterval: 36500) == 42)
+        #expect(
+            fsrs6.interval(desiredRetention: 0.9, stability: stability, maximumInterval: 36500)
+                == Int(stability.rounded(.toNearestOrEven))
+        )
     }
 
     @Test("間隔は日単位に丸め、1 日以上・上限以下にする", arguments: [
