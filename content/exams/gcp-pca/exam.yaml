@@ -1,0 +1,172 @@
+# 試験定義(DDD 4.4)。Schema は schemas/exam.schema.json
+# 【暫定】ドメイン名・サブ項目名(特に日本語訳)は、公式の試験ガイド v6.1 との照合が必要(DDD-P0 申し送り P4)
+id: gcp-pca
+vendor: google-cloud
+name:
+  ja: Google Cloud Professional Cloud Architect
+  en: Google Cloud Professional Cloud Architect
+shortName: PCA
+guideVersion: "6.1"
+guideURL: https://cloud.google.com/learn/certification/cloud-architect
+format:
+  durationMinutes: 120
+  officialQuestionCount: { min: 50, max: 60 }
+  questionKinds: [single, multiple]
+  mockExam:
+    questionCount: 55
+    setCount: 6
+    caseStudiesPerSet: 2
+scoring:
+  policy: allOrNothing
+# 比重は旧 weights.yaml の値。合計が 1.0(誤差 ±0.001)であること(CI-10)
+domains:
+  - id: 1
+    name:
+      ja: クラウド ソリューション アーキテクチャの設計と計画
+      en: Designing and planning a cloud solution architecture
+    weight: 0.25
+    subObjectives:
+      - id: "1.1"
+        name:
+          ja: ビジネス要件を満たすクラウド ソリューション インフラストラクチャの設計
+          en: Designing a cloud solution infrastructure that meets business requirements
+      - id: "1.2"
+        name:
+          ja: 技術要件を満たすクラウド ソリューション インフラストラクチャの設計
+          en: Designing a cloud solution infrastructure that meets technical requirements
+      - id: "1.3"
+        name:
+          ja: ネットワーク、ストレージ、コンピューティング リソースの設計
+          en: Designing network, storage, and compute resources
+      - id: "1.4"
+        name:
+          ja: 移行計画の作成
+          en: Creating a migration plan
+      - id: "1.5"
+        name:
+          ja: 将来のソリューション改善の構想
+          en: Envisioning future solution improvements
+  - id: 2
+    name:
+      ja: ソリューション インフラストラクチャの管理とプロビジョニング
+      en: Managing and provisioning a solution infrastructure
+    weight: 0.18
+    subObjectives:
+      - id: "2.1"
+        name:
+          ja: ネットワーク トポロジの構成
+          en: Configuring network topologies
+      - id: "2.2"
+        name:
+          ja: 個々のストレージ システムの構成
+          en: Configuring individual storage systems
+      - id: "2.3"
+        name:
+          ja: コンピューティング システムの構成
+          en: Configuring compute systems
+      - id: "2.4"
+        name:
+          ja: Vertex AI を活用したエンドツーエンドの ML ワークフロー
+          en: Leveraging Vertex AI for end-to-end ML workflows
+      - id: "2.5"
+        name:
+          ja: 構築済みのソリューションや API の構成
+          en: Configuring prebuilt solutions or APIs
+  - id: 3
+    name:
+      ja: セキュリティとコンプライアンスを考慮した設計
+      en: Designing for security and compliance
+    weight: 0.19
+    subObjectives:
+      - id: "3.1"
+        name:
+          ja: セキュリティを考慮した設計
+          en: Designing for security
+      - id: "3.2"
+        name:
+          ja: コンプライアンスを考慮した設計
+          en: Designing for compliance
+  - id: 4
+    name:
+      ja: 技術プロセスとビジネス プロセスの分析と最適化
+      en: Analyzing and optimizing technical and business processes
+    weight: 0.15
+    subObjectives:
+      - id: "4.1"
+        name:
+          ja: 技術プロセスの分析と定義
+          en: Analyzing and defining technical processes
+      - id: "4.2"
+        name:
+          ja: ビジネス プロセスの分析と定義
+          en: Analyzing and defining business processes
+      - id: "4.3"
+        name:
+          ja: 本番環境でのソリューションの信頼性を確保する手順の策定
+          en: Developing procedures to ensure reliability of solutions in production
+  - id: 5
+    name:
+      ja: 実装の管理
+      en: Managing implementation
+    weight: 0.115   # 暫定値: ドメイン5・6の個別比重は未確定(TBD-01)
+    subObjectives:
+      - id: "5.1"
+        name:
+          ja: ソリューションのデプロイを成功させるための開発チーム・運用チームへの助言
+          en: Advising development and operation teams to ensure successful deployment of the solution
+      - id: "5.2"
+        name:
+          ja: プログラムによる Google Cloud の操作
+          en: Interacting with Google Cloud programmatically
+  - id: 6
+    name:
+      ja: ソリューションと運用の信頼性の確保
+      en: Ensuring solution and operations reliability
+    weight: 0.115   # 暫定値: ドメイン5・6の個別比重は未確定(TBD-01)
+    subObjectives:
+      - id: "6.1"
+        name:
+          ja: Well-Architected Framework のオペレーショナル エクセレンスの原則の理解
+          en: Understanding the principles of the operational excellence pillar of the Well-Architected Framework
+      - id: "6.2"
+        name:
+          ja: モニタリング、ロギング、プロファイリング、アラートのソリューション
+          en: Monitoring, logging, profiling, and alerting solutions
+      - id: "6.3"
+        name:
+          ja: デプロイとリリースの管理
+          en: Deployment and release management
+      - id: "6.4"
+        name:
+          ja: デプロイ済みソリューションのサポート
+          en: Assisting with the support of deployed solutions
+      - id: "6.5"
+        name:
+          ja: 品質管理の手法の評価
+          en: Evaluating quality control measures
+      - id: "6.6"
+        name:
+          ja: 本番環境でのソリューションの信頼性の確保
+          en: Ensuring the reliability of solutions in production
+features:
+  caseStudies: true
+  docs: true
+  flashcards: true
+  decisionTrees: true
+  keywordDrills: true
+taxonomies:
+  wafPillars:
+    - id: operationalExcellence
+      name: { ja: オペレーショナル エクセレンス, en: Operational excellence }
+    - id: security
+      name: { ja: セキュリティ、プライバシー、コンプライアンス, en: "Security, privacy, and compliance" }
+    - id: reliability
+      name: { ja: 信頼性, en: Reliability }
+    - id: costOptimization
+      name: { ja: 費用の最適化, en: Cost optimization }
+    - id: performance
+      name: { ja: パフォーマンスの最適化, en: Performance optimization }
+    - id: sustainability
+      name: { ja: サステナビリティ, en: Sustainability }
+# 表示順。cases/*.yaml の id と一致させる(CI-12、P0-S06)。現時点で cases/ にあるのは ehr のみ
+caseStudies: [ehr, altostrat, cymbal, knightMotives]

@@ -1,0 +1,5 @@
+description: 模試のケース数が caseStudiesPerSet と異なる
+expect:
+  CI-02:
+  - error
+options: {}

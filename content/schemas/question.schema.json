@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://pca-content.invalid/schemas/question.schema.json",
+  "$id": "https://examprep-content.invalid/schemas/question.schema.json",
   "title": "問題(1ファイル1問)",
   "type": "object",
   "properties": {
@@ -19,7 +19,7 @@
     "difficulty": { "type": "integer", "minimum": 1, "maximum": 5 },
     "wafPillars": {
       "type": "array",
-      "items": { "$ref": "common.schema.json#/$defs/WAFPillar" },
+      "items": { "$ref": "common.schema.json#/$defs/WAFPillarID" },
       "minItems": 1,
       "uniqueItems": true
     },
@@ -65,7 +65,7 @@
       "description": "single は count を持たない。multiple は 2 以上の count が必須。",
       "type": "object",
       "properties": {
-        "kind": { "type": "string", "enum": ["single", "multiple"] },
+        "kind": { "$ref": "common.schema.json#/$defs/QuestionKind" },
         "count": { "type": "integer", "minimum": 2 }
       },
       "required": ["kind"],

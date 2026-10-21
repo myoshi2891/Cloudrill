@@ -1,5 +1,0 @@
-# 直接依存はバージョンを固定する(更新は Dependabot の PR で行う)
-jsonschema==4.26.0
-PyYAML==6.0.3
-pytest==9.1.1
-httpx==0.28.1

@@ -10,7 +10,7 @@ import httpx
 import pytest
 import yaml
 
-from pcavalidate.config import Config, load_config
+from contentvalidate.config import Config, load_config
 
 CONTENT_ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = CONTENT_ROOT / "tests" / "fixtures"

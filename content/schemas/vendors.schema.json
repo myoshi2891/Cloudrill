@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://examprep-content.invalid/schemas/vendors.schema.json",
+  "title": "ベンダー定義(vendors.yaml)",
+  "description": "全試験で共有するベンダーの情報。商標の表示(LG-04)と出典ライセンスの既定値を持つ。",
+  "type": "object",
+  "properties": {
+    "vendors": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Vendor" },
+      "minItems": 1
+    }
+  },
+  "required": ["vendors"],
+  "additionalProperties": false,
+  "$defs": {
+    "Vendor": {
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/VendorID" },
+        "name": { "$ref": "common.schema.json#/$defs/NonEmptyString" },
+        "trademarkNotice": { "$ref": "common.schema.json#/$defs/LocalizedText" },
+        "defaultReferenceLicense": { "$ref": "common.schema.json#/$defs/License" }
+      },
+      "required": ["id", "name", "trademarkNotice", "defaultReferenceLicense"],
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://examprep-content.invalid/schemas/exam.schema.json",
+  "title": "試験定義(exams/<examID>/exam.yaml)",
+  "description": "試験ごとのドメイン、比重、形式、有効な機能、語彙。ファイル間の整合(ID とディレクトリ名、連番、一意性など)は CI-10・CI-12 が確認する。",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/ExamID" },
+    "vendor": { "$ref": "common.schema.json#/$defs/VendorID" },
+    "name": { "$ref": "common.schema.json#/$defs/LocalizedText" },
+    "shortName": {
+      "description": "画面の狭い場所での表示用(例: PCA)。",
+      "$ref": "common.schema.json#/$defs/NonEmptyString"
+    },
+    "guideVersion": { "$ref": "common.schema.json#/$defs/ExamGuideVersion" },
+    "guideURL": { "$ref": "common.schema.json#/$defs/HttpsURL" },
+    "format": { "$ref": "#/$defs/Format" },
+    "scoring": { "$ref": "#/$defs/Scoring" },
+    "domains": {
+      "description": "id は 1 から始まる連番(CI-12)。比重の合計は CI-10 が確認する。",
+      "type": "array",
+      "items": { "$ref": "#/$defs/Domain" },
+      "minItems": 1
+    },
+    "features": { "$ref": "#/$defs/Features" },
+    "taxonomies": { "$ref": "#/$defs/Taxonomies" },
+    "caseStudies": {
+      "description": "ケーススタディの表示順。cases/*.yaml の id と一致させる(CI-12)。",
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/CaseStudyID" },
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "id",
+    "vendor",
+    "name",
+    "shortName",
+    "guideVersion",
+    "guideURL",
+    "format",
+    "scoring",
+    "domains",
+    "features",
+    "taxonomies",
+    "caseStudies"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "PositiveInt": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "Format": {
+      "type": "object",
+      "properties": {
+        "durationMinutes": { "$ref": "#/$defs/PositiveInt" },
+        "officialQuestionCount": {
+          "type": "object",
+          "properties": {
+            "min": { "$ref": "#/$defs/PositiveInt" },
+            "max": { "$ref": "#/$defs/PositiveInt" }
+          },
+          "required": ["min", "max"],
+          "additionalProperties": false
+        },
+        "questionKinds": {
+          "type": "array",
+          "items": { "$ref": "common.schema.json#/$defs/QuestionKind" },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "mockExam": {
+          "type": "object",
+          "properties": {
+            "questionCount": { "$ref": "#/$defs/PositiveInt" },
+            "setCount": {
+              "description": "模試の回数の上限(exam-sets の id は 1〜setCount)。",
+              "$ref": "#/$defs/PositiveInt"
+            },
+            "caseStudiesPerSet": {
+              "description": "1回の模試で扱うケーススタディの数。ケースがない試験では 0。",
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": ["questionCount", "setCount", "caseStudiesPerSet"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["durationMinutes", "officialQuestionCount", "questionKinds", "mockExam"],
+      "additionalProperties": false
+    },
+    "Scoring": {
+      "type": "object",
+      "properties": {
+        "policy": {
+          "description": "採点方式(構造語彙。Swift の ScoringPolicyKind)。",
+          "type": "string",
+          "enum": ["allOrNothing"]
+        }
+      },
+      "required": ["policy"],
+      "additionalProperties": false
+    },
+    "Domain": {
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/Domain" },
+        "name": { "$ref": "common.schema.json#/$defs/LocalizedText" },
+        "weight": { "type": "number", "minimum": 0, "maximum": 1 },
+        "subObjectives": {
+          "description": "サブ項目 ID の試験内での一意性は CI-12 が確認する。",
+          "type": "array",
+          "items": { "$ref": "#/$defs/SubObjective" },
+          "minItems": 1
+        }
+      },
+      "required": ["id", "name", "weight", "subObjectives"],
+      "additionalProperties": false
+    },
+    "SubObjective": {
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/SubObjective" },
+        "name": { "$ref": "common.schema.json#/$defs/LocalizedText" }
+      },
+      "required": ["id", "name"],
+      "additionalProperties": false
+    },
+    "Features": {
+      "description": "無効な機能のコンテンツは置けない(CI-12)。",
+      "type": "object",
+      "properties": {
+        "caseStudies": { "type": "boolean" },
+        "docs": { "type": "boolean" },
+        "flashcards": { "type": "boolean" },
+        "decisionTrees": { "type": "boolean" },
+        "keywordDrills": { "type": "boolean" }
+      },
+      "required": ["caseStudies", "docs", "flashcards", "decisionTrees", "keywordDrills"],
+      "additionalProperties": false
+    },
+    "Taxonomies": {
+      "type": "object",
+      "properties": {
+        "wafPillars": {
+          "description": "問題の wafPillars の参照先(CI-09)。WAF のない試験では空。",
+          "type": "array",
+          "items": { "$ref": "#/$defs/WAFPillar" },
+          "uniqueItems": true
+        }
+      },
+      "required": ["wafPillars"],
+      "additionalProperties": false
+    },
+    "WAFPillar": {
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/WAFPillarID" },
+        "name": { "$ref": "common.schema.json#/$defs/LocalizedText" }
+      },
+      "required": ["id", "name"],
+      "additionalProperties": false
+    }
+  }
+}

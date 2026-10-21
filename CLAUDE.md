@@ -6,18 +6,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Google Cloud Professional Cloud Architect(PCA)試験対策 iOS アプリと、その学習コンテンツのモノレポ。
 
-- `PCAApp/` + `PCAApp.xcodeproj` — iOS アプリ(SwiftUI)。`packages/DomainModels` をローカルパッケージ(相対パス)として参照
+- `ExamPrepApp/` + `ExamPrepApp.xcodeproj` — iOS アプリ(SwiftUI、表示名 Cloudrill)。`packages/DomainModels` をローカルパッケージ(相対パス)として参照
 - `packages/DomainModels/` — コンテンツの値型(SwiftPM、Swift 6、Swift Testing)
 - `content/` — 学習コンテンツ(YAML / Markdown)、JSON Schema(Draft 2020-12)、Python の検証ツール。詳細仕様は `content/README.md`
 - `Documentation.docc/` — 要件定義書(`RDD.md`)、基本設計書(`BDD.md`)
 
 ## コマンド
 
-すべてリポジトリのルートから実行する。Python は 3.14(`requires-python >= 3.12`)、仮想環境は `content/.venv`。
+すべてリポジトリのルートから実行する。Python は 3.14(`requires-python >= 3.12`、`content/.python-version`)。パッケージ管理は uv で、依存は `content/pyproject.toml` と `content/uv.lock`、仮想環境は `content/.venv` に置く。
 
 ```sh
-# 初回セットアップ
-python3.14 -m venv content/.venv && content/.venv/bin/pip install -r content/requirements.txt
+# 初回セットアップ(依存を変えたら uv lock --project content で uv.lock を更新する)
+uv sync --project content
 
 # Python テスト(pyproject.toml がある content/ で実行する)
 (cd content && .venv/bin/pytest)
@@ -54,10 +54,10 @@ validate.py の終了コード: `0` = error なし / `1` = error あり(`--stric
 - Swift のテストは `../../content/tests/fixtures/valid-json` を直接読む(パッケージ内にはコピーしない)。
 - Swift 側では未知の列挙値をデコードエラーにする(古いアプリへの配信は `manifest.minAppVersion` で制御する前提)。
 
-## 検証ツールの構成(`content/scripts/pcavalidate/`)
+## 検証ツールの構成(`content/scripts/contentvalidate/`)
 
 - `validate.py`(CLI)→ `engine.run()` → `context.build_context()`(ロード、Schema 検証、行番号の付与)→ `rules.ALL_RULES` の各 `check(ctx)` → `report` で text / json / github 形式に整形する。
-- Schema の `$id` は `https://pca-content.invalid/schemas/<name>.schema.json`。`referencing.Registry` に全 Schema を事前に登録し、オフラインで解決する。共通の定義は `common.schema.json#/$defs/...` に置く。すべてのオブジェクトに `additionalProperties: false` を付けている。
+- Schema の `$id` は `https://examprep-content.invalid/schemas/<name>.schema.json`。`referencing.Registry` に全 Schema を事前に登録し、オフラインで解決する。共通の定義は `common.schema.json#/$defs/...` に置く。すべてのオブジェクトに `additionalProperties: false` を付けている。
 - 役割分担: 1ファイル内の構造は Schema が担当する。Schema で表しにくい条件と、ファイル間の整合(模試の構成、統計、重複、参照)はルール CI-01〜CI-11 が担当する。閾値はすべて `content/validation.yaml` に置く。
 - Schema に違反したファイルは、ファイル間ルールの対象から外す(違反の連鎖を防ぐため)。`--only` で CI-01 を外しても、Schema 検証自体は常に行う。
 - 例外として、`choices[*].rationale` に関する Schema 違反は CI-01 では報告せず、CI-05 だけが報告する。
@@ -80,6 +80,6 @@ validate.py の終了コード: `0` = error なし / `1` = error あり(`--stric
 
 ## 命名とリリース
 
-- Xcode のプロジェクト・ターゲット・フォルダは PascalCase で、スペースを含めない(`PCAApp`)。表示名「PCA 試験対策」は `INFOPLIST_KEY_CFBundleDisplayName` で設定する。
+- Xcode のプロジェクト・ターゲット・フォルダは PascalCase で、スペースを含めない(`ExamPrepApp`)。識別子は表示名と切り離した中立な名前にする。表示名「Cloudrill」は `INFOPLIST_KEY_CFBundleDisplayName` だけで設定する(名前を変えるときはここだけを変更する)。
 - パッケージを追加するときは `project.pbxproj` を手で編集せず、Xcode の **File > Add Package Dependencies… > Add Local…** から追加する。
 - リリースタグは `content-vX.Y.Z`(`manifest.json` の `packVersion` と一致させる)と `app-vX.Y.Z`。

@@ -11,8 +11,9 @@ from pathlib import Path
 import pytest
 
 from conftest import CONTENT_ROOT, VALID, materialize
-from pcavalidate.model import Issue, Severity
-from pcavalidate.report import format_github
+from contentvalidate.config import load_config
+from contentvalidate.model import Issue, Severity
+from contentvalidate.report import format_github
 from validate import main
 
 GITHUB_LINE = re.compile(r"^::(error|warning) file=[^,]+(,line=\d+)?,title=CI-\d{2}::\[CI-\d{2}\] .+$")
@@ -27,8 +28,9 @@ def test_exit_code_one_on_error(tmp_path: Path, capsys: pytest.CaptureFixture[st
     root = materialize("CI-10-weights-sum", tmp_path)
     assert main(["--root", str(root)]) == 1
     out = capsys.readouterr().out
-    assert re.search(r"^weights\.yaml:\d+: \[CI-10\] error: ", out, re.MULTILINE)
-    assert "  CI-10 error: 1" in out
+    assert re.search(r"^exams/test-alpha/weights\.yaml:\d+: \[CI-10\] error: ", out, re.MULTILINE)
+    # weights.yaml の合計と、exam.yaml との不一致の 2 件
+    assert "  CI-10 error: 2" in out
 
 
 def test_warning_only_exits_zero_unless_strict(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
@@ -106,7 +108,7 @@ def test_default_root_is_content_dir_regardless_of_cwd(
     monkeypatch.chdir(tmp_path)
     assert main(["--format", "json"]) == 0
     files = {issue["file"] for issue in json.loads(capsys.readouterr().out)}
-    assert files <= {"exam-sets.yaml"}
+    assert files <= {"exams/gcp-pca/exam-sets.yaml"}
 
 
 def test_github_paths_are_relative_to_workspace(
@@ -118,3 +120,9 @@ def test_github_paths_are_relative_to_workspace(
     main(["--format", "github"])
     lines = capsys.readouterr().out.splitlines()
     assert lines and all("file=content/" in line for line in lines)
+
+
+def test_link_check_user_agent() -> None:
+    # 接尾辞(連絡先)は任意。名称がブランド名ではなく examprep であることだけを確認する
+    config = load_config(CONTENT_ROOT / "validation.yaml")
+    assert config.link_user_agent.startswith("examprep-content-link-check/1.0")

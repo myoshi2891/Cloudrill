@@ -21,7 +21,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from pcavalidate.loader import YamlLoadError, parse_yaml  # noqa: E402
+from contentvalidate.loader import YamlLoadError, parse_yaml  # noqa: E402
 
 CONTENT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SRC = CONTENT_ROOT / "tests/fixtures/valid"

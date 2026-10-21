@@ -6,6 +6,9 @@
 valid/(全ルールを error・warning ゼロで通過する一式)と、invalid/<ケース名>/(valid への差分 overlay)を
 固定 seed で決定論的に再生成する。生成物はコミットし、test_generate.py で生成結果との一致を確認する。
 
+valid は全体のファイル(vendors.yaml)と試験ディレクトリ(exams/test-alpha/)からなる。
+試験のファイルは試験ディレクトリからの相対パスで組み立て、書き出すときに ALPHA を前に付ける。
+
 overlay の構成:
     expected.yaml   … 検出されるべきルール ID と深刻度、テストオプション
     _delete.txt     … valid から削除するファイル(任意)
@@ -26,6 +29,8 @@ import yaml
 SEED = 20261020
 HERE = Path(__file__).resolve().parent
 EXAM_GUIDE_VERSION = "6.1"
+# fixture の試験ディレクトリ(valid のルートからの相対)
+ALPHA = "exams/test-alpha"
 
 # 問題文・選択肢の生成に使う語彙(すべてダミー)
 WORDS = [
@@ -44,6 +49,8 @@ SUB_OBJECTIVES = {
     5: ["5.1", "5.2"],
     6: ["6.1", "6.2", "6.3", "6.4", "6.5", "6.6"],
 }
+WEIGHTS = {1: 0.25, 2: 0.18, 3: 0.19, 4: 0.15, 5: 0.115, 6: 0.115}
+FEATURES = ["caseStudies", "docs", "flashcards", "decisionTrees", "keywordDrills"]
 PILLARS = ["operationalExcellence", "security", "reliability", "costOptimization", "performance", "sustainability"]
 TAGS = ["cost", "opsOverhead", "compliance", "scalability", "availability", "latency", "requirementMismatch", "deprecated"]
 REFERENCE = {"title": "Google Cloud ドキュメント", "url": "https://cloud.google.com/docs", "license": "link-only"}
@@ -181,13 +188,59 @@ def build_practice(rng: random.Random) -> list[dict[str, Any]]:
     ]
 
 
+def build_vendors() -> dict[str, Any]:
+    """valid/vendors.yaml。"""
+    return {
+        "vendors": [
+            {
+                "id": "google-cloud",
+                "name": "Google Cloud",
+                "trademarkNotice": loc("ダミーの商標表示", "Dummy trademark notice"),
+                "defaultReferenceLicense": "CC-BY-4.0",
+            }
+        ]
+    }
+
+
+def build_exam_definition() -> dict[str, Any]:
+    """test-alpha の exam.yaml。既存の SUB_OBJECTIVES・WEIGHTS・PILLARS と模試 1 の構成から作る。"""
+    return {
+        "id": "test-alpha",
+        "vendor": "google-cloud",
+        "name": loc("テスト試験 Alpha", "Test exam Alpha"),
+        "shortName": "ALPHA",
+        "guideVersion": EXAM_GUIDE_VERSION,
+        "guideURL": "https://cloud.google.com/learn/certification/cloud-architect",
+        "format": {
+            "durationMinutes": 120,
+            "officialQuestionCount": {"min": 50, "max": 60},
+            "questionKinds": ["single", "multiple"],
+            "mockExam": {"questionCount": sum(SET1_DOMAINS.values()), "setCount": 6, "caseStudiesPerSet": len(SET1_CASES)},
+        },
+        "scoring": {"policy": "allOrNothing"},
+        "domains": [
+            {
+                "id": domain,
+                "name": loc(f"ダミーのドメイン {domain}", f"Dummy domain {domain}"),
+                "weight": WEIGHTS[domain],
+                "subObjectives": [{"id": sub, "name": loc(f"ダミーのサブ項目 {sub}", f"Dummy sub-objective {sub}")} for sub in subs],
+            }
+            for domain, subs in SUB_OBJECTIVES.items()
+        ],
+        "features": dict.fromkeys(FEATURES, True),
+        "taxonomies": {"wafPillars": [{"id": p, "name": loc(f"ダミーの柱 {p}", f"Dummy pillar {p}")} for p in PILLARS]},
+        "caseStudies": list(SET1_CASES),
+    }
+
+
 def build_valid() -> dict[str, Any]:
-    """valid/ の全ファイル(相対パス → データ。docs は文字列)。"""
+    """test-alpha の全ファイル(試験ディレクトリからの相対パス → データ。docs は文字列)。"""
     rng = random.Random(SEED)
     set1 = build_set1(rng)
     practice = build_practice(rng)
     files: dict[str, Any] = {question_path(q): q for q in set1 + practice}
 
+    files["exam.yaml"] = build_exam_definition()
     files["exam-sets.yaml"] = {
         "examSets": [
             {"id": 1, "status": "complete", "level": "basic", "caseStudies": list(SET1_CASES), "questionIDs": [q["id"] for q in set1]},
@@ -195,7 +248,7 @@ def build_valid() -> dict[str, Any]:
     }
     files["weights.yaml"] = {
         "examGuideVersion": EXAM_GUIDE_VERSION,
-        "weights": {1: 0.25, 2: 0.18, 3: 0.19, 4: 0.15, 5: 0.115, 6: 0.115},
+        "weights": dict(WEIGHTS),
     }
     files["flashcards/domain1.yaml"] = {
         "cards": [
@@ -329,6 +382,12 @@ def ov_ci01_yaml(valid: dict[str, Any]) -> dict[str, Any]:
     return {"questions/domain2/Q-2.1-0905.yaml": "id: Q-2.1-0905\nstem: [unclosed\n"}
 
 
+def ov_ci01_exam_id(valid: dict[str, Any]) -> dict[str, Any]:
+    exam = copy.deepcopy(valid["exam.yaml"])
+    exam["id"] = "test-other"
+    return {"exam.yaml": exam}
+
+
 def ov_ci02_case(valid: dict[str, Any]) -> dict[str, Any]:
     q = copy.deepcopy(next(q for q in _set1(valid) if q["caseStudy"] == "ehr"))
     q["caseStudy"] = "cymbal"
@@ -344,6 +403,22 @@ def ov_ci02_draft(valid: dict[str, Any]) -> dict[str, Any]:
     sets["examSets"][0]["status"] = "draft"
     sets["examSets"][0]["level"] = "standard"
     return {"exam-sets.yaml": sets}
+
+
+def ov_ci02_cases_per_set(valid: dict[str, Any]) -> dict[str, Any]:
+    exam = copy.deepcopy(valid["exam.yaml"])
+    exam["format"]["mockExam"]["caseStudiesPerSet"] = 3
+    return {"exam.yaml": exam}
+
+
+def ov_ci02_set_count(valid: dict[str, Any]) -> dict[str, Any]:
+    exam = copy.deepcopy(valid["exam.yaml"])
+    exam["format"]["mockExam"]["setCount"] = 1
+    sets = copy.deepcopy(valid["exam-sets.yaml"])
+    sets["examSets"].append(
+        {"id": 2, "status": "draft", "level": "basic", "caseStudies": ["cymbal", "knightMotives"], "questionIDs": []}
+    )
+    return {"exam.yaml": exam, "exam-sets.yaml": sets}
 
 
 def ov_ci03(valid: dict[str, Any]) -> dict[str, Any]:
@@ -450,6 +525,12 @@ def ov_ci10(valid: dict[str, Any]) -> dict[str, Any]:
     return {"weights.yaml": weights}
 
 
+def ov_ci10_exam(valid: dict[str, Any]) -> dict[str, Any]:
+    exam = copy.deepcopy(valid["exam.yaml"])
+    exam["domains"][0]["weight"] = 0.3
+    return {"exam.yaml": exam}
+
+
 def ov_ci11(valid: dict[str, Any]) -> dict[str, Any]:
     q = _practice(911)
     del q["stem"]["en"]
@@ -463,9 +544,12 @@ INVALID_CASES: list[tuple[str, str, dict[str, list[str]], Callable[[dict[str, An
     ("CI-01-single-two-correct", "single なのに正解が 2 つ", {"CI-01": ["error"]}, ov_ci01_two_correct, {}),
     ("CI-01-mistake-tags", "正解に mistakeTags、誤答に mistakeTags なし", {"CI-01": ["error"]}, ov_ci01_mistake_tags, {}),
     ("CI-01-yaml-syntax", "YAML の構文エラー", {"CI-01": ["error"]}, ov_ci01_yaml, {}),
+    ("CI-01-exam-id-mismatch", "exam.yaml の id がディレクトリ名と異なる", {"CI-01": ["error"]}, ov_ci01_exam_id, {}),
     ("CI-02-case-mismatch", "模試のケース外の caseStudy", {"CI-02": ["error"]}, ov_ci02_case, {}),
     ("CI-02-bidirectional", "問題の examSets にあるが questionIDs にない", {"CI-02": ["error"]}, ov_ci02_bidirectional, {}),
     ("CI-02-draft-default-level", "draft の模試で既定と異なる level", {"CI-02": ["warning"]}, ov_ci02_draft, {}),
+    ("CI-02-case-studies-per-set", "模試のケース数が caseStudiesPerSet と異なる", {"CI-02": ["error"]}, ov_ci02_cases_per_set, {}),
+    ("CI-02-set-count", "模試の id が setCount を超える", {"CI-02": ["error", "warning"]}, ov_ci02_set_count, {}),
     ("CI-03-answer-position", "正解位置が A に偏る", {"CI-03": ["error"]}, ov_ci03, {}),
     ("CI-04-longest-choice", "最長の選択肢が正解の割合が 35% 超", {"CI-04": ["error"]}, ov_ci04, {}),
     ("CI-05-empty-rationale", "rationale.ja が空文字", {"CI-05": ["error"]}, ov_ci05_empty, {}),
@@ -485,7 +569,8 @@ INVALID_CASES: list[tuple[str, str, dict[str, list[str]], Callable[[dict[str, An
         ov_ci09_exam_set,
         {},
     ),
-    ("CI-10-weights-sum", "比重の合計が 0.985", {"CI-10": ["error"]}, ov_ci10, {}),
+    ("CI-10-weights-sum", "比重の合計が 0.985(exam.yaml との不一致も出る)", {"CI-10": ["error"]}, ov_ci10, {}),
+    ("CI-10-exam-weights", "exam.yaml の比重の合計が 1.05 で weights.yaml とも異なる", {"CI-10": ["error"]}, ov_ci10_exam, {}),
     ("CI-11-missing-en", "stem.en の欠落", {"CI-11": ["warning"]}, ov_ci11, {}),
 ]
 
@@ -504,13 +589,18 @@ def write_tree(base: Path, files: dict[str, Any]) -> None:
         path.write_text(data if isinstance(data, str) else dump(data), encoding="utf-8")
 
 
+def in_exam(exam_dir: str, files: dict[str, Any]) -> dict[str, Any]:
+    """試験ディレクトリからの相対パスを、valid のルートからの相対パスにする。"""
+    return {f"{exam_dir}/{rel}": data for rel, data in files.items()}
+
+
 def generate(out: Path = HERE) -> None:
     valid = build_valid()
     for name in ("valid", "invalid"):
         shutil.rmtree(out / name, ignore_errors=True)
-    write_tree(out / "valid", valid)
+    write_tree(out / "valid", {"vendors.yaml": build_vendors(), **in_exam(ALPHA, valid)})
     for name, description, expect, overlay, options in INVALID_CASES:
-        files = overlay(valid)
+        files = in_exam(ALPHA, overlay(valid))
         files["expected.yaml"] = {"description": description, "expect": expect, "options": options}
         write_tree(out / "invalid" / name, files)
 

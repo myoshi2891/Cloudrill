@@ -1,14 +1,14 @@
 # Google Cloud Professional Cloud Architect 試験対策アプリ
 
-PCA 試験対策 iOS アプリと、その学習コンテンツを1つのリポジトリで管理するモノレポです。
+クラウド認定試験対策 iOS アプリ「Cloudrill」(最初の対象は Google Cloud PCA)と、その学習コンテンツを1つのリポジトリで管理するモノレポです。
 コンテンツの JSON Schema と、Swift の `Codable` 定義を、1つのコミット・PR で同時に変更できます。
 
 ## ディレクトリ構成
 
 ```
 google-cloud-professional-cloud-architect/
-├── PCAApp/                                          # iOS アプリのソース
-├── PCAApp.xcodeproj                                 # DomainModels をローカルパッケージとして参照
+├── ExamPrepApp/                                     # iOS アプリのソース
+├── ExamPrepApp.xcodeproj                            # DomainModels をローカルパッケージとして参照
 ├── Documentation.docc/                              # 要件定義書(RDD.md)、基本設計書(BDD.md)
 ├── packages/
 │   └── DomainModels/                                # コンテンツの値型(SwiftPM、Swift Testing)
@@ -27,7 +27,7 @@ google-cloud-professional-cloud-architect/
 
 | ディレクトリ | 役割 |
 |---|---|
-| `PCAApp/` と `PCAApp.xcodeproj` | iOS アプリ本体。ホーム画面の表示名は「PCA 試験対策」(`INFOPLIST_KEY_CFBundleDisplayName`) |
+| `ExamPrepApp/` と `ExamPrepApp.xcodeproj` | iOS アプリ本体。ホーム画面の表示名は「Cloudrill」(`INFOPLIST_KEY_CFBundleDisplayName`) |
 | `Documentation.docc/` | 要件定義書と基本設計書 |
 | `packages/DomainModels/` | `content/schemas` に対応する Swift の値型(`Question`、`Choice`、`Flashcard`、`CaseStudy` など) |
 | `content/` | 学習コンテンツ(YAML / Markdown)、JSON Schema、検証スクリプト。詳細は [content/README.md](content/README.md) |
@@ -38,9 +38,8 @@ google-cloud-professional-cloud-architect/
 ```sh
 cd /path/to/google-cloud-professional-cloud-architect
 
-# 初回のみ: Python 3.14 の仮想環境を作る
-python3.14 -m venv content/.venv
-content/.venv/bin/pip install -r content/requirements.txt
+# 初回のみ: uv で Python 3.14 の仮想環境(content/.venv)を作る
+uv sync --project content
 
 # コンテンツのテスト
 (cd content && .venv/bin/pytest)
@@ -86,7 +85,7 @@ swift test --package-path packages/DomainModels
 
 ## アプリから DomainModels を使う
 
-`PCAApp.xcodeproj` には、`packages/DomainModels` がローカルパッケージとして登録済みです(PCAApp ターゲットにリンク済み)。
+`ExamPrepApp.xcodeproj` には、`packages/DomainModels` がローカルパッケージとして登録済みです(ExamPrepApp ターゲットにリンク済み)。
 アプリのソースで `import DomainModels` と書けば使えます。Xcode のナビゲーターでは **Package Dependencies** の下に表示されます。
 
 パッケージはリポジトリ内の相対パス(`relativePath = packages/DomainModels`)で参照されるため、クローンした場所に関係なく動作します。
@@ -97,6 +96,6 @@ swift test --package-path packages/DomainModels
 | 対象 | 規則 | 例 |
 |---|---|---|
 | リポジトリのフォルダ | 小文字の kebab-case(GitHub のリポジトリ名に対応) | `google-cloud-professional-cloud-architect` |
-| Xcode のプロジェクト・ターゲット・ソースフォルダ | PascalCase、スペースや記号なし | `PCAApp` |
+| Xcode のプロジェクト・ターゲット・ソースフォルダ | PascalCase、スペースや記号なし。表示名と切り離した中立な名前にする | `ExamPrepApp` |
 | Swift パッケージ | PascalCase | `DomainModels` |
-| 利用者に見せるアプリ名 | `INFOPLIST_KEY_CFBundleDisplayName` で設定(日本語・スペース可) | `PCA 試験対策` |
+| 利用者に見せるアプリ名 | `INFOPLIST_KEY_CFBundleDisplayName` で設定(日本語・スペース可)。表示名を変えるときはここだけを変更する | `Cloudrill` |

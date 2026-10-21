@@ -14,7 +14,8 @@ struct FixtureDecodingTests {
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
-        root = packageRoot.appending(path: "../../content/tests/fixtures/valid-json").standardized
+        // 試験ごとのディレクトリの列挙は P0-S09 で行う。それまでは test-alpha だけを読む
+        root = packageRoot.appending(path: "../../content/tests/fixtures/valid-json/exams/test-alpha").standardized
         let exists = FileManager.default.fileExists(atPath: root.appending(path: "exam-sets.json").path)
         try #require(exists, "フィクスチャがありません: \(root.path)。content/scripts/export_json.py を実行してください")
     }
