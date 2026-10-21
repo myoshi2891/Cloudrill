@@ -19,6 +19,27 @@ public struct Question: Codable, Hashable, Sendable, Identifiable {
     public var choices: [Choice]
     public var references: [Reference]
 
+    public init(
+        id: String, revision: Int, examGuideVersion: String, domain: Int, subObjective: String, caseStudy: CaseStudyID?,
+        type: QuestionType, difficulty: Int, wafPillars: [WAFPillarID], keywords: [String], examSets: [Int],
+        stem: LocalizedText, choices: [Choice], references: [Reference]
+    ) {
+        self.id = id
+        self.revision = revision
+        self.examGuideVersion = examGuideVersion
+        self.domain = domain
+        self.subObjective = subObjective
+        self.caseStudy = caseStudy
+        self.type = type
+        self.difficulty = difficulty
+        self.wafPillars = wafPillars
+        self.keywords = keywords
+        self.examSets = examSets
+        self.stem = stem
+        self.choices = choices
+        self.references = references
+    }
+
     public var correctChoiceIDs: [String] {
         choices.filter(\.isCorrect).map(\.id)
     }
