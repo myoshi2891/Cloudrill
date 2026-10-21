@@ -1,0 +1,641 @@
+# Cloudrill 詳細設計書 P2: コンテンツパック
+
+| 項目 | 内容 |
+|---|---|
+| 文書バージョン | 0.1(初版ドラフト) |
+| 作成日 | 2026-10-21 |
+| 上位文書 | [詳細設計書(索引・共通設計)](../DDD.md) |
+| 対象 | `content/scripts/contentpack/`(ビルド・署名・カタログ)、`packages/Data` の `ContentKit`、`packages/Domain` の `DomainInterfaces`(コンテンツ提供のプロトコル) |
+| ステータス | レビュー待ち |
+
+---
+
+## 目次
+
+1. [目的とスコープ](#1-目的とスコープ)
+2. [前提](#2-前提)
+3. [設計](#3-設計)
+4. [ステップ](#4-ステップ)
+5. [フェーズの完了条件](#5-フェーズの完了条件)
+6. [申し送り](#6-申し送り)
+
+---
+
+## 1. 目的とスコープ
+
+YAML のコンテンツを、署名付きの配信用パックにする処理(Python)と、アプリがパックを検証して読み込む処理(Swift)を作る。2つの言語の間の取り決めは、**契約 fixture**(Python が作ったパックを、Swift のテストがそのまま読む)で固定する。
+
+| 区分 | 内容 |
+|---|---|
+| スコープ内 | パックの形式、`build_pack.py`、`sign_manifest.py`、`build_catalog.py`、`catalog.yaml`、CI-13、契約 fixture、`PackVerifier`、`PackLoader`、`ContentIntegrityChecker`、`PackStore`、同梱パックとカタログ |
+| スコープ外 | CDN からの取得と差分更新(P5-S03)、リリースのワークフロー(P5-S01)、ドキュメントの全文検索インデックス(P6-S03) |
+
+```mermaid
+flowchart LR
+    subgraph Python["content/(Python)"]
+        Y["exams/&lt;examID&gt;/*.yaml"] --> B["build_pack.py"]
+        B --> S["sign_manifest.py"]
+        S --> P[("パック<br/>manifest.json + manifest.sig")]
+        C["catalog.yaml"] --> BC["build_catalog.py"]
+        BC --> CJ[("catalog.json")]
+    end
+    subgraph Swift["packages/Data(ContentKit)"]
+        V["PackVerifier"] --> L["PackLoader"]
+        L --> I["ContentIntegrityChecker"]
+        I --> ST["PackStore"]
+        ST --> CP["ExamContentProvider"]
+    end
+    P -- 契約 fixture --> V
+    CJ -- 契約 fixture --> CAT["ExamCatalogService"]
+```
+
+---
+
+## 2. 前提
+
+- P0 が完了している。Swift 側(P2-S05 以降)は、P1 の完了も前提にする(`QuestionKind` の対応一覧を `AnswerEvaluatorRegistry` から得るため)。
+- 外部依存 `cryptography` の採用を確認済みである([DDD 8 章](../DDD.md#8-外部依存の候補))。
+- ブランチは `feat/p2-content-pack`。
+
+---
+
+## 3. 設計
+
+### 3.1 パックの形式(formatVersion 1)
+
+```text
+<examID>/<packVersion>/
+├── manifest.json
+├── manifest.sig              # manifest.json のバイト列に対する Ed25519 署名(Base64、改行なし)
+├── exam.json                 # exam.yaml を JSON にしたもの(ExamDefinition)
+├── vendor.json               # vendors.yaml のうち、この試験のベンダー(Vendor)
+├── exam-sets.json            # ExamSetsFile
+├── questions/
+│   ├── index.json            # 全問題の要約(QuestionIndexEntry の配列)
+│   └── domain{N}.json        # ドメインごとの問題本文(Question の配列。ID の昇順)
+├── flashcards.json           # 全カードを1つにまとめたもの({ cards: [...] })。features.flashcards が true のときだけ
+├── cases.json                # CaseStudy の配列。features.caseStudies が true のときだけ
+├── decisions.json            # DecisionTree の配列。features.decisionTrees が true のときだけ
+├── drills.json               # { drills: [...] }。features.keywordDrills が true のときだけ
+├── docs/
+│   ├── index.json            # DocEntry の配列(フロントマターと本文のパス)
+│   └── <subObjective>.md     # フロントマターを除いた本文
+└── assets/                   # 図(SVG / PNG)
+```
+
+```json
+{
+  "formatVersion": 1,
+  "examID": "gcp-pca",
+  "packVersion": "1.2.0",
+  "examGuideVersion": "6.1",
+  "minAppVersion": "1.0.0",
+  "createdAt": "2026-11-01T00:00:00Z",
+  "keyID": "prod-2026",
+  "files": [
+    { "path": "exam.json", "sha256": "…", "size": 4096 }
+  ]
+}
+```
+
+| 項目 | 規則 |
+|---|---|
+| `files` | `manifest.json` と `manifest.sig` を除く全ファイル。`path` の昇順 |
+| JSON の書式 | キーを並べ替え、空白なし(`separators=(",", ":")`)、UTF-8、末尾に改行なし。`manifest.json` だけは読みやすさのため `indent=2` にする(署名はバイト列に対して行うので、書式は検証に影響しない) |
+| `createdAt` | `SOURCE_DATE_EPOCH` から作る(秒精度、`Z`) |
+| `formatVersion` | ファイルの構成やキーの意味を変えたら上げる。アプリは `supportedFormatVersion` 以下のパックだけを取り込む |
+| `minAppVersion` | 新しい構造語彙(①)を使うときに、それを解釈できる最初のアプリの版にする([DDD 4.10 C](../DDD.md#c-新しい出題形式を追加するアプリの更新が必要)) |
+
+**問題の索引**(`questions/index.json` の1件):
+
+```json
+{ "id": "Q-3.2-0147", "revision": 2, "domain": 3, "subObjective": "3.2", "caseStudy": "ehr",
+  "difficulty": 3, "kind": "single", "examSets": [1] }
+```
+
+起動時には、索引と `exam.json`・`exam-sets.json`・`docs/index.json` だけを読む(NFR-01)。問題の本文は、模試の開始時や練習の開始時に、必要なドメインのファイルだけを読む(NFR-02)。
+
+### 3.2 追加する Schema と Swift の型
+
+| Schema(`content/schemas/`) | 対象 | Swift の型(DomainModels) |
+|---|---|---|
+| `pack-question-index.schema.json` | `questions/index.json` | `QuestionIndexEntry` |
+| `pack-docs-index.schema.json` | `docs/index.json` | `DocEntry`(`subObjective`、`title`、`references`、`path`) |
+| `catalog.schema.json` | `catalog.json`([DDD 4.8](../DDD.md#48-配信の構成)) | `Catalog`、`CatalogEntry`、`CatalogStatus` |
+| `catalog-source.schema.json` | `content/catalog.yaml` | (Python のみ) |
+
+Schema と Swift の型は、同じ PR で変更する(CLAUDE.md の運用ルール)。
+
+### 3.3 署名と鍵
+
+| 項目 | 方式 |
+|---|---|
+| アルゴリズム | Ed25519 |
+| 署名の対象 | `manifest.json` のバイト列そのもの([DDD 2 章 C-06](../DDD.md#2-基本設計書からの変更点)) |
+| `manifest.sig` | 64 バイトの署名を Base64(標準のアルファベット、パディングあり)にした ASCII。改行なし |
+| 本番の鍵 | 32 バイトの秘密鍵(seed)を Base64 にして Secret Manager に置く。CI からだけ読む(P5-S01) |
+| 鍵 ID | `manifest.json` の `keyID`。アプリは、鍵 ID と公開鍵の組を複数持つ(ローテーションのため) |
+| ローテーション | ①新しい公開鍵を入れたアプリをリリースする → ②その版が十分に普及したら、新しい鍵で署名を始める → ③古い鍵を外したアプリをリリースする |
+| テスト用の鍵 | `contentpack.testing.test_signing_key(label)` が、`SHA-256("examprep-test-key:" + label)` を seed にして決定論的に作る。秘密鍵はファイルにしない(PEM をコミットしない)。公開鍵だけを `packs/test-keys.json` に出力する |
+
+### 3.4 アプリ内の保存の構成(PackStore)
+
+```text
+<App Group コンテナ>/Library/Application Support/Content/
+└── <examID>/
+    ├── state.json                  # 現在の版、直前の版、模試が固定している版
+    ├── versions/<packVersion>/…    # インストール済みのパック
+    └── staging/<UUID>/             # 更新中の一時ディレクトリ(P5-S03)
+```
+
+```json
+{
+  "current": { "source": "installed", "version": "1.2.0" },
+  "previous": { "source": "bundled", "version": "1.0.0" },
+  "pins": { "<受験の UUID>": "1.1.0" }
+}
+```
+
+- `source` は `bundled`(アプリに同梱。読み取り専用)か `installed`(`versions/` の下)。同梱パックはコピーしない(初回起動を速くするため。NFR-01)。
+- `state.json` は `Data.write(to:options: .atomic)` で書く(同じボリューム内でのリネームになるので、書き込みの途中で失われない)。
+- 削除の対象は、`current`、`previous`、`pins` のどれにも含まれない版だけである(E-07、BDD 6.8 のロールバック)。
+- インストール時に全ファイルを検証したパックは、起動時には再検証しない(NFR-01)。
+
+### 3.5 Swift の型
+
+```swift
+// packages/Domain/Sources/DomainInterfaces/ExamContentProvider.swift
+/// 1つの試験の、読み込み済みのコンテンツ。Feature はこのプロトコルだけに依存する(DDD 5.3 R-03)。
+public protocol ExamContentProvider: Sendable {
+    var definition: ExamDefinition { get }
+    var vendor: Vendor { get }
+    var packVersion: String { get }
+    var questionIndex: [QuestionIndexEntry] { get }
+    var examSets: [ExamSet] { get }
+    var docsIndex: [DocEntry] { get }
+    func questions(ids: [String]) async throws(ContentError) -> [Question]
+    func flashcards() async throws(ContentError) -> [Flashcard]
+    func caseStudies() async throws(ContentError) -> [CaseStudy]
+    func decisionTrees() async throws(ContentError) -> [DecisionTree]
+    func keywordDrills() async throws(ContentError) -> [KeywordDrill]
+    func docBody(for entry: DocEntry) async throws(ContentError) -> String
+}
+
+public enum ContentError: Error, Equatable, Sendable {
+    case fileMissing(String)
+    case undecodable(path: String, reason: String)
+    case featureDisabled(String)
+    case unknownQuestionIDs([String])
+    case integrityViolations([IntegrityViolation])
+    case storage(String)
+}
+```
+
+```swift
+// packages/Data/Sources/ContentKit/PackVerifier.swift
+public struct PackVerifier: Sendable {
+    public init(keyRing: PublicKeyRing, appVersion: SemanticVersion, supportedFormatVersion: Int)
+    /// 検証の順序: 署名 → デコード → 形式の版 → アプリの版 → 試験 ID → 版の巻き戻し → 各ファイル(パス、存在、サイズ、SHA-256)
+    public func verify(
+        packAt directory: URL,
+        expectedExamID: ExamID,
+        currentVersion: SemanticVersion?
+    ) throws(PackVerificationError) -> Manifest
+}
+
+public enum PackVerificationError: Error, Equatable, Sendable {
+    case manifestMissing
+    case signatureMissing
+    case signatureInvalid
+    case manifestUndecodable
+    case unsupportedFormat(Int)
+    case appTooOld(required: String)            // E-04
+    case examMismatch(expected: ExamID, actual: ExamID)
+    case notNewer(current: String, candidate: String)
+    case unsafePath(String)
+    case fileMissing(String)
+    case sizeMismatch(String)
+    case hashMismatch(String)
+}
+```
+
+- **署名を最初に確かめる**。署名が正しいと分かるまで、manifest の JSON をデコードしない(信頼できない入力を解析しないため)。
+- 署名の検証は、鍵リングのすべての鍵で試す。成功した鍵の ID と、デコード後の `keyID` が一致しなければ `signatureInvalid` にする。
+- パスの安全性は、Schema と同じ正規表現に加えて、次の2点で確かめる。
+  - 標準化した URL がパックのディレクトリの中にあること
+  - シンボリックリンクでないこと
+
+---
+
+## 4. ステップ
+
+### P2-S01 パックの形式の Schema と Swift の型
+
+| 項目 | 内容 |
+|---|---|
+| 対応要件 | [3.1](#31-パックの形式formatversion-1)、[3.2](#32-追加する-schema-と-swift-の型)、RDD 7.3 |
+| 前提 | P0 |
+| 成果物 | `content/schemas/pack-question-index.schema.json`、`pack-docs-index.schema.json`、`catalog.schema.json`、`catalog-source.schema.json`、`tests/test_schemas.py`、`packages/DomainModels/Sources/DomainModels/PackIndex.swift`、`Catalog.swift`、`Tests/DomainModelsTests/PackIndexTests.swift` |
+
+**Red**:
+
+| テスト | 条件(Arrange) | 期待(Assert) |
+|---|---|---|
+| `test_question_index_schema_accepts_entry` | [3.1](#31-パックの形式formatversion-1) の索引の例 | 違反なし |
+| `test_question_index_schema_rejects_missing_kind` | `kind` がない | 違反あり |
+| `test_docs_index_schema_requires_path` | `path` がない | 違反あり |
+| `test_catalog_schema_accepts_example` | [DDD 4.8](../DDD.md#48-配信の構成) の例 | 違反なし |
+| `test_catalog_schema_rejects_unknown_status` | `status: beta` | 違反あり |
+| `test_catalog_source_schema_accepts_minimal` | `exams: [{ id: gcp-pca, status: comingSoon, productIDs: [] }]` | 違反なし |
+| `PackIndexTests.decodeIndexEntry` | 索引の例 | `kind == .single`、`caseStudy == "ehr"` |
+| `PackIndexTests.indexEntryWithoutCase` | `caseStudy: null` | `caseStudy == nil` |
+| `CatalogTests.decodeCatalog` | カタログの例 | `exams[0].status == .available` |
+| `CatalogTests.unknownStatusFails` | `status: beta` | デコードエラー(① 構造語彙) |
+
+**Green**: Schema と型を追加する。`QuestionSelector` に `QuestionSummary.init(_ entry: QuestionIndexEntry)` を追加する。
+
+**Refactor**: `QuestionIndexEntry` と `Question` で共通の項目(`id`、`domain` など)の型が一致していることを、型のコメントで対応づける。
+
+**完了条件**: `(cd content && .venv/bin/pytest tests/test_schemas.py)` と `swift test --package-path packages/DomainModels` が通る。
+
+---
+
+### P2-S02 パックのビルド(build_pack.py)
+
+| 項目 | 内容 |
+|---|---|
+| 対応要件 | FR-CONT-01、NFR-05、[DDD 6.3](../DDD.md#63-決定論) |
+| 前提 | P2-S01 |
+| 成果物 | `content/scripts/build_pack.py`(CLI)、`content/scripts/contentpack/__init__.py`、`build.py`、`tests/test_build_pack.py` |
+
+```text
+content/scripts/build_pack.py --exam <examID> --version <X.Y.Z> --min-app-version <X.Y.Z> --key-id <ID>
+                              [--root content] --out <出力先>
+環境変数 SOURCE_DATE_EPOCH(必須)
+出力: <出力先>/<examID>/<version>/(manifest.sig は作らない。署名は sign_manifest.py が行う)
+終了コード: 0 = 成功 / 1 = コンテンツの検証で error がある / 2 = 引数・環境の不備、出力先がすでにある
+```
+
+**Red**:
+
+| テスト | 条件(Arrange) | 期待(Assert) |
+|---|---|---|
+| `test_build_is_deterministic` | 同じ入力と `SOURCE_DATE_EPOCH` で2回ビルドする | すべてのファイルのバイト列が一致する |
+| `test_build_aborts_on_validation_error` | CI-08 違反の invalid fixture(`materialize` で作る) | 終了コード 1。出力先が作られない |
+| `test_build_allows_warnings` | CI-11(warning)だけがある状態 | 終了コード 0。warning を標準エラーに出す |
+| `test_build_requires_source_date_epoch` | 環境変数がない | 終了コード 2 |
+| `test_build_refuses_existing_output` | 出力先がすでにある | 終了コード 2(上書きしない) |
+| `test_manifest_lists_all_files_sorted` | `test-alpha` | `files` が出力の全ファイル(manifest を除く)と一致し、`path` の昇順 |
+| `test_manifest_hashes_match` | 同上 | 各ファイルの SHA-256 とサイズが一致する |
+| `test_manifest_validates_against_schema` | 同上 | `manifest.schema.json` に適合する |
+| `test_beta_pack_has_no_disabled_features` | `test-beta` | `cases.json`、`decisions.json`、`drills.json` がない |
+| `test_questions_split_by_domain` | `test-alpha` | `questions/domain1.json` 〜 `domain6.json` があり、各問題が自分のドメインのファイルにある |
+| `test_index_matches_questions` | 同上 | 索引の件数と ID が、全ドメインのファイルの問題と一致する |
+| `test_docs_frontmatter_removed` | 同上 | `docs/*.md` の先頭が `---` で始まらない。`docs/index.json` にフロントマターの内容がある |
+| `test_vendor_embedded` | `test-beta` | `vendor.json` の `id == "example-cloud"` |
+| `test_pack_has_no_exam_specific_code_paths` | `contentpack/**/*.py` | 試験 ID の文字列を含まない([P0 の拡張性テスト](DDD-P0-MultiExamContent.md#p0-s07-2つ目の-fixture-試験拡張性の受け入れテスト)と同じ確認) |
+
+**Green**: `contentpack.build.build_pack(root, exam_id, version, min_app_version, key_id, out, epoch) -> Path` を実装する。検証は `contentvalidate.engine.run(..., exams={exam_id})` を再利用する。YAML の読み込みは `contentvalidate.loader.parse_yaml` を再利用する(`export_json.py` と同じ正規化にするため)。
+
+**Refactor**: ファイルごとの変換(問題の分割、カードの結合、docs の分離)を、`Kind` ごとの関数の表にまとめる。新しい種別を追加するときは、表に1行足せばよいようにする。
+
+**完了条件**: `(cd content && .venv/bin/pytest tests/test_build_pack.py)` が通る。
+
+---
+
+### P2-S03 署名、カタログ、CI-13
+
+| 項目 | 内容 |
+|---|---|
+| 対応要件 | NFR-10、[3.3](#33-署名と鍵)、[DDD 4.8](../DDD.md#48-配信の構成) |
+| 前提 | P2-S02 |
+| 成果物 | `content/scripts/sign_manifest.py`、`build_catalog.py`、`contentpack/sign.py`、`catalog.py`、`testing.py`、`verify.py`、`content/catalog.yaml`、`contentvalidate/rules/ci13_catalog.py`、`tests/test_sign.py`、`tests/test_catalog.py` |
+
+```text
+content/scripts/sign_manifest.py --manifest <manifest.json> --key-id <ID> (--key-env <環境変数名> | --test-key <label>)
+content/scripts/build_catalog.py [--previous <catalog.json>] [--update <examID>=<manifest.json> …] [--root content] --out <catalog.json>
+```
+
+**Red**:
+
+| テスト | 条件(Arrange) | 期待(Assert) |
+|---|---|---|
+| `test_sign_and_verify` | テスト用の鍵で署名する | `contentpack.verify.verify_pack` が成功する |
+| `test_signature_is_deterministic` | 同じ鍵で2回署名する | `manifest.sig` が一致する(Ed25519 は決定論的) |
+| `test_tampered_manifest_fails` | 署名後に `manifest.json` を1バイト変える | 検証が `signature_invalid` で失敗する |
+| `test_key_id_mismatch_exits_2` | manifest の `keyID` と `--key-id` が異なる | 終了コード 2 |
+| `test_sig_format` | 署名ファイル | Base64 の ASCII で改行がなく、デコードすると 64 バイト |
+| `test_verify_detects_hash_mismatch` | 署名後に `exam.json` を変える | `hash_mismatch` |
+| `test_catalog_from_source` | `catalog.yaml` と `exam.yaml` だけ(`--previous` なし) | 全試験の名前とベンダーが入り、`latestPackVersion` は `null` |
+| `test_catalog_update_entry` | `--previous` と、`--update gcp-pca=<manifest>` | その試験の `latestPackVersion` と `minAppVersion` だけが更新される |
+| `test_catalog_rejects_downgrade` | `--update` の版が、`--previous` の版より低い | 終了コード 2 |
+| `test_catalog_is_deterministic` | 同じ入力で2回 | バイト列が一致する |
+| `CI-13-unknown-exam`(invalid fixture) | `catalog.yaml` に存在しない試験 ID | CI-13 error |
+| `CI-13-duplicate-exam`(invalid fixture) | 同じ試験 ID が2回 | CI-13 error |
+
+CI-13 は全体ルール(`scope=GLOBAL`)とする。`catalog.yaml` は任意のファイルで、ない場合は CI-13 は何も報告しない(fixture の大半のケースを単純に保つため)。
+
+**Green**: 上記を実装する。`verify.py` は、P5-S01 でアップロード後の確認にも使う。
+
+**Refactor**: Swift の `PackVerifier` と同じ検証の順序([3.5](#35-swift-の型))に、Python の `verify_pack` の順序をそろえる。エラーの名前も、Swift の enum の case と対応させる(`signature_invalid` ↔ `signatureInvalid`)。
+
+**完了条件**: `(cd content && .venv/bin/pytest)` が通り、`validate.py` が error 0 件。
+
+---
+
+### P2-S04 契約 fixture
+
+| 項目 | 内容 |
+|---|---|
+| 対応要件 | AC-05、[DDD 7.4](../DDD.md#74-テストダブル) |
+| 前提 | P2-S03 |
+| 成果物 | `content/tests/fixtures/generate_packs.py`、`content/tests/fixtures/packs/`、`tests/test_generated.py` への追加 |
+
+```text
+content/tests/fixtures/packs/
+├── test-keys.json                  # { "test-2026": "<公開鍵 Base64>", "test-next": "<公開鍵 Base64>" }
+├── catalog.json
+├── valid/
+│   ├── test-alpha/1.0.0/
+│   ├── test-alpha/1.1.0/           # 問題を1つ改訂した版(P5-S03 の差分更新のテスト用)
+│   └── test-beta/1.0.0/
+└── tampered/
+    ├── bad-signature/              # manifest.json を1バイト変えた
+    ├── unknown-key/                # 鍵リングにない鍵(label: "outsider")で署名した
+    ├── hash-mismatch/              # questions/domain1.json の内容を変えた
+    ├── size-mismatch/              # manifest の size を変えて署名し直した
+    ├── missing-file/               # exam-sets.json を削除した
+    ├── app-too-old/                # minAppVersion: 99.0.0 で署名した
+    ├── unsupported-format/         # formatVersion: 2 で署名した
+    ├── exam-mismatch/              # test-beta の内容に examID: test-alpha を付けて署名した
+    └── path-traversal/             # files[].path に "../outside.json" を含めて署名した(Schema を迂回して直接書く)
+```
+
+**Red**:
+
+| テスト | 条件(Arrange) | 期待(Assert) |
+|---|---|---|
+| `test_generated.py::test_packs_match_generator` | `generate_packs.py` の出力とコミット済みの `packs/` | 一致する(現在は `packs/` がないので失敗する) |
+| `test_generated.py::test_valid_packs_verify` | `packs/valid/*/*` を `verify_pack` で検証する | すべて成功する |
+| `test_generated.py::test_tampered_packs_fail_with_expected_error` | `packs/tampered/*` | 各ディレクトリ名に対応するエラーで失敗する(対応表は `generate_packs.py` に置く) |
+
+**Green**: `generate_packs.py` を実装し、`packs/` を生成してコミットする。`SOURCE_DATE_EPOCH` は固定値(`1793491200` = 2026-11-01T00:00:00Z)を使う。
+
+**Refactor**: 改ざんの種類と期待するエラーの対応表を、Swift のテスト(P2-S05)からも読めるように、`packs/tampered/expected.json` に出力する。
+
+**完了条件**: `(cd content && .venv/bin/pytest tests/test_generated.py)` が通る。
+
+---
+
+### P2-S05 パックの検証(PackVerifier)
+
+| 項目 | 内容 |
+|---|---|
+| 対応要件 | NFR-10、AC-05、E-02、E-04 |
+| 前提 | P2-S04、P1 の完了 |
+| 成果物 | `packages/Data/Package.swift`、`Sources/ContentKit/SemanticVersion.swift`、`PublicKeyRing.swift`、`PackVerifier.swift`、`Tests/ContentKitTests/`、`.github/workflows/data-test.yml` |
+
+**Red**:
+
+| テスト | 条件(Arrange) | 期待(Assert) |
+|---|---|---|
+| `SemanticVersionTests.ordering`(表形式) | `1.0.0 < 1.0.1 < 1.1.0 < 2.0.0`、`1.0.0-alpha < 1.0.0`、`1.0.0-alpha < 1.0.0-alpha.1 < 1.0.0-beta`、`1.0.0+build == 1.0.0`(順序の比較) | SemVer 2.0.0 の優先順位に従う |
+| `SemanticVersionTests.rejectsInvalid` | `1.0`、`01.0.0`、`v1.0.0` | 初期化が `nil` |
+| `PublicKeyRingTests.loadsTestKeys` | `packs/test-keys.json` | 鍵が2つ |
+| `PackVerifierTests.validPacks` | `packs/valid/*/*` | すべて成功し、`Manifest` を返す |
+| `PackVerifierTests.tamperedPacks`(表形式) | `packs/tampered/*` と `expected.json` | 各ディレクトリで、期待する `PackVerificationError` になる |
+| `PackVerifierTests.notNewerIsRejected` | `currentVersion: 1.1.0` で `test-alpha/1.0.0` | `.notNewer(current: "1.1.0", candidate: "1.0.0")` |
+| `PackVerifierTests.sameVersionIsRejected` | `currentVersion: 1.0.0` で `test-alpha/1.0.0` | `.notNewer` |
+| `PackVerifierTests.firstInstallAllowsAnyVersion` | `currentVersion: nil` | 成功する |
+| `PackVerifierTests.symlinkIsRejected` | 一時ディレクトリに有効なパックをコピーし、1ファイルをシンボリックリンクに置き換える | `.unsafePath` |
+| `PackVerifierTests.signatureCheckedBeforeDecode` | `manifest.json` を不正な JSON にし、署名は元のまま | `.signatureInvalid`(`.manifestUndecodable` ではない) |
+
+テストは、fixture を `URL(filePath: #filePath)` からの相対パス(`../../content/tests/fixtures/packs`)で直接読む(DomainModels のテストと同じ方式)。
+
+**Green**: [3.5](#35-swift-の型) の `PackVerifier` を実装する。SHA-256 は CryptoKit の `SHA256` で、`FileHandle` から 1MB ずつ読んで計算する(大きな図のファイルでメモリを使いすぎないため)。
+
+**Refactor**: 検証の各段階を、`private func checkSignature`、`checkVersions`、`checkFiles` に分ける。
+
+**完了条件**: `swift test --package-path packages/Data --filter PackVerifierTests` と `SemanticVersionTests` が通る。`data-test.yml` を追加し、PR で通ることを確認する。
+
+---
+
+### P2-S06 パックの読み込み(PackLoader と ExamContentProvider)
+
+| 項目 | 内容 |
+|---|---|
+| 対応要件 | NFR-01、NFR-02、FR-CONT-01 |
+| 前提 | P2-S05 |
+| 成果物 | `packages/Domain/Sources/DomainInterfaces/ExamContentProvider.swift`(Domain の Package.swift にターゲットを追加)、`packages/Data/Sources/ContentKit/PackLoader.swift`、`PackContent.swift`、`Tests/ContentKitTests/PackLoaderTests.swift` |
+
+**Red**:
+
+| テスト | 条件(Arrange) | 期待(Assert) |
+|---|---|---|
+| `loadsEagerParts` | `packs/valid/test-alpha/1.0.0` | `definition`、`vendor`、`questionIndex`、`examSets`、`docsIndex` が読める |
+| `doesNotReadQuestionBodiesAtLoad` | 読み込みを `SpyFileReader` で記録する | `questions/domain*.json` を読んでいない(NFR-01) |
+| `questionsReadOnlyNeededDomains` | ドメイン 2 の問題 ID だけを要求する | 読んだのは `questions/domain2.json` だけ |
+| `questionsAreCached` | 同じ ID を2回要求する | ファイルの読み込みは1回 |
+| `questionsKeepRequestedOrder` | ID を [Q3, Q1] の順で要求する | 結果も [Q3, Q1] の順 |
+| `unknownQuestionID` | 存在しない ID を含めて要求する | `ContentError.unknownQuestionIDs([その ID])`(黙って除かない) |
+| `disabledFeature` | `test-beta` で `caseStudies()` | `ContentError.featureDisabled("caseStudies")` |
+| `docBody` | `test-alpha` の `docsIndex[0]` | フロントマターのない本文 |
+| `loadAllQuestionsForExamSetUnderBudget` | 55 問を一括で読む | 処理時間を計測し、記録する(しきい値は実機で決める。シミュレータでは記録のみ) |
+
+> 存在しない ID は、CI と `ContentIntegrityChecker` で防いでいるので、ここに来るのはプログラムの誤りだけである。早く気づけるように、結果から除かずにエラーにする。`ContentError` に `unknownQuestionIDs([String])` を追加する。
+
+**Green**:
+
+```swift
+public struct PackLoader: Sendable {
+    public init(fileReader: any FileReading = FileManagerReader())
+    public func load(packAt directory: URL, manifest: Manifest) throws(ContentError) -> PackContent
+}
+
+/// 読み込み済みのパック。索引などは不変の値として持ち、問題の本文は actor の中でキャッシュする。
+public final class PackContent: ExamContentProvider {
+    public let definition: ExamDefinition
+    public let vendor: Vendor
+    public let packVersion: String
+    public let questionIndex: [QuestionIndexEntry]
+    public let examSets: [ExamSet]
+    public let docsIndex: [DocEntry]
+    private let bodies: QuestionBodyCache   // actor
+    // …
+}
+```
+
+`FileReading` は、ファイルの読み込みを抽象化するプロトコルにする(テストで読み込みを記録するため)。
+
+**Refactor**: 本文のキャッシュ(`QuestionBodyCache`)と、ファイルの読み込み(`FileReading`)の責務を分ける。
+
+**完了条件**: `swift test --package-path packages/Data --filter PackLoaderTests` と `swift test --package-path packages/Domain` が通る。
+
+---
+
+### P2-S07 内容の整合チェック(ContentIntegrityChecker)
+
+| 項目 | 内容 |
+|---|---|
+| 対応要件 | [DDD 4.3](../DDD.md#43-語彙の3つの層) の②、NFR-10 |
+| 前提 | P2-S06 |
+| 成果物 | `Sources/ContentKit/ContentIntegrityChecker.swift`、`IntegrityViolation.swift`、`Tests/ContentKitTests/ContentIntegrityCheckerTests.swift` |
+
+CI-09・CI-12 と同じ条件を、アプリでも確認する。CI を通らずに作られたパック(手作業や、ツールの不具合)を取り込まないためである。
+
+**Red**: `test-alpha` のパックを読み込み、テストの中で1か所だけ値を書き換えた `PackContent` を作って確認する。
+
+| テスト | 書き換え | 期待(Assert) |
+|---|---|---|
+| `validPacksHaveNoViolations` | なし(`test-alpha`、`test-beta`) | 違反 0 件 |
+| `unknownDomain` | 索引の1件を `domain: 9` | `.unknownDomain(questionID:, domain: 9)` |
+| `subObjectiveInWrongDomain` | `subObjective: "2.1"`、`domain: 1` | `.subObjectiveDomainMismatch` |
+| `unknownCaseStudy` | `caseStudy: "acmeBank"` | `.unknownCaseStudy` |
+| `caseStudyWhenDisabled` | `test-beta` の索引の1件に `caseStudy: "ehr"` | `.caseStudyFeatureDisabled` |
+| `unsupportedKind` | `supportedKinds: [.single]` で `test-alpha`(multiple を含む) | `.unsupportedQuestionKind(.multiple)` |
+| `kindNotAllowedByExam` | `test-beta` の索引の1件を `kind: multiple` | `.questionKindNotAllowed` |
+| `examSetReferencesMissingQuestion` | 模試の `questionIDs` に存在しない ID | `.missingQuestion` |
+| `examSetCaseCount` | 模試の `caseStudies` を1つにする(`caseStudiesPerSet: 2`) | `.examSetCaseCountMismatch` |
+| `unknownWAFPillar` | 問題本文の `wafPillars: [resilience]`(`test-alpha`) | `.unknownWAFPillar`(本文の確認は、模試の開始時に問題を読み込んだときに行う) |
+
+**Green**:
+
+```swift
+public struct ContentIntegrityChecker: Sendable {
+    /// supportedKinds は、アプリ本体で AnswerEvaluatorRegistry.standard から作って渡す(ContentKit を ExamEngine に依存させないため)
+    public init(supportedKinds: Set<QuestionKind>)
+    public func check(_ content: PackContent) -> [IntegrityViolation]
+    public func check(questions: [Question], in definition: ExamDefinition) -> [IntegrityViolation]
+}
+```
+
+**Refactor**: 確認の条件を、P0 の [3.4](DDD-P0-MultiExamContent.md#34-ci-12試験定義の整合) と [3.5](DDD-P0-MultiExamContent.md#35-既存ルールの変更) の表と同じ順に並べ、各条件のコメントに、対応する CI のルール ID を書く。
+
+**完了条件**: `swift test --package-path packages/Data --filter ContentIntegrityCheckerTests` が通る。
+
+---
+
+### P2-S08 パックの保存(PackStore)
+
+| 項目 | 内容 |
+|---|---|
+| 対応要件 | E-07、BDD 6.8(ロールバック)、[3.4](#34-アプリ内の保存の構成packstore) |
+| 前提 | P2-S07 |
+| 成果物 | `Sources/ContentKit/PackStore.swift`、`PackState.swift`、`Tests/ContentKitTests/PackStoreTests.swift` |
+
+テストは、一時ディレクトリをコンテナの代わりに使う。
+
+**Red**:
+
+| テスト | 条件(Arrange) | 期待(Assert) |
+|---|---|---|
+| `initialStateIsEmpty` | 何もない | `state(for:)` の `current == nil` |
+| `installMovesStagingIntoVersions` | `staging/<UUID>/` にパックを置いて `install` | `versions/1.0.0/` に移り、`staging` が空になる |
+| `installRefusesExistingVersion` | 同じ版を2回 `install` | `ContentError.storage("…already installed")` |
+| `activateShiftsPrevious` | 1.0.0 を有効化した後に 1.1.0 を有効化する | `current == 1.1.0`、`previous == 1.0.0` |
+| `activateIsAtomic` | `state.json` の書き込みを失敗させる(書き込み不可のディレクトリ) | エラーになり、`state.json` は元の内容のまま |
+| `pinKeepsVersion` | 1.0.0 を受験 A が固定 → 1.1.0、1.2.0 を順に有効化 → `garbageCollect` | 1.0.0 が残る(E-07) |
+| `unpinAllowsRemoval` | 上の状態で受験 A の固定を外して `garbageCollect` | 1.0.0 が消え、1.1.0(previous)と 1.2.0(current)が残る |
+| `bundledIsNeverDeleted` | `previous` が `bundled` | `garbageCollect` が同梱パックに触れない |
+| `rollback` | `current == 1.1.0`、`previous == 1.0.0` で `rollback` | `current == 1.0.0`、`previous == nil` |
+| `stateSurvivesReopen` | 書き込んだ後に、新しい `PackStore` で同じディレクトリを開く | 同じ状態が読める |
+| `perExamIsolation` | `test-alpha` と `test-beta` を別々に操作する | 互いの状態に影響しない |
+
+**Green**:
+
+```swift
+public enum PackSource: String, Codable, Sendable { case bundled, installed }
+public struct PackLocation: Codable, Hashable, Sendable {
+    public var source: PackSource
+    public var version: String
+}
+
+public actor PackStore {
+    public init(root: URL, fileManager: FileManager = .default)
+    public func state(for examID: ExamID) throws(ContentError) -> PackState
+    public func install(staged: URL, version: String, for examID: ExamID) throws(ContentError)
+    public func activate(_ location: PackLocation, for examID: ExamID) throws(ContentError)
+    public func rollback(for examID: ExamID) throws(ContentError)
+    public func pin(_ version: String, for examID: ExamID, attemptID: UUID) throws(ContentError)
+    public func unpin(attemptID: UUID, for examID: ExamID) throws(ContentError)
+    public func garbageCollect(for examID: ExamID) throws(ContentError)
+    public func directory(for location: PackLocation, examID: ExamID, bundledRoot: URL) -> URL
+}
+```
+
+**Refactor**: `state.json` の読み書きを `PackStateFile` に分ける。
+
+**完了条件**: `swift test --package-path packages/Data --filter PackStoreTests` が通る。
+
+---
+
+### P2-S09 同梱パックとカタログ(ExamCatalogService)
+
+| 項目 | 内容 |
+|---|---|
+| 対応要件 | FR-CONT-01、NFR-03、[DDD 4.8](../DDD.md#48-配信の構成) |
+| 前提 | P2-S08 |
+| 成果物 | `Sources/ContentKit/BundledPacks.swift`、`ExamCatalogService.swift`、`ContentBootstrapper.swift`、`Tests/ContentKitTests/ExamCatalogServiceTests.swift`、`ContentBootstrapperTests.swift` |
+
+同梱パックは、アプリのバンドルの `Packs/<examID>/<version>/` に置き、`Packs/catalog.json` に同梱時点のカタログを置く(リソースの組み込みは P4-S01)。テストでは、`packs/valid/` を同梱パックのディレクトリとして渡す。
+
+**Red**:
+
+| テスト | 条件(Arrange) | 期待(Assert) |
+|---|---|---|
+| `bundledPacksAreListed` | 同梱 `test-alpha/1.0.0`、`test-beta/1.0.0` | 2つの試験が「利用可能かつインストール済み」 |
+| `firstLaunchUsesBundled` | `PackStore` が空 | `test-alpha` の有効な場所が `bundled 1.0.0`。ファイルのコピーは発生しない |
+| `newerInstalledWins` | 同梱 1.0.0、インストール済み 1.1.0 | `installed 1.1.0` |
+| `newerBundledWinsAfterAppUpdate` | インストール済み 1.0.0、アプリの更新で同梱が 1.1.0 になった | `bundled 1.1.0`。インストール済みの 1.0.0 は `previous` になる |
+| `comingSoonIsListedButNotLoadable` | カタログに `status: comingSoon` の試験 | 一覧に出るが、`load` は `ContentError.storage("not available")` |
+| `retiredHiddenUnlessInstalled` | `retired` の試験が、インストール済みのものと、そうでないもの | インストール済みのものだけが一覧に出る |
+| `bootstrapVerifiesIntegrity` | 同梱パックの1つが `ContentIntegrityChecker` で違反になる | その試験は利用できず、`ContentError.integrityViolations` を報告する。他の試験は利用できる |
+| `bootstrapFailsWhenNoUsableExam` | 同梱パックがすべて読めない | `ContentError` を返す(E-01「データの読み込みに失敗しました。再インストールしてください」の表示につなぐ) |
+
+**Green**:
+
+```swift
+public struct ExamCatalogService: Sendable {
+    public init(bundled: BundledPacks, store: PackStore, cachedCatalog: Catalog?)
+    public func entries() async throws(ContentError) -> [ExamCatalogItem]   // 表示用(状態つき)
+    public func activeLocation(for examID: ExamID) async throws(ContentError) -> PackLocation?
+}
+
+/// 起動時に呼ぶ。各試験の有効なパックを決め、読み込み、整合を確認する。
+public struct ContentBootstrapper: Sendable {
+    public func bootstrap() async -> ContentBootstrapResult
+}
+
+public struct ContentBootstrapResult: Sendable {
+    public var available: [ExamID: any ExamContentProvider]
+    public var failures: [ExamID: ContentError]
+}
+```
+
+**Refactor**: 「どの版を有効にするか」の判定を、純粋関数 `resolveActiveLocation(bundled:installed:)` に切り出し、表形式のテストで確認する。
+
+**完了条件**: `swift test --package-path packages/Data` がすべて通る。
+
+---
+
+## 5. フェーズの完了条件
+
+[DDD 7.8](../DDD.md#78-フェーズの完了条件共通) の共通条件に加えて、次を満たすこと。
+
+| No. | 条件 | 確認方法 |
+|---|---|---|
+| 1 | Python で作った契約 fixture を、Swift がすべて期待どおりに検証できる | `swift test --package-path packages/Data --filter PackVerifierTests` |
+| 2 | パックのビルドが決定論的である | `test_build_is_deterministic`、`test_packs_match_generator` |
+| 3 | `test-beta` のパックが、ケースなどの無効な機能を含まずに作られ、アプリで読める | `test_beta_pack_has_no_disabled_features`、`bundledPacksAreListed` |
+| 4 | 秘密鍵がリポジトリにない | `git grep -n -I -e 'PRIVATE KEY' -e 'BEGIN OPENSSH'` が 0 件 |
+
+---
+
+## 6. 申し送り
+
+| 宛先 | 内容 |
+|---|---|
+| P4 | アプリの起動時に `ContentBootstrapper.bootstrap()` を呼ぶ。`failures` があれば、その試験だけを使えない状態にする。全滅なら E-01 を表示する |
+| P4 | 同梱するパックは、ビルドの前に `build_pack.py` で作り、`ExamPrepApp/Resources/Packs/` に置く。公開鍵(`PublicKeyRing`)はアプリ本体の定数にする。テスト用の鍵は DEBUG 構成でだけ含める |
+| P5 | `PackUpdater` は、`staging/<UUID>/` に取得したファイルを置き、`PackVerifier.verify` → `ContentIntegrityChecker.check` → `PackStore.install` → `activate` の順に呼ぶ。模試の受験中は `activate` を遅らせる |
+| P5 | 差分の算出には、現在のパックの manifest と、新しい manifest の `sha256` を比べる。変わっていないファイルは、`versions/<現在の版>/` からハードリンク(できなければコピー)する |
