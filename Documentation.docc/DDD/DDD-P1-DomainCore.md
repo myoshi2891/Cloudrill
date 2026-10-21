@@ -788,6 +788,16 @@ public struct FSRSScheduler: Sendable {
 
 **完了条件**: `swift test --package-path packages/Domain --filter InitialReviewTests` が通る。
 
+**実装メモ**(実装時に本書と変えた点):
+
+- 初回の評価は、リファレンス実装と同じく learning の step 0 として扱う。安定度と難易度の初期値を決めた後、学習ステップの規則で期限を決める(Again: step 0・1 分後、Hard: step 0・最初の2ステップの平均 5.5 分後、Good: step 1・10 分後、Easy: review に移り日単位の間隔)。
+- 学習ステップの遷移(`scheduleLearningStep`)と review への移行(`graduate`)は、P1-S08d の learning の段階でも使えるように、段階によらない関数にした。learning・review・relearning の更新式は P1-S08d で実装する。それまでは、カードを変えずに返す。
+- `retrievability(of:at:)` は、最後の評価からの経過日数を切り捨ての整数日にして計算する(`ElapsedDays.whole`)。未学習のカードは 0。
+- テストを2件追加した: 学習ステップの期限(`learningSteps`)と、回数・時刻の記録(`recordsReviewFacts`)。ベクタとの照合処理は `replay(_:with:)` に切り出し、`FSRSVectorTests.allVectors` と共有した。
+- Refactor: 重みの添字に名前を付けた(`FSRSWeights.swift` の `initialStability(for:)`、`initialDifficultyBase`、`initialDifficultyScale`)。
+- FSRS ターゲットは StudyModels に依存しない(3.1)ので、`Duration.timeInterval` を internal の拡張として FSRS にも置いた。
+- 全体の照合の既知の問題は 438 件から 369 件に減った(初回の評価の分)。
+
 ---
 
 ### P1-S08d FSRS: 2回目以降の評価
