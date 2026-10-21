@@ -759,6 +759,14 @@ swift test --package-path packages/DomainModels                            # す
 git grep -n -e 'gcp-pca' -e 'knightMotives' -- packages/DomainModels/Sources   # 0 件(試験固有の値がコードにない)
 ```
 
+**実装メモ**(実装時に本書と変えた点):
+
+- `Identifiers.swift`、`IdentifierTests`、`Common.swift` の enum の削除、`Manifest` の型付けは P0-S05 で前倒しした(P0-S05 の実装メモを参照)。このステップでは残りの、`Exam.swift` から `ExamDefinition.swift` への改名(型名を 3.7 のとおりにそろえる)、`QuestionKind` の `Question.swift` への移動と `QuestionType.kind`、`domainBySubObjective`、`ExamFeatures` の `decodeIfPresent ?? false`、`ExamDefinitionTests`、試験ごとの fixture の列挙を行った。
+- `TaxonomyEntry` は `TaxonomyEntry<ID: StringIdentifier>` のジェネリック型にした(WAF の柱以外の語彙を追加するときに、同じ型を使えるようにするため)。
+- `ExamFeatures` は、追加する機能だけでなく既存の 5 つのフラグもすべて `decodeIfPresent ?? false` で読む(すべて同じ規則にしたほうが読みやすいため。Schema では 5 つとも必須なので、配信されるパックには影響しない)。
+- `FixtureDecodingTests` の試験固有の値の確認(問題数、ケースの組み合わせなど)は `test-alpha` のまま残し、全ファイルのデコードと id の一致だけを全試験で行う。
+- 完了条件の grep で、`Identifiers.swift` のドキュメントコメントの例(`gcp-pca`)が見つかったので、例を一般的な書き方に変えた。
+
 ---
 
 ### P0-S10 CI とドキュメントの更新

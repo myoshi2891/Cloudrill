@@ -172,7 +172,7 @@ tests/                    pytest と fixture(valid-json/ は Swift テストが�
 | `tests/test_extensibility.py` | 各試験を `--exam` で1つずつ検証できること、検証ツールのコードに試験固有の値(`gcp-pca`、ケース ID など)がないこと、試験が異なれば同じ ID を使えること |
 | `tests/fixtures/valid-json/` | valid を JSON に変換したもの。`packages/DomainModels` のテストが `../../content/tests/fixtures/valid-json` として直接読む(パッケージ内にはコピーしない) |
 | `tests/test_generated.py` | コミット済みの fixture と valid-json が、生成スクリプトの出力と一致すること |
-| `packages/DomainModels/Tests/` | Swift Testing。valid fixture の JSON のデコード、`QuestionType` などのカスタムデコード、エンコードと再デコードの往復 |
+| `packages/DomainModels/Tests/` | Swift Testing。valid fixture の JSON のデコード(`valid-json/exams/*/` を列挙し、試験ごとに全ファイル)、試験定義(`ExamDefinitionTests`)、文字列 ID(`IdentifierTests`)、`QuestionType` などのカスタムデコード、エンコードと再デコードの往復 |
 
 fixture は `tests/fixtures/generate.py` が固定 seed で決定論的に生成します。手で編集せず、生成スクリプトを変更してから再生成してください。
 
@@ -214,6 +214,7 @@ fixture は `tests/fixtures/generate.py` が固定 seed で決定論的に生成
     - `Question.caseStudy` は Optional です。`Choice.mistakeTags` は省略時に空配列になり、エンコード時に空なら省略します。
     - 未知の列挙値はデコードエラーにしています。新しい列挙値を含むパックが古いアプリに配信されないよう、`manifest.minAppVersion` で制御する前提です。
     - 試験語彙の ID(`ExamID`、`VendorID`、`CaseStudyID`、`WAFPillarID`)は列挙ではなく、文字列をラップした型(`StringIdentifier`)です。デコード時は空文字だけを拒否し、実在は CI-09・CI-12 が確認します。
+    - `exam.json` は `ExamDefinition` でデコードします。`ExamFeatures` は、フラグがなければ `false` として読みます(機能を追加したときに古い `exam.json` も読めるようにするため)。採点方式(`ScoringPolicyKind`)と出題形式(`QuestionKind`)は構造語彙なので、未知の値はデコードエラーです。
     - `Manifest.createdAt` は `Date` で、デコードには `ContentDecoder.make()`(ISO 8601)を使います。
 20. **サンプルコンテンツ。** すべてオリジナルです。ケーススタディの要約は学習用に書き起こした短い文章です。正確な内容は公式のケーススタディを参照する前提です(`cases/ehr.yaml` の `officialURL` は暫定で試験ページを指しています)。
 
