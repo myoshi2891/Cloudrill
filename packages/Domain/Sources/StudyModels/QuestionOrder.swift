@@ -61,4 +61,8 @@ public enum QuestionOrderError: Error {
     case unsupportedVersion(Int)
     /// JSON として読めない、または項目が欠けている
     case invalidData(underlying: any Error)
+    /// 出題順にある問題が、コンテンツにない
+    case missingQuestion(String)
+    /// 保存した選択肢の ID が、問題の選択肢と一致しない(問題が改訂された場合など)
+    case choicesMismatch(questionID: String)
 }
