@@ -1081,6 +1081,18 @@ public struct QuestionSelector: Sendable {
 
 **完了条件**: `swift test --package-path packages/Domain --filter QuestionSelectorTests` が通る。
 
+**実装メモ**(実装時に本書と変えた点):
+
+- `PracticeHistory` は `AnswerFact` を直接受け取らないので、テスト用の `AnswerFact` のビルダーは DomainTestSupport に追加しなかった。
+- 弱点優先の鍵は、`u^(1/w)` と同じ順になる `log(u) / w` にした(w が小さいときのアンダーフローを避けるため)。`u` は 53 ビットの (0, 1] の乱数(`unitRandom`)で、標準ライブラリの `random(in:using:)` は使わない(DDD 6.3 と同じ理由)。鍵が同じなら ID 順。
+- `domainScores` にないドメイン(準備度をまだ算出していない)は score 0、つまり最も弱いとして扱う。テスト `missingDomainScoreIsWeakest` を追加した。
+- fresh が足りないときの並びは、fresh(選び方の順)の後に recent(出題の古い順。同時刻なら ID 順)。`.all` を指定したときも同じで、recent は最後に並ぶ。
+- recent は「出題からの経過が `recentExclusion` 未満」。ちょうど 24 時間前は fresh とする(テスト `servedExactlyAtBoundaryIsFresh`)。
+- `weaknessFirstStillPicksStrongDomain` は、ドメイン2の score を 1.0 にして確かめた(0.9 では重みが 0.1 で、`minimumWeight` が効いていることを確かめられないため)。
+- 重みとボーナスの掛け算を確かめる `weightIncludesBonuses` を追加した。`noDuplicates`、`excludesRecentWhenEnough`、`inputOrderDoesNotMatter` は、ランダムと弱点優先の両方で確かめる。
+- `SelectionParameters.init` は、ボーナスと `minimumWeight` が正の値であることを `precondition` で確かめる(`.init()` を既定の引数に使うため throws にしない。値はコードで決めるもので、利用者の入力ではない)。
+- Refactor の分割(`filter`、`splitByRecency`、`draw`)は、最初からその形で書いた。
+
 ---
 
 ### P1-S11 カバレッジの確認と CI
