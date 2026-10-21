@@ -642,6 +642,14 @@ FEATURE_KINDS: dict[str, Kind] = {
 
 **完了条件**: `(cd content && .venv/bin/pytest)` が通り、`validate.py` が error 0 件。`validate.py --only CI-12` で、`gcp-pca` の版の不一致が warning で列挙される(問題がすべて 6.1 なら 0 件)。
 
+**実装メモ**(実装時に本書と変えた点):
+
+- 条件 1(`id` とディレクトリ名の一致)は先に CI-01 に実装していたので、CI-12 に移した。invalid ケースは `CI-01-exam-id-mismatch` から `CI-12-exam-id-mismatch` に改名した。
+- `CI-12-case-list-mismatch` は、`test-alpha` のケースが `ehr` と `altostrat` だけなので、「`caseStudies` から `cymbal` を外す」ではなく「`caseStudies` にない `cases/cymbal.yaml` を置く」(条件 5 の逆方向)で作った。
+- 条件 2 は、`vendors.yaml` が欠落または Schema 違反のときは確認しない(誤報の防止。原因は CI-01 が報告する)。条件 5 は、Schema 違反のケースのファイルも ID が読めれば数える(欠落の誤報の防止)。
+- CI-12 の導入で、`gcp-pca` の `caseStudies` に `cases/` のないケースが 3 件(`altostrat`・`cymbal`・`knightMotives`)あることが分かった。ユーザーの判断で、`caseStudies` を `[ehr]` に絞った(ケースを作成したら戻す)。模試 1(draft)の `caseStudies: [ehr, altostrat]` はそのままで、これを検出するルールはまだない。
+- Refactor の `FEATURE_KINDS` は、使う条件 6・7 と一緒に P0-S07 で作る。
+
 ---
 
 ### P0-S07 2つ目の fixture 試験(拡張性の受け入れテスト)

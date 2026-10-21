@@ -116,7 +116,7 @@ tests/                    pytest と fixture(valid-json/ は Swift テストが�
 |---|---|
 | Schema | 1ファイル内の構造(型、必須項目、列挙値、パターン、個数、重複なし) |
 | validate.py(ファイル内) | Schema では表現しにくい条件(CI-01 の追加条件、CI-05、CI-08、CI-11) |
-| validate.py(ファイル間) | 模試の構成、統計、重複、参照の整合性(CI-02、03、04、07、09、10) |
+| validate.py(ファイル間) | 模試の構成、統計、重複、参照の整合性、試験定義の整合(CI-02、03、04、07、09、10、12) |
 | validate.py(外部) | リンク切れ(CI-06) |
 
 - Schema に違反したファイルは、ファイル間のルールの対象から外します。型が崩れたデータが原因で、別のルールでも違反が連鎖して報告されるのを防ぐためです。
@@ -146,6 +146,8 @@ tests/                    pytest と fixture(valid-json/ は Swift テストが�
 | CI-09 | `relatedQuestionIDs`、`questionIDs`、ツリーの `rootNodeID` と `next`、docs・問題・カードの `subObjective` が実在する。問題・カードの `domain`、問題の `caseStudy` と `wafPillars` が exam.yaml にある | error | exam.yaml の `domains`、`caseStudies`、`taxonomies.wafPillars` |
 | CI-10 | exam.yaml の `domains[*].weight` の合計が 1.0 ± 0.001 | error | `weights.*` |
 | CI-11 | `LocalizedText` の `en` の欠落(空文字を含む) | warning | — |
+| CI-12 | 試験定義の整合: `exam.yaml` の `id` がディレクトリ名と一致する、`vendor` が `vendors.yaml` にある、`domains[*].id` が 1 から始まる連番、サブ項目 ID が試験内で一意、`caseStudies` と `cases/*.yaml` の id の集合が一致する | error | — |
+| CI-12 | 問題の `examGuideVersion` が `exam.yaml` の `guideVersion` と一致する。試験ガイドの改訂時は、`guideVersion` を上げてから `--exam <examID> --only CI-12` を実行すると、見直しが必要な問題の一覧が得られる | warning | — |
 
 ### ルールの追加方法
 
@@ -221,4 +223,6 @@ fixture は `tests/fixtures/generate.py` が固定 seed で決定論的に生成
 - `questions/domainN/` のディレクトリと `domain` の一致、ファイル名と `id` の一致のチェック
 - docs のフロントマターに対応する Swift モデル(アプリ側で Markdown と一緒に扱う想定)
 - `exam.yaml` のサブ項目と公式試験ガイドの照合、ドメイン 5・6 の比重の確定
+- gcp-pca のケーススタディ `altostrat`・`cymbal`・`knightMotives` の作成(作成したら `exam.yaml` の `caseStudies` にも加える。現在は `ehr` のみ)
+- CI-12 の機能フラグとコンテンツの整合(無効な機能のファイルがないこと)と、`type.kind` が `format.questionKinds` に含まれることの確認(P0-S07 で追加予定)
 - GitHub Actions のアクションを SHA で固定すること(現在はメジャーバージョンのタグを指定し、Dependabot で更新)
