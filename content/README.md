@@ -143,7 +143,7 @@ tests/                    pytest と fixture(valid-json/ は Swift テストが�
 | CI-07 | 試験内での問題 ID・カード ID・ドリル ID・ケース ID・ツリー ID の重複(試験が異なれば同じ ID でもよい) | error | — |
 | CI-07 | `stem.ja` の文字 3-gram の Jaccard 係数が 0.8 を超える組 | warning | `similarity.*` |
 | CI-08 | multiple の問題で `type.count` と正解数が一致する | error | — |
-| CI-09 | `relatedQuestionIDs`、`questionIDs`、ツリーの `rootNodeID` と `next`、docs・問題・カードの `subObjective` が実在する。問題・カードの `domain`、問題の `caseStudy` と `wafPillars` が exam.yaml にある | error | exam.yaml の `domains`、`caseStudies`、`taxonomies.wafPillars` |
+| CI-09 | `relatedQuestionIDs`、`questionIDs`、ツリーの `rootNodeID` と `next`、docs・問題・カードの `subObjective` が実在する。問題・カードの `domain`、問題の `caseStudy` と `wafPillars`、模試の `caseStudies` が exam.yaml にある | error | exam.yaml の `domains`、`caseStudies`、`taxonomies.wafPillars` |
 | CI-10 | exam.yaml の `domains[*].weight` の合計が 1.0 ± 0.001 | error | `weights.*` |
 | CI-11 | `LocalizedText` の `en` の欠落(空文字を含む) | warning | — |
 | CI-12 | 試験定義の整合: `exam.yaml` の `id` がディレクトリ名と一致する、`vendor` が `vendors.yaml` にある、`domains[*].id` が 1 から始まる連番、サブ項目 ID が試験内で一意、`caseStudies` と `cases/*.yaml` の id の集合が一致する、無効な機能(`features.*: false`)のファイルがない(ケースが無効なら、問題の `caseStudy` と模試の `caseStudies` も空)、問題の `type.kind` が `format.questionKinds` に含まれる | error | — |
@@ -225,5 +225,5 @@ fixture は `tests/fixtures/generate.py` が固定 seed で決定論的に生成
 - `questions/domainN/` のディレクトリと `domain` の一致、ファイル名と `id` の一致のチェック
 - docs のフロントマターに対応する Swift モデル(アプリ側で Markdown と一緒に扱う想定)
 - `exam.yaml` のサブ項目と公式試験ガイドの照合、ドメイン 5・6 の比重の確定
-- gcp-pca のケーススタディ `altostrat`・`cymbal`・`knightMotives` の作成(作成したら `exam.yaml` の `caseStudies` にも加える。現在は `ehr` のみ)
+- gcp-pca のケーススタディ `altostrat`・`cymbal`・`knightMotives` の作成(作成したら `exam.yaml` の `caseStudies` に加え、`caseStudiesPerSet` を 2 に、模試 1 の `caseStudies` と `validation.yaml` の既定の割り当てを `[ehr, altostrat]` に戻す。現在は `ehr` のみで、`caseStudiesPerSet` は暫定で 1)
 - GitHub Actions のアクションを SHA で固定すること(現在はメジャーバージョンのタグを指定し、Dependabot で更新)
