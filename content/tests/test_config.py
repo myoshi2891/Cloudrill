@@ -120,6 +120,17 @@ def test_exam_config_rejects_unknown_key(tmp_path: Path, exam: dict[str, Any]) -
         load_exam_config(_global(tmp_path), _exam_dir(tmp_path, exam))
 
 
+def test_exam_config_rejects_duplicate_key(tmp_path: Path) -> None:
+    # Arrange: safe_dump は重複キーを書けないので、テキストで書く
+    exam_dir = _exam_dir(tmp_path, None)
+    (exam_dir / "validation.yaml").write_text(
+        "answerPosition:\n  maxRatio: 0.35\nanswerPosition:\n  maxRatio: 0.40\n", encoding="utf-8"
+    )
+    # Act / Assert: 重複したキーの名前と行番号を示す
+    with pytest.raises(ConfigError, match=re.escape("'answerPosition'(行 3)")):
+        load_exam_config(_global(tmp_path), exam_dir)
+
+
 def test_exam_config_rejects_bool_as_number(tmp_path: Path) -> None:
     exam_dir = _exam_dir(tmp_path, {"answerPosition": {"maxRatio": True}})
     # エラーメッセージは、どの validation.yaml の誤りかを示す

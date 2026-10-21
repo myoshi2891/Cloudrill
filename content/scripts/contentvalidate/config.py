@@ -13,6 +13,8 @@ from typing import Any
 
 import yaml
 
+from .loader import YamlLoadError, parse_yaml
+
 DEFAULT_CONFIG_NAME = "validation.yaml"
 # スクリプト同梱の既定設定(--root にない場合のフォールバック)
 _BUNDLED_CONFIG = Path(__file__).resolve().parents[2] / DEFAULT_CONFIG_NAME
@@ -167,10 +169,14 @@ def _merge(base: Mapping[str, Any], override: Mapping[str, Any]) -> dict[str, An
 
 
 def _read(path: Path) -> dict[str, Any]:
+    # コンテンツと同じく重複キーを誤りにする(yaml.safe_load は後のキーで黙って上書きするため)
     try:
-        raw = yaml.safe_load(path.read_text(encoding="utf-8"))
-    except (OSError, yaml.YAMLError) as e:
+        raw, _, dups = parse_yaml(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, yaml.YAMLError, YamlLoadError) as e:
         raise ConfigError(f"{path} を読み込めません: {e}") from e
+    if dups:
+        listed = ", ".join(f"'{key}'(行 {line})" for key, line in dups)
+        raise ConfigError(f"{path}: キー {listed} が重複しています")
     if not isinstance(raw, dict):
         raise ConfigError(f"{path} の形式が不正です")
     return raw
