@@ -1,0 +1,22 @@
+// swift-tools-version: 6.0
+// Domain 層。Foundation と DomainModels 以外に依存しない(DDD 5.3 R-01)。
+// ターゲットは DDD-P1 3.1 の構成のうち、実装済みのステップの分だけを宣言する(空のターゲットは SwiftPM がエラーにするため)。
+import PackageDescription
+
+let package = Package(
+    name: "Domain",
+    platforms: [.iOS(.v18), .macOS(.v15)],
+    products: [
+        .library(name: "StudyModels", targets: ["StudyModels"]),
+        .library(name: "DomainTestSupport", targets: ["DomainTestSupport"]),
+    ],
+    dependencies: [
+        .package(path: "../DomainModels"),
+    ],
+    targets: [
+        .target(name: "StudyModels", dependencies: ["DomainModels"]),
+        .target(name: "DomainTestSupport", dependencies: ["StudyModels", "DomainModels"]),
+        .testTarget(name: "DomainTestSupportTests", dependencies: ["DomainTestSupport"]),
+    ],
+    swiftLanguageModes: [.v6]
+)
