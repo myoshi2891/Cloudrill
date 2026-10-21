@@ -61,16 +61,17 @@ python content/scripts/validate.py [--root content] [--config validation.yaml] [
 | `--only` | 指定したルールだけを報告する。Schema 検証そのものは常に行う(後述) |
 | `--strict` | warning を error に昇格する。出力の深刻度と終了コードの両方に反映される |
 | `--root` | 省略時は、スクリプトの位置から見た `content/` を使う(実行場所に依存しない) |
-| `--config` | 省略時は `<root>/validation.yaml` を使い、なければ `content/validation.yaml` を使う |
+| `--config` | 全体の設定ファイル。省略時は `<root>/validation.yaml` を使い、なければ `content/validation.yaml` を使う。試験ごとの設定(`exams/<examID>/validation.yaml`)は常に試験ディレクトリから読む |
 
 ## ディレクトリ構成(`content/` 配下)
 
 ```
 schemas/                  JSON Schema(Draft 2020-12)
-validation.yaml           検証の閾値と設定
+validation.yaml           検証の閾値(全体)
 vendors.yaml              ベンダーの定義(全試験で共通)
 exams/<examID>/           試験ごとのディレクトリ(例: exams/gcp-pca/)
   exam.yaml               試験の定義(ドメインと比重、形式、機能、語彙)
+  validation.yaml         試験ごとの検証設定(模試の構成 examSet、閾値の上書き。任意)
   weights.yaml            ドメイン比重
   exam-sets.yaml          模試ごとの問題 ID とケースの割り当て
   questions/domain{1..6}/ 問題(1ファイル1問。ファイル名は <id>.yaml)
@@ -124,12 +125,17 @@ tests/                    pytest と fixture(valid-json/ は Swift テストが�
 
 ## 検証ルール
 
-閾値はすべて `validation.yaml` にあります。
+閾値はすべて `validation.yaml` にあります。設定は2階層です。
+
+- 全体の `content/validation.yaml` に、試験ごとの `exams/<examID>/validation.yaml` を深いマージで重ねます。マッピングはキーごとにマージし、リストとスカラーは試験側の値で置き換えます。
+- 模試の構成(`examSet`)は試験ごとの設定にだけ書けます。`examSet` がない試験では、CI-02 のドメイン配分・ケース問題数・既定の割り当ての確認を省略します。
+- サブ項目の一覧と模試の問題数は `exam.yaml` が正です(全体の設定に `examGuide` や `examSet` があると、終了コード 2)。
+- 未知のキーは typo とみなし、終了コード 2 にします。
 
 | ID | ルール | 深刻度 | 設定キー |
 |---|---|---|---|
 | CI-01 | 全ファイルの Schema 適合、YAML 構文、キーの重複、必須ファイルの有無。加えて、`subObjective` と `domain` の整合(問題とカード)、single の正解がちょうど 1 つ、誤答の `mistakeTags` が 1 つ以上、正解に `mistakeTags` がない、選択肢 ID・模試 ID・ノード ID の重複 | error | — |
-| CI-02 | 模試の問題数、ドメイン配分、ケース数(exam.yaml の `caseStudiesPerSet`)、ケース問題数(`caseStudiesPerSet` が 0 なら 0 問)、ケース問題の `caseStudy` が模試のケースに含まれること、問題の `examSets` と `questionIDs` の双方向の一致、存在しない模試番号の参照 | complete は error、draft は warning(存在しない模試番号は常に error) | `examSet.*` |
+| CI-02 | 模試の問題数、ドメイン配分、ケース数(exam.yaml の `caseStudiesPerSet`)、ケース問題数(`caseStudiesPerSet` が 0 なら 0 問)、ケース問題の `caseStudy` が模試のケースに含まれること、問題の `examSets` と `questionIDs` の双方向の一致、存在しない模試番号の参照 | complete は error、draft は warning(存在しない模試番号は常に error) | 試験ごとの `examSet.*`、exam.yaml の `format.mockExam` |
 | CI-02 | 既定のケース割り当て・level との違い | warning | `examSet.defaultAssignments` |
 | CI-03 | 単一選択問題の正解位置(元の並び順)A〜D がそれぞれ 20〜30% | complete は error、draft は warning | `answerPosition.*`、`statistics.draftMinSample` |
 | CI-04 | 最長の選択肢(`ja` の文字数)が正解である問題の割合が 35% 以下 | complete は error、draft は warning | `longestChoice.*`、`statistics.draftMinSample` |
@@ -138,7 +144,7 @@ tests/                    pytest と fixture(valid-json/ は Swift テストが�
 | CI-07 | 問題 ID・カード ID・ドリル ID・ケース ID・ツリー ID の重複 | error | — |
 | CI-07 | `stem.ja` の文字 3-gram の Jaccard 係数が 0.8 を超える組 | warning | `similarity.*` |
 | CI-08 | multiple の問題で `type.count` と正解数が一致する | error | — |
-| CI-09 | `relatedQuestionIDs`、`questionIDs`、ツリーの `rootNodeID` と `next`、docs・問題・カードの `subObjective` が実在する | error | `examGuide.subObjectives` |
+| CI-09 | `relatedQuestionIDs`、`questionIDs`、ツリーの `rootNodeID` と `next`、docs・問題・カードの `subObjective` が実在する | error | exam.yaml の `domains[*].subObjectives` |
 | CI-10 | `weights.yaml` と exam.yaml の `domains[*].weight` の合計が 1.0 ± 0.001、両者の比重が一致する | error | `weights.*` |
 | CI-11 | `LocalizedText` の `en` の欠落(空文字を含む) | warning | — |
 
@@ -192,11 +198,11 @@ fixture は `tests/fixtures/generate.py` が固定 seed で決定論的に生成
 9. **CI-04 は multiple の問題も対象にします。** 最長の選択肢が正解のいずれかであれば該当とします。最長が同率で複数ある場合も、その中に正解があれば該当と数えます(`countTies: true` で変更できます)。
 10. **draft の模試の統計チェック(CI-03・CI-04)。** 単一選択問題(CI-04 では全問題)が `statistics.draftMinSample`(20)未満の draft 模試では、統計チェックを省略します。数問の段階で偏りの warning が出続けるのを避けるためです。complete の模試は常に検査します。
 11. **CI-07 の対象範囲。** 仕様の「問題 ID・カード ID」に加えて、ドリル・ケース・ツリーの ID の重複も検出します。類似度の判定前に、NFKC 正規化と空白の除去を行います。
-12. **CI-09 の subObjective の実在確認。** `validation.yaml` の `examGuide.subObjectives` と照合します。仕様の docs に加えて、問題とカードにも適用します。
+12. **CI-09 の subObjective の実在確認。** 試験の `exam.yaml` の `domains[*].subObjectives` と照合します。仕様の docs に加えて、問題とカードにも適用します。
     **この一覧は暫定値です。公式の試験ガイド(v6.1)との照合が必要です。**
 13. **CI-06 の対象。** `references[].url` に加えて、ケースの `officialURL` も対象にします。同じ URL は1回だけ確認し、検出された問題はその URL のすべての出現箇所に報告します。
 14. **`--strict` は出力の深刻度も error に書き換えます。** GitHub のアノテーションも error になります。
-15. **終了コード 2。** 引数の不備や `validation.yaml` の不備は、コンテンツの違反と区別するため 2 にします。argparse の慣例にも合わせています。
+15. **終了コード 2。** 引数の不備や `validation.yaml`(全体・試験ごと)の不備は、コンテンツの違反と区別するため 2 にします。argparse の慣例にも合わせています。
 16. **YAML の正規化。** キーはすべて文字列にし(`weights.yaml` の `1:` は `"1"` になります)、日付は ISO 8601 の文字列にします。`examGuideVersion: 6.1` のように引用符を付け忘れると数値として読まれ、CI-01 になります。
 17. **行番号。** マッピングの要素ではキーの行を、配列の要素では要素の先頭行を指します。docs ではフロントマターの開始行(`---`)からのずれを補正します。
 18. **Python のバージョン。** 依頼では 3.12 でしたが、セキュリティ修正の状況を踏まえて 3.14 を採用しました(依頼者と合意済み)。コードは 3.12 でも動くように書いており、`requires-python >= 3.12` としています。直接の依存は `==` で固定し、Dependabot で更新します。
@@ -213,5 +219,5 @@ fixture は `tests/fixtures/generate.py` が固定 seed で決定論的に生成
 - ディシジョンツリーの循環検出と、到達できないノードの検出
 - `questions/domainN/` のディレクトリと `domain` の一致、ファイル名と `id` の一致のチェック
 - docs のフロントマターに対応する Swift モデル(アプリ側で Markdown と一緒に扱う想定)
-- `examGuide.subObjectives` と公式試験ガイドの照合、ドメイン 5・6 の比重の確定
+- `exam.yaml` のサブ項目と公式試験ガイドの照合、ドメイン 5・6 の比重の確定
 - GitHub Actions のアクションを SHA で固定すること(現在はメジャーバージョンのタグを指定し、Dependabot で更新)

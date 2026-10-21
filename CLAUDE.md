@@ -58,7 +58,7 @@ validate.py の終了コード: `0` = error なし / `1` = error あり(`--stric
 
 - `validate.py`(CLI)→ `engine.run()` → `context.build_context()`(ロード、Schema 検証、行番号の付与)→ `rules.ALL_RULES` の各 `check(ctx)` → `report` で text / json / github 形式に整形する。
 - Schema の `$id` は `https://examprep-content.invalid/schemas/<name>.schema.json`。`referencing.Registry` に全 Schema を事前に登録し、オフラインで解決する。共通の定義は `common.schema.json#/$defs/...` に置く。すべてのオブジェクトに `additionalProperties: false` を付けている。
-- 役割分担: 1ファイル内の構造は Schema が担当する。Schema で表しにくい条件と、ファイル間の整合(模試の構成、統計、重複、参照)はルール CI-01〜CI-11 が担当する。閾値はすべて `content/validation.yaml` に置く。
+- 役割分担: 1ファイル内の構造は Schema が担当する。Schema で表しにくい条件と、ファイル間の整合(模試の構成、統計、重複、参照)はルール CI-01〜CI-11 が担当する。閾値は `content/validation.yaml`(全体)に置き、試験ごとの `exams/<examID>/validation.yaml` を深いマージで重ねる(模試の構成 `examSet` は試験側にだけ書ける。サブ項目と模試の問題数は `exam.yaml` が正)。
 - Schema に違反したファイルは、ファイル間ルールの対象から外す(違反の連鎖を防ぐため)。`--only` で CI-01 を外しても、Schema 検証自体は常に行う。
 - 例外として、`choices[*].rationale` に関する Schema 違反は CI-01 では報告せず、CI-05 だけが報告する。
 - ルールを追加する手順: `rules/ciNN_xxx.py` に `check(ctx) -> Iterable[Issue]` と `RULE = Rule("CI-NN", ...)` を定義する → `rules/__init__.py` の `ALL_RULES` に追加する → `generate.py` の `INVALID_CASES` に違反ケースを追加し、fixture を再生成する。

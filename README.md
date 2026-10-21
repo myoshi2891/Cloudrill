@@ -14,8 +14,8 @@ google-cloud-professional-cloud-architect/
 │   └── DomainModels/                                # コンテンツの値型(SwiftPM、Swift Testing)
 ├── content/                                         # 学習コンテンツ、JSON Schema、検証ツール
 │   ├── schemas/                                     # JSON Schema(Draft 2020-12)
-│   ├── questions/ flashcards/ cases/ decisions/ drills/ docs/
-│   ├── exam-sets.yaml  weights.yaml  validation.yaml
+│   ├── vendors.yaml  validation.yaml                # ベンダー定義、検証の閾値(全体)
+│   ├── exams/<examID>/                              # 試験ごと: exam.yaml、validation.yaml、問題などのコンテンツ
 │   ├── scripts/                                     # validate.py、export_json.py
 │   └── tests/                                       # pytest と fixture(valid-json/ は Swift テストも使う)
 ├── .github/

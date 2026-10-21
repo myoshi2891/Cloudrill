@@ -536,6 +536,13 @@ git status --short content | grep -c '^R'                         # 移動した
 
 **完了条件**: `(cd content && .venv/bin/pytest)` が通り、`validate.py` が error 0 件。
 
+**実装メモ**(実装時に本書と変えた点。P0-S05 で解消する):
+
+- `ExamContext` の導入前なので、`Context` に試験ごとの設定(`exam_config(exam_id)`)と、`exam.yaml` のサブ項目(`sub_objectives(exam_id)`)の読み替えを置いた。CI-02 の問題数も `exam.yaml` の `format.mockExam.questionCount` から読む。
+- CI-07 の類似度はまだ試験をまたいで比較しているため、全体の閾値を使う。
+- 全体の設定に `examSet` があっても `ConfigError` にする(試験ごとの設定にだけ書ける)。
+- P0-S08 の `export()` での `validation.yaml` の除外と `test_export_skips_validation_yaml` を先に実装した(fixture に試験ごとの `validation.yaml` が入り、valid-json に `validation.json` が出力されるため)。
+
 ---
 
 ### P0-S05 試験ごとの検証コンテキストと既存ルールの移行
