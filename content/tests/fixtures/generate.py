@@ -382,6 +382,12 @@ def ov_ci01_yaml(valid: dict[str, Any]) -> dict[str, Any]:
     return {"questions/domain2/Q-2.1-0905.yaml": "id: Q-2.1-0905\nstem: [unclosed\n"}
 
 
+def ov_ci01_exam_id(valid: dict[str, Any]) -> dict[str, Any]:
+    exam = copy.deepcopy(valid["exam.yaml"])
+    exam["id"] = "test-other"
+    return {"exam.yaml": exam}
+
+
 def ov_ci02_case(valid: dict[str, Any]) -> dict[str, Any]:
     q = copy.deepcopy(next(q for q in _set1(valid) if q["caseStudy"] == "ehr"))
     q["caseStudy"] = "cymbal"
@@ -538,6 +544,7 @@ INVALID_CASES: list[tuple[str, str, dict[str, list[str]], Callable[[dict[str, An
     ("CI-01-single-two-correct", "single なのに正解が 2 つ", {"CI-01": ["error"]}, ov_ci01_two_correct, {}),
     ("CI-01-mistake-tags", "正解に mistakeTags、誤答に mistakeTags なし", {"CI-01": ["error"]}, ov_ci01_mistake_tags, {}),
     ("CI-01-yaml-syntax", "YAML の構文エラー", {"CI-01": ["error"]}, ov_ci01_yaml, {}),
+    ("CI-01-exam-id-mismatch", "exam.yaml の id がディレクトリ名と異なる", {"CI-01": ["error"]}, ov_ci01_exam_id, {}),
     ("CI-02-case-mismatch", "模試のケース外の caseStudy", {"CI-02": ["error"]}, ov_ci02_case, {}),
     ("CI-02-bidirectional", "問題の examSets にあるが questionIDs にない", {"CI-02": ["error"]}, ov_ci02_bidirectional, {}),
     ("CI-02-draft-default-level", "draft の模試で既定と異なる level", {"CI-02": ["warning"]}, ov_ci02_draft, {}),
