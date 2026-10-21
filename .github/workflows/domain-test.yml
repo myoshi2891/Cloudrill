@@ -1,0 +1,37 @@
+name: domain-test
+
+on:
+  pull_request:
+    paths:
+      - "packages/Domain/**"
+      - "packages/DomainModels/**"
+      - "scripts/coverage.sh"
+      - ".github/workflows/domain-test.yml"
+  push:
+    branches: [main]
+    paths:
+      - "packages/Domain/**"
+      - "packages/DomainModels/**"
+      - "scripts/coverage.sh"
+      - ".github/workflows/domain-test.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: domain-test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  swift:
+    name: swift test (coverage)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Swift version
+        run: swift --version
+      # coverage.sh が swift test --enable-code-coverage を実行し、行カバレッジが 80% 未満なら失敗する(DDD 7.6、NFR-11)
+      - name: Run Swift tests with coverage (Domain)
+        run: scripts/coverage.sh packages/Domain 80

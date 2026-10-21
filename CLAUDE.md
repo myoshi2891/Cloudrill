@@ -43,6 +43,9 @@ content/.venv/bin/python content/scripts/fsrs_vectors.py --out packages/Domain/T
 swift test --package-path packages/DomainModels
 swift test --package-path packages/Domain
 swift test --package-path packages/DomainModels --filter FixtureDecodingTests   # 単一テスト
+
+# 行カバレッジ(Sources の *TestSupport/ を除く。最低値を下回ると終了コード 1)
+scripts/coverage.sh packages/Domain 80
 ```
 
 `swift test` が `plugin for module 'TestingMacros' not found` で失敗する場合は、`DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer` を前に付ける。
@@ -86,7 +89,8 @@ validate.py の終了コード: `0` = error なし / `1` = error あり(`--stric
 変更されたパスに応じて、必要なワークフローだけが動く。
 
 - `content-validate.yml` — `pytest -q` と `validate.py --format github`(Ubuntu、`content/` で実行)
-- `domainmodels-test.yml` — `swift test --package-path packages/DomainModels` と `swift test --package-path packages/Domain`(macOS。`packages/DomainModels/**`、`packages/Domain/**`、`content/schemas/**`、`content/tests/fixtures/**` の変更時。Domain は DomainModels に依存するので、どの変更でも両方を実行する)
+- `domainmodels-test.yml` — `swift test --package-path packages/DomainModels`(macOS。`packages/DomainModels/**`、`content/schemas/**`、`content/tests/fixtures/**` の変更時)
+- `domain-test.yml` — `scripts/coverage.sh packages/Domain 80`(macOS。`swift test` と行カバレッジ 80% の確認。`packages/Domain/**`、`packages/DomainModels/**` の変更時。Domain は DomainModels に依存するので、DomainModels の変更でも実行する)
 - `content-link-check.yml` — 毎週、`--only CI-06 --check-links --strict`
 
 ## 命名とリリース
