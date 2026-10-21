@@ -13,11 +13,11 @@ Google Cloud Professional Cloud Architect(PCA)試験対策 iOS アプリと、�
 
 ## コマンド
 
-すべてリポジトリのルートから実行する。Python は 3.14(`requires-python >= 3.12`)、仮想環境は `content/.venv`。
+すべてリポジトリのルートから実行する。Python は 3.14(`requires-python >= 3.12`、`content/.python-version`)。パッケージ管理は uv で、依存は `content/pyproject.toml` と `content/uv.lock`、仮想環境は `content/.venv` に置く。
 
 ```sh
-# 初回セットアップ
-python3.14 -m venv content/.venv && content/.venv/bin/pip install -r content/requirements.txt
+# 初回セットアップ(依存を変えたら uv lock --project content で uv.lock を更新する)
+uv sync --project content
 
 # Python テスト(pyproject.toml がある content/ で実行する)
 (cd content && .venv/bin/pytest)

@@ -23,10 +23,8 @@ Google Cloud Professional Cloud Architect(PCA)試験対策 iOS アプリの学�
 ```sh
 cd /path/to/google-cloud-professional-cloud-architect
 
-# Python 3.14(pyenv の例)。仮想環境は content/.venv に作る
-pyenv install -s 3.14.7
-python3.14 -m venv content/.venv
-content/.venv/bin/pip install -r content/requirements.txt
+# uv(https://docs.astral.sh/uv/)が必要。Python 3.14 の取得と content/.venv の作成をまとめて行う
+uv sync --project content
 
 # コンテンツの検証(--root を省略すると content/ が対象。どのディレクトリから実行しても結果は同じ)
 content/.venv/bin/python content/scripts/validate.py

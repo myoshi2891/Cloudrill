@@ -38,9 +38,8 @@ google-cloud-professional-cloud-architect/
 ```sh
 cd /path/to/google-cloud-professional-cloud-architect
 
-# 初回のみ: Python 3.14 の仮想環境を作る
-python3.14 -m venv content/.venv
-content/.venv/bin/pip install -r content/requirements.txt
+# 初回のみ: uv で Python 3.14 の仮想環境(content/.venv)を作る
+uv sync --project content
 
 # コンテンツのテスト
 (cd content && .venv/bin/pytest)
