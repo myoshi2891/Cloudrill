@@ -420,6 +420,14 @@ public enum ScoringPolicies {
 
 **完了条件**: `swift test --package-path packages/Domain --filter ScoringTests` が通る。
 
+**実装メモ**(実装時に本書と変えた点):
+
+- 未対応の出題形式は、未解答の問題も含めて採点の前に確かめる。解答の有無で、エラーになるかどうかが変わらないようにするため。
+- `byDomain` は試験定義の全ドメインを 0/0 で初期化する。`byCaseStudy` は、出題のあったケースだけを持つ(テスト `byCaseStudy` の期待値のとおり)。
+- テストのケース ID は、`ehr` ではなく `alphaLike` の `case-a` を使った(P1-S01 の実装メモを参照)。
+- Refactor: 集計は、`Sequence<QuestionOutcome>.tally(by:initialKeys:)`(internal)にまとめた。キーが nil の問題(ケースなしの問題)は数えない。
+- `ScoringPolicies.policy(for:)` は `switch` で書いた。`ScoringPolicyKind` に case を追加すると、コンパイルエラーで実装漏れが分かる。
+
 ---
 
 ### P1-S05 模試の状態機械(ExamSession)
