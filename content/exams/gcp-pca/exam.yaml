@@ -168,5 +168,5 @@ taxonomies:
       name: { ja: パフォーマンスの最適化, en: Performance optimization }
     - id: sustainability
       name: { ja: サステナビリティ, en: Sustainability }
-# 表示順。cases/*.yaml の id と一致させる(CI-12、P0-S06)。現時点で cases/ にあるのは ehr のみ
-caseStudies: [ehr, altostrat, cymbal, knightMotives]
+# 表示順。cases/*.yaml の id と一致させる(CI-12)。altostrat・cymbal・knightMotives は、cases/ に追加したらここにも加える
+caseStudies: [ehr]
