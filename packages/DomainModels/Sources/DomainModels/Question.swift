@@ -11,7 +11,7 @@ public struct Question: Codable, Hashable, Sendable, Identifiable {
     public var caseStudy: CaseStudyID?
     public var type: QuestionType
     public var difficulty: Int
-    public var wafPillars: [WAFPillar]
+    public var wafPillars: [WAFPillarID]
     public var keywords: [String]
     /// 収録先の模試番号。練習専用なら空
     public var examSets: [Int]

@@ -45,7 +45,7 @@ struct FixtureDecodingTests {
         let ids = Set(questions.map(\.id))
         let set1 = try #require(examSets.examSets.first { $0.id == 1 })
         #expect(set1.status == .complete)
-        #expect(set1.caseStudies == [.ehr, .altostrat])
+        #expect(set1.caseStudies == ["ehr", "altostrat"])
         #expect(set1.questionIDs.count == 55)
         #expect(set1.questionIDs.allSatisfy { ids.contains($0) })
         #expect(questions.contains { $0.type == .multiple(count: 2) })
@@ -57,20 +57,13 @@ struct FixtureDecodingTests {
         }
     }
 
-    @Test("ドメイン比重のキーが Int 1〜6 で、合計が 1.0")
-    func weights() throws {
-        let weights = try decode(DomainWeights.self, root.appending(path: "weights.json"))
-        #expect(weights.weights.keys.sorted() == Array(1...6))
-        #expect(abs(weights.weights.values.reduce(0, +) - 1.0) < 0.001)
-    }
-
     @Test("フラッシュカード・ケース・ツリー・ドリルをデコードできる")
     func otherContent() throws {
         let cards = try jsonFiles(in: "flashcards").flatMap { try decode(FlashcardFile.self, $0).cards }
         #expect(cards.count == 2)
 
         let cases = try jsonFiles(in: "cases").map { try decode(CaseStudy.self, $0) }
-        #expect(Set(cases.map(\.id)) == [.ehr, .altostrat])
+        #expect(Set(cases.map(\.id)) == ["ehr", "altostrat"])
 
         let trees = try jsonFiles(in: "decisions").map { try decode(DecisionTree.self, $0) }
         let tree = try #require(trees.first)
@@ -100,8 +93,10 @@ struct FixtureDecodingTests {
         #expect(abs(exam.domains.map(\.weight).reduce(0, +) - 1.0) < 0.001)
         #expect(exam.domains.allSatisfy { !$0.subObjectives.isEmpty })
         #expect(exam.features.keywordDrills)
-        #expect(exam.taxonomies.wafPillars.map(\.id) == WAFPillar.allCases)
-        #expect(exam.caseStudies == [.ehr, .altostrat])
+        #expect(exam.taxonomies.wafPillars.map(\.id) == [
+            "operationalExcellence", "security", "reliability", "costOptimization", "performance", "sustainability",
+        ])
+        #expect(exam.caseStudies == ["ehr", "altostrat"])
     }
 
     @Test("ベンダー定義をデコードでき、試験の vendor が実在する")

@@ -25,9 +25,3 @@ public struct ExamSet: Codable, Hashable, Sendable, Identifiable {
 public struct ExamSetsFile: Codable, Hashable, Sendable {
     public var examSets: [ExamSet]
 }
-
-/// weights.schema.json(weights.yaml)。JSON のキー "1"〜"6" は Int キーとしてデコードされる。
-public struct DomainWeights: Codable, Hashable, Sendable {
-    public var examGuideVersion: String
-    public var weights: [Int: Double]
-}

@@ -57,7 +57,6 @@ struct CustomDecodingTests {
     @Test("未知の列挙値はエラー")
     func unknownEnum() {
         #expect(throws: DecodingError.self) { try decode(MistakeTag.self, #""unknown""#) }
-        #expect(throws: DecodingError.self) { try decode(CaseStudyID.self, #""mountkirk""#) }
     }
 
     private func manifestJSON(examID: String? = "gcp-pca") -> String {

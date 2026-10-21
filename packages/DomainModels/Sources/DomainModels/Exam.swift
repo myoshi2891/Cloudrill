@@ -13,9 +13,8 @@ public enum ScoringPolicyKind: String, Codable, Hashable, Sendable, CaseIterable
 
 /// exam.schema.json(exams/<examID>/exam.yaml)
 public struct Exam: Codable, Hashable, Sendable, Identifiable {
-    /// P0-S09 で `ExamID` 型に置き換える
-    public var id: String
-    public var vendor: String
+    public var id: ExamID
+    public var vendor: VendorID
     public var name: LocalizedText
     /// 画面の狭い場所での表示用(例: PCA)
     public var shortName: String
@@ -90,6 +89,6 @@ public struct ExamTaxonomies: Codable, Hashable, Sendable {
 
 /// exam.schema.json#/$defs/WAFPillar(柱の ID と表示名)
 public struct WAFPillarEntry: Codable, Hashable, Sendable, Identifiable {
-    public var id: WAFPillar
+    public var id: WAFPillarID
     public var name: LocalizedText
 }
