@@ -17,8 +17,8 @@ def _sub_objective(ctx: Context, doc: SourceDoc, obj: object, path: tuple[str | 
 
 
 def _flashcards(ctx: Context) -> Iterator[Issue]:
-    known = ctx.known_question_ids
     for doc in ctx.of_kind(Kind.FLASHCARD):
+        known = ctx.known_question_ids(doc.exam_id)
         for i, card in enumerate(get_list(doc.data, "cards")):
             yield from _sub_objective(ctx, doc, card, ("cards", i))
             for j, qid in enumerate(get_list(card, "relatedQuestionIDs")):
@@ -27,18 +27,16 @@ def _flashcards(ctx: Context) -> Iterator[Issue]:
 
 
 def _exam_sets(ctx: Context) -> Iterator[Issue]:
-    doc, exam_sets = ctx.exam_sets
-    if doc is None:
-        return
-    known = ctx.known_question_ids
-    for i, exam_set in exam_sets:
-        for j, qid in enumerate(get_list(exam_set, "questionIDs")):
-            if qid not in known:
-                yield doc.issue(
-                    RULE_ID, Severity.ERROR,
-                    f"模試 {exam_set.get('id')} の questionIDs の {qid} は存在しません",
-                    ("examSets", i, "questionIDs", j),
-                )
+    for doc, exam_sets in ctx.exam_sets:
+        known = ctx.known_question_ids(doc.exam_id)
+        for i, exam_set in exam_sets:
+            for j, qid in enumerate(get_list(exam_set, "questionIDs")):
+                if qid not in known:
+                    yield doc.issue(
+                        RULE_ID, Severity.ERROR,
+                        f"模試 {exam_set.get('id')} の questionIDs の {qid} は存在しません",
+                        ("examSets", i, "questionIDs", j),
+                    )
 
 
 def _decisions(ctx: Context) -> Iterator[Issue]:

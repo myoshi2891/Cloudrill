@@ -399,6 +399,12 @@ def ov_ci02_draft(valid: dict[str, Any]) -> dict[str, Any]:
     return {"exam-sets.yaml": sets}
 
 
+def ov_ci02_cases_per_set(valid: dict[str, Any]) -> dict[str, Any]:
+    exam = copy.deepcopy(valid["exam.yaml"])
+    exam["format"]["mockExam"]["caseStudiesPerSet"] = 3
+    return {"exam.yaml": exam}
+
+
 def ov_ci03(valid: dict[str, Any]) -> dict[str, Any]:
     """正解が B の単一選択問題 5 問の正解を A に移す(選択肢ごと入れ替えるので長さの条件は変わらない)。"""
     out: dict[str, Any] = {}
@@ -503,6 +509,12 @@ def ov_ci10(valid: dict[str, Any]) -> dict[str, Any]:
     return {"weights.yaml": weights}
 
 
+def ov_ci10_exam(valid: dict[str, Any]) -> dict[str, Any]:
+    exam = copy.deepcopy(valid["exam.yaml"])
+    exam["domains"][0]["weight"] = 0.3
+    return {"exam.yaml": exam}
+
+
 def ov_ci11(valid: dict[str, Any]) -> dict[str, Any]:
     q = _practice(911)
     del q["stem"]["en"]
@@ -519,6 +531,7 @@ INVALID_CASES: list[tuple[str, str, dict[str, list[str]], Callable[[dict[str, An
     ("CI-02-case-mismatch", "模試のケース外の caseStudy", {"CI-02": ["error"]}, ov_ci02_case, {}),
     ("CI-02-bidirectional", "問題の examSets にあるが questionIDs にない", {"CI-02": ["error"]}, ov_ci02_bidirectional, {}),
     ("CI-02-draft-default-level", "draft の模試で既定と異なる level", {"CI-02": ["warning"]}, ov_ci02_draft, {}),
+    ("CI-02-case-studies-per-set", "模試のケース数が caseStudiesPerSet と異なる", {"CI-02": ["error"]}, ov_ci02_cases_per_set, {}),
     ("CI-03-answer-position", "正解位置が A に偏る", {"CI-03": ["error"]}, ov_ci03, {}),
     ("CI-04-longest-choice", "最長の選択肢が正解の割合が 35% 超", {"CI-04": ["error"]}, ov_ci04, {}),
     ("CI-05-empty-rationale", "rationale.ja が空文字", {"CI-05": ["error"]}, ov_ci05_empty, {}),
@@ -538,7 +551,8 @@ INVALID_CASES: list[tuple[str, str, dict[str, list[str]], Callable[[dict[str, An
         ov_ci09_exam_set,
         {},
     ),
-    ("CI-10-weights-sum", "比重の合計が 0.985", {"CI-10": ["error"]}, ov_ci10, {}),
+    ("CI-10-weights-sum", "比重の合計が 0.985(exam.yaml との不一致も出る)", {"CI-10": ["error"]}, ov_ci10, {}),
+    ("CI-10-exam-weights", "exam.yaml の比重の合計が 1.05 で weights.yaml とも異なる", {"CI-10": ["error"]}, ov_ci10_exam, {}),
     ("CI-11-missing-en", "stem.en の欠落", {"CI-11": ["warning"]}, ov_ci11, {}),
 ]
 

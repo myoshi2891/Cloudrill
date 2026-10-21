@@ -42,28 +42,42 @@ class Context:
         return self.of_kind(Kind.QUESTION)
 
     @cached_property
-    def question_by_id(self) -> dict[str, SourceDoc]:
-        """ID → 問題。重複時はパス順で先のものを採用する(重複自体は CI-07 が報告)。"""
-        result: dict[str, SourceDoc] = {}
+    def _question_index(self) -> dict[str | None, dict[str, SourceDoc]]:
+        result: dict[str | None, dict[str, SourceDoc]] = {}
         for doc in self.questions:
             qid = get_str(doc.data, "id")
             if qid is not None:
-                result.setdefault(qid, doc)
+                result.setdefault(doc.exam_id, {}).setdefault(qid, doc)
         return result
 
-    @cached_property
-    def known_question_ids(self) -> set[str]:
-        """Schema 違反のファイルも含めて、ID が読み取れる問題の ID 一覧(参照切れの二重報告を避ける)。"""
-        return {qid for d in self.of_kind(Kind.QUESTION, valid_only=False) if (qid := get_str(d.data, "id"))}
+    def question_by_id(self, exam_id: str | None) -> dict[str, SourceDoc]:
+        """試験内の ID → 問題。重複時はパス順で先のものを採用する(重複自体は CI-07 が報告)。"""
+        return self._question_index.get(exam_id, {})
 
     @cached_property
-    def exam_sets(self) -> tuple[SourceDoc | None, list[tuple[int, dict[str, Any]]]]:
-        """(exam-sets.yaml の doc, [(配列 index, 模試定義)])。Schema 違反なら空。"""
-        docs = self.of_kind(Kind.EXAM_SETS)
-        if not docs:
-            return None, []
-        doc = docs[0]
-        return doc, [(i, s) for i, s in enumerate(get_list(doc.data, "examSets")) if isinstance(s, dict)]
+    def _known_question_ids(self) -> dict[str | None, set[str]]:
+        result: dict[str | None, set[str]] = {}
+        for doc in self.of_kind(Kind.QUESTION, valid_only=False):
+            if qid := get_str(doc.data, "id"):
+                result.setdefault(doc.exam_id, set()).add(qid)
+        return result
+
+    def known_question_ids(self, exam_id: str | None) -> set[str]:
+        """Schema 違反のファイルも含めて、試験内で ID が読み取れる問題の ID 一覧(参照切れの二重報告を避ける)。"""
+        return self._known_question_ids.get(exam_id, set())
+
+    @cached_property
+    def exam_by_id(self) -> dict[str | None, SourceDoc]:
+        """試験 ID → Schema に適合した exam.yaml。"""
+        return {d.exam_id: d for d in self.of_kind(Kind.EXAM)}
+
+    @cached_property
+    def exam_sets(self) -> list[tuple[SourceDoc, list[tuple[int, dict[str, Any]]]]]:
+        """試験ごとの (exam-sets.yaml の doc, [(配列 index, 模試定義)])。Schema 違反の試験は含まない。"""
+        return [
+            (doc, [(i, s) for i, s in enumerate(get_list(doc.data, "examSets")) if isinstance(s, dict)])
+            for doc in self.of_kind(Kind.EXAM_SETS)
+        ]
 
 
 # ---- 問題データの補助関数 ---------------------------------------------------
@@ -91,9 +105,9 @@ def status_severity(exam_set: dict[str, Any]) -> Severity:
     return Severity.ERROR if exam_set.get("status") == "complete" else Severity.WARNING
 
 
-def set_questions(ctx: Context, exam_set: dict[str, Any]) -> list[SourceDoc]:
-    """模試に収録された(実在し Schema に適合する)問題。"""
-    by_id = ctx.question_by_id
+def set_questions(ctx: Context, exam_id: str | None, exam_set: dict[str, Any]) -> list[SourceDoc]:
+    """模試に収録された(同じ試験に実在し Schema に適合する)問題。"""
+    by_id = ctx.question_by_id(exam_id)
     return [by_id[q] for q in get_list(exam_set, "questionIDs") if isinstance(q, str) and q in by_id]
 
 

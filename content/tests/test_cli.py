@@ -29,7 +29,8 @@ def test_exit_code_one_on_error(tmp_path: Path, capsys: pytest.CaptureFixture[st
     assert main(["--root", str(root)]) == 1
     out = capsys.readouterr().out
     assert re.search(r"^exams/test-alpha/weights\.yaml:\d+: \[CI-10\] error: ", out, re.MULTILINE)
-    assert "  CI-10 error: 1" in out
+    # weights.yaml の合計と、exam.yaml との不一致の 2 件
+    assert "  CI-10 error: 2" in out
 
 
 def test_warning_only_exits_zero_unless_strict(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:

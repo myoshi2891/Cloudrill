@@ -71,8 +71,8 @@ def test_strict_promotes_warnings(config: Config, tmp_path: Path) -> None:
 def test_issue_reports_line_number(config: Config, tmp_path: Path) -> None:
     root = materialize("CI-10-weights-sum", tmp_path)
     lines = (root / ALPHA / "weights.yaml").read_text(encoding="utf-8").splitlines()
-    [issue] = run(root, config)
-    assert issue.file == f"{ALPHA}/weights.yaml"
+    # exam.yaml との不一致(CI-10)も出るので、weights.yaml の issue だけを見る
+    [issue] = [i for i in run(root, config) if i.file == f"{ALPHA}/weights.yaml"]
     assert issue.line == lines.index("weights:") + 1
 
 
