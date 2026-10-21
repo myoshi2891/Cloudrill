@@ -68,14 +68,17 @@ python content/scripts/validate.py [--root content] [--config validation.yaml] [
 ```
 schemas/                  JSON Schema(Draft 2020-12)
 validation.yaml           検証の閾値と設定
-weights.yaml              ドメイン比重
-exam-sets.yaml            模試ごとの問題 ID とケースの割り当て
-questions/domain{1..6}/   問題(1ファイル1問。ファイル名は <id>.yaml)
-flashcards/*.yaml         フラッシュカード(1ファイルに複数枚: { cards: [...] })
-cases/*.yaml              ケーススタディ(1ファイル1ケース)
-decisions/*.yaml          ディシジョンツリー(1ファイル1ツリー)
-drills/keywords.yaml      キーワード反射ドリル({ drills: [...] })
-docs/*.md                 YAML フロントマター + Markdown 本文
+vendors.yaml              ベンダーの定義(全試験で共通)
+exams/<examID>/           試験ごとのディレクトリ(例: exams/gcp-pca/)
+  exam.yaml               試験の定義(ドメインと比重、形式、機能、語彙)
+  weights.yaml            ドメイン比重
+  exam-sets.yaml          模試ごとの問題 ID とケースの割り当て
+  questions/domain{1..6}/ 問題(1ファイル1問。ファイル名は <id>.yaml)
+  flashcards/*.yaml       フラッシュカード(1ファイルに複数枚: { cards: [...] })
+  cases/*.yaml            ケーススタディ(1ファイル1ケース)
+  decisions/*.yaml        ディシジョンツリー(1ファイル1ツリー)
+  drills/keywords.yaml    キーワード反射ドリル({ drills: [...] })
+  docs/*.md               YAML フロントマター + Markdown 本文
 scripts/validate.py       検証 CLI(実装は scripts/contentvalidate/)
 scripts/export_json.py    YAML → JSON 変換(tests/fixtures/valid-json/ の生成)
 tests/                    pytest と fixture(valid-json/ は Swift テストが直接参照する)
@@ -94,13 +97,15 @@ tests/                    pytest と fixture(valid-json/ は Swift テストが�
 
 | Schema | 対象 | 主な内容 |
 |---|---|---|
-| `common` | — | `LocalizedText`、`CaseStudyID`、`WAFPillar`、`MistakeTag`、`License`、`Reference`、`SubObjective`、`Domain`、`QuestionID`、`CardID`、`SemVer`、`HttpsURL` |
+| `common` | — | `LocalizedText`、`ExamID`、`VendorID`、`QuestionKind`、`CaseStudyID`、`WAFPillarID`、`MistakeTag`、`License`、`Reference`、`SubObjective`、`Domain`、`QuestionID`、`CardID`、`SemVer`、`HttpsURL` |
 | `question` | `questions/**/*.yaml` | 問題。`type` は `kind` に応じて `if/then/else` で分岐する(single は `count` 不可、multiple は `count ≥ 2` が必須) |
 | `flashcard` | `flashcards/*.yaml` | `{ cards: Flashcard[] }` |
 | `case` | `cases/*.yaml` | ケーススタディと要件マッピング |
 | `decision` | `decisions/*.yaml` | ツリー。各 option は `next` と `result` のどちらか一方を持つ(`oneOf`) |
 | `drill` | `drills/*.yaml` | `{ drills: KeywordDrill[] }`。ID は `^K-[0-9]{4}$` |
-| `exam-sets` | `exam-sets.yaml` | 模試の定義(`caseStudies` はちょうど 2 つ、`questionIDs` は重複なし) |
+| `exam` | `exams/<examID>/exam.yaml` | 試験の定義(ドメインと比重、サブ項目、模試の形式、有効な機能、WAF の柱、ケースの表示順) |
+| `vendors` | `vendors.yaml` | ベンダーの定義 |
+| `exam-sets` | `exam-sets.yaml` | 模試の定義(`caseStudies` は `minItems: 0`。個数が `caseStudiesPerSet` と一致するかは CI-02 が確認する。`questionIDs` は重複なし) |
 | `weights` | `weights.yaml` | ドメイン比重(キー 1〜6 はすべて必須) |
 | `docs-frontmatter` | `docs/*.md` のフロントマター | `title`、`subObjective`、`references`(1つ以上) |
 | `manifest` | 配信パックの `manifest.json` | 定義のみ。生成と署名はこのリポジトリの対象外 |
@@ -124,7 +129,7 @@ tests/                    pytest と fixture(valid-json/ は Swift テストが�
 | ID | ルール | 深刻度 | 設定キー |
 |---|---|---|---|
 | CI-01 | 全ファイルの Schema 適合、YAML 構文、キーの重複、必須ファイルの有無。加えて、`subObjective` と `domain` の整合(問題とカード)、single の正解がちょうど 1 つ、誤答の `mistakeTags` が 1 つ以上、正解に `mistakeTags` がない、選択肢 ID・模試 ID・ノード ID の重複 | error | — |
-| CI-02 | 模試の問題数、ドメイン配分、ケース問題数、ケース問題の `caseStudy` が模試のケースに含まれること、問題の `examSets` と `questionIDs` の双方向の一致、存在しない模試番号の参照 | complete は error、draft は warning(存在しない模試番号は常に error) | `examSet.*` |
+| CI-02 | 模試の問題数、ドメイン配分、ケース数(exam.yaml の `caseStudiesPerSet`)、ケース問題数(`caseStudiesPerSet` が 0 なら 0 問)、ケース問題の `caseStudy` が模試のケースに含まれること、問題の `examSets` と `questionIDs` の双方向の一致、存在しない模試番号の参照 | complete は error、draft は warning(存在しない模試番号は常に error) | `examSet.*` |
 | CI-02 | 既定のケース割り当て・level との違い | warning | `examSet.defaultAssignments` |
 | CI-03 | 単一選択問題の正解位置(元の並び順)A〜D がそれぞれ 20〜30% | complete は error、draft は warning | `answerPosition.*`、`statistics.draftMinSample` |
 | CI-04 | 最長の選択肢(`ja` の文字数)が正解である問題の割合が 35% 以下 | complete は error、draft は warning | `longestChoice.*`、`statistics.draftMinSample` |
@@ -134,7 +139,7 @@ tests/                    pytest と fixture(valid-json/ は Swift テストが�
 | CI-07 | `stem.ja` の文字 3-gram の Jaccard 係数が 0.8 を超える組 | warning | `similarity.*` |
 | CI-08 | multiple の問題で `type.count` と正解数が一致する | error | — |
 | CI-09 | `relatedQuestionIDs`、`questionIDs`、ツリーの `rootNodeID` と `next`、docs・問題・カードの `subObjective` が実在する | error | `examGuide.subObjectives` |
-| CI-10 | `weights.yaml` の合計が 1.0 ± 0.001 | error | `weights.*` |
+| CI-10 | `weights.yaml` と exam.yaml の `domains[*].weight` の合計が 1.0 ± 0.001、両者の比重が一致する | error | `weights.*` |
 | CI-11 | `LocalizedText` の `en` の欠落(空文字を含む) | warning | — |
 
 ### ルールの追加方法
@@ -143,7 +148,7 @@ tests/                    pytest と fixture(valid-json/ は Swift テストが�
 2. `scripts/contentvalidate/rules/__init__.py` の `ALL_RULES` に1行追加する
 3. `tests/fixtures/generate.py` の `INVALID_CASES` に違反ケースを追加し、fixture を再生成する
 
-`ctx` から、ロード済みのコンテンツ(`ctx.docs`、`ctx.questions`、`ctx.question_by_id`、`ctx.exam_sets`)と、各要素の行番号(`doc.issue(..., path)`)を利用できます。
+`ctx` から、ロード済みのコンテンツ(`ctx.docs`、`ctx.questions`、`ctx.question_by_id(exam_id)`、`ctx.exam_sets`(試験ごとの一覧)、`ctx.exam_by_id`)と、各要素の行番号(`doc.issue(..., path)`)を利用できます。
 
 ## テスト
 
