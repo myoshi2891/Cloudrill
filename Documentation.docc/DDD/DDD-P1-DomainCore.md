@@ -220,6 +220,14 @@ public final class ManualTimeSource: TimeSource {
 
 **完了条件**: `swift test --package-path packages/Domain --filter DomainTestSupportTests` が通る。
 
+**実装メモ**(実装時に本書と変えた点):
+
+- `Package.swift` には、3.1 のターゲットのうち `StudyModels`、`DomainTestSupport`、`DomainTestSupportTests` だけを宣言した。SwiftPM は空のターゲットをエラーにするので、残りのターゲットは各ステップで追加する。
+- DomainModels の値型(`ExamDefinition` とその構成要素、`Question`)に public な init を追加した。memberwise init は `internal` なので、別のモジュールにあるビルダーから組み立てられないため(追加だけで、既存の API は変えていない)。
+- ビルダーは、値を `with(\.keyPath, value)` で差し替える形にした。`.alphaLike()` は fixture の形(ドメイン、サブ項目、比重、形式、機能)に合わせた。ただし、ベンダー ID とケース ID は、実在の試験の語彙を避けて中立な値(`test-vendor`、`case-a`、`case-b`)にした。
+- `SystemTimeSourceTests` と `Duration.timeInterval`、`FixedTimeSource`、`approximatelyEqual` のテストも `DomainTestSupportTests` に置いた(`StudyModelsTests` は P1-S02 で作る)。
+- 完了条件 3 の grep(`55|120`)は `Sources/DomainTestSupport/ExamDefinitionBuilder.swift` を検出する。これはテストデータで、試験の値ではない。
+
 ---
 
 ### P1-S02 学習記録の値型(StudyModels)
