@@ -32,8 +32,9 @@
       "type": "object",
       "properties": {
         "path": {
+          "description": "パック内の相対パス。先頭の / と、セグメントとしての ..(先頭・途中・末尾)を禁止する。",
           "type": "string",
-          "pattern": "^(?!/)(?!.*\\.\\./)[A-Za-z0-9._/-]+$"
+          "pattern": "^(?!/)(?!(?:.*/)?\\.\\.(?:/|$))[A-Za-z0-9._/-]+$"
         },
         "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
         "size": { "type": "integer", "minimum": 0 }
