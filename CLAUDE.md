@@ -54,10 +54,10 @@ validate.py の終了コード: `0` = error なし / `1` = error あり(`--stric
 - Swift のテストは `../../content/tests/fixtures/valid-json` を直接読む(パッケージ内にはコピーしない)。
 - Swift 側では未知の列挙値をデコードエラーにする(古いアプリへの配信は `manifest.minAppVersion` で制御する前提)。
 
-## 検証ツールの構成(`content/scripts/pcavalidate/`)
+## 検証ツールの構成(`content/scripts/contentvalidate/`)
 
 - `validate.py`(CLI)→ `engine.run()` → `context.build_context()`(ロード、Schema 検証、行番号の付与)→ `rules.ALL_RULES` の各 `check(ctx)` → `report` で text / json / github 形式に整形する。
-- Schema の `$id` は `https://pca-content.invalid/schemas/<name>.schema.json`。`referencing.Registry` に全 Schema を事前に登録し、オフラインで解決する。共通の定義は `common.schema.json#/$defs/...` に置く。すべてのオブジェクトに `additionalProperties: false` を付けている。
+- Schema の `$id` は `https://examprep-content.invalid/schemas/<name>.schema.json`。`referencing.Registry` に全 Schema を事前に登録し、オフラインで解決する。共通の定義は `common.schema.json#/$defs/...` に置く。すべてのオブジェクトに `additionalProperties: false` を付けている。
 - 役割分担: 1ファイル内の構造は Schema が担当する。Schema で表しにくい条件と、ファイル間の整合(模試の構成、統計、重複、参照)はルール CI-01〜CI-11 が担当する。閾値はすべて `content/validation.yaml` に置く。
 - Schema に違反したファイルは、ファイル間ルールの対象から外す(違反の連鎖を防ぐため)。`--only` で CI-01 を外しても、Schema 検証自体は常に行う。
 - 例外として、`choices[*].rationale` に関する Schema 違反は CI-01 では報告せず、CI-05 だけが報告する。

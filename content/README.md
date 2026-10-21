@@ -76,7 +76,7 @@ cases/*.yaml              ケーススタディ(1ファイル1ケース)
 decisions/*.yaml          ディシジョンツリー(1ファイル1ツリー)
 drills/keywords.yaml      キーワード反射ドリル({ drills: [...] })
 docs/*.md                 YAML フロントマター + Markdown 本文
-scripts/validate.py       検証 CLI(実装は scripts/pcavalidate/)
+scripts/validate.py       検証 CLI(実装は scripts/contentvalidate/)
 scripts/export_json.py    YAML → JSON 変換(tests/fixtures/valid-json/ の生成)
 tests/                    pytest と fixture(valid-json/ は Swift テストが直接参照する)
 ```
@@ -85,7 +85,7 @@ tests/                    pytest と fixture(valid-json/ は Swift テストが�
 
 ### ファイル分割と `$ref`
 
-- 各 Schema の `$id` は `https://pca-content.invalid/schemas/<name>.schema.json` です。
+- 各 Schema の `$id` は `https://examprep-content.invalid/schemas/<name>.schema.json` です。
   - `.invalid` は予約済みの TLD なので、外部への名前解決は起きません。
   - validate.py は `referencing.Registry` に全 Schema を事前に登録し、オフラインで解決します。
 - 共通の定義は `common.schema.json#/$defs/...` にまとめ、各 Schema から `$ref` で参照します。
@@ -139,8 +139,8 @@ tests/                    pytest と fixture(valid-json/ は Swift テストが�
 
 ### ルールの追加方法
 
-1. `scripts/pcavalidate/rules/ciNN_xxx.py` を作成し、`check(ctx: Context) -> Iterable[Issue]` と `RULE = Rule("CI-NN", "名前", check)` を定義する
-2. `scripts/pcavalidate/rules/__init__.py` の `ALL_RULES` に1行追加する
+1. `scripts/contentvalidate/rules/ciNN_xxx.py` を作成し、`check(ctx: Context) -> Iterable[Issue]` と `RULE = Rule("CI-NN", "名前", check)` を定義する
+2. `scripts/contentvalidate/rules/__init__.py` の `ALL_RULES` に1行追加する
 3. `tests/fixtures/generate.py` の `INVALID_CASES` に違反ケースを追加し、fixture を再生成する
 
 `ctx` から、ロード済みのコンテンツ(`ctx.docs`、`ctx.questions`、`ctx.question_by_id`、`ctx.exam_sets`)と、各要素の行番号(`doc.issue(..., path)`)を利用できます。
