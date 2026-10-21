@@ -1,0 +1,1160 @@
+{
+  "cases": [
+    {
+      "expected": [
+        {
+          "difficulty": 6.4133,
+          "due": "2026-01-01T09:01:00Z",
+          "phase": "learning",
+          "retrievabilityAtDue": 1.0,
+          "stability": 0.212,
+          "step": 0
+        }
+      ],
+      "name": "new-again",
+      "reviews": [
+        {
+          "at": "2026-01-01T09:00:00Z",
+          "rating": 1
+        }
+      ],
+      "start": "2026-01-01T09:00:00Z"
+    },
+    {
+      "expected": [
+        {
+          "difficulty": 5.112170705601056,
+          "due": "2026-01-01T09:05:30Z",
+          "phase": "learning",
+          "retrievabilityAtDue": 1.0,
+          "stability": 1.2931,
+          "step": 0
+        }
+      ],
+      "name": "new-hard",
+      "reviews": [
+        {
+          "at": "2026-01-01T09:00:00Z",
+          "rating": 2
+        }
+      ],
+      "start": "2026-01-01T09:00:00Z"
+    },
+    {
+      "expected": [
+        {
+          "difficulty": 2.118103970459016,
+          "due": "2026-01-01T09:10:00Z",
+          "phase": "learning",
+          "retrievabilityAtDue": 1.0,
+          "stability": 2.3065,
+          "step": 1
+        }
+      ],
+      "name": "new-good",
+      "reviews": [
+        {
+          "at": "2026-01-01T09:00:00Z",
+          "rating": 3
+        }
+      ],
+      "start": "2026-01-01T09:00:00Z"
+    },
+    {
+      "expected": [
+        {
+          "difficulty": 1.0,
+          "due": "2026-01-09T09:00:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.9024733005284542,
+          "stability": 8.2956,
+          "step": null
+        }
+      ],
+      "name": "new-easy",
+      "reviews": [
+        {
+          "at": "2026-01-01T09:00:00Z",
+          "rating": 4
+        }
+      ],
+      "start": "2026-01-01T09:00:00Z"
+    },
+    {
+      "expected": [
+        {
+          "difficulty": 2.118103970459016,
+          "due": "2026-01-01T09:10:00Z",
+          "phase": "learning",
+          "retrievabilityAtDue": 1.0,
+          "stability": 2.3065,
+          "step": 1
+        },
+        {
+          "difficulty": 2.111214235785395,
+          "due": "2026-01-03T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.9094932559773545,
+          "stability": 2.3065,
+          "step": null
+        },
+        {
+          "difficulty": 2.1043313908464483,
+          "due": "2026-01-14T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.8998188390602377,
+          "stability": 10.971048263078135,
+          "step": null
+        },
+        {
+          "difficulty": 2.0974554287524403,
+          "due": "2026-03-01T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.9004709139017502,
+          "stability": 46.316858440073425,
+          "step": null
+        },
+        {
+          "difficulty": 2.0905863426205262,
+          "due": "2026-08-11T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.899999922352538,
+          "stability": 162.99981577472244,
+          "step": null
+        },
+        {
+          "difficulty": 2.083724125574744,
+          "due": "2027-12-22T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.8999829672046629,
+          "stability": 497.8765551245907,
+          "step": null
+        },
+        {
+          "difficulty": 2.0768687707460076,
+          "due": "2031-08-31T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.8999958524113184,
+          "stability": 1347.918623024373,
+          "step": null
+        },
+        {
+          "difficulty": 2.0700202712721,
+          "due": "2040-09-11T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.8999926192943212,
+          "stability": 3298.6456099035986,
+          "step": null
+        },
+        {
+          "difficulty": 2.0631786202976663,
+          "due": "2060-12-30T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.8999956765569768,
+          "stability": 7414.533387817105,
+          "step": null
+        },
+        {
+          "difficulty": 2.056343810974207,
+          "due": "2103-06-13T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.9000007718862169,
+          "stability": 15504.174194818168,
+          "step": null
+        }
+      ],
+      "name": "good-streak",
+      "reviews": [
+        {
+          "at": "2026-01-01T09:00:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-01T09:10:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-03T09:10:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-14T09:10:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-03-01T09:10:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-08-11T09:10:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2027-12-22T09:10:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2031-08-31T09:10:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2040-09-11T09:10:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2060-12-30T09:10:00Z",
+          "rating": 3
+        }
+      ],
+      "start": "2026-01-01T09:00:00Z"
+    },
+    {
+      "expected": [
+        {
+          "difficulty": 1.0,
+          "due": "2026-01-09T09:00:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.9024733005284542,
+          "stability": 8.2956,
+          "step": null
+        },
+        {
+          "difficulty": 1.0,
+          "due": "2026-03-16T09:00:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.899607248317662,
+          "stability": 65.62422616189994,
+          "step": null
+        },
+        {
+          "difficulty": 1.0,
+          "due": "2027-04-17T09:00:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.899961051738456,
+          "stability": 396.7750233497581,
+          "step": null
+        },
+        {
+          "difficulty": 1.0,
+          "due": "2032-06-04T09:00:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.8999969570898693,
+          "stability": 1874.9169554074524,
+          "step": null
+        },
+        {
+          "difficulty": 1.0,
+          "due": "2052-04-25T09:00:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.9000040934883285,
+          "stability": 7265.432894791257,
+          "step": null
+        },
+        {
+          "difficulty": 1.0,
+          "due": "2117-11-04T09:00:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.8999997775297924,
+          "stability": 23932.922499822544,
+          "step": null
+        }
+      ],
+      "name": "easy-streak",
+      "reviews": [
+        {
+          "at": "2026-01-01T09:00:00Z",
+          "rating": 4
+        },
+        {
+          "at": "2026-01-09T09:00:00Z",
+          "rating": 4
+        },
+        {
+          "at": "2026-03-16T09:00:00Z",
+          "rating": 4
+        },
+        {
+          "at": "2027-04-17T09:00:00Z",
+          "rating": 4
+        },
+        {
+          "at": "2032-06-04T09:00:00Z",
+          "rating": 4
+        },
+        {
+          "at": "2052-04-25T09:00:00Z",
+          "rating": 4
+        }
+      ],
+      "start": "2026-01-01T09:00:00Z"
+    },
+    {
+      "expected": [
+        {
+          "difficulty": 2.118103970459016,
+          "due": "2026-01-01T09:10:00Z",
+          "phase": "learning",
+          "retrievabilityAtDue": 1.0,
+          "stability": 2.3065,
+          "step": 1
+        },
+        {
+          "difficulty": 2.111214235785395,
+          "due": "2026-01-03T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.9094932559773545,
+          "stability": 2.3065,
+          "step": null
+        },
+        {
+          "difficulty": 4.748284761594571,
+          "due": "2026-01-11T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.8956682365745637,
+          "stability": 7.517359325415191,
+          "step": null
+        },
+        {
+          "difficulty": 6.498895064113205,
+          "due": "2026-01-30T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.8995994889784805,
+          "stability": 18.88969435993583,
+          "step": null
+        },
+        {
+          "difficulty": 7.661031761365171,
+          "due": "2026-03-07T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.8997023629502384,
+          "stability": 35.844517283758535,
+          "step": null
+        },
+        {
+          "difficulty": 8.432512256571117,
+          "due": "2026-05-03T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.90032684649383,
+          "stability": 57.2721019074237,
+          "step": null
+        },
+        {
+          "difficulty": 8.944656960279902,
+          "due": "2026-07-23T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.9003915410066533,
+          "stability": 81.4635198217034,
+          "step": null
+        },
+        {
+          "difficulty": 9.284642480544985,
+          "due": "2026-11-07T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.9002698713739077,
+          "stability": 107.42149797000803,
+          "step": null
+        }
+      ],
+      "name": "hard-streak",
+      "reviews": [
+        {
+          "at": "2026-01-01T09:00:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-01T09:10:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-03T09:10:00Z",
+          "rating": 2
+        },
+        {
+          "at": "2026-01-11T09:10:00Z",
+          "rating": 2
+        },
+        {
+          "at": "2026-01-30T09:10:00Z",
+          "rating": 2
+        },
+        {
+          "at": "2026-03-07T09:10:00Z",
+          "rating": 2
+        },
+        {
+          "at": "2026-05-03T09:10:00Z",
+          "rating": 2
+        },
+        {
+          "at": "2026-07-23T09:10:00Z",
+          "rating": 2
+        }
+      ],
+      "start": "2026-01-01T09:00:00Z"
+    },
+    {
+      "expected": [
+        {
+          "difficulty": 2.118103970459016,
+          "due": "2026-01-01T09:10:00Z",
+          "phase": "learning",
+          "retrievabilityAtDue": 1.0,
+          "stability": 2.3065,
+          "step": 1
+        },
+        {
+          "difficulty": 2.111214235785395,
+          "due": "2026-01-03T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.9094932559773545,
+          "stability": 2.3065,
+          "step": null
+        },
+        {
+          "difficulty": 2.1043313908464483,
+          "due": "2026-01-14T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.8998188390602377,
+          "stability": 10.971048263078135,
+          "step": null
+        },
+        {
+          "difficulty": 2.0974554287524403,
+          "due": "2026-03-01T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.9004709139017502,
+          "stability": 46.316858440073425,
+          "step": null
+        },
+        {
+          "difficulty": 7.387715706030851,
+          "due": "2026-03-01T09:20:00Z",
+          "phase": "relearning",
+          "retrievabilityAtDue": 1.0,
+          "stability": 2.9338452901880046,
+          "step": 0
+        },
+        {
+          "difficulty": 7.375556359621658,
+          "due": "2026-03-04T09:20:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.8984607665011997,
+          "stability": 2.9338452901880046,
+          "step": null
+        },
+        {
+          "difficulty": 7.363409172558875,
+          "due": "2026-03-12T09:20:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.8982432207493937,
+          "stability": 7.799102228394648,
+          "step": null
+        },
+        {
+          "difficulty": 7.351274132683154,
+          "due": "2026-03-31T09:20:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.8994542370870647,
+          "stability": 18.84991601950064,
+          "step": null
+        },
+        {
+          "difficulty": 7.339151227847309,
+          "due": "2026-05-12T09:20:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.8995027972363532,
+          "stability": 41.6976028269057,
+          "step": null
+        }
+      ],
+      "name": "lapse-and-recover",
+      "reviews": [
+        {
+          "at": "2026-01-01T09:00:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-01T09:10:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-03T09:10:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-14T09:10:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-03-01T09:10:00Z",
+          "rating": 1
+        },
+        {
+          "at": "2026-03-01T09:20:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-03-04T09:20:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-03-12T09:20:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-03-31T09:20:00Z",
+          "rating": 3
+        }
+      ],
+      "start": "2026-01-01T09:00:00Z"
+    },
+    {
+      "expected": [
+        {
+          "difficulty": 2.118103970459016,
+          "due": "2026-01-01T09:10:00Z",
+          "phase": "learning",
+          "retrievabilityAtDue": 1.0,
+          "stability": 2.3065,
+          "step": 1
+        },
+        {
+          "difficulty": 2.111214235785395,
+          "due": "2026-01-03T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.9094932559773545,
+          "stability": 2.3065,
+          "step": null
+        },
+        {
+          "difficulty": 7.392238132342694,
+          "due": "2026-01-03T09:20:00Z",
+          "phase": "relearning",
+          "retrievabilityAtDue": 1.0,
+          "stability": 0.6077016626638644,
+          "step": 0
+        },
+        {
+          "difficulty": 9.128074776178583,
+          "due": "2026-01-03T09:30:00Z",
+          "phase": "relearning",
+          "retrievabilityAtDue": 1.0,
+          "stability": 0.22294679606919743,
+          "step": 0
+        },
+        {
+          "difficulty": 9.114175070699241,
+          "due": "2026-01-04T09:30:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.7853663643886409,
+          "stability": 0.25856917397987833,
+          "step": null
+        },
+        {
+          "difficulty": 9.694063738645198,
+          "due": "2026-01-04T09:40:00Z",
+          "phase": "relearning",
+          "retrievabilityAtDue": 1.0,
+          "stability": 0.1149934285245354,
+          "step": 0
+        },
+        {
+          "difficulty": 9.67959804420339,
+          "due": "2026-01-05T09:40:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.7251556723139803,
+          "stability": 0.13930538072310636,
+          "step": null
+        },
+        {
+          "difficulty": 9.665146815456024,
+          "due": "2026-01-06T09:40:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.8533306649193236,
+          "stability": 0.5455123424593963,
+          "step": null
+        }
+      ],
+      "name": "repeated-lapses",
+      "reviews": [
+        {
+          "at": "2026-01-01T09:00:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-01T09:10:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-03T09:10:00Z",
+          "rating": 1
+        },
+        {
+          "at": "2026-01-03T09:20:00Z",
+          "rating": 1
+        },
+        {
+          "at": "2026-01-03T09:30:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-04T09:30:00Z",
+          "rating": 1
+        },
+        {
+          "at": "2026-01-04T09:40:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-05T09:40:00Z",
+          "rating": 3
+        }
+      ],
+      "start": "2026-01-01T09:00:00Z"
+    },
+    {
+      "expected": [
+        {
+          "difficulty": 2.118103970459016,
+          "due": "2026-01-01T09:10:00Z",
+          "phase": "learning",
+          "retrievabilityAtDue": 1.0,
+          "stability": 2.3065,
+          "step": 1
+        },
+        {
+          "difficulty": 7.394502741279718,
+          "due": "2026-01-01T09:11:00Z",
+          "phase": "learning",
+          "retrievabilityAtDue": 1.0,
+          "stability": 0.7750839828558984,
+          "step": 0
+        },
+        {
+          "difficulty": 7.382336607835277,
+          "due": "2026-01-01T09:21:00Z",
+          "phase": "learning",
+          "retrievabilityAtDue": 1.0,
+          "stability": 0.8281648000472626,
+          "step": 1
+        },
+        {
+          "difficulty": 7.37018264052428,
+          "due": "2026-01-02T09:21:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.8910646618043954,
+          "stability": 0.8810323149596583,
+          "step": null
+        },
+        {
+          "difficulty": 7.358040827180594,
+          "due": "2026-01-05T09:21:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.8953139331852007,
+          "stability": 2.804896429048646,
+          "step": null
+        }
+      ],
+      "name": "learning-again",
+      "reviews": [
+        {
+          "at": "2026-01-01T09:00:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-01T09:10:00Z",
+          "rating": 1
+        },
+        {
+          "at": "2026-01-01T09:11:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-01T09:21:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-02T09:21:00Z",
+          "rating": 3
+        }
+      ],
+      "start": "2026-01-01T09:00:00Z"
+    },
+    {
+      "expected": [
+        {
+          "difficulty": 2.118103970459016,
+          "due": "2026-01-01T09:10:00Z",
+          "phase": "learning",
+          "retrievabilityAtDue": 1.0,
+          "stability": 2.3065,
+          "step": 1
+        },
+        {
+          "difficulty": 2.111214235785395,
+          "due": "2026-01-03T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.9094932559773545,
+          "stability": 2.3065,
+          "step": null
+        },
+        {
+          "difficulty": 2.1043313908464483,
+          "due": "2026-01-14T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.8998188390602377,
+          "stability": 10.971048263078135,
+          "step": null
+        },
+        {
+          "difficulty": 2.0974554287524403,
+          "due": "2026-03-01T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.9004709139017502,
+          "stability": 46.316858440073425,
+          "step": null
+        },
+        {
+          "difficulty": 2.0905863426205262,
+          "due": "2026-08-02T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.9002003664279881,
+          "stability": 157.458843874021,
+          "step": null
+        },
+        {
+          "difficulty": 2.083724125574744,
+          "due": "2027-11-27T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.9000203434779737,
+          "stability": 482.1427574600082,
+          "step": null
+        }
+      ],
+      "name": "early-review",
+      "reviews": [
+        {
+          "at": "2026-01-01T09:00:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-01T09:10:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-03T09:10:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-14T09:10:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-02-26T09:10:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-08-02T09:10:00Z",
+          "rating": 3
+        }
+      ],
+      "start": "2026-01-01T09:00:00Z"
+    },
+    {
+      "expected": [
+        {
+          "difficulty": 2.118103970459016,
+          "due": "2026-01-01T09:10:00Z",
+          "phase": "learning",
+          "retrievabilityAtDue": 1.0,
+          "stability": 2.3065,
+          "step": 1
+        },
+        {
+          "difficulty": 2.111214235785395,
+          "due": "2026-01-03T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.9094932559773545,
+          "stability": 2.3065,
+          "step": null
+        },
+        {
+          "difficulty": 2.1043313908464483,
+          "due": "2026-01-14T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.8998188390602377,
+          "stability": 10.971048263078135,
+          "step": null
+        },
+        {
+          "difficulty": 2.0974554287524403,
+          "due": "2026-03-01T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.9004709139017502,
+          "stability": 46.316858440073425,
+          "step": null
+        },
+        {
+          "difficulty": 2.0905863426205262,
+          "due": "2026-10-27T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.8999780466437884,
+          "stability": 209.9329103078419,
+          "step": null
+        },
+        {
+          "difficulty": 2.083724125574744,
+          "due": "2028-07-12T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.89994733419785,
+          "stability": 623.5219093613885,
+          "step": null
+        }
+      ],
+      "name": "late-review",
+      "reviews": [
+        {
+          "at": "2026-01-01T09:00:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-01T09:10:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-03T09:10:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-14T09:10:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-03-31T09:10:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-10-27T09:10:00Z",
+          "rating": 3
+        }
+      ],
+      "start": "2026-01-01T09:00:00Z"
+    },
+    {
+      "expected": [
+        {
+          "difficulty": 2.118103970459016,
+          "due": "2026-01-01T09:10:00Z",
+          "phase": "learning",
+          "retrievabilityAtDue": 1.0,
+          "stability": 2.3065,
+          "step": 1
+        },
+        {
+          "difficulty": 2.111214235785395,
+          "due": "2026-01-03T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.9094932559773545,
+          "stability": 2.3065,
+          "step": null
+        },
+        {
+          "difficulty": 2.1043313908464483,
+          "due": "2026-01-14T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.8998188390602377,
+          "stability": 10.971048263078135,
+          "step": null
+        },
+        {
+          "difficulty": 2.0974554287524403,
+          "due": "2026-03-01T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.9004709139017502,
+          "stability": 46.316858440073425,
+          "step": null
+        },
+        {
+          "difficulty": 7.387715706030851,
+          "due": "2026-04-30T09:20:00Z",
+          "phase": "relearning",
+          "retrievabilityAtDue": 1.0,
+          "stability": 3.2732130966372606,
+          "step": 0
+        },
+        {
+          "difficulty": 7.375556359621658,
+          "due": "2026-05-03T09:20:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.9058753986069965,
+          "stability": 3.2732130966372606,
+          "step": null
+        }
+      ],
+      "name": "late-review-again",
+      "reviews": [
+        {
+          "at": "2026-01-01T09:00:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-01T09:10:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-03T09:10:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-14T09:10:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-04-30T09:10:00Z",
+          "rating": 1
+        },
+        {
+          "at": "2026-04-30T09:20:00Z",
+          "rating": 3
+        }
+      ],
+      "start": "2026-01-01T09:00:00Z"
+    },
+    {
+      "expected": [
+        {
+          "difficulty": 2.118103970459016,
+          "due": "2026-01-01T09:10:00Z",
+          "phase": "learning",
+          "retrievabilityAtDue": 1.0,
+          "stability": 2.3065,
+          "step": 1
+        },
+        {
+          "difficulty": 2.111214235785395,
+          "due": "2026-01-03T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.9094932559773545,
+          "stability": 2.3065,
+          "step": null
+        },
+        {
+          "difficulty": 2.1043313908464483,
+          "due": "2026-01-14T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.8998188390602377,
+          "stability": 10.971048263078135,
+          "step": null
+        },
+        {
+          "difficulty": 2.0974554287524403,
+          "due": "2026-03-01T09:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.9004709139017502,
+          "stability": 46.316858440073425,
+          "step": null
+        },
+        {
+          "difficulty": 2.0905863426205262,
+          "due": "2026-03-01T11:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.9004709139017502,
+          "stability": 46.316858440073425,
+          "step": null
+        },
+        {
+          "difficulty": 1.0,
+          "due": "2026-03-20T14:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.9000493503914782,
+          "stability": 65.04671555951936,
+          "step": null
+        },
+        {
+          "difficulty": 1.0,
+          "due": "2026-11-15T14:10:00Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.8999303088113364,
+          "stability": 239.75671842026156,
+          "step": null
+        }
+      ],
+      "name": "same-day-review",
+      "reviews": [
+        {
+          "at": "2026-01-01T09:00:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-01T09:10:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-03T09:10:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-14T09:10:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-14T11:10:00Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-14T14:10:00Z",
+          "rating": 4
+        },
+        {
+          "at": "2026-03-20T14:10:00Z",
+          "rating": 3
+        }
+      ],
+      "start": "2026-01-01T09:00:00Z"
+    },
+    {
+      "expected": [
+        {
+          "difficulty": 5.112170705601056,
+          "due": "2026-01-01T09:05:30Z",
+          "phase": "learning",
+          "retrievabilityAtDue": 1.0,
+          "stability": 1.2931,
+          "step": 0
+        },
+        {
+          "difficulty": 5.102286904192293,
+          "due": "2026-01-01T09:15:30Z",
+          "phase": "learning",
+          "retrievabilityAtDue": 1.0,
+          "stability": 1.3358997622047517,
+          "step": 1
+        },
+        {
+          "difficulty": 3.4509277903004603,
+          "due": "2026-01-03T09:15:30Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.9112089546549325,
+          "stability": 2.369135290197524,
+          "step": null
+        },
+        {
+          "difficulty": 5.637649049733312,
+          "due": "2026-01-10T09:15:30Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.8980543982918262,
+          "stability": 6.805695822116345,
+          "step": null
+        },
+        {
+          "difficulty": 8.551353275930639,
+          "due": "2026-01-10T09:25:30Z",
+          "phase": "relearning",
+          "retrievabilityAtDue": 1.0,
+          "stability": 1.130563239834278,
+          "step": 0
+        },
+        {
+          "difficulty": 9.023549166922253,
+          "due": "2026-01-10T09:40:30Z",
+          "phase": "relearning",
+          "retrievabilityAtDue": 1.0,
+          "stability": 1.130563239834278,
+          "step": 0
+        },
+        {
+          "difficulty": 9.009753987052168,
+          "due": "2026-01-11T09:40:30Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.9108738177760448,
+          "stability": 1.1783524585766412,
+          "step": null
+        },
+        {
+          "difficulty": 8.664088284286043,
+          "due": "2026-01-14T09:40:30Z",
+          "phase": "review",
+          "retrievabilityAtDue": 0.9048210721994653,
+          "stability": 3.2216098450409185,
+          "step": null
+        }
+      ],
+      "name": "mixed",
+      "reviews": [
+        {
+          "at": "2026-01-01T09:00:00Z",
+          "rating": 2
+        },
+        {
+          "at": "2026-01-01T09:05:30Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-01T09:15:30Z",
+          "rating": 4
+        },
+        {
+          "at": "2026-01-03T09:15:30Z",
+          "rating": 2
+        },
+        {
+          "at": "2026-01-10T09:15:30Z",
+          "rating": 1
+        },
+        {
+          "at": "2026-01-10T09:25:30Z",
+          "rating": 2
+        },
+        {
+          "at": "2026-01-10T09:40:30Z",
+          "rating": 3
+        },
+        {
+          "at": "2026-01-11T09:40:30Z",
+          "rating": 4
+        }
+      ],
+      "start": "2026-01-01T09:00:00Z"
+    }
+  ],
+  "generator": {
+    "fsrsVersion": "FSRS-6",
+    "library": "py-fsrs",
+    "version": "6.3.2"
+  },
+  "parameters": {
+    "desiredRetention": 0.9,
+    "enableFuzzing": false,
+    "learningSteps": [
+      60,
+      600
+    ],
+    "maximumInterval": 36500,
+    "relearningSteps": [
+      600
+    ],
+    "w": [
+      0.212,
+      1.2931,
+      2.3065,
+      8.2956,
+      6.4133,
+      0.8334,
+      3.0194,
+      0.001,
+      1.8722,
+      0.1666,
+      0.796,
+      1.4835,
+      0.0614,
+      0.2629,
+      1.6483,
+      0.6014,
+      1.8729,
+      0.5425,
+      0.0912,
+      0.0658,
+      0.1542
+    ]
+  }
+}
