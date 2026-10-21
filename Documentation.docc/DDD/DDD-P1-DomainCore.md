@@ -825,6 +825,15 @@ public struct FSRSScheduler: Sendable {
 
 **完了条件**: `swift test --package-path packages/Domain --filter FSRS` がすべて通り、既知の問題が 0 件。
 
+**実装メモ**(実装時に本書と変えた点):
+
+- テストベクタの 15 ケースは、初回の実装で全項目(phase、step、stability、difficulty、due、retrievability)が許容誤差の範囲で一致した。`withKnownIssue` を外し、既知の問題は 0 件になった。
+- 「同じ日」は、リファレンス実装と同じく、前回の評価からの経過が切り捨ての整数日で 0(24 時間未満)かどうかで判定する。暦日ではない。
+- `lapses` はアプリ独自の値(py-fsrs のカードにはない)。review の段階での Again だけを数え、relearning の段階での Again は数えない。このためのテスト `againInRelearningDoesNotIncrementLapses` を追加した。経過日数の記録を確かめる `recordsElapsedDays` も追加した。
+- `sameDayReview` は、テストベクタの `same-day-review` ケースを再生して確かめる(短期の安定度の式の結果が、リファレンス実装と一致すること)。
+- Refactor: `review` を段階ごとの関数(`reviewNew`、`reviewLearning`、`reviewReview`、`reviewRelearning`)に分けた。learning と relearning は、使うステップの一覧だけが違うので、期限の決め方は `scheduleStep(_:rating:steps:at:)` を共有する。安定度と難易度の更新は `updateMemory` にまとめた。
+- 重みの名前(`FSRSWeights.swift`)を w[6]〜w[19] まで追加した。
+
 ---
 
 ### P1-S08e 1日の出題キュー
@@ -878,6 +887,14 @@ public struct DailyQueueBuilder: Sendable {
 **Refactor**: タプルの引数を、名前付きの型(`ScheduledCard`)に置き換える。
 
 **完了条件**: `swift test --package-path packages/Domain --filter DailyQueueBuilderTests` が通る。
+
+**実装メモ**(実装時に本書と変えた点):
+
+- Refactor の `ScheduledCard` は、公開する API の形なので、最初から使った(タプルの引数は作っていない)。
+- 「今日」は、注入した `Calendar` での翌日の 0:00 より前とする。期限がそれより前の学習済みのカードを、復習の対象にする。learning・relearning の段階のカード(分単位の期限)も含む。未学習(`.new`)のカードが候補に混じっていても、対象外にする。
+- 復習の上限は、新規と同じく、今日すでに復習した枚数を引く(`reviewedToday`)。負の値は 0 として扱う。
+- 同じ期限のカードは、候補の順を保つ(元の位置で並べる。Swift の `sorted` は安定ソートを保証しないため)。
+- `DailyQueue.cardIDs`(復習の後に新規)を追加した。テストを3件追加した: `reviewLimitConsidersToday`、`phasesInReviewCandidates`、`negativeLimitsAreZero`。
 
 ---
 
