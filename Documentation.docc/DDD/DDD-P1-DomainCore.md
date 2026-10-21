@@ -500,6 +500,14 @@ public struct ExamSession: Hashable, Sendable {
 
 **完了条件**: `swift test --package-path packages/Domain --filter ExamSession` が通る。遷移表のテストが 48 件実行されていることを、テストの出力で確認する。
 
+**実装メモ**(実装時に本書と変えた点):
+
+- `select` を inProgress 以外で呼んだときのエラーは、`invalidTransition` ではなく、新しく追加した `ExamSessionError.operationNotAllowed(ExamSessionState)` にした。`select` は `ExamSessionEvent` にないので、`event` に入れる値がない。また、イベントに足すと遷移表が 48 マスでなくなる。`toggleFlag` と `move` は、inProgress と reviewing のときだけ受け付ける。
+- `ExamTimer` は、状態機械が使う部分(`init(startedAt:duration:)`、`remaining`、`isExpired`、`pause`、`resume`)だけをこのステップで作った。`init(startedAt:definition:)`、`crossedThreshold`、`ExamTimerTests` は P1-S06 で作る。
+- 遷移表のテストは、各マスで期限内と期限切れの両方を確かめる(条件付きのマス: inProgress・reviewing の tick と、suspended の resume)。状態は notStarted からイベントを送って作る(submitted は `submitted(.user)`)。
+- テストを2件追加した: `transitionTableHasAllCells`(表が 48 マスで重複がないこと)と `invalidTransitionKeepsTimer`(× の遷移でタイマーも変わらないこと)。`handle` はタイマーの写しで判定してから確定する。
+- `ExamSessionState` の Codable は自動合成を使った(`Snapshot` に入れるため)。保存の形は P3 で見直す。`Snapshot` はタイマーのポリシーを含めない(設定なので、復元時に渡す)。
+
 ---
 
 ### P1-S06 タイマー(ExamTimer)
