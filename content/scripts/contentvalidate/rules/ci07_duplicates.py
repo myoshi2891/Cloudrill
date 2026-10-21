@@ -54,8 +54,10 @@ def ngrams(text: str, n: int) -> frozenset[str]:
 
 
 def _similar_stems(ctx: Context) -> Iterator[Issue]:
-    threshold = ctx.config.jaccard_threshold
-    items = [(ngrams(ja_of(doc.data.get("stem")), ctx.config.ngram), doc) for doc in ctx.questions]
+    # 試験ごとの比較への変更は P0-S05 で行う。それまでは全体の閾値を使う
+    cfg = ctx.config.thresholds
+    threshold = cfg.jaccard_threshold
+    items = [(ngrams(ja_of(doc.data.get("stem")), cfg.ngram), doc) for doc in ctx.questions]
     items = [(grams, doc) for grams, doc in items if grams]
     # サイズ昇順に並べ、|A|/|B| <= 閾値 になった時点で以降の組は Jaccard <= 閾値 なので打ち切る
     items.sort(key=lambda x: (len(x[0]), x[1].path))

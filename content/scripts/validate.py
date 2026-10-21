@@ -54,11 +54,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 2
     try:
         config = load_config(resolve_config_path(root, args.config))
+        # 試験ごとの validation.yaml は run() の中で読む
+        issues = run(root, config, only=args.only, check_links=args.check_links, strict=args.strict)
     except ConfigError as e:
         print(f"error: {e}", file=sys.stderr)
         return 2
-
-    issues = run(root, config, only=args.only, check_links=args.check_links, strict=args.strict)
 
     if args.format == "json":
         sys.stdout.write(format_json(issues))

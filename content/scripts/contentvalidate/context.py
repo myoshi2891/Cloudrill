@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Callable, Iterable, Iterator
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import cached_property
 from pathlib import Path
 from typing import Any
@@ -13,8 +13,8 @@ import httpx
 from jsonschema import ValidationError
 from jsonschema.exceptions import best_match
 
-from .config import Config
-from .loader import load_content
+from .config import ExamConfig, GlobalConfig, load_exam_config
+from .loader import exam_dirs, load_content
 from .model import Issue, JsonPath, Kind, Severity, SourceDoc, format_path, get_list, get_str
 from .schemas import validator_for_kind
 
@@ -24,12 +24,13 @@ SCHEMA_RULE = "CI-01"
 @dataclass
 class Context:
     root: Path
-    config: Config
+    config: GlobalConfig
     docs: list[SourceDoc]
     load_issues: list[Issue]
     schema_issues: list[Issue]
     check_links: bool = False
     transport: httpx.BaseTransport | None = None
+    exam_configs: dict[str, ExamConfig] = field(default_factory=dict)
 
     # ---- 種別ごとの取り出し -------------------------------------------------
 
@@ -70,6 +71,21 @@ class Context:
     def exam_by_id(self) -> dict[str | None, SourceDoc]:
         """試験 ID → Schema に適合した exam.yaml。"""
         return {d.exam_id: d for d in self.of_kind(Kind.EXAM)}
+
+    def exam_config(self, exam_id: str | None) -> ExamConfig:
+        """試験ごとの設定。試験に属さないファイル(exam_id が None)には全体の閾値を返す。"""
+        config = self.exam_configs.get(exam_id) if exam_id is not None else None
+        return config or ExamConfig(exam_id or "", self.config.thresholds, None)
+
+    def sub_objectives(self, exam_id: str | None) -> frozenset[str] | None:
+        """exam.yaml の domains[].subObjectives[].id。exam.yaml が Schema 違反なら None。
+
+        P0-S05 で ExamDefinitionView に移す(validation.yaml の examGuide からの一時的な読み替え)。
+        """
+        exam = self.exam_by_id.get(exam_id)
+        if exam is None:
+            return None
+        return frozenset(sub["id"] for domain in exam.data["domains"] for sub in domain["subObjectives"])
 
     @cached_property
     def exam_sets(self) -> list[tuple[SourceDoc, list[tuple[int, dict[str, Any]]]]]:
@@ -158,7 +174,7 @@ def schema_check(doc: SourceDoc) -> list[Issue]:
 
 def build_context(
     root: Path,
-    config: Config,
+    config: GlobalConfig,
     *,
     check_links: bool = False,
     transport: httpx.BaseTransport | None = None,
@@ -167,7 +183,9 @@ def build_context(
     schema_issues: list[Issue] = []
     for doc in loaded.docs:
         schema_issues.extend(schema_check(doc))
-    return Context(root, config, loaded.docs, loaded.issues, schema_issues, check_links, transport)
+    # 試験ごとの validation.yaml の不備は ConfigError として呼び出し元(CLI は終了コード 2)に伝える
+    exam_configs = {d.name: load_exam_config(config, d) for d in exam_dirs(root)}
+    return Context(root, config, loaded.docs, loaded.issues, schema_issues, check_links, transport, exam_configs)
 
 
 # ---- ルール定義 -------------------------------------------------------------

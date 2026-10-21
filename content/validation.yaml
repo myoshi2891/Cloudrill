@@ -1,27 +1,8 @@
-# validate.py の閾値・設定。コードを変更せずに調整できるよう、数値はすべてここに置く。
+# validate.py の閾値・設定(全体)。コードを変更せずに調整できるよう、数値はすべてここに置く。
+# 試験ごとの値は exams/<examID>/validation.yaml に書き、この内容に深いマージで重ねる
+# (マッピングはキーごとにマージ、リストとスカラーは置き換え)。模試の構成(examSet)は試験ごとにだけ書ける。
+# サブ項目・模試の問題数は exam.yaml が正。
 version: 1
-
-examSet:
-  # CI-02: status: complete の模試に求める条件(draft では warning)
-  questionCount: 55
-  # キーは対象ドメイン。"5+6" のように + で合算グループを指定できる
-  domainDistribution:
-    "1": 14
-    "2": 10
-    "3": 10
-    "4": 8
-    "5+6": 13
-  caseQuestions:
-    min: 12
-    max: 15
-  # 既定のケース割り当てと難易度(違反は warning)
-  defaultAssignments:
-    "1": { caseStudies: [ehr, altostrat], level: basic }
-    "2": { caseStudies: [cymbal, knightMotives], level: basic }
-    "3": { caseStudies: [ehr, cymbal], level: standard }
-    "4": { caseStudies: [altostrat, knightMotives], level: standard }
-    "5": { caseStudies: [ehr, knightMotives], level: advanced }
-    "6": { caseStudies: [altostrat, cymbal], level: advanced }
 
 statistics:
   # CI-03 / CI-04 で draft の模試を集計する最小問題数。これ未満の draft は統計チェックを省略する
@@ -56,32 +37,3 @@ links:
   concurrency: 8
   userAgent: "examprep-content-link-check/1.0 (+https://github.com/)"
   retryWithGetOn: [405]
-
-examGuide:
-  version: "6.1"
-  # CI-09: docs・問題・カードの subObjective はこの一覧に含まれること
-  # 【暫定】公式試験ガイドとの照合が必要(README「前提と判断」参照)
-  subObjectives:
-    - "1.1"
-    - "1.2"
-    - "1.3"
-    - "1.4"
-    - "1.5"
-    - "2.1"
-    - "2.2"
-    - "2.3"
-    - "2.4"
-    - "2.5"
-    - "3.1"
-    - "3.2"
-    - "4.1"
-    - "4.2"
-    - "4.3"
-    - "5.1"
-    - "5.2"
-    - "6.1"
-    - "6.2"
-    - "6.3"
-    - "6.4"
-    - "6.5"
-    - "6.6"

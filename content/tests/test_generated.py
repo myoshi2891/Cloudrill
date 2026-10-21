@@ -27,3 +27,12 @@ def test_swift_fixtures_are_up_to_date(tmp_path: Path) -> None:
         "Swift 用 JSON が古くなっています。python content/scripts/export_json.py を実行してください"
     )
     assert DEFAULT_OUT == FIXTURES / "valid-json"
+
+
+def test_export_skips_validation_yaml(tmp_path: Path) -> None:
+    # Arrange: valid には試験ごとの validation.yaml がある
+    assert (VALID / "exams/test-alpha/validation.yaml").is_file()
+    # Act
+    written = export(VALID, tmp_path / "out")
+    # Assert: 検証ツールの設定はアプリ向けの JSON に出力しない
+    assert all(p.name != "validation.json" for p in written)

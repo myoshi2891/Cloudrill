@@ -62,6 +62,19 @@ SET1_CASE_QUESTIONS = 13
 SET1_MULTIPLE = 4
 SET1_FIVE_CHOICE_SINGLE = 2
 SET1_LONGEST_CORRECT = 14  # 14/55 ≒ 25%
+# test-alpha の validation.yaml の examSet(gcp-pca と同じ形)
+EXAM_SET_POLICY = {
+    "domainDistribution": {"1": 14, "2": 10, "3": 10, "4": 8, "5+6": 13},
+    "caseQuestions": {"min": 12, "max": 15},
+    "defaultAssignments": {
+        "1": {"caseStudies": ["ehr", "altostrat"], "level": "basic"},
+        "2": {"caseStudies": ["cymbal", "knightMotives"], "level": "basic"},
+        "3": {"caseStudies": ["ehr", "cymbal"], "level": "standard"},
+        "4": {"caseStudies": ["altostrat", "knightMotives"], "level": "standard"},
+        "5": {"caseStudies": ["ehr", "knightMotives"], "level": "advanced"},
+        "6": {"caseStudies": ["altostrat", "cymbal"], "level": "advanced"},
+    },
+}
 
 
 def stem_text(rng: random.Random) -> str:
@@ -241,6 +254,7 @@ def build_valid() -> dict[str, Any]:
     files: dict[str, Any] = {question_path(q): q for q in set1 + practice}
 
     files["exam.yaml"] = build_exam_definition()
+    files["validation.yaml"] = {"version": 1, "examSet": copy.deepcopy(EXAM_SET_POLICY)}
     files["exam-sets.yaml"] = {
         "examSets": [
             {"id": 1, "status": "complete", "level": "basic", "caseStudies": list(SET1_CASES), "questionIDs": [q["id"] for q in set1]},

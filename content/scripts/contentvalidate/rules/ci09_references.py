@@ -12,8 +12,10 @@ RULE_ID = "CI-09"
 
 def _sub_objective(ctx: Context, doc: SourceDoc, obj: object, path: tuple[str | int, ...]) -> Iterator[Issue]:
     sub = get_str(obj, "subObjective")
-    if sub is not None and sub not in ctx.config.sub_objectives:
-        yield doc.issue(RULE_ID, Severity.ERROR, f"subObjective '{sub}' は試験ガイドの一覧(validation.yaml)にありません", (*path, "subObjective"))
+    # exam.yaml が Schema 違反の試験は確認しない(原因は CI-01 が報告する)
+    known = ctx.sub_objectives(doc.exam_id)
+    if sub is not None and known is not None and sub not in known:
+        yield doc.issue(RULE_ID, Severity.ERROR, f"subObjective '{sub}' は exam.yaml のサブ項目にありません", (*path, "subObjective"))
 
 
 def _flashcards(ctx: Context) -> Iterator[Issue]:

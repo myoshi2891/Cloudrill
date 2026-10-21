@@ -28,7 +28,7 @@ def check(ctx: Context) -> Iterator[Issue]:
 
 
 def _check_exam(ctx: Context, doc: SourceDoc, exam_sets: list[tuple[int, dict[str, Any]]]) -> Iterator[Issue]:
-    cfg = ctx.config
+    cfg = ctx.exam_config(doc.exam_id).thresholds
     for i, exam_set in exam_sets:
         questions = set_questions(ctx, doc.exam_id, exam_set)
         total = len(questions)

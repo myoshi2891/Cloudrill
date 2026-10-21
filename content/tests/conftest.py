@@ -10,7 +10,7 @@ import httpx
 import pytest
 import yaml
 
-from contentvalidate.config import Config, load_config
+from contentvalidate.config import GlobalConfig, load_config
 
 CONTENT_ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = CONTENT_ROOT / "tests" / "fixtures"
@@ -60,7 +60,7 @@ def link_handler(request: httpx.Request) -> httpx.Response:
 
 
 @pytest.fixture(scope="session")
-def config() -> Config:
+def config() -> GlobalConfig:
     return load_config(CONTENT_ROOT / "validation.yaml")
 
 

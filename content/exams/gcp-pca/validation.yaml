@@ -1,0 +1,24 @@
+# gcp-pca の検証設定。content/validation.yaml(全体)に深いマージで重ねる。
+# 模試の問題数・回数・ケース数は exam.yaml の format.mockExam が正。
+version: 1
+
+examSet:
+  # CI-02: status: complete の模試に求める条件(draft では warning)
+  # キーは対象ドメイン。"5+6" のように + で合算グループを指定できる
+  domainDistribution:
+    "1": 14
+    "2": 10
+    "3": 10
+    "4": 8
+    "5+6": 13
+  caseQuestions:
+    min: 12
+    max: 15
+  # 既定のケース割り当てと難易度(違反は warning)
+  defaultAssignments:
+    "1": { caseStudies: [ehr, altostrat], level: basic }
+    "2": { caseStudies: [cymbal, knightMotives], level: basic }
+    "3": { caseStudies: [ehr, cymbal], level: standard }
+    "4": { caseStudies: [altostrat, knightMotives], level: standard }
+    "5": { caseStudies: [ehr, knightMotives], level: advanced }
+    "6": { caseStudies: [altostrat, cymbal], level: advanced }

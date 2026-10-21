@@ -29,10 +29,15 @@ DEFAULT_OUT = CONTENT_ROOT / "tests/fixtures/valid-json"
 
 
 def export(src: Path, out: Path) -> list[Path]:
-    """src 配下の *.yaml を out 配下の同じ相対パス(拡張子 .json)に書き出す。out は作り直す。"""
+    """src 配下の *.yaml を out 配下の同じ相対パス(拡張子 .json)に書き出す。out は作り直す。
+
+    検証ツールの設定(validation.yaml)はアプリに配信しないので出力しない。
+    """
     shutil.rmtree(out, ignore_errors=True)
     written: list[Path] = []
     for file in sorted(src.rglob("*.yaml")):
+        if file.name == "validation.yaml":
+            continue
         data, _, _ = parse_yaml(file.read_text(encoding="utf-8"))
         target = out / file.relative_to(src).with_suffix(".json")
         target.parent.mkdir(parents=True, exist_ok=True)

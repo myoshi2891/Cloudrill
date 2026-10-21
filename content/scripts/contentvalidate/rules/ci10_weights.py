@@ -11,7 +11,7 @@ RULE_ID = "CI-10"
 
 
 def _check_sum(ctx: Context, doc: SourceDoc, total: float, path: JsonPath) -> Iterator[Issue]:
-    cfg = ctx.config
+    cfg = ctx.exam_config(doc.exam_id).thresholds
     if abs(total - cfg.weights_sum) > cfg.weights_tolerance:
         yield doc.issue(
             RULE_ID, Severity.ERROR,

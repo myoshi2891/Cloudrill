@@ -47,7 +47,7 @@ def probe(client: httpx.Client, url: str, retry_get_on: frozenset[int]) -> str |
 def check(ctx: Context) -> Iterator[Issue]:
     if not ctx.check_links:
         return
-    cfg = ctx.config
+    cfg = ctx.config.thresholds
     urls = collect_urls(ctx)
     if not urls:
         return

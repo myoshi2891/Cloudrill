@@ -8,7 +8,7 @@ from pathlib import Path
 
 import httpx
 
-from .config import Config
+from .config import GlobalConfig
 from .context import build_context
 from .model import Issue, Severity
 from .rules import ALL_RULES
@@ -16,7 +16,7 @@ from .rules import ALL_RULES
 
 def run(
     root: Path,
-    config: Config,
+    config: GlobalConfig,
     *,
     only: Iterable[str] | None = None,
     check_links: bool = False,

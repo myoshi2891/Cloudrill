@@ -18,7 +18,7 @@ def check(ctx: Context) -> Iterator[Issue]:
 
 
 def _check_exam(ctx: Context, doc: SourceDoc, exam_sets: list[tuple[int, dict[str, Any]]]) -> Iterator[Issue]:
-    cfg = ctx.config
+    cfg = ctx.exam_config(doc.exam_id).thresholds
     for i, exam_set in exam_sets:
         singles = [q for q in set_questions(ctx, doc.exam_id, exam_set) if kind_of(q.data) == "single"]
         positions = [idx[0] for q in singles if len(idx := correct_indices(q.data)) == 1]
