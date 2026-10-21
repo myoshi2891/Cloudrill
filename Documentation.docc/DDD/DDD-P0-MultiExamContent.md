@@ -798,6 +798,21 @@ TDD の対象外(ワークフローとドキュメント)。代わりに次の�
 
 **完了条件**: PR 上で、全ワークフローが通る。
 
+**実装メモ**(2026-10-21 時点の状況):
+
+- 手順 1: ワークフローの変更は不要だった。`content-validate.yml` の `paths` は `content/**` で、`content/exams/**` と `content/vendors.yaml` を含む。`domainmodels-test.yml` は `content/schemas/**` と `content/tests/fixtures/**`(valid-json を含む)を対象にしている。`content-link-check.yml` は `--exam` を付けずに全試験を確認する。
+- 手順 4・5: README、`content/README.md`、CLAUDE.md は、各ステップの中で随時更新した(Schema の一覧、ルールの一覧、`--exam`、前提と判断の 12・19、検証ツールの構成)。このステップでは、概要の文言、`--exam` のコマンド例、コンテンツのパス、試験 ID の命名、リリースタグ(`content/<examID>/vX.Y.Z`)を更新した。
+- 手順 2・3(PR 上での CI の確認と、`content-link-check` の手動実行)は、push と PR の作成が必要なので未実施。
+
+**フェーズの完了条件の確認状況**(2026-10-21 時点):
+
+| No. | 結果 | 備考 |
+|---|---|---|
+| 1 | 一部未達 | `test-alpha`・`test-beta` は `--strict` で 0 件。`gcp-pca` は、模試 1(draft、2 問)の CI-02 の warning が 7 件あり、`--strict` の終了コードが 1。コードではなくコンテンツ(問題の作成)の課題 |
+| 2 | 達成 | `test_validator_has_no_exam_specific_literals` が通り、P0-S09 の grep が 0 件 |
+| 3 | 達成 | P0-S00 の grep が 0 件 |
+| 4 | レビュー待ち | |
+
 ---
 
 ## 5. フェーズの完了条件

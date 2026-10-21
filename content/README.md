@@ -1,6 +1,6 @@
 # content — 学習コンテンツ
 
-Google Cloud Professional Cloud Architect(PCA)試験対策 iOS アプリの学習コンテンツです。
+クラウド認定試験対策 iOS アプリ「Cloudrill」の学習コンテンツです。試験ごとに `exams/<examID>/` の下に置きます(初期リリースの対象は Google Cloud PCA の `exams/gcp-pca/`)。
 問題、フラッシュカード、ケーススタディなどを YAML / Markdown で管理し、CI で検証してから JSON に変換して配信します。
 モノレポ全体の構成は [ルートの README](../README.md) を参照してください。
 

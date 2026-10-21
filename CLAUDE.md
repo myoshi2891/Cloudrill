@@ -4,12 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 概要
 
-Google Cloud Professional Cloud Architect(PCA)試験対策 iOS アプリと、その学習コンテンツのモノレポ。
+クラウド認定試験対策 iOS アプリ「Cloudrill」と、その学習コンテンツのモノレポ。初期リリースの対象は Google Cloud Professional Cloud Architect(PCA、`examID: gcp-pca`)だが、コンテンツの構造と検証ツールは複数の試験(他ベンダーを含む)に対応している。試験の追加はコンテンツの追加だけで済む(コードを変えない)。
 
 - `ExamPrepApp/` + `ExamPrepApp.xcodeproj` — iOS アプリ(SwiftUI、表示名 Cloudrill)。`packages/DomainModels` をローカルパッケージ(相対パス)として参照
 - `packages/DomainModels/` — コンテンツの値型(SwiftPM、Swift 6、Swift Testing)
 - `content/` — 学習コンテンツ(YAML / Markdown)、JSON Schema(Draft 2020-12)、Python の検証ツール。詳細仕様は `content/README.md`
-- `Documentation.docc/` — 要件定義書(`RDD.md`)、基本設計書(`BDD.md`)
+  - `content/vendors.yaml`(全試験で共通のベンダー定義)と `content/validation.yaml`(検証の閾値、全体)
+  - `content/exams/<examID>/` — 試験ごとのディレクトリ。`exam.yaml`(試験定義)、`validation.yaml`(試験ごとの検証設定)、`exam-sets.yaml`、問題などのコンテンツ
+- `Documentation.docc/` — 要件定義書(`RDD.md`)、基本設計書(`BDD.md`)、詳細設計書(`DDD.md` と `DDD/DDD-P0〜P6`)
 
 ## コマンド
 
@@ -26,6 +28,7 @@ uv sync --project content
 # コンテンツ検証(--root 省略時は content/ が対象。実行場所に依存しない)
 content/.venv/bin/python content/scripts/validate.py
 content/.venv/bin/python content/scripts/validate.py --only CI-02,CI-03 --format json
+content/.venv/bin/python content/scripts/validate.py --exam gcp-pca   # 試験を絞る(カンマ区切り。存在しない ID は終了コード 2)
 content/.venv/bin/python content/scripts/validate.py --check-links   # CI-06(ネットワークアクセスあり)
 
 # fixture と Swift 用 JSON の再生成(生成物はコミット対象)
@@ -68,7 +71,8 @@ validate.py の終了コード: `0` = error なし / `1` = error あり(`--stric
 
 ## コンテンツの規約
 
-- 問題・ケース・ツリーは 1ファイル1件(`questions/domain{1..6}/<id>.yaml`)。カードとドリルは配列のラッパー(`{ cards: [...] }` / `{ drills: [...] }`)で 1ファイルに複数件を持つ。
+- コンテンツは試験ごとに `exams/<examID>/` の下に置く。試験のドメイン、サブ項目、比重、模試の形式、有効な機能、語彙(ケース ID、WAF の柱)は `exam.yaml` が正で、コードには書かない。
+- 問題・ケース・ツリーは 1ファイル1件(`exams/<examID>/questions/domain<N>/<id>.yaml`)。カードとドリルは配列のラッパー(`{ cards: [...] }` / `{ drills: [...] }`)で 1ファイルに複数件を持つ。
 - 利用者に表示する文章は `LocalizedText`(`ja` は必須、`en` の欠落は CI-11 の warning)。サービス名や `Reference.title` はプレーン文字列。
 - YAML のキーはすべて文字列に正規化される。`examGuideVersion: 6.1` のように引用符を付け忘れると数値として読まれ、CI-01 になる。
 
@@ -84,4 +88,5 @@ validate.py の終了コード: `0` = error なし / `1` = error あり(`--stric
 
 - Xcode のプロジェクト・ターゲット・フォルダは PascalCase で、スペースを含めない(`ExamPrepApp`)。識別子は表示名と切り離した中立な名前にする。表示名「Cloudrill」は `INFOPLIST_KEY_CFBundleDisplayName` だけで設定する(名前を変えるときはここだけを変更する)。
 - パッケージを追加するときは `project.pbxproj` を手で編集せず、Xcode の **File > Add Package Dependencies… > Add Local…** から追加する。
-- リリースタグは `content-vX.Y.Z`(`manifest.json` の `packVersion` と一致させる)と `app-vX.Y.Z`。
+- 試験 ID(`examID`)は `<ベンダー略称>-<試験略称>`(例: `gcp-pca`)。表示名と同じく、識別子は製品名やブランド名に依存させない。
+- リリースタグは `content/<examID>/vX.Y.Z`(試験ごとのパック。`manifest.json` の `packVersion` と一致させる)と `app-vX.Y.Z`。
