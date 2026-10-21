@@ -36,7 +36,7 @@ jobs:
         with:
           working-directory: content
           enable-cache: true
-          cache-dependency-glob: content/uv.lock
+          cache-dependency-glob: uv.lock
       - name: Install dependencies
         # --locked: uv.lock が pyproject.toml と食い違っていれば失敗させる
         run: uv sync --locked

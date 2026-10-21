@@ -23,7 +23,7 @@ jobs:
         with:
           working-directory: content
           enable-cache: true
-          cache-dependency-glob: content/uv.lock
+          cache-dependency-glob: uv.lock
       - name: Install dependencies
         run: uv sync --locked --no-dev
       - name: Check links
