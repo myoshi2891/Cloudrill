@@ -11,8 +11,9 @@ from pathlib import Path
 import pytest
 
 from conftest import CONTENT_ROOT, VALID, materialize
-from pcavalidate.model import Issue, Severity
-from pcavalidate.report import format_github
+from contentvalidate.config import load_config
+from contentvalidate.model import Issue, Severity
+from contentvalidate.report import format_github
 from validate import main
 
 GITHUB_LINE = re.compile(r"^::(error|warning) file=[^,]+(,line=\d+)?,title=CI-\d{2}::\[CI-\d{2}\] .+$")
@@ -118,3 +119,9 @@ def test_github_paths_are_relative_to_workspace(
     main(["--format", "github"])
     lines = capsys.readouterr().out.splitlines()
     assert lines and all("file=content/" in line for line in lines)
+
+
+def test_link_check_user_agent() -> None:
+    # 接尾辞(連絡先)は任意。名称がブランド名ではなく examprep であることだけを確認する
+    config = load_config(CONTENT_ROOT / "validation.yaml")
+    assert config.link_user_agent.startswith("examprep-content-link-check/1.0")

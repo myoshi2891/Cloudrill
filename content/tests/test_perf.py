@@ -8,8 +8,8 @@ from pathlib import Path
 
 from conftest import materialize
 from generate import dump, make_question, question_path
-from pcavalidate.config import Config
-from pcavalidate.engine import run
+from contentvalidate.config import Config
+from contentvalidate.engine import run
 
 TOTAL_QUESTIONS = 500
 LIMIT_SECONDS = 10.0

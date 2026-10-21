@@ -13,7 +13,7 @@ from referencing.jsonschema import DRAFT202012
 from .model import Kind
 
 SCHEMA_DIR = Path(__file__).resolve().parents[2] / "schemas"
-SCHEMA_BASE = "https://pca-content.invalid/schemas/"
+SCHEMA_BASE = "https://examprep-content.invalid/schemas/"
 
 
 @cache

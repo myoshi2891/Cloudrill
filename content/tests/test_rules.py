@@ -9,10 +9,10 @@ import httpx
 import pytest
 
 from conftest import VALID, invalid_cases, materialize, read_expected
-from pcavalidate.config import Config
-from pcavalidate.engine import run
-from pcavalidate.model import Issue
-from pcavalidate.rules import RULE_IDS
+from contentvalidate.config import Config
+from contentvalidate.engine import run
+from contentvalidate.model import Issue
+from contentvalidate.rules import RULE_IDS
 
 
 def _by_rule(issues: list[Issue]) -> dict[str, list[str]]:

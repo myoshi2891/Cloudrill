@@ -54,7 +54,7 @@ links:
   # CI-06(--check-links 指定時のみ)
   timeoutSeconds: 10
   concurrency: 8
-  userAgent: "pca-content-link-check/1.0 (+https://github.com/)"
+  userAgent: "examprep-content-link-check/1.0 (+https://github.com/)"
   retryWithGetOn: [405]
 
 examGuide:

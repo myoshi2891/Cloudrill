@@ -160,7 +160,7 @@ def load_config(path: Path) -> Config:
         weights_tolerance=_num(weights, "tolerance", "weights"),
         link_timeout=_num(links, "timeoutSeconds", "links"),
         link_concurrency=_int(links, "concurrency", "links"),
-        link_user_agent=str(links.get("userAgent", "pca-content-link-check")),
+        link_user_agent=str(links.get("userAgent", "examprep-content-link-check")),
         link_retry_get_on=retry_get_on,
         sub_objectives=frozenset(str(s) for s in subs),
     )

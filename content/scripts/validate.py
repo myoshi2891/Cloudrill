@@ -18,10 +18,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from pcavalidate.config import ConfigError, load_config, resolve_config_path  # noqa: E402
-from pcavalidate.engine import exit_code, run  # noqa: E402
-from pcavalidate.report import format_github, format_json, format_text  # noqa: E402
-from pcavalidate.rules import RULE_IDS  # noqa: E402
+from contentvalidate.config import ConfigError, load_config, resolve_config_path  # noqa: E402
+from contentvalidate.engine import exit_code, run  # noqa: E402
+from contentvalidate.report import format_github, format_json, format_text  # noqa: E402
+from contentvalidate.rules import RULE_IDS  # noqa: E402
 
 # 既定のコンテンツルート(このスクリプトから見た content/)。実行場所に依存しない
 DEFAULT_ROOT = Path(__file__).resolve().parents[1]
@@ -36,7 +36,7 @@ def _parse_only(value: str) -> frozenset[str]:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="pca-content のコンテンツを検証する")
+    parser = argparse.ArgumentParser(description="学習コンテンツを検証する")
     parser.add_argument("--root", type=Path, default=DEFAULT_ROOT, help="コンテンツのルート(既定: このスクリプトの親の content/)")
     parser.add_argument("--config", type=Path, default=None, help="設定ファイル(既定: <root>/validation.yaml)")
     parser.add_argument("--check-links", action="store_true", help="CI-06(リンク切れ確認)を実行する")
