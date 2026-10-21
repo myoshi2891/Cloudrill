@@ -19,6 +19,7 @@ let package = Package(
         .target(name: "ExamEngine", dependencies: ["StudyModels", "DomainModels"]),
         .target(name: "DomainTestSupport", dependencies: ["StudyModels", "DomainModels"]),
         .testTarget(name: "StudyModelsTests", dependencies: ["StudyModels", "DomainTestSupport"]),
+        .testTarget(name: "ExamEngineTests", dependencies: ["ExamEngine", "DomainTestSupport"]),
         .testTarget(name: "DomainTestSupportTests", dependencies: ["DomainTestSupport"]),
     ],
     swiftLanguageModes: [.v6]
