@@ -24,7 +24,6 @@ class Kind(StrEnum):
     DECISION = "decision"
     DRILL = "drill"
     EXAM_SETS = "exam-sets"
-    WEIGHTS = "weights"
     DOCS = "docs-frontmatter"
     EXAM = "exam"
     VENDORS = "vendors"

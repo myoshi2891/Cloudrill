@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from conftest import CONTENT_ROOT, VALID, materialize
+from conftest import CONTENT_ROOT, VALID, copy_exam, materialize
 from contentvalidate.config import load_config
 from contentvalidate.model import Issue, Severity
 from contentvalidate.report import format_github
@@ -28,9 +28,8 @@ def test_exit_code_one_on_error(tmp_path: Path, capsys: pytest.CaptureFixture[st
     root = materialize("CI-10-weights-sum", tmp_path)
     assert main(["--root", str(root)]) == 1
     out = capsys.readouterr().out
-    assert re.search(r"^exams/test-alpha/weights\.yaml:\d+: \[CI-10\] error: ", out, re.MULTILINE)
-    # weights.yaml の合計と、exam.yaml との不一致の 2 件
-    assert "  CI-10 error: 2" in out
+    assert re.search(r"^exams/test-alpha/exam\.yaml:\d+: \[CI-10\] error: ", out, re.MULTILINE)
+    assert "  CI-10 error: 1" in out
 
 
 def test_warning_only_exits_zero_unless_strict(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
@@ -75,6 +74,27 @@ def test_unknown_rule_in_only_exits_two(capsys: pytest.CaptureFixture[str]) -> N
     with pytest.raises(SystemExit) as exc:
         main(["--only", "CI-99"])
     assert exc.value.code == 2
+
+
+def test_cli_exam_option_limits_exams(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    # Arrange: test-beta にだけ違反(英語訳の欠落)がある
+    root = materialize(None, tmp_path)
+    beta = copy_exam(root, "test-beta")
+    question = beta / "questions/domain2/Q-2.2-0101.yaml"
+    question.write_text(question.read_text(encoding="utf-8").replace("  en: ", "  en_removed: ", 1), encoding="utf-8")
+    assert main(["--root", str(root), "--format", "json"]) == 1
+    capsys.readouterr()
+    # Act
+    code = main(["--root", str(root), "--exam", "test-alpha", "--format", "json"])
+    # Assert
+    files = {issue["file"] for issue in json.loads(capsys.readouterr().out)}
+    assert code == 0
+    assert not any(f.startswith("exams/test-beta/") for f in files)
+
+
+def test_cli_unknown_exam_exits_2(capsys: pytest.CaptureFixture[str]) -> None:
+    assert main(["--root", str(VALID), "--exam", "nope"]) == 2
+    assert "nope" in capsys.readouterr().err
 
 
 def test_missing_root_exits_two(tmp_path: Path) -> None:

@@ -260,10 +260,6 @@ def build_valid() -> dict[str, Any]:
             {"id": 1, "status": "complete", "level": "basic", "caseStudies": list(SET1_CASES), "questionIDs": [q["id"] for q in set1]},
         ]
     }
-    files["weights.yaml"] = {
-        "examGuideVersion": EXAM_GUIDE_VERSION,
-        "weights": dict(WEIGHTS),
-    }
     files["flashcards/domain1.yaml"] = {
         "cards": [
             {
@@ -403,9 +399,14 @@ def ov_ci01_exam_id(valid: dict[str, Any]) -> dict[str, Any]:
 
 
 def ov_ci02_case(valid: dict[str, Any]) -> dict[str, Any]:
+    """試験にはあるが模試 1 にはないケース(cymbal)の問題を模試 1 に入れる。"""
+    exam = copy.deepcopy(valid["exam.yaml"])
+    exam["caseStudies"].append("cymbal")
+    case = copy.deepcopy(valid["cases/ehr.yaml"])
+    case["id"] = "cymbal"
     q = copy.deepcopy(next(q for q in _set1(valid) if q["caseStudy"] == "ehr"))
     q["caseStudy"] = "cymbal"
-    return _with_question(q)
+    return {"exam.yaml": exam, "cases/cymbal.yaml": case, **_with_question(q)}
 
 
 def ov_ci02_bidirectional(valid: dict[str, Any]) -> dict[str, Any]:
@@ -533,15 +534,23 @@ def ov_ci09_exam_set(valid: dict[str, Any]) -> dict[str, Any]:
     return {"exam-sets.yaml": sets}
 
 
+def ov_ci09_unknown_domain(valid: dict[str, Any]) -> dict[str, Any]:
+    return _with_question(_practice(912, domain=7))
+
+
+def ov_ci09_unknown_case_study(valid: dict[str, Any]) -> dict[str, Any]:
+    return _with_question(_practice(913, case="acmeBank"))
+
+
+def ov_ci09_unknown_waf_pillar(valid: dict[str, Any]) -> dict[str, Any]:
+    q = _practice(914)
+    q["wafPillars"] = ["resilience"]
+    return _with_question(q)
+
+
 def ov_ci10(valid: dict[str, Any]) -> dict[str, Any]:
-    weights = copy.deepcopy(valid["weights.yaml"])
-    weights["weights"][5] = 0.1
-    return {"weights.yaml": weights}
-
-
-def ov_ci10_exam(valid: dict[str, Any]) -> dict[str, Any]:
     exam = copy.deepcopy(valid["exam.yaml"])
-    exam["domains"][0]["weight"] = 0.3
+    exam["domains"][4]["weight"] = 0.1
     return {"exam.yaml": exam}
 
 
@@ -583,8 +592,10 @@ INVALID_CASES: list[tuple[str, str, dict[str, list[str]], Callable[[dict[str, An
         ov_ci09_exam_set,
         {},
     ),
-    ("CI-10-weights-sum", "比重の合計が 0.985(exam.yaml との不一致も出る)", {"CI-10": ["error"]}, ov_ci10, {}),
-    ("CI-10-exam-weights", "exam.yaml の比重の合計が 1.05 で weights.yaml とも異なる", {"CI-10": ["error"]}, ov_ci10_exam, {}),
+    ("CI-09-unknown-domain", "exam.yaml にないドメイン 7 の問題", {"CI-09": ["error"]}, ov_ci09_unknown_domain, {}),
+    ("CI-09-unknown-case-study", "exam.yaml にないケース acmeBank の問題", {"CI-09": ["error"]}, ov_ci09_unknown_case_study, {}),
+    ("CI-09-unknown-waf-pillar", "exam.yaml にない WAF の柱 resilience の問題", {"CI-09": ["error"]}, ov_ci09_unknown_waf_pillar, {}),
+    ("CI-10-weights-sum", "exam.yaml の比重の合計が 0.985", {"CI-10": ["error"]}, ov_ci10, {}),
     ("CI-11-missing-en", "stem.en の欠落", {"CI-11": ["warning"]}, ov_ci11, {}),
 ]
 

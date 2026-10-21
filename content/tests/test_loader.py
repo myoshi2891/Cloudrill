@@ -16,7 +16,7 @@ def _write(root: Path, rel: str, text: str = "{}\n") -> None:
 
 def _exam(root: Path, exam_id: str) -> None:
     """必須ファイルだけを持つ試験ディレクトリを作る(中身の妥当性は問わない)。"""
-    for name in ("exam.yaml", "exam-sets.yaml", "weights.yaml"):
+    for name in ("exam.yaml", "exam-sets.yaml"):
         _write(root, f"exams/{exam_id}/{name}")
 
 
@@ -108,6 +108,5 @@ def test_loader_paths_are_relative_to_root(tmp_path: Path) -> None:
     assert exam_docs == sorted([
         (Kind.EXAM, "exams/a/exam.yaml"),
         (Kind.EXAM_SETS, "exams/a/exam-sets.yaml"),
-        (Kind.WEIGHTS, "exams/a/weights.yaml"),
         (Kind.QUESTION, "exams/a/questions/domain1/Q-1.1-0001.yaml"),
     ])

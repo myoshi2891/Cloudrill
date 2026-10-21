@@ -4,25 +4,38 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 
-from ..context import Context, Rule, choices_of, correct_indices, kind_of
+from ..context import ExamDefinitionView, GlobalContext, Rule, choices_of, correct_indices, kind_of
 from ..model import Issue, Kind, Severity, SourceDoc, get_list, get_str
 
 RULE_ID = "CI-01"
 
 
-def _domain_matches(doc: SourceDoc, obj: object, base: tuple[str | int, ...]) -> Iterator[Issue]:
-    """subObjective の先頭の数字と domain が一致するか。"""
-    if not isinstance(obj, dict):
+Definition = ExamDefinitionView | None
+
+
+def _domain_matches(doc: SourceDoc, definition: Definition, obj: object, base: tuple[str | int, ...]) -> Iterator[Issue]:
+    """subObjective が属するドメイン(exam.yaml の対応表)と domain が一致するか。
+
+    exam.yaml が Schema 違反の試験と、サブ項目・ドメインが exam.yaml にない場合は確認しない(CI-01 / CI-09 が報告する)。
+    """
+    if definition is None or not isinstance(obj, dict):
         return
     domain = obj.get("domain")
     sub = get_str(obj, "subObjective")
-    if isinstance(domain, int) and sub is not None and sub.split(".")[0] != str(domain):
-        yield doc.issue(RULE_ID, Severity.ERROR, f"subObjective '{sub}' が domain {domain} と一致しません", (*base, "subObjective"))
+    expected = definition.sub_objective_domain.get(sub) if sub is not None else None
+    if expected is None or not isinstance(domain, int) or domain not in definition.domain_ids:
+        return
+    if domain != expected:
+        yield doc.issue(
+            RULE_ID, Severity.ERROR,
+            f"subObjective '{sub}' はドメイン {expected} のサブ項目で、domain {domain} と一致しません",
+            (*base, "subObjective"),
+        )
 
 
-def _check_question(doc: SourceDoc) -> Iterator[Issue]:
+def _check_question(doc: SourceDoc, definition: Definition) -> Iterator[Issue]:
     q = doc.data
-    yield from _domain_matches(doc, q, ())
+    yield from _domain_matches(doc, definition, q, ())
 
     choices = choices_of(q)
     seen: dict[str, int] = {}
@@ -45,12 +58,12 @@ def _check_question(doc: SourceDoc) -> Iterator[Issue]:
             yield doc.issue(RULE_ID, Severity.ERROR, f"single の問題は正解がちょうど 1 つ必要です(現在 {n} 個)", ("choices",))
 
 
-def _check_flashcards(doc: SourceDoc) -> Iterator[Issue]:
+def _check_flashcards(doc: SourceDoc, definition: Definition) -> Iterator[Issue]:
     for i, card in enumerate(get_list(doc.data, "cards")):
-        yield from _domain_matches(doc, card, ("cards", i))
+        yield from _domain_matches(doc, definition, card, ("cards", i))
 
 
-def _check_exam_sets(doc: SourceDoc) -> Iterator[Issue]:
+def _check_exam_sets(doc: SourceDoc, definition: Definition) -> Iterator[Issue]:
     seen: set[int] = set()
     for i, exam_set in enumerate(get_list(doc.data, "examSets")):
         set_id = exam_set.get("id") if isinstance(exam_set, dict) else None
@@ -60,7 +73,7 @@ def _check_exam_sets(doc: SourceDoc) -> Iterator[Issue]:
             seen.add(set_id)
 
 
-def _check_decision(doc: SourceDoc) -> Iterator[Issue]:
+def _check_decision(doc: SourceDoc, definition: Definition) -> Iterator[Issue]:
     seen: set[str] = set()
     for i, node in enumerate(get_list(doc.data, "nodes")):
         nid = get_str(node, "id")
@@ -70,7 +83,7 @@ def _check_decision(doc: SourceDoc) -> Iterator[Issue]:
             seen.add(nid)
 
 
-def _check_exam(doc: SourceDoc) -> Iterator[Issue]:
+def _check_exam(doc: SourceDoc, definition: Definition) -> Iterator[Issue]:
     """exam.yaml の id とディレクトリ名(試験のスコープ)が一致するか。"""
     declared = get_str(doc.data, "id")
     if declared is not None and declared != doc.exam_id:
@@ -86,13 +99,14 @@ _CHECKERS = {
 }
 
 
-def check(ctx: Context) -> Iterator[Issue]:
+def check(ctx: GlobalContext) -> Iterator[Issue]:
     yield from ctx.load_issues
     yield from ctx.schema_issues
     for doc in ctx.docs:
         checker = _CHECKERS.get(doc.kind)
         if checker is not None and doc.schema_ok:
-            yield from checker(doc)
+            exam = ctx.exam(doc.exam_id)
+            yield from checker(doc, exam.definition if exam is not None else None)
 
 
-RULE = Rule(RULE_ID, "Schema 適合と構造条件", check)
+RULE = Rule(RULE_ID, "Schema 適合と構造条件", check_global=check)

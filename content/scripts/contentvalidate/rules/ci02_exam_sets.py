@@ -6,35 +6,27 @@ from collections import Counter
 from collections.abc import Iterator
 from typing import Any
 
-from ..context import Context, Rule, set_questions, status_severity
+from ..context import ExamContext, Rule, set_questions, status_severity
 from ..model import Issue, Severity, SourceDoc, get_list, get_str
 
 RULE_ID = "CI-02"
 
 
-def _mock_exam(ctx: Context, exam_id: str | None, key: str) -> int | None:
-    """exam.yaml の format.mockExam.<key>(questionCount・setCount・caseStudiesPerSet)。exam.yaml が Schema 違反なら None。"""
-    exam = ctx.exam_by_id.get(exam_id)
-    if exam is None:
-        return None
-    value = exam.data["format"]["mockExam"][key]
-    return value if isinstance(value, int) else None
-
-
-def check(ctx: Context) -> Iterator[Issue]:
+def check(ctx: ExamContext) -> Iterator[Issue]:
     for doc, exam_sets in ctx.exam_sets:
         yield from _check_exam(ctx, doc, exam_sets)
 
 
-def _check_exam(ctx: Context, doc: SourceDoc, exam_sets: list[tuple[int, dict[str, Any]]]) -> Iterator[Issue]:
-    exam_id = doc.exam_id
+def _check_exam(ctx: ExamContext, doc: SourceDoc, exam_sets: list[tuple[int, dict[str, Any]]]) -> Iterator[Issue]:
     # 試験ごとの validation.yaml に examSet がなければ、配分・ケース問題数・既定の割り当ての確認を省略する
-    policy = ctx.exam_config(exam_id).exam_set_policy
-    question_by_id = ctx.question_by_id(exam_id)
+    policy = ctx.config.exam_set_policy
+    # exam.yaml が Schema 違反なら、exam.yaml の値を使う確認を省略する
+    definition = ctx.definition
+    question_by_id = ctx.question_by_id
     sets_by_id = {s.get("id"): (i, s) for i, s in exam_sets}
-    question_count = _mock_exam(ctx, exam_id, "questionCount")
-    per_set = _mock_exam(ctx, exam_id, "caseStudiesPerSet")
-    set_count = _mock_exam(ctx, exam_id, "setCount")
+    question_count = definition.mock_question_count if definition is not None else None
+    per_set = definition.case_studies_per_set if definition is not None else None
+    set_count = definition.mock_set_count if definition is not None else None
     # ケースがない試験(caseStudiesPerSet: 0)ではケース問題も 0 問
     case_range = (0, 0) if per_set == 0 else (policy.case_min, policy.case_max) if policy is not None else None
 
@@ -43,7 +35,7 @@ def _check_exam(ctx: Context, doc: SourceDoc, exam_sets: list[tuple[int, dict[st
         sev = status_severity(exam_set)
         base = ("examSets", i)
         label = f"模試 {set_id}({exam_set.get('status')})"
-        questions = set_questions(ctx, exam_id, exam_set)
+        questions = set_questions(ctx, exam_set)
 
         if set_count is not None and isinstance(set_id, int) and set_id > set_count:
             yield doc.issue(
@@ -107,10 +99,8 @@ def _check_exam(ctx: Context, doc: SourceDoc, exam_sets: list[tuple[int, dict[st
                     (*base, "level"),
                 )
 
-    # 問題 → exam-sets.yaml の方向(同じ試験の問題だけ)
+    # 問題 → exam-sets.yaml の方向
     for q in ctx.questions:
-        if q.exam_id != exam_id:
-            continue
         qid = get_str(q.data, "id")
         for k, set_id in enumerate(get_list(q.data, "examSets")):
             entry = sets_by_id.get(set_id)

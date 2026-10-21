@@ -6,21 +6,21 @@ from collections import Counter
 from collections.abc import Iterator
 from typing import Any
 
-from ..context import Context, Rule, correct_indices, kind_of, set_questions, status_severity
+from ..context import ExamContext, Rule, correct_indices, kind_of, set_questions, status_severity
 from ..model import Issue, SourceDoc
 
 RULE_ID = "CI-03"
 
 
-def check(ctx: Context) -> Iterator[Issue]:
+def check(ctx: ExamContext) -> Iterator[Issue]:
     for doc, exam_sets in ctx.exam_sets:
         yield from _check_exam(ctx, doc, exam_sets)
 
 
-def _check_exam(ctx: Context, doc: SourceDoc, exam_sets: list[tuple[int, dict[str, Any]]]) -> Iterator[Issue]:
-    cfg = ctx.exam_config(doc.exam_id).thresholds
+def _check_exam(ctx: ExamContext, doc: SourceDoc, exam_sets: list[tuple[int, dict[str, Any]]]) -> Iterator[Issue]:
+    cfg = ctx.config.thresholds
     for i, exam_set in exam_sets:
-        singles = [q for q in set_questions(ctx, doc.exam_id, exam_set) if kind_of(q.data) == "single"]
+        singles = [q for q in set_questions(ctx, exam_set) if kind_of(q.data) == "single"]
         positions = [idx[0] for q in singles if len(idx := correct_indices(q.data)) == 1]
         total = len(positions)
         if total == 0:
