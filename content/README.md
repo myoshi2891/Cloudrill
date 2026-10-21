@@ -48,7 +48,7 @@ swift test --package-path packages/DomainModels
 ### validate.py
 
 ```
-python content/scripts/validate.py [--root content] [--config validation.yaml] [--check-links] [--strict]
+python content/scripts/validate.py [--root content] [--config validation.yaml] [--exam gcp-pca] [--check-links] [--strict]
                                    [--format text|json|github] [--only CI-02,CI-03]
 ```
 
@@ -59,6 +59,7 @@ python content/scripts/validate.py [--root content] [--config validation.yaml] [
 | `--format json` | `[{"rule","severity","file","line","message"}]`。`file` は `--root` からの相対パス |
 | `--format github` | `::error file=...,line=...,title=CI-xx::message`。`file` はリポジトリルート(`GITHUB_WORKSPACE`、なければカレントディレクトリ)からの相対パス |
 | `--only` | 指定したルールだけを報告する。Schema 検証そのものは常に行う(後述) |
+| `--exam` | 指定した試験(カンマ区切り)だけを検証する。全体のファイル(`vendors.yaml`)は常に対象。存在しない試験 ID は終了コード 2 |
 | `--strict` | warning を error に昇格する。出力の深刻度と終了コードの両方に反映される |
 | `--root` | 省略時は、スクリプトの位置から見た `content/` を使う(実行場所に依存しない) |
 | `--config` | 全体の設定ファイル。省略時は `<root>/validation.yaml` を使い、なければ `content/validation.yaml` を使う。試験ごとの設定(`exams/<examID>/validation.yaml`)は常に試験ディレクトリから読む |
@@ -72,7 +73,6 @@ vendors.yaml              ベンダーの定義(全試験で共通)
 exams/<examID>/           試験ごとのディレクトリ(例: exams/gcp-pca/)
   exam.yaml               試験の定義(ドメインと比重、形式、機能、語彙)
   validation.yaml         試験ごとの検証設定(模試の構成 examSet、閾値の上書き。任意)
-  weights.yaml            ドメイン比重
   exam-sets.yaml          模試ごとの問題 ID とケースの割り当て
   questions/domain{1..6}/ 問題(1ファイル1問。ファイル名は <id>.yaml)
   flashcards/*.yaml       フラッシュカード(1ファイルに複数枚: { cards: [...] })
@@ -107,7 +107,6 @@ tests/                    pytest と fixture(valid-json/ は Swift テストが�
 | `exam` | `exams/<examID>/exam.yaml` | 試験の定義(ドメインと比重、サブ項目、模試の形式、有効な機能、WAF の柱、ケースの表示順) |
 | `vendors` | `vendors.yaml` | ベンダーの定義 |
 | `exam-sets` | `exam-sets.yaml` | 模試の定義(`caseStudies` は `minItems: 0`。個数が `caseStudiesPerSet` と一致するかは CI-02 が確認する。`questionIDs` は重複なし) |
-| `weights` | `weights.yaml` | ドメイン比重(キー 1〜6 はすべて必須) |
 | `docs-frontmatter` | `docs/*.md` のフロントマター | `title`、`subObjective`、`references`(1つ以上) |
 | `manifest` | 配信パックの `manifest.json` | 定義のみ。生成と署名はこのリポジトリの対象外 |
 
@@ -134,27 +133,29 @@ tests/                    pytest と fixture(valid-json/ は Swift テストが�
 
 | ID | ルール | 深刻度 | 設定キー |
 |---|---|---|---|
-| CI-01 | 全ファイルの Schema 適合、YAML 構文、キーの重複、必須ファイルの有無。加えて、`subObjective` と `domain` の整合(問題とカード)、single の正解がちょうど 1 つ、誤答の `mistakeTags` が 1 つ以上、正解に `mistakeTags` がない、選択肢 ID・模試 ID・ノード ID の重複 | error | — |
+| CI-01 | 全ファイルの Schema 適合、YAML 構文、キーの重複、必須ファイルの有無。加えて、`subObjective` と `domain` の整合(問題とカード。exam.yaml のサブ項目とドメインの対応で判定する)、single の正解がちょうど 1 つ、誤答の `mistakeTags` が 1 つ以上、正解に `mistakeTags` がない、選択肢 ID・模試 ID・ノード ID の重複 | error | — |
 | CI-02 | 模試の問題数、ドメイン配分、ケース数(exam.yaml の `caseStudiesPerSet`)、ケース問題数(`caseStudiesPerSet` が 0 なら 0 問)、ケース問題の `caseStudy` が模試のケースに含まれること、問題の `examSets` と `questionIDs` の双方向の一致、存在しない模試番号の参照 | complete は error、draft は warning(存在しない模試番号は常に error) | 試験ごとの `examSet.*`、exam.yaml の `format.mockExam` |
 | CI-02 | 既定のケース割り当て・level との違い | warning | `examSet.defaultAssignments` |
 | CI-03 | 単一選択問題の正解位置(元の並び順)A〜D がそれぞれ 20〜30% | complete は error、draft は warning | `answerPosition.*`、`statistics.draftMinSample` |
 | CI-04 | 最長の選択肢(`ja` の文字数)が正解である問題の割合が 35% 以下 | complete は error、draft は warning | `longestChoice.*`、`statistics.draftMinSample` |
 | CI-05 | 全選択肢に `rationale.ja` があり、空白だけでない | error | — |
 | CI-06 | 参照 URL(`references[].url`、`officialURL`)のリンク切れ。`--check-links` を指定したときだけ実行する。HEAD を送り、405 なら GET で再試行する | warning | `links.*` |
-| CI-07 | 問題 ID・カード ID・ドリル ID・ケース ID・ツリー ID の重複 | error | — |
+| CI-07 | 試験内での問題 ID・カード ID・ドリル ID・ケース ID・ツリー ID の重複(試験が異なれば同じ ID でもよい) | error | — |
 | CI-07 | `stem.ja` の文字 3-gram の Jaccard 係数が 0.8 を超える組 | warning | `similarity.*` |
 | CI-08 | multiple の問題で `type.count` と正解数が一致する | error | — |
-| CI-09 | `relatedQuestionIDs`、`questionIDs`、ツリーの `rootNodeID` と `next`、docs・問題・カードの `subObjective` が実在する | error | exam.yaml の `domains[*].subObjectives` |
-| CI-10 | `weights.yaml` と exam.yaml の `domains[*].weight` の合計が 1.0 ± 0.001、両者の比重が一致する | error | `weights.*` |
+| CI-09 | `relatedQuestionIDs`、`questionIDs`、ツリーの `rootNodeID` と `next`、docs・問題・カードの `subObjective` が実在する。問題・カードの `domain`、問題の `caseStudy` と `wafPillars` が exam.yaml にある | error | exam.yaml の `domains`、`caseStudies`、`taxonomies.wafPillars` |
+| CI-10 | exam.yaml の `domains[*].weight` の合計が 1.0 ± 0.001 | error | `weights.*` |
 | CI-11 | `LocalizedText` の `en` の欠落(空文字を含む) | warning | — |
 
 ### ルールの追加方法
 
-1. `scripts/contentvalidate/rules/ciNN_xxx.py` を作成し、`check(ctx: Context) -> Iterable[Issue]` と `RULE = Rule("CI-NN", "名前", check)` を定義する
+1. `scripts/contentvalidate/rules/ciNN_xxx.py` を作成し、`check` 関数と `RULE` を定義する
+   - 試験ごとのルール(既定): `check(ctx: ExamContext) -> Iterable[Issue]` と `RULE = Rule("CI-NN", "名前", check)`。試験の数だけ実行される
+   - 全体のルール(CI-01、CI-06、CI-11): `check(ctx: GlobalContext)` と `RULE = Rule("CI-NN", "名前", check_global=check)`。1回だけ実行される
 2. `scripts/contentvalidate/rules/__init__.py` の `ALL_RULES` に1行追加する
 3. `tests/fixtures/generate.py` の `INVALID_CASES` に違反ケースを追加し、fixture を再生成する
 
-`ctx` から、ロード済みのコンテンツ(`ctx.docs`、`ctx.questions`、`ctx.question_by_id(exam_id)`、`ctx.exam_sets`(試験ごとの一覧)、`ctx.exam_by_id`)と、各要素の行番号(`doc.issue(..., path)`)を利用できます。
+`ExamContext` からは、その試験のコンテンツ(`ctx.docs`、`ctx.questions`、`ctx.question_by_id`、`ctx.exam_sets`)、試験ごとの設定(`ctx.config`)、試験定義(`ctx.definition`。`exam.yaml` が Schema 違反なら `None` で、その場合は何も報告しない)を利用できます。ルールは `exam.yaml` の生データを直接読まず、`ctx.definition`(`ExamDefinitionView`)を使います。`GlobalContext` は全ファイル(`ctx.docs`)と各試験のコンテキスト(`ctx.exam(exam_id)`)を持ちます。行番号は `doc.issue(..., path)` で付きます。
 
 ## テスト
 
@@ -203,13 +204,13 @@ fixture は `tests/fixtures/generate.py` が固定 seed で決定論的に生成
 13. **CI-06 の対象。** `references[].url` に加えて、ケースの `officialURL` も対象にします。同じ URL は1回だけ確認し、検出された問題はその URL のすべての出現箇所に報告します。
 14. **`--strict` は出力の深刻度も error に書き換えます。** GitHub のアノテーションも error になります。
 15. **終了コード 2。** 引数の不備や `validation.yaml`(全体・試験ごと)の不備は、コンテンツの違反と区別するため 2 にします。argparse の慣例にも合わせています。
-16. **YAML の正規化。** キーはすべて文字列にし(`weights.yaml` の `1:` は `"1"` になります)、日付は ISO 8601 の文字列にします。`examGuideVersion: 6.1` のように引用符を付け忘れると数値として読まれ、CI-01 になります。
+16. **YAML の正規化。** キーはすべて文字列にし(`1:` は `"1"` になります)、日付は ISO 8601 の文字列にします。`examGuideVersion: 6.1` のように引用符を付け忘れると数値として読まれ、CI-01 になります。
 17. **行番号。** マッピングの要素ではキーの行を、配列の要素では要素の先頭行を指します。docs ではフロントマターの開始行(`---`)からのずれを補正します。
 18. **Python のバージョン。** 依頼では 3.12 でしたが、セキュリティ修正の状況を踏まえて 3.14 を採用しました(依頼者と合意済み)。コードは 3.12 でも動くように書いており、`requires-python >= 3.12` としています。直接の依存は `==` で固定し、Dependabot で更新します。
 19. **Swift の型。**
     - `Question.caseStudy` は Optional です。`Choice.mistakeTags` は省略時に空配列になり、エンコード時に空なら省略します。
     - 未知の列挙値はデコードエラーにしています。新しい列挙値を含むパックが古いアプリに配信されないよう、`manifest.minAppVersion` で制御する前提です。
-    - `DomainWeights.weights` は `[Int: Double]` です。
+    - 試験語彙の ID(`ExamID`、`VendorID`、`CaseStudyID`、`WAFPillarID`)は列挙ではなく、文字列をラップした型(`StringIdentifier`)です。デコード時は空文字だけを拒否し、実在は CI-09・CI-12 が確認します。
     - `Manifest.createdAt` は `Date` で、デコードには `ContentDecoder.make()`(ISO 8601)を使います。
 20. **サンプルコンテンツ。** すべてオリジナルです。ケーススタディの要約は学習用に書き起こした短い文章です。正確な内容は公式のケーススタディを参照する前提です(`cases/ehr.yaml` の `officialURL` は暫定で試験ページを指しています)。
 

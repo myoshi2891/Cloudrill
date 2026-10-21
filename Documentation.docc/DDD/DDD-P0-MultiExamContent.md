@@ -536,7 +536,7 @@ git status --short content | grep -c '^R'                         # 移動した
 
 **完了条件**: `(cd content && .venv/bin/pytest)` が通り、`validate.py` が error 0 件。
 
-**実装メモ**(実装時に本書と変えた点。P0-S05 で解消する):
+**実装メモ**(実装時に本書と変えた点。1〜2 項目めは P0-S05 で解消済み):
 
 - `ExamContext` の導入前なので、`Context` に試験ごとの設定(`exam_config(exam_id)`)と、`exam.yaml` のサブ項目(`sub_objectives(exam_id)`)の読み替えを置いた。CI-02 の問題数も `exam.yaml` の `format.mockExam.questionCount` から読む。
 - CI-07 の類似度はまだ試験をまたいで比較しているため、全体の閾値を使う。
@@ -592,6 +592,15 @@ git status --short content | grep -c '^R'                         # 移動した
 content/.venv/bin/python content/scripts/validate.py                   # error 0 件
 content/.venv/bin/python content/scripts/validate.py --exam gcp-pca --format json | python3 -c 'import json,sys; assert all(i["file"].startswith("exams/gcp-pca/") or "/" not in i["file"] for i in json.load(sys.stdin))'
 ```
+
+**実装メモ**(実装時に本書と変えた点):
+
+- ユーザーの判断により、P0-S09 の一部を前倒しした。Schema の試験語彙の固定(`Domain` の上限、`CaseStudyID`・`WAFPillarID` の列挙)を外すと Swift の enum と食い違い、`weights.yaml` を消すと `DomainWeights` のテストが壊れるため、同じ変更で次を行った: `Identifiers.swift`(`StringIdentifier`、`ExamID`、`VendorID`、`CaseStudyID`、`WAFPillarID`、`ExamScoped`)と `IdentifierTests`、enum の `CaseStudyID`・`WAFPillar` と `DomainWeights` の削除、`Exam`・`Vendor`・`Manifest` の ID の型付け。P0-S09 に残るのは、`ExamDefinition` などへの改名、`QuestionKind` の統合、`domainBySubObjective`、`ExamDefinitionTests`、試験ごとの fixture の列挙。
+- `Rule` の `scope` は、`check`(`ExamContext` を取る)と `check_global`(`GlobalContext` を取る)のどちらを持つかで決まる(型の安全のため、`scope` を別の引数にしていない)。
+- CI-11 も全体のルールにした。`vendors.yaml` の `trademarkNotice` など、試験に属さないファイルの英語訳も確認するため。
+- CI-01 は、`domain` が `exam.yaml` にない場合も整合を確認しない(CI-09 だけが報告する。二重報告の防止)。
+- invalid ケースの名前は既存のものを使った(`CI-02-cases-per-set` → `CI-02-case-studies-per-set`、`CI-02-set-number-range` → `CI-02-set-count`)。`CI-10-exam-weights` は `weights.yaml` との照合がなくなったので削除した。`CI-02-case-mismatch` は、ケースが `exam.yaml` にないと CI-09 も検出するため、overlay で `cymbal` を `exam.yaml` とケースのファイルに追加した。
+- `ExamContext.require_definition()` は作らず、各ルールで `ctx.definition is None` なら早期リターンする形にした(補助関数より読みやすいため)。
 
 ---
 
