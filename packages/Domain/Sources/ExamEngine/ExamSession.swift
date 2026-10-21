@@ -85,10 +85,15 @@ public struct ExamSession: Hashable, Sendable {
         timer = nextTimer
     }
 
-    /// 解答を記録する。nil なら未解答に戻す。見直し中は受け付けない(問題に戻ってから変える)
+    /// 解答を記録する。nil または空の選択なら未解答に戻す。見直し中は受け付けない(問題に戻ってから変える)
     public mutating func select(_ selection: AnswerSelection?, for questionID: String) throws(ExamSessionError) {
         guard state == .inProgress else { throw .operationNotAllowed(state) }
         try requireQuestion(questionID)
+        // 複数選択で最後の選択肢を外すと空の選択になる。解答済みとして数えないよう nil にそろえる
+        if case let .choices(ids)? = selection, ids.isEmpty {
+            answers[questionID] = nil
+            return
+        }
         answers[questionID] = selection
     }
 

@@ -35,6 +35,20 @@ struct ExamSessionAnswerTests {
         #expect(session.unansweredQuestionIDs.contains("Q1"))
     }
 
+    @Test("空の選択は未解答として扱う(複数選択で最後の選択肢を外した場合など)")
+    func selectEmptyClearsAnswer() throws {
+        // Arrange
+        var session = try startedSession()
+        try session.select(.choices(["a"]), for: "Q1")
+        try session.select(.choices(["b"]), for: "Q2")
+        // Act
+        try session.select(.choices([]), for: "Q1")
+        // Assert
+        #expect(session.answers["Q1"] == nil)
+        #expect(session.answers["Q2"] == .choices(["b"]))
+        #expect(session.unansweredQuestionIDs == ["Q1", "Q3"])
+    }
+
     @Test("見直し中は解答を変えられない(問題に戻ってから変える)")
     func selectOnlyInProgress() throws {
         // Arrange
