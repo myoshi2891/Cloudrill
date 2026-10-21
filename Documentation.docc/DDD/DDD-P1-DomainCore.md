@@ -1121,6 +1121,15 @@ scripts/coverage.sh packages/Domain 80
 
 **完了条件**: `domain-test.yml` が PR 上で通り、カバレッジが 80% 以上。
 
+**実装メモ**(実装時に本書と変えた点):
+
+- SwiftPM(Xcode 同梱の版)は、テストターゲットごとに `*.xctest` を作る。テストの後に書き出す `codecov/Domain.json` は、そのうち1つのバンドル(DomainTestSupportTests)の分しか集計していなかった。そのため `coverage.sh` は、`--show-bin-path` の下のすべてのテストバンドルを `llvm-cov report` / `export` に渡して集計する(最初のバイナリは位置引数、残りは `-object`)。
+- 集計の対象は `<パッケージ>/Sources` に限る(位置引数で指定)。これで Tests/、依存パッケージ(DomainModels)、生成されたファイルが外れる。`*TestSupport/` は `-ignore-filename-regex` で除く。合計の値は `llvm-cov export -summary-only` の JSON から python3 で読む。
+- 終了コードは validate.py に合わせた: 0 = 最低値以上 / 1 = 最低値未満、またはテストや集計の失敗 / 2 = 引数の誤り。
+- 結果: 行カバレッジ **97.59%**(831 行のうち未実行 20 行)。検証手順 2 では、テストのない 10 行の関数を足すと 96.43% に下がり、そのファイルが 0.00% と表示されることを確かめた(確かめた後に削除した)。
+- `domainmodels-test.yml` は、P1-S01 から Domain の `swift test` も実行していた。これを `domain-test.yml` に移し、`domainmodels-test.yml` のトリガーから `packages/Domain/**` を外した(同じテストを2回実行しないため)。CLAUDE.md のコマンドと CI の節も更新した。
+- 検証手順 4(PR でワークフローが通ること)は、PR を作るときに確かめる。
+
 ---
 
 ## 5. フェーズの完了条件
@@ -1143,5 +1152,9 @@ scripts/coverage.sh packages/Domain 80
 | P2 | `QuestionSelector` は `QuestionSummary` の配列を受け取る。パックの `questions/index.json`(P2-S01)は、この型に直接デコードできる形にする |
 | P3 | `ExamSession.Snapshot` と `QuestionOrder` を、`ExamAttempt` に JSON で保存する。`AnswerSelection` の Codable の形式(`kind` + `choiceIDs`)を、`AnswerRecord` の `selectedChoiceIDs` の代わりに使う(列名は `selectionJSON`) |
 | P3 | `FSRSCard` を `CardState` に、`ReviewOutcome` を `ReviewLog` に対応させる |
+| P3 | `PracticeHistory.lastServedAt` は**出題した**時刻(解答した時刻ではない)。解答せずに次へ進んだ問題も、直近 24 時間の除外の対象にするため、出題の時刻を記録する |
+| P3 | `ReadinessInput.cardRetentions` は、ドメインごとの復習済みカード(`.new` 以外)について `FSRSScheduler.retrievability(of:at:)` で計算する。対象にする解答は `examID` が試験定義と一致するものだけなので、複数の試験の解答をまとめて渡してよい |
+| P4 | 弱点優先の `domainScores` には `ReadinessResult.ready` の `DomainReadiness.score` を渡す。`.collecting` のときは空の辞書でよい(すべてのドメインを score 0 として扱う) |
+| P2 以降 | 新しいパッケージのカバレッジも `scripts/coverage.sh` で測る。SwiftPM が書き出す `codecov/*.json` は、テストターゲットが複数あると一部しか集計しないので使わない |
 | P4 | 準備度の画面は `.collecting` のときに数値を出さない。数値には常に「目安」を併記する(LG-05) |
 | P4 | タイマーの表示は `TimelineView(.periodic(by: 1))` の各回で `ExamSession.handle(.tick, at:)` を呼ぶ。警告は `crossedThreshold` で判定する |
