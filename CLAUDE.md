@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Google Cloud Professional Cloud Architect(PCA)試験対策 iOS アプリと、その学習コンテンツのモノレポ。
 
-- `PCAApp/` + `PCAApp.xcodeproj` — iOS アプリ(SwiftUI)。`packages/DomainModels` をローカルパッケージ(相対パス)として参照
+- `ExamPrepApp/` + `ExamPrepApp.xcodeproj` — iOS アプリ(SwiftUI、表示名 Cloudrill)。`packages/DomainModels` をローカルパッケージ(相対パス)として参照
 - `packages/DomainModels/` — コンテンツの値型(SwiftPM、Swift 6、Swift Testing)
 - `content/` — 学習コンテンツ(YAML / Markdown)、JSON Schema(Draft 2020-12)、Python の検証ツール。詳細仕様は `content/README.md`
 - `Documentation.docc/` — 要件定義書(`RDD.md`)、基本設計書(`BDD.md`)
@@ -80,6 +80,6 @@ validate.py の終了コード: `0` = error なし / `1` = error あり(`--stric
 
 ## 命名とリリース
 
-- Xcode のプロジェクト・ターゲット・フォルダは PascalCase で、スペースを含めない(`PCAApp`)。表示名「PCA 試験対策」は `INFOPLIST_KEY_CFBundleDisplayName` で設定する。
+- Xcode のプロジェクト・ターゲット・フォルダは PascalCase で、スペースを含めない(`ExamPrepApp`)。識別子は表示名と切り離した中立な名前にする。表示名「Cloudrill」は `INFOPLIST_KEY_CFBundleDisplayName` だけで設定する(名前を変えるときはここだけを変更する)。
 - パッケージを追加するときは `project.pbxproj` を手で編集せず、Xcode の **File > Add Package Dependencies… > Add Local…** から追加する。
 - リリースタグは `content-vX.Y.Z`(`manifest.json` の `packVersion` と一致させる)と `app-vX.Y.Z`。
