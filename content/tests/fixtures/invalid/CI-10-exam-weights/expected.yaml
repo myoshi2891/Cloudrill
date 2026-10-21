@@ -1,5 +1,0 @@
-description: exam.yaml の比重の合計が 1.05 で weights.yaml とも異なる
-expect:
-  CI-10:
-  - error
-options: {}

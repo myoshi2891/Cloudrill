@@ -25,7 +25,7 @@ domains:
   name:
     ja: ダミーのドメイン 1
     en: Dummy domain 1
-  weight: 0.3
+  weight: 0.25
   subObjectives:
   - id: '1.1'
     name:
@@ -184,3 +184,4 @@ taxonomies:
 caseStudies:
 - ehr
 - altostrat
+- cymbal

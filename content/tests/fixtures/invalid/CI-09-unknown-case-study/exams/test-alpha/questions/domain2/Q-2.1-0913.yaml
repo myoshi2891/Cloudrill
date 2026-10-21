@@ -1,0 +1,61 @@
+id: Q-2.1-0913
+revision: 1
+examGuideVersion: '6.1'
+domain: 2
+subObjective: '2.1'
+caseStudy: acmeBank
+type:
+  kind: single
+difficulty: 4
+wafPillars:
+- security
+keywords:
+- ダミー
+- 陶器
+examSets: []
+stem:
+  ja: 【ダミー】果樹園・化石・鍾乳石・雪原・灯籠に関する設問。
+  en: Dummy question stem for Q-2.1-0913.
+choices:
+- id: a
+  text:
+    ja: 陶器刺繍草原劇場青銅星座流星流星織機噴水砂丘製本羅
+    en: Dummy choice A of Q-2.1-0913
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - opsOverhead
+- id: b
+  text:
+    ja: 刺繍海溝宿場草原灯籠舞台灯籠風車星座潮
+    en: Dummy choice B of Q-2.1-0913
+  isCorrect: true
+  rationale:
+    ja: 選択肢Bが正しい理由(ダミー)
+    en: Why choice B is correct (dummy)
+- id: c
+  text:
+    ja: 彫刻山脈羅針盤惑星雪原月面石
+    en: Dummy choice C of Q-2.1-0913
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - scalability
+- id: d
+  text:
+    ja: 木版画砂丘湿原渡り鳥湿原時計塔陶器峡谷望遠鏡
+    en: Dummy choice D of Q-2.1-0913
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - availability
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

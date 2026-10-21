@@ -1,4 +1,4 @@
-description: 比重の合計が 0.985(exam.yaml との不一致も出る)
+description: exam.yaml の比重の合計が 0.985
 expect:
   CI-10:
   - error
