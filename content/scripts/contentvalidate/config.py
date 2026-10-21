@@ -96,18 +96,20 @@ def _section(raw: Mapping[str, Any], key: str, where: str) -> Mapping[str, Any]:
     return value
 
 
-def _num(section: Mapping[str, Any], key: str, where: str) -> float:
+def _num(section: Mapping[str, Any], key: str, where: str, source: str = DEFAULT_CONFIG_NAME) -> float:
+    """source はエラーメッセージに出すファイル名。"""
     value = section.get(key)
     # bool は int のサブクラスなので明示的に除外する
     if isinstance(value, bool) or not isinstance(value, (int, float)):
-        raise ConfigError(f"validation.yaml: {where}.{key} は数値で指定してください")
+        raise ConfigError(f"{source}: {where}.{key} は数値で指定してください")
     return float(value)
 
 
-def _int(section: Mapping[str, Any], key: str, where: str) -> int:
+def _int(section: Mapping[str, Any], key: str, where: str, source: str = DEFAULT_CONFIG_NAME) -> int:
+    """source はエラーメッセージに出すファイル名。"""
     value = section.get(key)
     if isinstance(value, bool) or not isinstance(value, int):
-        raise ConfigError(f"validation.yaml: {where}.{key} は整数で指定してください")
+        raise ConfigError(f"{source}: {where}.{key} は整数で指定してください")
     return value
 
 
@@ -185,22 +187,22 @@ def _thresholds(raw: Mapping[str, Any], where: str) -> Thresholds:
     links = _section(raw, "links", where)
     retry_raw = links.get("retryWithGetOn", [405])
     if not isinstance(retry_raw, list):
-        raise ConfigError("validation.yaml: links.retryWithGetOn はリストで指定してください")
-    retry_get_on = frozenset(_int({"retryWithGetOn": s}, "retryWithGetOn", "links") for s in retry_raw)
+        raise ConfigError(f"{where}: links.retryWithGetOn はリストで指定してください")
+    retry_get_on = frozenset(_int({"retryWithGetOn": s}, "retryWithGetOn", "links", where) for s in retry_raw)
 
     return Thresholds(
-        draft_min_sample=_int(stats, "draftMinSample", "statistics"),
-        position_count=_int(pos, "positions", "answerPosition"),
-        position_min=_num(pos, "minRatio", "answerPosition"),
-        position_max=_num(pos, "maxRatio", "answerPosition"),
-        longest_max=_num(longest, "maxRatio", "longestChoice"),
+        draft_min_sample=_int(stats, "draftMinSample", "statistics", where),
+        position_count=_int(pos, "positions", "answerPosition", where),
+        position_min=_num(pos, "minRatio", "answerPosition", where),
+        position_max=_num(pos, "maxRatio", "answerPosition", where),
+        longest_max=_num(longest, "maxRatio", "longestChoice", where),
         longest_count_ties=bool(longest.get("countTies", True)),
-        ngram=_int(sim, "ngram", "similarity"),
-        jaccard_threshold=_num(sim, "jaccardThreshold", "similarity"),
-        weights_sum=_num(weights, "expectedSum", "weights"),
-        weights_tolerance=_num(weights, "tolerance", "weights"),
-        link_timeout=_num(links, "timeoutSeconds", "links"),
-        link_concurrency=_int(links, "concurrency", "links"),
+        ngram=_int(sim, "ngram", "similarity", where),
+        jaccard_threshold=_num(sim, "jaccardThreshold", "similarity", where),
+        weights_sum=_num(weights, "expectedSum", "weights", where),
+        weights_tolerance=_num(weights, "tolerance", "weights", where),
+        link_timeout=_num(links, "timeoutSeconds", "links", where),
+        link_concurrency=_int(links, "concurrency", "links", where),
         link_user_agent=str(links.get("userAgent", "examprep-content-link-check")),
         link_retry_get_on=retry_get_on,
     )

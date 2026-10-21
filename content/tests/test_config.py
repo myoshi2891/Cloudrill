@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import re
 import shutil
 from pathlib import Path
 from typing import Any
@@ -121,7 +122,8 @@ def test_exam_config_rejects_unknown_key(tmp_path: Path, exam: dict[str, Any]) -
 
 def test_exam_config_rejects_bool_as_number(tmp_path: Path) -> None:
     exam_dir = _exam_dir(tmp_path, {"answerPosition": {"maxRatio": True}})
-    with pytest.raises(ConfigError):
+    # エラーメッセージは、どの validation.yaml の誤りかを示す
+    with pytest.raises(ConfigError, match=re.escape(str(exam_dir / "validation.yaml"))):
         load_exam_config(_global(tmp_path), exam_dir)
 
 
