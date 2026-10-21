@@ -1,0 +1,6 @@
+description: 模試の id が setCount を超える
+expect:
+  CI-02:
+  - error
+  - warning
+options: {}

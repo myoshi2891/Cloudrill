@@ -405,6 +405,16 @@ def ov_ci02_cases_per_set(valid: dict[str, Any]) -> dict[str, Any]:
     return {"exam.yaml": exam}
 
 
+def ov_ci02_set_count(valid: dict[str, Any]) -> dict[str, Any]:
+    exam = copy.deepcopy(valid["exam.yaml"])
+    exam["format"]["mockExam"]["setCount"] = 1
+    sets = copy.deepcopy(valid["exam-sets.yaml"])
+    sets["examSets"].append(
+        {"id": 2, "status": "draft", "level": "basic", "caseStudies": ["cymbal", "knightMotives"], "questionIDs": []}
+    )
+    return {"exam.yaml": exam, "exam-sets.yaml": sets}
+
+
 def ov_ci03(valid: dict[str, Any]) -> dict[str, Any]:
     """正解が B の単一選択問題 5 問の正解を A に移す(選択肢ごと入れ替えるので長さの条件は変わらない)。"""
     out: dict[str, Any] = {}
@@ -532,6 +542,7 @@ INVALID_CASES: list[tuple[str, str, dict[str, list[str]], Callable[[dict[str, An
     ("CI-02-bidirectional", "問題の examSets にあるが questionIDs にない", {"CI-02": ["error"]}, ov_ci02_bidirectional, {}),
     ("CI-02-draft-default-level", "draft の模試で既定と異なる level", {"CI-02": ["warning"]}, ov_ci02_draft, {}),
     ("CI-02-case-studies-per-set", "模試のケース数が caseStudiesPerSet と異なる", {"CI-02": ["error"]}, ov_ci02_cases_per_set, {}),
+    ("CI-02-set-count", "模試の id が setCount を超える", {"CI-02": ["error", "warning"]}, ov_ci02_set_count, {}),
     ("CI-03-answer-position", "正解位置が A に偏る", {"CI-03": ["error"]}, ov_ci03, {}),
     ("CI-04-longest-choice", "最長の選択肢が正解の割合が 35% 超", {"CI-04": ["error"]}, ov_ci04, {}),
     ("CI-05-empty-rationale", "rationale.ja が空文字", {"CI-05": ["error"]}, ov_ci05_empty, {}),
