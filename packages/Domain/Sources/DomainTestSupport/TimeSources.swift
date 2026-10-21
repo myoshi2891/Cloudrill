@@ -20,6 +20,6 @@ public final class ManualTimeSource: TimeSource {
     public func now() -> Date { current.withLock { $0 } }
 
     public func advance(by duration: Duration) {
-        current.withLock { $0 = $0.addingTimeInterval(duration.timeInterval) }
+        current.withLock { $0 = $0.adding(duration) }
     }
 }
