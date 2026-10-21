@@ -973,6 +973,15 @@ public struct ReadinessCalculator: Sendable {
 
 **完了条件**: `swift test --package-path packages/Domain --filter ReadinessCalculatorTests` が通る。
 
+**実装メモ**(実装時に本書と変えた点):
+
+- 対象にする解答は、`mode` が `exam`・`practice` であることに加えて、`examID` が試験定義の ID と一致するものに限った(ドメイン番号は試験ごとに意味が違うため)。テスト `otherExamAnswersExcluded` を追加した。モードは許可リスト(`countedModes`)で判定し、`StudyMode` が増えても準備度に含めないようにした。
+- `ReadinessParameters.init` は、重みの合計に加えて、半減期と網羅度の目標が正の値であることも確かめる(`nonPositiveHalfLife`、`nonPositiveCoverageTarget`。0 での除算を防ぐため)。重みの合計の比較は誤差 1e-9 まで許す。テスト `nonPositiveParametersAreRejected` と `defaultParameters` を追加した。
+- `DomainReadiness.retention` は、解答が 0 件のドメインでも、カードがあれば計算して返す(表示に使えるように)。`score` は BDD 6.6 のとおり 0。
+- 経過日数は 86400 秒を 1 日とする小数(FSRS の `ElapsedDays` と同じ数え方。Readiness は FSRS に依存しないので、共有はしない)。
+- `halfLife` と `futureAnswerTreatedAsNow` は、internal の `recencyWeight(answeredAt:now:)` を直接確かめる。exam と practice を合わせて数えることを確かめる `examAndPracticeCount` も追加した。
+- Refactor の `domainReadiness(...)` は、最初から切り出して書いた。
+
 ---
 
 ### P1-S10 練習の出題選択(QuestionSelector)
