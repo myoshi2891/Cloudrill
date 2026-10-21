@@ -21,6 +21,15 @@ def _case_studies_per_set(ctx: Context, exam_id: str | None) -> int | None:
     return value if isinstance(value, int) else None
 
 
+def _set_count(ctx: Context, exam_id: str | None) -> int | None:
+    """exam.yaml の format.mockExam.setCount。exam.yaml が Schema 違反なら None。"""
+    exam = ctx.exam_by_id.get(exam_id)
+    if exam is None:
+        return None
+    value = exam.data["format"]["mockExam"]["setCount"]
+    return value if isinstance(value, int) else None
+
+
 def check(ctx: Context) -> Iterator[Issue]:
     for doc, exam_sets in ctx.exam_sets:
         yield from _check_exam(ctx, doc, exam_sets)
@@ -32,6 +41,7 @@ def _check_exam(ctx: Context, doc: SourceDoc, exam_sets: list[tuple[int, dict[st
     question_by_id = ctx.question_by_id(exam_id)
     sets_by_id = {s.get("id"): (i, s) for i, s in exam_sets}
     per_set = _case_studies_per_set(ctx, exam_id)
+    set_count = _set_count(ctx, exam_id)
     # ケースがない試験(caseStudiesPerSet: 0)ではケース問題も 0 問
     case_min, case_max = (0, 0) if per_set == 0 else (cfg.case_min, cfg.case_max)
 
@@ -41,6 +51,13 @@ def _check_exam(ctx: Context, doc: SourceDoc, exam_sets: list[tuple[int, dict[st
         base = ("examSets", i)
         label = f"模試 {set_id}({exam_set.get('status')})"
         questions = set_questions(ctx, exam_id, exam_set)
+
+        if set_count is not None and isinstance(set_id, int) and set_id > set_count:
+            yield doc.issue(
+                RULE_ID, Severity.ERROR,
+                f"{label}: id が exam.yaml の setCount({set_count})を超えています",
+                (*base, "id"),
+            )
 
         if len(questions) != cfg.question_count:
             yield doc.issue(RULE_ID, sev, f"{label}: 問題数が {len(questions)} です(期待値 {cfg.question_count})", (*base, "questionIDs"))
