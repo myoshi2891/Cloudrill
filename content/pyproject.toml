@@ -1,7 +1,7 @@
 [project]
-name = "pca-content"
+name = "examprep-content"
 version = "0.1.0"
-description = "PCA 試験対策アプリの学習コンテンツと検証ツール"
+description = "Cloudrill(クラウド認定試験対策アプリ)の学習コンテンツと検証ツール"
 requires-python = ">=3.12"
 # 直接依存はバージョンを固定する(更新は Dependabot の PR で行う)
 dependencies = [
