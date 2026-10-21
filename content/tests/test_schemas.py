@@ -10,6 +10,7 @@ import yaml
 from jsonschema import Draft202012Validator
 
 from conftest import VALID
+from generate import ALPHA
 from contentvalidate.schemas import SCHEMA_DIR, validator_for
 
 
@@ -241,7 +242,7 @@ def test_vendors_schema_rejects_empty_list() -> None:
 
 def _sample_question() -> dict[str, Any]:
     """valid fixture の問題を1つ読み、テストごとに値を差し替える土台にする。"""
-    file = sorted((VALID / "questions").rglob("*.yaml"))[0]
+    file = sorted((VALID / ALPHA / "questions").rglob("*.yaml"))[0]
     return yaml.safe_load(file.read_text(encoding="utf-8"))
 
 

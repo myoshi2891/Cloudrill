@@ -1,0 +1,13 @@
+{
+  "vendors": [
+    {
+      "id": "google-cloud",
+      "name": "Google Cloud",
+      "trademarkNotice": {
+        "ja": "ダミーの商標表示",
+        "en": "Dummy trademark notice"
+      },
+      "defaultReferenceLicense": "CC-BY-4.0"
+    }
+  ]
+}

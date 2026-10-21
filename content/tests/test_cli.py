@@ -28,7 +28,7 @@ def test_exit_code_one_on_error(tmp_path: Path, capsys: pytest.CaptureFixture[st
     root = materialize("CI-10-weights-sum", tmp_path)
     assert main(["--root", str(root)]) == 1
     out = capsys.readouterr().out
-    assert re.search(r"^weights\.yaml:\d+: \[CI-10\] error: ", out, re.MULTILINE)
+    assert re.search(r"^exams/test-alpha/weights\.yaml:\d+: \[CI-10\] error: ", out, re.MULTILINE)
     assert "  CI-10 error: 1" in out
 
 
@@ -107,7 +107,7 @@ def test_default_root_is_content_dir_regardless_of_cwd(
     monkeypatch.chdir(tmp_path)
     assert main(["--format", "json"]) == 0
     files = {issue["file"] for issue in json.loads(capsys.readouterr().out)}
-    assert files <= {"exam-sets.yaml"}
+    assert files <= {"exams/gcp-pca/exam-sets.yaml"}
 
 
 def test_github_paths_are_relative_to_workspace(

@@ -17,7 +17,9 @@ _Loader: type = getattr(yaml, "CSafeLoader", yaml.SafeLoader)
 
 LOAD_RULE = "CI-01"
 
-# 種別ごとの探索パターン(root からの相対)。上から順に評価する
+EXAMS_DIR = "exams"
+
+# 種別ごとの探索パターン(試験ディレクトリからの相対)。上から順に評価する
 _SOURCES: tuple[tuple[Kind, str], ...] = (
     (Kind.QUESTION, "questions/**/*.y*ml"),
     (Kind.FLASHCARD, "flashcards/**/*.y*ml"),
@@ -26,8 +28,10 @@ _SOURCES: tuple[tuple[Kind, str], ...] = (
     (Kind.DRILL, "drills/**/*.y*ml"),
     (Kind.DOCS, "docs/**/*.md"),
 )
-# 必須の単一ファイル
-_REQUIRED_FILES: tuple[tuple[Kind, str], ...] = (
+# 必須の単一ファイル(全体: root からの相対、試験ごと: 試験ディレクトリからの相対)
+_GLOBAL_REQUIRED: tuple[tuple[Kind, str], ...] = ((Kind.VENDORS, "vendors.yaml"),)
+_EXAM_REQUIRED: tuple[tuple[Kind, str], ...] = (
+    (Kind.EXAM, "exam.yaml"),
     (Kind.EXAM_SETS, "exam-sets.yaml"),
     (Kind.WEIGHTS, "weights.yaml"),
 )
@@ -37,6 +41,11 @@ _REQUIRED_FILES: tuple[tuple[Kind, str], ...] = (
 class LoadResult:
     docs: list[SourceDoc]
     issues: list[Issue]
+
+    def add(self, doc: SourceDoc | None, issues: list[Issue]) -> None:
+        self.issues.extend(issues)
+        if doc is not None:
+            self.docs.append(doc)
 
 
 class YamlLoadError(Exception):
@@ -108,7 +117,7 @@ def split_frontmatter(text: str) -> tuple[str, int] | None:
     return None
 
 
-def _load_file(root: Path, file: Path, kind: Kind) -> tuple[SourceDoc | None, list[Issue]]:
+def _load_file(root: Path, file: Path, kind: Kind, exam_id: str | None) -> tuple[SourceDoc | None, list[Issue]]:
     rel = file.relative_to(root).as_posix()
     try:
         text = file.read_text(encoding="utf-8")
@@ -128,34 +137,49 @@ def _load_file(root: Path, file: Path, kind: Kind) -> tuple[SourceDoc | None, li
         return None, [Issue(rel, e.line, LOAD_RULE, Severity.ERROR, str(e))]
 
     issues = [Issue(rel, line, LOAD_RULE, Severity.ERROR, f"キー '{key}' が重複しています") for key, line in dups]
-    return SourceDoc(rel, kind, data, lines), issues
+    return SourceDoc(rel, kind, data, lines, exam_id=exam_id), issues
 
 
-def iter_sources(root: Path) -> Iterator[tuple[Kind, Path]]:
+def iter_sources(base: Path) -> Iterator[tuple[Kind, Path]]:
     for kind, pattern in _SOURCES:
-        for file in sorted(root.glob(pattern)):
+        for file in sorted(base.glob(pattern)):
             if file.is_file():
                 yield kind, file
 
 
-def load_content(root: Path) -> LoadResult:
-    docs: list[SourceDoc] = []
-    issues: list[Issue] = []
+def exam_dirs(root: Path) -> list[Path]:
+    """root/exams/ の直下の試験ディレクトリ(名前順)。"""
+    base = root / EXAMS_DIR
+    if not base.is_dir():
+        return []
+    return sorted(p for p in base.iterdir() if p.is_dir())
 
-    for kind, name in _REQUIRED_FILES:
-        file = root / name
+
+def _load_required(
+    root: Path, base: Path, required: tuple[tuple[Kind, str], ...], exam_id: str | None, result: LoadResult
+) -> None:
+    for kind, name in required:
+        file = base / name
         if not file.is_file():
-            issues.append(Issue(name, None, LOAD_RULE, Severity.ERROR, f"必須ファイル {name} がありません"))
+            rel = file.relative_to(root).as_posix()
+            result.issues.append(Issue(rel, None, LOAD_RULE, Severity.ERROR, f"必須ファイル {name} がありません"))
             continue
-        doc, errs = _load_file(root, file, kind)
-        issues.extend(errs)
-        if doc is not None:
-            docs.append(doc)
+        result.add(*_load_file(root, file, kind, exam_id))
 
-    for kind, file in iter_sources(root):
-        doc, errs = _load_file(root, file, kind)
-        issues.extend(errs)
-        if doc is not None:
-            docs.append(doc)
 
-    return LoadResult(docs, issues)
+def load_content(root: Path) -> LoadResult:
+    result = LoadResult([], [])
+    _load_required(root, root, _GLOBAL_REQUIRED, None, result)
+
+    exams = exam_dirs(root)
+    if not exams:
+        message = f"試験がありません({EXAMS_DIR}/<examID>/ に試験のディレクトリを置いてください)"
+        result.issues.append(Issue(EXAMS_DIR, None, LOAD_RULE, Severity.ERROR, message))
+
+    for exam_dir in exams:
+        exam_id = exam_dir.name
+        _load_required(root, exam_dir, _EXAM_REQUIRED, exam_id, result)
+        for kind, file in iter_sources(exam_dir):
+            result.add(*_load_file(root, file, kind, exam_id))
+
+    return result

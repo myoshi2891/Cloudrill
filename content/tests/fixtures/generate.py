@@ -6,6 +6,9 @@
 valid/(全ルールを error・warning ゼロで通過する一式)と、invalid/<ケース名>/(valid への差分 overlay)を
 固定 seed で決定論的に再生成する。生成物はコミットし、test_generate.py で生成結果との一致を確認する。
 
+valid は全体のファイル(vendors.yaml)と試験ディレクトリ(exams/test-alpha/)からなる。
+試験のファイルは試験ディレクトリからの相対パスで組み立て、書き出すときに ALPHA を前に付ける。
+
 overlay の構成:
     expected.yaml   … 検出されるべきルール ID と深刻度、テストオプション
     _delete.txt     … valid から削除するファイル(任意)
@@ -26,6 +29,8 @@ import yaml
 SEED = 20261020
 HERE = Path(__file__).resolve().parent
 EXAM_GUIDE_VERSION = "6.1"
+# fixture の試験ディレクトリ(valid のルートからの相対)
+ALPHA = "exams/test-alpha"
 
 # 問題文・選択肢の生成に使う語彙(すべてダミー)
 WORDS = [
@@ -44,6 +49,8 @@ SUB_OBJECTIVES = {
     5: ["5.1", "5.2"],
     6: ["6.1", "6.2", "6.3", "6.4", "6.5", "6.6"],
 }
+WEIGHTS = {1: 0.25, 2: 0.18, 3: 0.19, 4: 0.15, 5: 0.115, 6: 0.115}
+FEATURES = ["caseStudies", "docs", "flashcards", "decisionTrees", "keywordDrills"]
 PILLARS = ["operationalExcellence", "security", "reliability", "costOptimization", "performance", "sustainability"]
 TAGS = ["cost", "opsOverhead", "compliance", "scalability", "availability", "latency", "requirementMismatch", "deprecated"]
 REFERENCE = {"title": "Google Cloud ドキュメント", "url": "https://cloud.google.com/docs", "license": "link-only"}
@@ -181,13 +188,59 @@ def build_practice(rng: random.Random) -> list[dict[str, Any]]:
     ]
 
 
+def build_vendors() -> dict[str, Any]:
+    """valid/vendors.yaml。"""
+    return {
+        "vendors": [
+            {
+                "id": "google-cloud",
+                "name": "Google Cloud",
+                "trademarkNotice": loc("ダミーの商標表示", "Dummy trademark notice"),
+                "defaultReferenceLicense": "CC-BY-4.0",
+            }
+        ]
+    }
+
+
+def build_exam_definition() -> dict[str, Any]:
+    """test-alpha の exam.yaml。既存の SUB_OBJECTIVES・WEIGHTS・PILLARS と模試 1 の構成から作る。"""
+    return {
+        "id": "test-alpha",
+        "vendor": "google-cloud",
+        "name": loc("テスト試験 Alpha", "Test exam Alpha"),
+        "shortName": "ALPHA",
+        "guideVersion": EXAM_GUIDE_VERSION,
+        "guideURL": "https://cloud.google.com/learn/certification/cloud-architect",
+        "format": {
+            "durationMinutes": 120,
+            "officialQuestionCount": {"min": 50, "max": 60},
+            "questionKinds": ["single", "multiple"],
+            "mockExam": {"questionCount": sum(SET1_DOMAINS.values()), "setCount": 6, "caseStudiesPerSet": len(SET1_CASES)},
+        },
+        "scoring": {"policy": "allOrNothing"},
+        "domains": [
+            {
+                "id": domain,
+                "name": loc(f"ダミーのドメイン {domain}", f"Dummy domain {domain}"),
+                "weight": WEIGHTS[domain],
+                "subObjectives": [{"id": sub, "name": loc(f"ダミーのサブ項目 {sub}", f"Dummy sub-objective {sub}")} for sub in subs],
+            }
+            for domain, subs in SUB_OBJECTIVES.items()
+        ],
+        "features": dict.fromkeys(FEATURES, True),
+        "taxonomies": {"wafPillars": [{"id": p, "name": loc(f"ダミーの柱 {p}", f"Dummy pillar {p}")} for p in PILLARS]},
+        "caseStudies": list(SET1_CASES),
+    }
+
+
 def build_valid() -> dict[str, Any]:
-    """valid/ の全ファイル(相対パス → データ。docs は文字列)。"""
+    """test-alpha の全ファイル(試験ディレクトリからの相対パス → データ。docs は文字列)。"""
     rng = random.Random(SEED)
     set1 = build_set1(rng)
     practice = build_practice(rng)
     files: dict[str, Any] = {question_path(q): q for q in set1 + practice}
 
+    files["exam.yaml"] = build_exam_definition()
     files["exam-sets.yaml"] = {
         "examSets": [
             {"id": 1, "status": "complete", "level": "basic", "caseStudies": list(SET1_CASES), "questionIDs": [q["id"] for q in set1]},
@@ -195,7 +248,7 @@ def build_valid() -> dict[str, Any]:
     }
     files["weights.yaml"] = {
         "examGuideVersion": EXAM_GUIDE_VERSION,
-        "weights": {1: 0.25, 2: 0.18, 3: 0.19, 4: 0.15, 5: 0.115, 6: 0.115},
+        "weights": dict(WEIGHTS),
     }
     files["flashcards/domain1.yaml"] = {
         "cards": [
@@ -504,13 +557,18 @@ def write_tree(base: Path, files: dict[str, Any]) -> None:
         path.write_text(data if isinstance(data, str) else dump(data), encoding="utf-8")
 
 
+def in_exam(exam_dir: str, files: dict[str, Any]) -> dict[str, Any]:
+    """試験ディレクトリからの相対パスを、valid のルートからの相対パスにする。"""
+    return {f"{exam_dir}/{rel}": data for rel, data in files.items()}
+
+
 def generate(out: Path = HERE) -> None:
     valid = build_valid()
     for name in ("valid", "invalid"):
         shutil.rmtree(out / name, ignore_errors=True)
-    write_tree(out / "valid", valid)
+    write_tree(out / "valid", {"vendors.yaml": build_vendors(), **in_exam(ALPHA, valid)})
     for name, description, expect, overlay, options in INVALID_CASES:
-        files = overlay(valid)
+        files = in_exam(ALPHA, overlay(valid))
         files["expected.yaml"] = {"description": description, "expect": expect, "options": options}
         write_tree(out / "invalid" / name, files)
 

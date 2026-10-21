@@ -1,0 +1,8 @@
+# ベンダーの定義(DDD 4.5)。Schema は schemas/vendors.schema.json
+vendors:
+  - id: google-cloud
+    name: Google Cloud
+    trademarkNotice:
+      ja: 本アプリは Google LLC とは関係のない非公式の学習教材です。Google Cloud は Google LLC の商標です。
+      en: This app is unofficial study material and is not affiliated with Google LLC. Google Cloud is a trademark of Google LLC.
+    defaultReferenceLicense: CC-BY-4.0

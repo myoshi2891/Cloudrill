@@ -26,6 +26,8 @@ class Kind(StrEnum):
     EXAM_SETS = "exam-sets"
     WEIGHTS = "weights"
     DOCS = "docs-frontmatter"
+    EXAM = "exam"
+    VENDORS = "vendors"
 
 
 @dataclass(frozen=True, order=True)
@@ -62,6 +64,8 @@ class SourceDoc:
     lines: dict[JsonPath, int] = field(default_factory=dict)
     # Schema 違反(CI-01 に分類されたもの)がなければ True。ファイル間ルールは True のものだけを対象にする
     schema_ok: bool = False
+    # 所属する試験(exams/<examID>/ の examID)。全体のファイル(vendors.yaml など)は None
+    exam_id: str | None = None
 
     def line_of(self, path: JsonPath = ()) -> int | None:
         """パスに対応する行番号。見つからなければ親をさかのぼる。"""
