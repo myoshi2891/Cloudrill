@@ -1,0 +1,42 @@
+version: 1
+examSet:
+  domainDistribution:
+    '1': 14
+    '2': 10
+    '3': 10
+    '4': 8
+    5+6: 13
+  caseQuestions:
+    min: 12
+    max: 15
+  defaultAssignments:
+    '1':
+      caseStudies:
+      - ehr
+      - altostrat
+      level: basic
+    '2':
+      caseStudies:
+      - cymbal
+      - knightMotives
+      level: basic
+    '3':
+      caseStudies:
+      - ehr
+      - cymbal
+      level: standard
+    '4':
+      caseStudies:
+      - altostrat
+      - knightMotives
+      level: standard
+    '5':
+      caseStudies:
+      - ehr
+      - knightMotives
+      level: advanced
+    '6':
+      caseStudies:
+      - altostrat
+      - cymbal
+      level: advanced
