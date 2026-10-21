@@ -561,6 +561,12 @@ public struct ExamTimer: Codable, Hashable, Sendable {
 
 **完了条件**: `swift test --package-path packages/Domain --filter ExamTimerTests` が通る。
 
+**実装メモ**(実装時に本書と変えた点):
+
+- `crossedThreshold` は「前回の残り > しきい値 ≧ 今回の残り」で判定する。しきい値ちょうどに達した場合も越えたとみなす。複数を一度に越えたときは、短い方(より切迫した方)を返す。この2つを、表形式のテストのケースに追加した。
+- 一時停止中は残り時間が変わらないので、`crossedThreshold` は nil を返し、`isExpired` も false になる。
+- Refactor: StudyModels に `Date.adding(_:)` と `Date.duration(since:)` を追加した。`ExamTimer` と `ManualTimeSource` は、これを使って変換する。
+
 ---
 
 ### P1-S07 出題順と選択肢のシャッフル
