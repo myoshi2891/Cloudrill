@@ -608,6 +608,14 @@ public enum ExamOrderBuilder {
 
 **完了条件**: `swift test --package-path packages/Domain --filter ExamOrderBuilderTests` が通る。
 
+**実装メモ**(実装時に本書と変えた点):
+
+- `DeterministicShuffle` は、Fisher–Yates に加えて、上限付きの乱数(Lemire の方法と棄却)も自前で実装した。標準ライブラリの `random(in:using:)` も、版の間で結果が同じとは限らないため。
+- ゴールデンの期待値(`shuffleGolden`、`fisherYatesDoesNotUseStdlibShuffle`)は、Swift の出力を記録するのではなく、同じアルゴリズムの Python の参照実装(SplitMix64、Lemire、Fisher–Yates)で求めた。実装の誤りを期待値として固定しないため。Swift の結果は、初回から一致した。
+- `QuestionOrderError` に `missingQuestion(String)` と `choicesMismatch(questionID:)` を追加した。`make` と `validate` は、出題順にある問題がコンテンツになければ `missingQuestion` を投げる。このためのテスト `missingQuestion` を追加した。
+- `validate` は、選択肢 ID の集合(並べ替えた配列)を比べる。シャッフル後の並びは問わない。
+- Refactor は不要だった(`DeterministicShuffle` は最初から StudyModels に置いた)。
+
 ---
 
 ### P1-S08a FSRS のバージョンの確定とテストベクタ
