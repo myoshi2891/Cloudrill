@@ -14,4 +14,4 @@ reviews:
     # ---- Xcode が自動生成・管理するファイル ----
     - "!**/xcuserdata/**"
     - "!**/*.xcodeproj/project.xcworkspace/**"
-    - "!**/*.xcassets/**"
+    # *.xcassets はアイコンや色の定義(Contents.json)を人が編集するため、除外しない
