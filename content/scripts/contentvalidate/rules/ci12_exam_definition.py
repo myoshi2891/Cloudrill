@@ -4,10 +4,19 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 
-from ..context import ExamContext, ExamDefinitionView, Rule
+from ..context import ExamContext, ExamDefinitionView, Rule, kind_of
 from ..model import Issue, Kind, Severity, SourceDoc, get_list, get_str
 
 RULE_ID = "CI-12"
+
+# 機能のフラグ → その機能のコンテンツの種別(機能を追加するときは、ここに1行足す)
+FEATURE_KINDS: dict[str, Kind] = {
+    "caseStudies": Kind.CASE,
+    "decisionTrees": Kind.DECISION,
+    "keywordDrills": Kind.DRILL,
+    "flashcards": Kind.FLASHCARD,
+    "docs": Kind.DOCS,
+}
 
 
 def _identity(ctx: ExamContext, exam: SourceDoc, definition: ExamDefinitionView) -> Iterator[Issue]:
@@ -51,6 +60,39 @@ def _case_studies(ctx: ExamContext, exam: SourceDoc, definition: ExamDefinitionV
             yield doc.issue(RULE_ID, Severity.ERROR, f"ケース '{cid}' が exam.yaml の caseStudies にありません", ("id",))
 
 
+def _disabled_features(ctx: ExamContext, definition: ExamDefinitionView) -> Iterator[Issue]:
+    """無効な機能のコンテンツを置いていないこと。ケースが無効なら、問題と模試からの参照もないこと。"""
+    for feature, kind in FEATURE_KINDS.items():
+        if definition.features.get(feature, False):
+            continue
+        for doc in ctx.of_kind(kind, valid_only=False):
+            yield doc.issue(RULE_ID, Severity.ERROR, f"exam.yaml の features.{feature} が false なのに、このファイルがあります")
+
+    if definition.features.get("caseStudies", False):
+        return
+    for doc in ctx.questions:
+        if doc.data.get("caseStudy") is not None:
+            yield doc.issue(RULE_ID, Severity.ERROR, "exam.yaml の features.caseStudies が false なので、caseStudy は null にしてください", ("caseStudy",))
+    for doc, exam_sets in ctx.exam_sets:
+        for i, exam_set in exam_sets:
+            if get_list(exam_set, "caseStudies"):
+                yield doc.issue(
+                    RULE_ID, Severity.ERROR,
+                    f"模試 {exam_set.get('id')}: exam.yaml の features.caseStudies が false なので、caseStudies は空にしてください",
+                    ("examSets", i, "caseStudies"),
+                )
+
+
+def _question_kinds(ctx: ExamContext, definition: ExamDefinitionView) -> Iterator[Issue]:
+    for doc in ctx.questions:
+        kind = kind_of(doc.data)
+        if kind is not None and kind not in definition.question_kinds:
+            allowed = ", ".join(sorted(definition.question_kinds))
+            yield doc.issue(
+                RULE_ID, Severity.ERROR, f"type.kind '{kind}' は exam.yaml の format.questionKinds({allowed})にありません", ("type", "kind")
+            )
+
+
 def _guide_version(ctx: ExamContext, definition: ExamDefinitionView) -> Iterator[Issue]:
     """試験ガイドの改訂時に、見直しが必要な問題を一覧にするための warning。"""
     for doc in ctx.questions:
@@ -71,6 +113,8 @@ def check(ctx: ExamContext) -> Iterator[Issue]:
     yield from _identity(ctx, exam, definition)
     yield from _domains(exam, definition)
     yield from _case_studies(ctx, exam, definition)
+    yield from _disabled_features(ctx, definition)
+    yield from _question_kinds(ctx, definition)
     yield from _guide_version(ctx, definition)
 
 

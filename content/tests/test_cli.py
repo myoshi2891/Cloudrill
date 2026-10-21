@@ -77,10 +77,10 @@ def test_unknown_rule_in_only_exits_two(capsys: pytest.CaptureFixture[str]) -> N
 
 
 def test_cli_exam_option_limits_exams(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
-    # Arrange: test-beta にだけ違反(英語訳の欠落)がある
+    # Arrange: test-gamma にだけ違反(英語訳の欠落)がある
     root = materialize(None, tmp_path)
-    beta = copy_exam(root, "test-beta")
-    question = beta / "questions/domain2/Q-2.2-0101.yaml"
+    gamma = copy_exam(root, "test-gamma")
+    question = gamma / "questions/domain2/Q-2.2-0101.yaml"
     question.write_text(question.read_text(encoding="utf-8").replace("  en: ", "  en_removed: ", 1), encoding="utf-8")
     assert main(["--root", str(root), "--format", "json"]) == 1
     capsys.readouterr()
@@ -89,7 +89,7 @@ def test_cli_exam_option_limits_exams(tmp_path: Path, capsys: pytest.CaptureFixt
     # Assert
     files = {issue["file"] for issue in json.loads(capsys.readouterr().out)}
     assert code == 0
-    assert not any(f.startswith("exams/test-beta/") for f in files)
+    assert not any(f.startswith("exams/test-gamma/") for f in files)
 
 
 def test_cli_unknown_exam_exits_2(capsys: pytest.CaptureFixture[str]) -> None:

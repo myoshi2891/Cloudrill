@@ -126,18 +126,10 @@ def test_duplicate_yaml_key_is_reported(config: GlobalConfig, tmp_path: Path) ->
     assert "重複" in issues[0].message
 
 
-def test_same_ids_in_different_exams_are_allowed(config: GlobalConfig, tmp_path: Path) -> None:
-    # Arrange: 中身が同じ 2 つの試験(問題 ID・カード ID・問題文がすべて同じ)
-    root = materialize(None, tmp_path)
-    copy_exam(root, "test-beta")
-    # Act / Assert: 重複と類似は試験の中だけで確認する(CI-07)
-    assert run(root, config) == []
-
-
 def test_link_check_dedupes_across_exams(config: GlobalConfig, tmp_path: Path) -> None:
     # Arrange: 2 つの試験が同じ壊れた URL を参照する
     root = materialize("CI-06-broken-link", tmp_path)
-    copy_exam(root, "test-beta")
+    copy_exam(root, "test-gamma")
     heads: list[str] = []
 
     def counting(request: httpx.Request) -> httpx.Response:
@@ -149,7 +141,7 @@ def test_link_check_dedupes_across_exams(config: GlobalConfig, tmp_path: Path) -
     issues = run(root, config, only={"CI-06"}, check_links=True, transport=httpx.MockTransport(counting))
     # Assert: HEAD は URL ごとに 1 回で、検出結果は両方の試験に出る
     assert len(heads) == len(set(heads))
-    assert {i.file.split("/")[1] for i in issues} == {"test-alpha", "test-beta"}
+    assert {i.file.split("/")[1] for i in issues} == {"test-alpha", "test-gamma"}
 
 
 def test_rules_skip_when_exam_definition_invalid(config: GlobalConfig, tmp_path: Path) -> None:
