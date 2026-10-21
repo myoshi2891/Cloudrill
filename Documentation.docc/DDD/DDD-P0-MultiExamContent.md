@@ -713,6 +713,11 @@ FEATURE_KINDS: dict[str, Kind] = {
 
 **完了条件**: `(cd content && .venv/bin/pytest tests/test_generated.py)` が通る。
 
+**実装メモ**(実装時に本書と変えた点):
+
+- Green の内容は、先行するステップで実装済みだった。`exams/<examID>/…` の構成での出力は P0-S03、`validation.yaml` の除外と `test_export_skips_validation_yaml` は P0-S04。既存の `test_valid_json_matches_export` に相当するテストは `test_swift_fixtures_are_up_to_date`。
+- このステップでは `test_export_includes_exam_and_vendors` だけを追加した。実装が先にあったので、Red の段階はない(追加した時点で通った)。
+
 ---
 
 ### P0-S09 DomainModels の試験定義型

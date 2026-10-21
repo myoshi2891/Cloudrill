@@ -36,3 +36,14 @@ def test_export_skips_validation_yaml(tmp_path: Path) -> None:
     written = export(VALID, tmp_path / "out")
     # Assert: 検証ツールの設定はアプリ向けの JSON に出力しない
     assert all(p.name != "validation.json" for p in written)
+
+
+def test_export_includes_exam_and_vendors(tmp_path: Path) -> None:
+    # Arrange
+    out = tmp_path / "out"
+    # Act
+    export(VALID, out)
+    # Assert: 全体のファイルと試験ごとの試験定義が、valid と同じ構成(exams/<examID>/…)で出力される
+    assert (out / "vendors.json").is_file()
+    assert (out / "exams/test-alpha/exam.json").is_file()
+    assert (out / "exams/test-beta/exam.json").is_file()
