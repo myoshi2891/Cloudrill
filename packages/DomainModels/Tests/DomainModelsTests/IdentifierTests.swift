@@ -37,7 +37,7 @@ struct IdentifierTests {
         // Arrange
         let id: ExamID = "gcp-pca"
         // Act
-        let json = String(decoding: try JSONEncoder().encode(id), as: UTF8.self)
+        let json = try #require(String(data: try JSONEncoder().encode(id), encoding: .utf8))
         // Assert
         #expect(json == #""gcp-pca""#)
         #expect(id.description == "gcp-pca")

@@ -5,7 +5,7 @@ import Foundation
 public struct Manifest: Codable, Hashable, Sendable {
     /// パックの構造の版。アプリが解釈できない版は取り込まない(DDD X-05)
     public var formatVersion: Int
-    /// P0-S09 で `ExamID` 型に置き換える
+    /// パックが対象とする試験(パックは試験ごとに作る)
     public var examID: ExamID
     /// 署名に使った鍵の ID(鍵のローテーション用)
     public var keyID: String
