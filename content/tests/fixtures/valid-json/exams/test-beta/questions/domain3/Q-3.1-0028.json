@@ -1,0 +1,92 @@
+{
+  "id": "Q-3.1-0028",
+  "revision": 1,
+  "examGuideVersion": "1.0",
+  "domain": 3,
+  "subObjective": "3.1",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 4,
+  "wafPillars": [
+    "efficiency"
+  ],
+  "keywords": [
+    "ダミー",
+    "茶室"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】時計塔・草原・染物・琥珀・陶器に関する設問。",
+    "en": "Dummy question stem for Q-3.1-0028."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "劇場青銅劇場峡谷温室茶室宿場石畳灯台羅針盤洞窟帆船",
+        "en": "Dummy choice A of Q-3.1-0028"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "availability"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "時計塔峡谷渓流染物茶室砂丘珊瑚風車火山羅針盤蜂蜜灯台棚",
+        "en": "Dummy choice B of Q-3.1-0028"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "latency"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "石畳宿場石畳竹林茶室舞台刺繍雪原茶室水路噴水樹",
+        "en": "Dummy choice C of Q-3.1-0028"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Cが正しい理由(ダミー)",
+        "en": "Why choice C is correct (dummy)"
+      }
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "雪原灯台月面滝壺楽譜棚田宿場洞窟木版画太鼓火山望遠鏡銀河蜂蜜山",
+        "en": "Dummy choice D of Q-3.1-0028"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Dが誤り理由(ダミー)",
+        "en": "Why choice D is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "deprecated"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

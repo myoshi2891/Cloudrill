@@ -1,0 +1,92 @@
+{
+  "id": "Q-1.2-0012",
+  "revision": 1,
+  "examGuideVersion": "1.0",
+  "domain": 1,
+  "subObjective": "1.2",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 3,
+  "wafPillars": [
+    "resilience"
+  ],
+  "keywords": [
+    "ダミー",
+    "製本"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】風車・洞窟・楽譜・彗星・銀河に関する設問。",
+    "en": "Dummy question stem for Q-1.2-0012."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "噴水刺繍鍾乳石茶室彫刻銀河鍵盤噴",
+        "en": "Dummy choice A of Q-1.2-0012"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Aが正しい理由(ダミー)",
+        "en": "Why choice A is correct (dummy)"
+      }
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "果樹園洞窟海溝潮汐灯台峡谷羅針盤彗星流星陶器刺繍木",
+        "en": "Dummy choice B of Q-1.2-0012"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "latency"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "楽譜茶室滝壺舞台舞台湿原彫刻庭園鍾乳石灯籠彫",
+        "en": "Dummy choice C of Q-1.2-0012"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "requirementMismatch"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "洞窟温室砂丘鍵盤染物木版画茶室染物果樹園噴水時計塔太鼓画",
+        "en": "Dummy choice D of Q-1.2-0012"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Dが誤り理由(ダミー)",
+        "en": "Why choice D is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "deprecated"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

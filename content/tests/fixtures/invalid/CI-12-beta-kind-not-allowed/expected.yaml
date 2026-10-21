@@ -1,0 +1,5 @@
+description: single のみの試験に multiple の問題
+expect:
+  CI-12:
+  - error
+options: {}

@@ -1,0 +1,92 @@
+{
+  "id": "Q-4.1-0040",
+  "revision": 1,
+  "examGuideVersion": "1.0",
+  "domain": 4,
+  "subObjective": "4.1",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 1,
+  "wafPillars": [
+    "efficiency"
+  ],
+  "keywords": [
+    "ダミー",
+    "樹氷"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】鐘楼・草原・石畳・茶室・滝壺に関する設問。",
+    "en": "Dummy question stem for Q-4.1-0040."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "劇場笛吹宿場氷河噴水劇場潮汐星座",
+        "en": "Dummy choice A of Q-4.1-0040"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "cost"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "陶器渡り鳥銀河火山鐘楼雪原流星",
+        "en": "Dummy choice B of Q-4.1-0040"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Bが正しい理由(ダミー)",
+        "en": "Why choice B is correct (dummy)"
+      }
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "羅針盤流星風車望遠鏡帆船時計塔染物竹林木版",
+        "en": "Dummy choice C of Q-4.1-0040"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "compliance"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "火山彗星滝壺砂丘噴水鐘楼海溝",
+        "en": "Dummy choice D of Q-4.1-0040"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Dが誤り理由(ダミー)",
+        "en": "Why choice D is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "scalability"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

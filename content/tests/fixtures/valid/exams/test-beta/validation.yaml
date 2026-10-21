@@ -1,0 +1,14 @@
+version: 1
+examSet:
+  domainDistribution:
+    '1': 12
+    '2': 12
+    '3': 8
+    '4': 8
+  caseQuestions:
+    min: 0
+    max: 0
+  defaultAssignments:
+    '1':
+      caseStudies: []
+      level: basic

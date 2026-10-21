@@ -1,0 +1,146 @@
+{
+  "id": "test-beta",
+  "vendor": "example-cloud",
+  "name": {
+    "ja": "テスト試験 Beta",
+    "en": "Test exam Beta"
+  },
+  "shortName": "BETA",
+  "guideVersion": "1.0",
+  "guideURL": "https://example.com/certification/beta",
+  "format": {
+    "durationMinutes": 90,
+    "officialQuestionCount": {
+      "min": 40,
+      "max": 50
+    },
+    "questionKinds": [
+      "single"
+    ],
+    "mockExam": {
+      "questionCount": 40,
+      "setCount": 2,
+      "caseStudiesPerSet": 0
+    }
+  },
+  "scoring": {
+    "policy": "allOrNothing"
+  },
+  "domains": [
+    {
+      "id": 1,
+      "name": {
+        "ja": "ダミーのドメイン 1",
+        "en": "Dummy domain 1"
+      },
+      "weight": 0.3,
+      "subObjectives": [
+        {
+          "id": "1.1",
+          "name": {
+            "ja": "ダミーのサブ項目 1.1",
+            "en": "Dummy sub-objective 1.1"
+          }
+        },
+        {
+          "id": "1.2",
+          "name": {
+            "ja": "ダミーのサブ項目 1.2",
+            "en": "Dummy sub-objective 1.2"
+          }
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": {
+        "ja": "ダミーのドメイン 2",
+        "en": "Dummy domain 2"
+      },
+      "weight": 0.3,
+      "subObjectives": [
+        {
+          "id": "NET.1",
+          "name": {
+            "ja": "ダミーのサブ項目 NET.1",
+            "en": "Dummy sub-objective NET.1"
+          }
+        },
+        {
+          "id": "NET.2",
+          "name": {
+            "ja": "ダミーのサブ項目 NET.2",
+            "en": "Dummy sub-objective NET.2"
+          }
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": {
+        "ja": "ダミーのドメイン 3",
+        "en": "Dummy domain 3"
+      },
+      "weight": 0.2,
+      "subObjectives": [
+        {
+          "id": "3.1",
+          "name": {
+            "ja": "ダミーのサブ項目 3.1",
+            "en": "Dummy sub-objective 3.1"
+          }
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": {
+        "ja": "ダミーのドメイン 4",
+        "en": "Dummy domain 4"
+      },
+      "weight": 0.2,
+      "subObjectives": [
+        {
+          "id": "4.1",
+          "name": {
+            "ja": "ダミーのサブ項目 4.1",
+            "en": "Dummy sub-objective 4.1"
+          }
+        }
+      ]
+    }
+  ],
+  "features": {
+    "caseStudies": false,
+    "docs": true,
+    "flashcards": true,
+    "decisionTrees": false,
+    "keywordDrills": false
+  },
+  "taxonomies": {
+    "wafPillars": [
+      {
+        "id": "resilience",
+        "name": {
+          "ja": "ダミーの柱 resilience",
+          "en": "Dummy pillar resilience"
+        }
+      },
+      {
+        "id": "efficiency",
+        "name": {
+          "ja": "ダミーの柱 efficiency",
+          "en": "Dummy pillar efficiency"
+        }
+      },
+      {
+        "id": "governance",
+        "name": {
+          "ja": "ダミーの柱 governance",
+          "en": "Dummy pillar governance"
+        }
+      }
+    ]
+  },
+  "caseStudies": []
+}

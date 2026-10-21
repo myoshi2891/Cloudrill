@@ -1,0 +1,62 @@
+id: Q-1.1-0003
+revision: 1
+examGuideVersion: '1.0'
+domain: 1
+subObjective: '1.1'
+caseStudy: null
+type:
+  kind: single
+difficulty: 4
+wafPillars:
+- resilience
+keywords:
+- ダミー
+- 水路
+examSets:
+- 1
+stem:
+  ja: 【ダミー】木版画・潮汐・竹林・石畳・彗星に関する設問。
+  en: Dummy question stem for Q-1.1-0003.
+choices:
+- id: a
+  text:
+    ja: 彗星楽譜青銅楽譜画廊月面琥珀化石樹氷羅
+    en: Dummy choice A of Q-1.1-0003
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - scalability
+- id: b
+  text:
+    ja: 化石草原滝壺樹氷滝壺陶器風車峡谷山脈惑星鍵盤
+    en: Dummy choice B of Q-1.1-0003
+  isCorrect: false
+  rationale:
+    ja: 選択肢Bが誤り理由(ダミー)
+    en: Why choice B is incorrect (dummy)
+  mistakeTags:
+  - availability
+- id: c
+  text:
+    ja: 渓流帆船太鼓潮汐風車温室琥珀渓流琥珀
+    en: Dummy choice C of Q-1.1-0003
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - latency
+- id: d
+  text:
+    ja: 宿場珊瑚劇場合唱刺繍海溝月
+    en: Dummy choice D of Q-1.1-0003
+  isCorrect: true
+  rationale:
+    ja: 選択肢Dが正しい理由(ダミー)
+    en: Why choice D is correct (dummy)
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

@@ -1,0 +1,62 @@
+id: Q-NET.1-0015
+revision: 1
+examGuideVersion: '1.0'
+domain: 2
+subObjective: NET.1
+caseStudy: null
+type:
+  kind: single
+difficulty: 1
+wafPillars:
+- resilience
+keywords:
+- ダミー
+- 帆船
+examSets:
+- 1
+stem:
+  ja: 【ダミー】温室・琥珀・染物・流星・彗星に関する設問。
+  en: Dummy question stem for Q-NET.1-0015.
+choices:
+- id: a
+  text:
+    ja: 草原鍵盤望遠鏡潮汐氷河滝壺水路灯籠珊瑚鍵盤温室峡谷
+    en: Dummy choice A of Q-NET.1-0015
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - deprecated
+- id: b
+  text:
+    ja: 灯台羅針盤帆船峡谷太鼓棚田蜂蜜陶器砂丘鍵盤水路笛吹水路製本望遠
+    en: Dummy choice B of Q-NET.1-0015
+  isCorrect: true
+  rationale:
+    ja: 選択肢Bが正しい理由(ダミー)
+    en: Why choice B is correct (dummy)
+- id: c
+  text:
+    ja: 合唱青銅氷河太鼓氷河楽譜望遠鏡染物太鼓氷河青銅月面雪原流
+    en: Dummy choice C of Q-NET.1-0015
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - opsOverhead
+- id: d
+  text:
+    ja: 山脈宿場織機風車陶器合唱羅
+    en: Dummy choice D of Q-NET.1-0015
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - compliance
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

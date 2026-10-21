@@ -1,0 +1,92 @@
+{
+  "id": "Q-1.1-0005",
+  "revision": 1,
+  "examGuideVersion": "1.0",
+  "domain": 1,
+  "subObjective": "1.1",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 1,
+  "wafPillars": [
+    "governance"
+  ],
+  "keywords": [
+    "ダミー",
+    "砂丘"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】月面・太鼓・潮汐・砂丘・陶器に関する設問。",
+    "en": "Dummy question stem for Q-1.1-0005."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "風車雪原羅針盤月面灯籠彫刻木版画砂丘樹氷画廊庭園帆船",
+        "en": "Dummy choice A of Q-1.1-0005"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "latency"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "雪原竹林噴水灯籠海溝鍵盤羅針盤鍾乳石滝",
+        "en": "Dummy choice B of Q-1.1-0005"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Bが正しい理由(ダミー)",
+        "en": "Why choice B is correct (dummy)"
+      }
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "峡谷灯籠石畳星座太鼓織機雪原湿原",
+        "en": "Dummy choice C of Q-1.1-0005"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "deprecated"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "劇場火山風車渡り鳥風車化石羅針盤草原山脈竹林月面氷河渡",
+        "en": "Dummy choice D of Q-1.1-0005"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Dが誤り理由(ダミー)",
+        "en": "Why choice D is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "cost"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

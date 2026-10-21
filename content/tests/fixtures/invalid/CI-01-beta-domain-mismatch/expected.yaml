@@ -1,0 +1,5 @@
+description: ドメイン 2 のサブ項目 NET.1 に domain 1
+expect:
+  CI-01:
+  - error
+options: {}

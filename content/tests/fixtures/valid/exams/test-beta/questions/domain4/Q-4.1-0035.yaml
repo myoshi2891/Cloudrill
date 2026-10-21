@@ -1,0 +1,72 @@
+id: Q-4.1-0035
+revision: 1
+examGuideVersion: '1.0'
+domain: 4
+subObjective: '4.1'
+caseStudy: null
+type:
+  kind: single
+difficulty: 1
+wafPillars:
+- governance
+keywords:
+- ダミー
+- 月面
+examSets:
+- 1
+stem:
+  ja: 【ダミー】洞窟・水路・宿場・峡谷・潮汐に関する設問。
+  en: Dummy question stem for Q-4.1-0035.
+choices:
+- id: a
+  text:
+    ja: 水路望遠鏡茶室蜂蜜潮汐樹氷灯台木版画庭園羅針盤
+    en: Dummy choice A of Q-4.1-0035
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - scalability
+- id: b
+  text:
+    ja: 織機庭園滝壺惑星笛吹石畳灯
+    en: Dummy choice B of Q-4.1-0035
+  isCorrect: false
+  rationale:
+    ja: 選択肢Bが誤り理由(ダミー)
+    en: Why choice B is incorrect (dummy)
+  mistakeTags:
+  - availability
+- id: c
+  text:
+    ja: 望遠鏡風車湿原陶器刺繍合唱峡谷
+    en: Dummy choice C of Q-4.1-0035
+  isCorrect: true
+  rationale:
+    ja: 選択肢Cが正しい理由(ダミー)
+    en: Why choice C is correct (dummy)
+- id: d
+  text:
+    ja: 惑星琥珀砂丘化石竹林火山鐘楼彗星画廊
+    en: Dummy choice D of Q-4.1-0035
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - requirementMismatch
+- id: e
+  text:
+    ja: 羅針盤鍾乳石楽譜湿原氷河染物望遠鏡舞台火山噴水舞台
+    en: Dummy choice E of Q-4.1-0035
+  isCorrect: false
+  rationale:
+    ja: 選択肢Eが誤り理由(ダミー)
+    en: Why choice E is incorrect (dummy)
+  mistakeTags:
+  - deprecated
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

@@ -1,0 +1,5 @@
+description: ドリルが無効な試験に drills/keywords.yaml
+expect:
+  CI-12:
+  - error
+options: {}

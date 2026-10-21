@@ -1,0 +1,92 @@
+{
+  "id": "Q-3.1-0031",
+  "revision": 1,
+  "examGuideVersion": "1.0",
+  "domain": 3,
+  "subObjective": "3.1",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 2,
+  "wafPillars": [
+    "efficiency"
+  ],
+  "keywords": [
+    "ダミー",
+    "流星"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】刺繍・流星・画廊・竹林・噴水に関する設問。",
+    "en": "Dummy question stem for Q-3.1-0031."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "灯籠時計塔織機海溝鍵盤琥珀温室星座噴水画廊灯籠棚田珊瑚織機",
+        "en": "Dummy choice A of Q-3.1-0031"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Aが正しい理由(ダミー)",
+        "en": "Why choice A is correct (dummy)"
+      }
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "青銅鍾乳石青銅木版画灯台竹林火山竹林渓流渡り",
+        "en": "Dummy choice B of Q-3.1-0031"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "cost"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "星座刺繍惑星彗星青銅茶室惑星火山山脈合唱温室劇場洞",
+        "en": "Dummy choice C of Q-3.1-0031"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "opsOverhead"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "彫刻流星鍾乳石時計塔帆船砂丘染物温室噴水彫刻望",
+        "en": "Dummy choice D of Q-3.1-0031"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Dが誤り理由(ダミー)",
+        "en": "Why choice D is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "compliance"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

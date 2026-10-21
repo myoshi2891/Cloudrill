@@ -1,0 +1,92 @@
+{
+  "id": "Q-1.2-0002",
+  "revision": 1,
+  "examGuideVersion": "1.0",
+  "domain": 1,
+  "subObjective": "1.2",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 3,
+  "wafPillars": [
+    "governance"
+  ],
+  "keywords": [
+    "ダミー",
+    "山脈"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】画廊・雪原・木版画・時計塔・鍾乳石に関する設問。",
+    "en": "Dummy question stem for Q-1.2-0002."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "水路太鼓青銅月面庭園陶器果樹園羅針盤",
+        "en": "Dummy choice A of Q-1.2-0002"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Aが正しい理由(ダミー)",
+        "en": "Why choice A is correct (dummy)"
+      }
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "望遠鏡洞窟惑星笛吹彫刻琥珀銀河惑星噴水果樹園月面蜂蜜太鼓劇",
+        "en": "Dummy choice B of Q-1.2-0002"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "scalability"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "灯籠劇場笛吹織機銀河海溝惑星鐘楼渓流茶室水",
+        "en": "Dummy choice C of Q-1.2-0002"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "availability"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "羅針盤竹林帆船琥珀峡谷渡り鳥羅針盤鐘楼茶室樹氷滝壺砂丘峡谷庭園",
+        "en": "Dummy choice D of Q-1.2-0002"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Dが誤り理由(ダミー)",
+        "en": "Why choice D is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "latency"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

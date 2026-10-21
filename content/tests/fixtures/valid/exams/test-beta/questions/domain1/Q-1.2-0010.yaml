@@ -1,0 +1,62 @@
+id: Q-1.2-0010
+revision: 1
+examGuideVersion: '1.0'
+domain: 1
+subObjective: '1.2'
+caseStudy: null
+type:
+  kind: single
+difficulty: 1
+wafPillars:
+- efficiency
+keywords:
+- ダミー
+- 時計塔
+examSets:
+- 1
+stem:
+  ja: 【ダミー】陶器・庭園・流星・砂丘・果樹園に関する設問。
+  en: Dummy question stem for Q-1.2-0010.
+choices:
+- id: a
+  text:
+    ja: 画廊月面山脈望遠鏡湿原雪原時計塔火山灯台彫刻
+    en: Dummy choice A of Q-1.2-0010
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - compliance
+- id: b
+  text:
+    ja: 珊瑚月面山脈竹林笛吹鍾乳石雪原流
+    en: Dummy choice B of Q-1.2-0010
+  isCorrect: true
+  rationale:
+    ja: 選択肢Bが正しい理由(ダミー)
+    en: Why choice B is correct (dummy)
+- id: c
+  text:
+    ja: 灯籠樹氷峡谷染物彗星惑星渡
+    en: Dummy choice C of Q-1.2-0010
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - availability
+- id: d
+  text:
+    ja: 渓流温室彗星時計塔氷河画廊宿場滝壺羅針
+    en: Dummy choice D of Q-1.2-0010
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - latency
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

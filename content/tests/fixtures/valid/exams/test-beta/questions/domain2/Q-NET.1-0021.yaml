@@ -1,0 +1,62 @@
+id: Q-NET.1-0021
+revision: 1
+examGuideVersion: '1.0'
+domain: 2
+subObjective: NET.1
+caseStudy: null
+type:
+  kind: single
+difficulty: 2
+wafPillars:
+- resilience
+keywords:
+- ダミー
+- 石畳
+examSets:
+- 1
+stem:
+  ja: 【ダミー】果樹園・流星・宿場・火山・鐘楼に関する設問。
+  en: Dummy question stem for Q-NET.1-0021.
+choices:
+- id: a
+  text:
+    ja: 草原画廊木版画合唱琥珀木版画棚田製本時計塔刺繍雪
+    en: Dummy choice A of Q-NET.1-0021
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - latency
+- id: b
+  text:
+    ja: 噴水染物楽譜渡り鳥湿原潮汐氷河織機流星
+    en: Dummy choice B of Q-NET.1-0021
+  isCorrect: false
+  rationale:
+    ja: 選択肢Bが誤り理由(ダミー)
+    en: Why choice B is incorrect (dummy)
+  mistakeTags:
+  - requirementMismatch
+- id: c
+  text:
+    ja: 棚田彫刻楽譜銀河灯籠噴水洞窟製本織機潮汐庭園灯台楽譜刺繍刺繍竹
+    en: Dummy choice C of Q-NET.1-0021
+  isCorrect: true
+  rationale:
+    ja: 選択肢Cが正しい理由(ダミー)
+    en: Why choice C is correct (dummy)
+- id: d
+  text:
+    ja: 画廊星座合唱湿原潮汐洞窟劇場彫刻刺繍星座惑星劇
+    en: Dummy choice D of Q-NET.1-0021
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - cost
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

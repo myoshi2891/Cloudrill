@@ -1,0 +1,92 @@
+{
+  "id": "Q-3.1-0027",
+  "revision": 1,
+  "examGuideVersion": "1.0",
+  "domain": 3,
+  "subObjective": "3.1",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 3,
+  "wafPillars": [
+    "resilience"
+  ],
+  "keywords": [
+    "ダミー",
+    "灯籠"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】水路・棚田・月面・合唱・氷河に関する設問。",
+    "en": "Dummy question stem for Q-3.1-0027."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "風車製本鐘楼棚田宿場灯台渡り",
+        "en": "Dummy choice A of Q-3.1-0027"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Aが正しい理由(ダミー)",
+        "en": "Why choice A is correct (dummy)"
+      }
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "鐘楼湿原惑星陶器氷河竹林砂丘洞窟劇場望遠鏡棚田鐘楼湿原氷河製",
+        "en": "Dummy choice B of Q-3.1-0027"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "availability"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "樹氷彗星山脈楽譜星座太鼓陶器時計塔灯台竹",
+        "en": "Dummy choice C of Q-3.1-0027"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "latency"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "渓流彫刻茶室峡谷劇場火山舞台洞窟鍵盤陶",
+        "en": "Dummy choice D of Q-3.1-0027"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Dが誤り理由(ダミー)",
+        "en": "Why choice D is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "requirementMismatch"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "id": "Q-1.1-0001",
+  "revision": 1,
+  "examGuideVersion": "1.0",
+  "domain": 1,
+  "subObjective": "1.1",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 2,
+  "wafPillars": [
+    "efficiency"
+  ],
+  "keywords": [
+    "ダミー",
+    "灯台"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】砂丘・彗星・鐘楼・洞窟・鍵盤に関する設問。",
+    "en": "Dummy question stem for Q-1.1-0001."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "合唱陶器雪原青銅時計塔石畳月面",
+        "en": "Dummy choice A of Q-1.1-0001"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "opsOverhead"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "湿原草原峡谷雪原洞窟琥珀火山海溝灯台合唱鍵盤渓流",
+        "en": "Dummy choice B of Q-1.1-0001"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Bが正しい理由(ダミー)",
+        "en": "Why choice B is correct (dummy)"
+      }
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "氷河彗星帆船鍾乳石火山木版画氷河木版",
+        "en": "Dummy choice C of Q-1.1-0001"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "scalability"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "滝壺果樹園山脈彗星峡谷刺繍氷",
+        "en": "Dummy choice D of Q-1.1-0001"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Dが誤り理由(ダミー)",
+        "en": "Why choice D is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "availability"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

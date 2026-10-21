@@ -1,0 +1,92 @@
+{
+  "id": "Q-3.1-0032",
+  "revision": 1,
+  "examGuideVersion": "1.0",
+  "domain": 3,
+  "subObjective": "3.1",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 3,
+  "wafPillars": [
+    "governance"
+  ],
+  "keywords": [
+    "ダミー",
+    "惑星"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】帆船・雪原・棚田・海溝・彫刻に関する設問。",
+    "en": "Dummy question stem for Q-3.1-0032."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "流星氷河滝壺竹林宿場樹氷鐘楼鍵盤木版画樹氷",
+        "en": "Dummy choice A of Q-3.1-0032"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Aが正しい理由(ダミー)",
+        "en": "Why choice A is correct (dummy)"
+      }
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "風車蜂蜜刺繍合唱山脈渡り鳥彗星氷河時計塔鐘楼鍾乳",
+        "en": "Dummy choice B of Q-3.1-0032"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "opsOverhead"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "石畳滝壺彗星茶室風車海溝石畳劇場渓",
+        "en": "Dummy choice C of Q-3.1-0032"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "compliance"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "棚田蜂蜜火山温室噴水宿場刺繍楽譜鍾乳石宿場雪原氷河彫刻雪原",
+        "en": "Dummy choice D of Q-3.1-0032"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Dが誤り理由(ダミー)",
+        "en": "Why choice D is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "scalability"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

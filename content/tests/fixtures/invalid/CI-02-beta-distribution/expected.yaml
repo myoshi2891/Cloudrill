@@ -1,0 +1,5 @@
+description: 模試のドメイン配分が D1=11、D2=13
+expect:
+  CI-02:
+  - error
+options: {}
