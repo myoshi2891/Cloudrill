@@ -392,12 +392,6 @@ def ov_ci01_yaml(valid: dict[str, Any]) -> dict[str, Any]:
     return {"questions/domain2/Q-2.1-0905.yaml": "id: Q-2.1-0905\nstem: [unclosed\n"}
 
 
-def ov_ci01_exam_id(valid: dict[str, Any]) -> dict[str, Any]:
-    exam = copy.deepcopy(valid["exam.yaml"])
-    exam["id"] = "test-other"
-    return {"exam.yaml": exam}
-
-
 def ov_ci02_case(valid: dict[str, Any]) -> dict[str, Any]:
     """試験にはあるが模試 1 にはないケース(cymbal)の問題を模試 1 に入れる。"""
     exam = copy.deepcopy(valid["exam.yaml"])
@@ -554,6 +548,45 @@ def ov_ci10(valid: dict[str, Any]) -> dict[str, Any]:
     return {"exam.yaml": exam}
 
 
+def ov_ci12_exam_id(valid: dict[str, Any]) -> dict[str, Any]:
+    exam = copy.deepcopy(valid["exam.yaml"])
+    exam["id"] = "test-gamma"
+    return {"exam.yaml": exam}
+
+
+def ov_ci12_vendor(valid: dict[str, Any]) -> dict[str, Any]:
+    exam = copy.deepcopy(valid["exam.yaml"])
+    exam["vendor"] = "nowhere"
+    return {"exam.yaml": exam}
+
+
+def ov_ci12_domains(valid: dict[str, Any]) -> dict[str, Any]:
+    """ドメイン 3 を削除し、比重の合計が 1.0 のままになるようドメイン 4 に足す。"""
+    exam = copy.deepcopy(valid["exam.yaml"])
+    removed = exam["domains"].pop(2)
+    exam["domains"][2]["weight"] = round(exam["domains"][2]["weight"] + removed["weight"], 3)
+    return {"exam.yaml": exam}
+
+
+def ov_ci12_sub_objective(valid: dict[str, Any]) -> dict[str, Any]:
+    exam = copy.deepcopy(valid["exam.yaml"])
+    exam["domains"][1]["subObjectives"].append(copy.deepcopy(exam["domains"][0]["subObjectives"][0]))
+    return {"exam.yaml": exam}
+
+
+def ov_ci12_case_list(valid: dict[str, Any]) -> dict[str, Any]:
+    """exam.yaml の caseStudies にないケースのファイルを置く(どの問題からも参照しない)。"""
+    case = copy.deepcopy(valid["cases/ehr.yaml"])
+    case["id"] = "cymbal"
+    return {"cases/cymbal.yaml": case}
+
+
+def ov_ci12_guide_version(valid: dict[str, Any]) -> dict[str, Any]:
+    q = _practice(915)
+    q["examGuideVersion"] = "6.0"
+    return _with_question(q)
+
+
 def ov_ci11(valid: dict[str, Any]) -> dict[str, Any]:
     q = _practice(911)
     del q["stem"]["en"]
@@ -567,7 +600,6 @@ INVALID_CASES: list[tuple[str, str, dict[str, list[str]], Callable[[dict[str, An
     ("CI-01-single-two-correct", "single なのに正解が 2 つ", {"CI-01": ["error"]}, ov_ci01_two_correct, {}),
     ("CI-01-mistake-tags", "正解に mistakeTags、誤答に mistakeTags なし", {"CI-01": ["error"]}, ov_ci01_mistake_tags, {}),
     ("CI-01-yaml-syntax", "YAML の構文エラー", {"CI-01": ["error"]}, ov_ci01_yaml, {}),
-    ("CI-01-exam-id-mismatch", "exam.yaml の id がディレクトリ名と異なる", {"CI-01": ["error"]}, ov_ci01_exam_id, {}),
     ("CI-02-case-mismatch", "模試のケース外の caseStudy", {"CI-02": ["error"]}, ov_ci02_case, {}),
     ("CI-02-bidirectional", "問題の examSets にあるが questionIDs にない", {"CI-02": ["error"]}, ov_ci02_bidirectional, {}),
     ("CI-02-draft-default-level", "draft の模試で既定と異なる level", {"CI-02": ["warning"]}, ov_ci02_draft, {}),
@@ -597,6 +629,18 @@ INVALID_CASES: list[tuple[str, str, dict[str, list[str]], Callable[[dict[str, An
     ("CI-09-unknown-waf-pillar", "exam.yaml にない WAF の柱 resilience の問題", {"CI-09": ["error"]}, ov_ci09_unknown_waf_pillar, {}),
     ("CI-10-weights-sum", "exam.yaml の比重の合計が 0.985", {"CI-10": ["error"]}, ov_ci10, {}),
     ("CI-11-missing-en", "stem.en の欠落", {"CI-11": ["warning"]}, ov_ci11, {}),
+    ("CI-12-exam-id-mismatch", "exam.yaml の id がディレクトリ名と異なる", {"CI-12": ["error"]}, ov_ci12_exam_id, {}),
+    ("CI-12-unknown-vendor", "vendors.yaml にないベンダー", {"CI-12": ["error"]}, ov_ci12_vendor, {}),
+    (
+        "CI-12-domain-not-contiguous",
+        "ドメイン 3 がない(ドメイン 3 の問題とサブ項目は CI-09 も検出する)",
+        {"CI-12": ["error"], "CI-09": ["error"]},
+        ov_ci12_domains,
+        {},
+    ),
+    ("CI-12-duplicate-sub-objective", "2 つのドメインにサブ項目 1.1", {"CI-12": ["error"]}, ov_ci12_sub_objective, {}),
+    ("CI-12-case-list-mismatch", "exam.yaml の caseStudies にないケースのファイル", {"CI-12": ["error"]}, ov_ci12_case_list, {}),
+    ("CI-12-guide-version-mismatch", "問題の examGuideVersion が exam.yaml の guideVersion と異なる", {"CI-12": ["warning"]}, ov_ci12_guide_version, {}),
 ]
 
 

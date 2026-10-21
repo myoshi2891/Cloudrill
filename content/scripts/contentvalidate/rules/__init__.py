@@ -15,6 +15,7 @@ from . import (
     ci09_references,
     ci10_weights,
     ci11_english,
+    ci12_exam_definition,
 )
 
 ALL_RULES: tuple[Rule, ...] = (
@@ -29,6 +30,7 @@ ALL_RULES: tuple[Rule, ...] = (
     ci09_references.RULE,
     ci10_weights.RULE,
     ci11_english.RULE,
+    ci12_exam_definition.RULE,
 )
 
 RULE_IDS: frozenset[str] = frozenset(rule.id for rule in ALL_RULES)

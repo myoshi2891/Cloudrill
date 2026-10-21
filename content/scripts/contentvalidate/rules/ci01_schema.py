@@ -83,19 +83,11 @@ def _check_decision(doc: SourceDoc, definition: Definition) -> Iterator[Issue]:
             seen.add(nid)
 
 
-def _check_exam(doc: SourceDoc, definition: Definition) -> Iterator[Issue]:
-    """exam.yaml の id とディレクトリ名(試験のスコープ)が一致するか。"""
-    declared = get_str(doc.data, "id")
-    if declared is not None and declared != doc.exam_id:
-        yield doc.issue(RULE_ID, Severity.ERROR, f"id '{declared}' がディレクトリ名 '{doc.exam_id}' と一致しません", ("id",))
-
-
 _CHECKERS = {
     Kind.QUESTION: _check_question,
     Kind.FLASHCARD: _check_flashcards,
     Kind.EXAM_SETS: _check_exam_sets,
     Kind.DECISION: _check_decision,
-    Kind.EXAM: _check_exam,
 }
 
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""学習コンテンツの検証(CI-01〜CI-11)。
+"""学習コンテンツの検証(CI-01〜CI-12)。
 
 使い方:
     python content/scripts/validate.py [--root content] [--exam gcp-pca] [--check-links] [--strict]
