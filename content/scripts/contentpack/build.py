@@ -245,5 +245,8 @@ def build_pack(
     manifest = _manifest(source.exam, version, min_app_version, key_id, epoch, files)
     # manifest.json だけは読みやすさのため indent=2(署名はバイト列に対して行うので、書式は検証に影響しない)
     files[MANIFEST] = json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2).encode("utf-8")
-    _write(target, files)
+    try:
+        _write(target, files)
+    except OSError as e:  # 一時ディレクトリの削除は _write が済ませている
+        raise BuildError(f"出力先 {target} に書き込めません: {e}") from e
     return BuiltPack(target, warnings)

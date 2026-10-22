@@ -123,6 +123,16 @@ def test_build_refuses_symlinked_output(tmp_path: Path, monkeypatch: pytest.Monk
     assert dangling or list(link_target.iterdir()) == []
 
 
+def test_build_reports_output_os_error(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    # Arrange: --out が通常のファイル(その下にディレクトリを作れない)
+    monkeypatch.setenv("SOURCE_DATE_EPOCH", EPOCH)
+    out = tmp_path / "out"
+    out.write_text("file", encoding="utf-8")
+    # Act / Assert: OSError をトレースバックにせず、終了コード 2
+    assert main(_args(VALID, "test-alpha", out)) == 2
+    assert out.read_text(encoding="utf-8") == "file"
+
+
 def test_write_refuses_output_created_after_check(tmp_path: Path) -> None:
     # Arrange: 最初の確認の後(検証中)に、空のディレクトリができた場合
     target = tmp_path / "pack"
