@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://examprep-content.invalid/schemas/catalog-source.schema.json",
+  "title": "カタログの元データ(content/catalog.yaml)",
+  "description": "試験の名前とベンダーは exam.yaml から補う。試験 ID の実在と重複は CI-13 が確認する。",
+  "type": "object",
+  "properties": {
+    "exams": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/CatalogSourceEntry" }
+    }
+  },
+  "required": ["exams"],
+  "additionalProperties": false,
+  "$defs": {
+    "CatalogSourceEntry": {
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/ExamID" },
+        "status": { "$ref": "catalog.schema.json#/$defs/CatalogStatus" },
+        "productIDs": {
+          "type": "array",
+          "items": { "$ref": "common.schema.json#/$defs/NonEmptyString" },
+          "uniqueItems": true
+        }
+      },
+      "required": ["id", "status", "productIDs"],
+      "additionalProperties": false
+    }
+  }
+}
