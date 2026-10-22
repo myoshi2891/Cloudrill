@@ -168,6 +168,7 @@ public struct FSRSScheduler: Sendable {
     }
 
     /// 短期(前回から 24 時間未満)。Hard 以上では安定度を下げない
+    /// (py-fsrs 6.3.2 は Hard も下限の対象にする。FSRS-6 の説明の「Good 以上」ではなく、リファレンス実装に合わせる)
     private func shortTermStability(_ stability: Double, rating: Rating) -> Double {
         var increase = exp(parameters.shortTermRatingScale * (Double(rating.rawValue) - 3 + parameters.shortTermRatingOffset))
             * pow(stability, -parameters.shortTermStabilityDecay)
