@@ -58,3 +58,16 @@ public enum ContentDecoder {
         return decoder
     }
 }
+
+extension KeyedDecodingContainer {
+    /// Schema で必須かつ null 可(`required` + `anyOf [..., null]`)の項目を読む。
+    /// null なら nil、キーがなければ keyNotFound(合成の Decodable は Optional のキーの欠落を許してしまうため)。
+    func decodeRequiredNullable<T: Decodable>(_ type: T.Type, forKey key: Key) throws -> T? {
+        guard contains(key) else {
+            throw DecodingError.keyNotFound(
+                key, .init(codingPath: codingPath, debugDescription: "\(key.stringValue) は必須です(値がなければ null)")
+            )
+        }
+        return try decodeIfPresent(type, forKey: key)
+    }
+}

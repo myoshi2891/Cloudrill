@@ -36,6 +36,37 @@ public struct QuestionIndexEntry: Codable, Hashable, Sendable, Identifiable {
     }
 }
 
+// caseStudy は Schema で必須(null 可)。キーの欠落はデコードエラー、エンコードでは null を書く
+extension QuestionIndexEntry {
+    private enum CodingKeys: String, CodingKey {
+        case id, revision, domain, subObjective, caseStudy, difficulty, kind, examSets
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        revision = try container.decode(Int.self, forKey: .revision)
+        domain = try container.decode(Int.self, forKey: .domain)
+        subObjective = try container.decode(String.self, forKey: .subObjective)
+        caseStudy = try container.decodeRequiredNullable(CaseStudyID.self, forKey: .caseStudy)
+        difficulty = try container.decode(Int.self, forKey: .difficulty)
+        kind = try container.decode(QuestionKind.self, forKey: .kind)
+        examSets = try container.decode([Int].self, forKey: .examSets)
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(revision, forKey: .revision)
+        try container.encode(domain, forKey: .domain)
+        try container.encode(subObjective, forKey: .subObjective)
+        try container.encode(caseStudy, forKey: .caseStudy)
+        try container.encode(difficulty, forKey: .difficulty)
+        try container.encode(kind, forKey: .kind)
+        try container.encode(examSets, forKey: .examSets)
+    }
+}
+
 /// pack-docs-index.schema.json(パックの docs/index.json の1件)。
 /// subObjective・title・references は docs/*.md のフロントマター(docs-frontmatter.schema.json)。
 public struct DocEntry: Codable, Hashable, Sendable {

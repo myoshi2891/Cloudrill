@@ -32,6 +32,27 @@ struct PackIndexTests {
         #expect(entry.kind == .multiple)
     }
 
+    @Test("QuestionIndexEntry: caseStudy のキーがなければデコードエラー(null とは区別する)")
+    func missingCaseStudyKeyFails() {
+        let json = #"""
+        {"id":"Q-1.1-0001","revision":1,"domain":1,"subObjective":"1.1",
+         "difficulty":2,"kind":"multiple","examSets":[]}
+        """#
+        #expect(throws: DecodingError.self) { try decode(QuestionIndexEntry.self, json) }
+    }
+
+    @Test("QuestionIndexEntry: エンコードすると nil の caseStudy は null として残り、再デコードできる")
+    func indexEntryRoundTripKeepsNull() throws {
+        let entry = QuestionIndexEntry(
+            id: "Q-1.1-0001", revision: 1, domain: 1, subObjective: "1.1", caseStudy: nil, difficulty: 2,
+            kind: .single, examSets: []
+        )
+        let data = try JSONEncoder().encode(entry)
+        let json = try #require(String(data: data, encoding: .utf8))
+        #expect(json.contains(#""caseStudy":null"#))
+        #expect(try decode(QuestionIndexEntry.self, json) == entry)
+    }
+
     @Test("QuestionIndexEntry: 未知の kind はデコードエラー(① 構造語彙)")
     func unknownKindFails() {
         let json = #"""

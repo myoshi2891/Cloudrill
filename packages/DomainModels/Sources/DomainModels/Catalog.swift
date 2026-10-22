@@ -22,6 +22,37 @@ public struct CatalogEntry: Codable, Hashable, Sendable, Identifiable {
     public var productIDs: [String]
 }
 
+// latestPackVersion・minAppVersion は Schema で必須(null 可)。キーの欠落はデコードエラー、エンコードでは null を書く
+extension CatalogEntry {
+    private enum CodingKeys: String, CodingKey {
+        case id, vendor, name, shortName, status, latestPackVersion, minAppVersion, productIDs
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(ExamID.self, forKey: .id)
+        vendor = try container.decode(VendorID.self, forKey: .vendor)
+        name = try container.decode(LocalizedText.self, forKey: .name)
+        shortName = try container.decode(String.self, forKey: .shortName)
+        status = try container.decode(CatalogStatus.self, forKey: .status)
+        latestPackVersion = try container.decodeRequiredNullable(String.self, forKey: .latestPackVersion)
+        minAppVersion = try container.decodeRequiredNullable(String.self, forKey: .minAppVersion)
+        productIDs = try container.decode([String].self, forKey: .productIDs)
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(vendor, forKey: .vendor)
+        try container.encode(name, forKey: .name)
+        try container.encode(shortName, forKey: .shortName)
+        try container.encode(status, forKey: .status)
+        try container.encode(latestPackVersion, forKey: .latestPackVersion)
+        try container.encode(minAppVersion, forKey: .minAppVersion)
+        try container.encode(productIDs, forKey: .productIDs)
+    }
+}
+
 /// catalog.schema.json#/$defs/CatalogStatus(構造語彙。未知の値はデコードエラー)
 public enum CatalogStatus: String, Codable, Hashable, Sendable, CaseIterable {
     /// 配信中
