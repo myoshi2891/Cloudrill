@@ -83,7 +83,7 @@ def test_build_allows_warnings(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, 
     assert (out / "test-alpha" / "1.0.0" / "manifest.json").is_file()
 
 
-@pytest.mark.parametrize("epoch", [None, "", "abc", "-1"])
+@pytest.mark.parametrize("epoch", [None, "", "abc", "-1", "253402300800", "9" * 30])
 def test_build_requires_source_date_epoch(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, epoch: str | None) -> None:
     # Arrange
     if epoch is None:

@@ -25,6 +25,8 @@ from contentvalidate.schemas import registry, schema_uri, validator_for
 FORMAT_VERSION = 1
 MANIFEST = "manifest.json"
 _SEMVER = re.compile(registry().contents(schema_uri("common"))["$defs"]["SemVer"]["pattern"])
+# createdAt を4桁の年(RFC 3339)で書ける最大の秒(9999-12-31T23:59:59Z)
+_MAX_EPOCH = int(dt.datetime(9999, 12, 31, 23, 59, 59, tzinfo=dt.UTC).timestamp())
 
 
 class BuildError(Exception):
@@ -159,8 +161,8 @@ def _check_arguments(root: Path, exam_id: str, version: str, min_app_version: st
             raise BuildError(f"{name} {value} は SemVer(X.Y.Z)ではありません")
     if not key_id:
         raise BuildError("--key-id が空です")
-    if epoch < 0:
-        raise BuildError(f"SOURCE_DATE_EPOCH {epoch} は 0 以上にしてください")
+    if not 0 <= epoch <= _MAX_EPOCH:
+        raise BuildError(f"SOURCE_DATE_EPOCH {epoch} は 0 以上 {_MAX_EPOCH} 以下にしてください")
 
 
 def _validate(root: Path, exam_id: str, config_path: Path | None) -> list[Issue]:
