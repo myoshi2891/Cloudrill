@@ -27,6 +27,18 @@ public struct QuestionOrder: Codable, Hashable, Sendable {
         case items
     }
 
+    /// 他の値(ExamSession.Snapshot など)の中で入れ子にデコードされる場合も、版を確かめる。
+    /// 版を先に読み、未対応なら items を読まずに unsupportedVersion を投げる。
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let version = try container.decode(Int.self, forKey: .version)
+        guard version == Self.currentVersion else {
+            throw QuestionOrderError.unsupportedVersion(version)
+        }
+        self.version = version
+        items = try container.decode([Item].self, forKey: .items)
+    }
+
     /// 版を確かめてから読む。未来の版は形が変わっている可能性があるので、全体をデコードする前に判定する。
     public static func decode(from data: Data) throws(QuestionOrderError) -> QuestionOrder {
         let decoder = JSONDecoder()

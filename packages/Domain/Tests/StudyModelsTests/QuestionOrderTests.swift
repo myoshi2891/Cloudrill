@@ -31,6 +31,20 @@ struct QuestionOrderTests {
         }
     }
 
+    @Test("入れ子のデコードでも未来の版はエラー(Snapshot の復元で版の確認を素通りしない)")
+    func rejectsFutureVersionWhenNested() {
+        // Arrange
+        struct Wrapper: Decodable { var order: QuestionOrder }
+        let json = Data(#"{"order":{"version":2,"items":[]}}"#.utf8)
+        // Act
+        let result = Result { try JSONDecoder().decode(Wrapper.self, from: json) }
+        // Assert
+        guard case .failure(let error) = result, case .unsupportedVersion(2) = error as? QuestionOrderError else {
+            Issue.record("unsupportedVersion(2) を期待したが \(result)")
+            return
+        }
+    }
+
     @Test("壊れた JSON はエラー(元のエラーを保持する)")
     func rejectsCorruptedData() {
         // Arrange
