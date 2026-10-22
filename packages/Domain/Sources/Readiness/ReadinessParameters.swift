@@ -10,13 +10,13 @@ public enum ReadinessError: Error, Equatable, Sendable {
 /// 合格準備度の計算のパラメータ。既定値は BDD 6.6 の値
 public struct ReadinessParameters: Hashable, Sendable {
     /// `score_d` での正答率の重み
-    public var accuracyWeight: Double
+    public private(set) var accuracyWeight: Double
     /// `score_d` での記憶保持率の重み
-    public var retentionWeight: Double
+    public private(set) var retentionWeight: Double
     /// 解答の重み `0.5^(t / halfLifeDays)` の半減期(日)
-    public var halfLifeDays: Double
+    public private(set) var halfLifeDays: Double
     /// 網羅度 `cov_d` が 1 になる、ドメインごとのユニークな問題数
-    public var coverageTarget: Int
+    public private(set) var coverageTarget: Int
     /// 準備度を算出するのに必要な、ユニークな問題数(これ未満は「データ収集中」)
     public var minimumUniqueQuestions: Int
 
