@@ -369,6 +369,26 @@ def test_catalog_schema_accepts_unreleased_exam() -> None:
     assert _errors("catalog", {**CATALOG, "exams": [entry]}) == []
 
 
+@pytest.mark.parametrize(
+    "versions",
+    [
+        {"latestPackVersion": None, "minAppVersion": None},
+        {"latestPackVersion": None},
+        {"minAppVersion": None},
+    ],
+)
+def test_catalog_schema_rejects_available_without_pack(versions: dict[str, Any]) -> None:
+    # 配信中の試験はパックがあるので、版は null にできない
+    entry = {**CATALOG["exams"][0], **versions}
+    assert _errors("catalog", {**CATALOG, "exams": [entry]})
+
+
+@pytest.mark.parametrize("status", ["comingSoon", "retired"])
+def test_catalog_schema_accepts_null_versions_unless_available(status: str) -> None:
+    entry = {**CATALOG["exams"][0], "status": status, "latestPackVersion": None, "minAppVersion": None}
+    assert _errors("catalog", {**CATALOG, "exams": [entry]}) == []
+
+
 def test_catalog_schema_rejects_unknown_status() -> None:
     entry = {**CATALOG["exams"][0], "status": "beta"}
     assert _errors("catalog", {**CATALOG, "exams": [entry]})

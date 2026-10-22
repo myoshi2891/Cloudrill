@@ -67,7 +67,7 @@ python content/scripts/validate.py [--root content] [--config validation.yaml] [
 ### build_pack.py
 
 ```
-SOURCE_DATE_EPOCH=<秒> python content/scripts/build_pack.py --exam <examID> --version <X.Y.Z> --min-app-version <X.Y.Z>
+SOURCE_DATE_EPOCH=<秒> python content/scripts/build_pack.py --exam <examID> --version <X.Y.Z> --min-app-version <X.Y.Z> \
                                                      --key-id <ID> [--root content] [--config validation.yaml] --out <出力先>
 ```
 
@@ -128,7 +128,7 @@ tests/                    pytest と fixture(valid-json/ は Swift テストが�
 | `manifest` | 配信パックの `manifest.json` | 生成は `build_pack.py`、署名は `sign_manifest.py`(P2-S03) |
 | `pack-question-index` | 配信パックの `questions/index.json` | 問題の要約(`QuestionIndexEntry`)の配列。各項目の制約は `question` と同じで、`type` の代わりに `kind` だけを持つ |
 | `pack-docs-index` | 配信パックの `docs/index.json` | `DocEntry`(フロントマターの内容と本文の `path`)の配列。`path` は `docs/` 直下の `.md` に限る |
-| `catalog` | 配信する試験の一覧 `catalog.json` | `status` は `available` / `comingSoon` / `retired`。パックがまだない試験は `latestPackVersion`・`minAppVersion` が `null` |
+| `catalog` | 配信する試験の一覧 `catalog.json` | `status` は `available` / `comingSoon` / `retired`。パックがまだない試験は `latestPackVersion`・`minAppVersion` が `null`(キーは必須。`available` では `null` 不可) |
 | `catalog-source` | `catalog.yaml` | カタログの元データ(`id`、`status`、`productIDs`)。試験 ID の実在と重複は Schema では確認しない |
 
 ### Schema と validate.py の役割分担
