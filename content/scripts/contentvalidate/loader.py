@@ -105,15 +105,32 @@ def parse_yaml(text: str, line_offset: int = 0) -> tuple[Any, dict[JsonPath, int
     return normalize(data), lines, dups
 
 
-def split_frontmatter(text: str) -> tuple[str, int] | None:
-    """Markdown 先頭の `---` で囲まれたフロントマターを返す。(本文, 先頭行オフセット)。"""
-    lines = text.splitlines(keepends=True)
+def _frontmatter_end(lines: list[str]) -> int | None:
+    """フロントマターの終わりの行(`---` または `...`)の index。フロントマターがなければ None。"""
     if not lines or lines[0].rstrip("\r\n") != "---":
         return None
     for i in range(1, len(lines)):
         if lines[i].rstrip("\r\n") in ("---", "..."):
-            return "".join(lines[1:i]), 1
+            return i
     return None
+
+
+def split_frontmatter(text: str) -> tuple[str, int] | None:
+    """Markdown 先頭の `---` で囲まれたフロントマターを返す。(本文, 先頭行オフセット)。"""
+    lines = text.splitlines(keepends=True)
+    end = _frontmatter_end(lines)
+    if end is None:
+        return None
+    return "".join(lines[1:end]), 1
+
+
+def strip_frontmatter(text: str) -> str | None:
+    """フロントマターを除いた Markdown の本文(先頭の空行も除く)。フロントマターがなければ None。"""
+    lines = text.splitlines(keepends=True)
+    end = _frontmatter_end(lines)
+    if end is None:
+        return None
+    return "".join(lines[end + 1 :]).lstrip("\r\n")
 
 
 def _load_file(root: Path, file: Path, kind: Kind, exam_id: str | None) -> tuple[SourceDoc | None, list[Issue]]:

@@ -64,6 +64,22 @@ python content/scripts/validate.py [--root content] [--config validation.yaml] [
 | `--root` | 省略時は、スクリプトの位置から見た `content/` を使う(実行場所に依存しない) |
 | `--config` | 全体の設定ファイル。省略時は `<root>/validation.yaml` を使い、なければ `content/validation.yaml` を使う。試験ごとの設定(`exams/<examID>/validation.yaml`)は常に試験ディレクトリから読む |
 
+### build_pack.py
+
+```
+SOURCE_DATE_EPOCH=<秒> python content/scripts/build_pack.py --exam <examID> --version <X.Y.Z> --min-app-version <X.Y.Z>
+                                                     --key-id <ID> [--root content] [--config validation.yaml] --out <出力先>
+```
+
+1つの試験の配信パック(形式は `Documentation.docc/DDD/DDD-P2-ContentPack.md` の 3.1)を `<出力先>/<examID>/<version>/` に作ります。署名(`manifest.sig`)は作りません。
+
+| 項目 | 仕様 |
+|---|---|
+| 終了コード | `0` = 成功(warning は標準エラーに出す)/ `1` = コンテンツの検証で error がある(出力しない)/ `2` = 引数・環境の不備、出力先がすでにある(上書きしない) |
+| 検証 | `validate.py --exam <examID>` と同じ検証を先に行う |
+| 決定論 | 同じ入力と `SOURCE_DATE_EPOCH` なら、全ファイルのバイト列が一致する。`createdAt` は `SOURCE_DATE_EPOCH` から作る |
+| 機能 | `exam.yaml` の `features` が false の種別(`cases.json` など)は出力しない。`docs/index.json` は常に出力する(`features.docs` が false なら空の配列) |
+
 ## ディレクトリ構成(`content/` 配下)
 
 ```
@@ -82,6 +98,7 @@ exams/<examID>/           試験ごとのディレクトリ(例: exams/gcp-pca/)
   docs/*.md               YAML フロントマター + Markdown 本文
 scripts/validate.py       検証 CLI(実装は scripts/contentvalidate/)
 scripts/export_json.py    YAML → JSON 変換(tests/fixtures/valid-json/ の生成)
+scripts/build_pack.py     配信パックのビルド CLI(実装は scripts/contentpack/)
 tests/                    pytest と fixture(valid-json/ は Swift テストが直接参照する)
 ```
 
@@ -108,7 +125,7 @@ tests/                    pytest と fixture(valid-json/ は Swift テストが�
 | `vendors` | `vendors.yaml` | ベンダーの定義 |
 | `exam-sets` | `exam-sets.yaml` | 模試の定義(`caseStudies` は `minItems: 0`。個数が `caseStudiesPerSet` と一致するかは CI-02 が確認する。`questionIDs` は重複なし) |
 | `docs-frontmatter` | `docs/*.md` のフロントマター | `title`、`subObjective`、`references`(1つ以上) |
-| `manifest` | 配信パックの `manifest.json` | 定義のみ。生成と署名はこのリポジトリの対象外 |
+| `manifest` | 配信パックの `manifest.json` | 生成は `build_pack.py`、署名は `sign_manifest.py`(P2-S03) |
 | `pack-question-index` | 配信パックの `questions/index.json` | 問題の要約(`QuestionIndexEntry`)の配列。各項目の制約は `question` と同じで、`type` の代わりに `kind` だけを持つ |
 | `pack-docs-index` | 配信パックの `docs/index.json` | `DocEntry`(フロントマターの内容と本文の `path`)の配列。`path` は `docs/` 直下の `.md` に限る |
 | `catalog` | 配信する試験の一覧 `catalog.json` | `status` は `available` / `comingSoon` / `retired`。パックがまだない試験は `latestPackVersion`・`minAppVersion` が `null` |
