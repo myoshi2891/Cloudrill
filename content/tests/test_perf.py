@@ -8,14 +8,14 @@ from pathlib import Path
 
 from conftest import materialize
 from generate import ALPHA, dump, make_question, question_path
-from contentvalidate.config import Config
+from contentvalidate.config import GlobalConfig
 from contentvalidate.engine import run
 
 TOTAL_QUESTIONS = 500
 LIMIT_SECONDS = 10.0
 
 
-def test_500_questions_within_time_limit(config: Config, tmp_path: Path) -> None:
+def test_500_questions_within_time_limit(config: GlobalConfig, tmp_path: Path) -> None:
     # Arrange: valid(58 問)に練習問題を追加して 500 問にする
     root = materialize(None, tmp_path)
     existing = len(list((root / ALPHA).glob("questions/**/*.yaml")))

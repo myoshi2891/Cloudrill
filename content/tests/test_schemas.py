@@ -255,23 +255,25 @@ def test_sample_question_is_valid() -> None:
     "fields",
     [
         pytest.param({"subObjective": "NET.1", "id": "Q-NET.1-0001"}, id="non_numeric_sub_objective"),
+        pytest.param({"domain": 7}, id="domain_above_six"),
+        pytest.param({"caseStudy": "acmeBank"}, id="custom_case_study_id"),
+        pytest.param({"wafPillars": ["resilience"]}, id="custom_waf_pillar"),
     ],
 )
 def test_question_schema_accepts(fields: dict[str, Any]) -> None:
+    # 試験語彙の実在(domain・caseStudy・wafPillars)は Schema ではなく CI-09・CI-12 が確認する
     assert _errors("question", {**_sample_question(), **fields}) == []
 
 
 @pytest.mark.parametrize(
     "fields",
     [
-        pytest.param({"domain": 7}, id="domain_above_six"),
-        pytest.param({"caseStudy": "acmeBank"}, id="custom_case_study_id"),
+        pytest.param({"domain": 0}, id="domain_zero"),
         pytest.param({"caseStudy": "Acme Bank"}, id="bad_case_study_id"),
-        pytest.param({"wafPillars": ["resilience"]}, id="custom_waf_pillar"),
+        pytest.param({"wafPillars": ["Resilience"]}, id="bad_waf_pillar_id"),
     ],
 )
-def test_question_schema_rejects_unknown_vocabulary(fields: dict[str, Any]) -> None:
-    # 試験語彙は exam.yaml との照合(CI-09・CI-12)と Swift 側の対応がそろうまで Schema で固定する(P0-S05)
+def test_question_schema_rejects_bad_vocabulary_format(fields: dict[str, Any]) -> None:
     assert _errors("question", {**_sample_question(), **fields})
 
 

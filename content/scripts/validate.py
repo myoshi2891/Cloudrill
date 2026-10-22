@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""学習コンテンツの検証(CI-01〜CI-11)。
+"""学習コンテンツの検証(CI-01〜CI-12)。
 
 使い方:
-    python content/scripts/validate.py [--root content] [--check-links] [--strict]
+    python content/scripts/validate.py [--root content] [--exam gcp-pca] [--check-links] [--strict]
                                        [--format text|json|github] [--only CI-02,CI-03]
 
 終了コード: 0 = error なし / 1 = error あり(--strict では warning も含む)/ 2 = 引数・設定の不備
@@ -20,6 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from contentvalidate.config import ConfigError, load_config, resolve_config_path  # noqa: E402
 from contentvalidate.engine import exit_code, run  # noqa: E402
+from contentvalidate.loader import exam_dirs  # noqa: E402
 from contentvalidate.report import format_github, format_json, format_text  # noqa: E402
 from contentvalidate.rules import RULE_IDS  # noqa: E402
 
@@ -35,6 +36,13 @@ def _parse_only(value: str) -> frozenset[str]:
     return ids
 
 
+def _parse_exams(value: str) -> frozenset[str]:
+    ids = frozenset(v.strip() for v in value.split(",") if v.strip())
+    if not ids:
+        raise argparse.ArgumentTypeError("試験 ID を指定してください")
+    return ids
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="学習コンテンツを検証する")
     parser.add_argument("--root", type=Path, default=DEFAULT_ROOT, help="コンテンツのルート(既定: このスクリプトの親の content/)")
@@ -43,6 +51,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--strict", action="store_true", help="warning も error として扱う")
     parser.add_argument("--format", choices=("text", "json", "github"), default="text")
     parser.add_argument("--only", type=_parse_only, default=None, help="実行するルール ID(カンマ区切り)")
+    parser.add_argument("--exam", type=_parse_exams, default=None, help="検証する試験 ID(カンマ区切り。既定: すべての試験)")
     return parser
 
 
@@ -52,13 +61,18 @@ def main(argv: Sequence[str] | None = None) -> int:
     if not root.is_dir():
         print(f"error: --root {root} はディレクトリではありません", file=sys.stderr)
         return 2
+    if args.exam is not None:
+        unknown = args.exam - {d.name for d in exam_dirs(root)}
+        if unknown:
+            print(f"error: --exam に存在しない試験 ID があります: {', '.join(sorted(unknown))}", file=sys.stderr)
+            return 2
     try:
         config = load_config(resolve_config_path(root, args.config))
+        # 試験ごとの validation.yaml は run() の中で読む
+        issues = run(root, config, exam_ids=args.exam, only=args.only, check_links=args.check_links, strict=args.strict)
     except ConfigError as e:
         print(f"error: {e}", file=sys.stderr)
         return 2
-
-    issues = run(root, config, only=args.only, check_links=args.check_links, strict=args.strict)
 
     if args.format == "json":
         sys.stdout.write(format_json(issues))

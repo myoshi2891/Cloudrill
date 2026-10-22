@@ -10,8 +10,19 @@ reviews:
     - "!content/tests/fixtures/valid/**"
     - "!content/tests/fixtures/invalid/**"
     - "!content/tests/fixtures/valid-json/**"
+    # content/scripts/fsrs_vectors.py が py-fsrs から生成する(FSRSVectorTests が照合する)
+    - "!packages/Domain/Tests/FSRSTests/Vectors/**"
+
+    # ---- 学習コンテンツ(データ) ----
+    # 構造と整合は Schema と validate.py(CI-01〜CI-12)が content-validate.yml で検証する
+    - "!content/exams/**"
+
+    # ---- テスト補助(テストからだけ使う部品とそのテスト) ----
+    - "!packages/**/*TestSupport/**"
+    - "!packages/**/*TestSupportTests/**"
 
     # ---- Xcode が自動生成・管理するファイル ----
     - "!**/xcuserdata/**"
     - "!**/*.xcodeproj/project.xcworkspace/**"
     # *.xcassets はアイコンや色の定義(Contents.json)を人が編集するため、除外しない
+    - "!docs/reports/2026-10-22-implementation-report.md"

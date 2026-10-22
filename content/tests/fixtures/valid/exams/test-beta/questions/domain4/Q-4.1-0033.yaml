@@ -1,0 +1,62 @@
+id: Q-4.1-0033
+revision: 1
+examGuideVersion: '1.0'
+domain: 4
+subObjective: '4.1'
+caseStudy: null
+type:
+  kind: single
+difficulty: 4
+wafPillars:
+- resilience
+keywords:
+- ダミー
+- 彗星
+examSets:
+- 1
+stem:
+  ja: 【ダミー】珊瑚・庭園・灯台・潮汐・宿場に関する設問。
+  en: Dummy question stem for Q-4.1-0033.
+choices:
+- id: a
+  text:
+    ja: 時計塔星座茶室鐘楼化石氷河彗星湿原舞台化石棚田舞台流星月面彫刻
+    en: Dummy choice A of Q-4.1-0033
+  isCorrect: true
+  rationale:
+    ja: 選択肢Aが正しい理由(ダミー)
+    en: Why choice A is correct (dummy)
+- id: b
+  text:
+    ja: 峡谷織機羅針盤庭園舞台羅針盤渡
+    en: Dummy choice B of Q-4.1-0033
+  isCorrect: false
+  rationale:
+    ja: 選択肢Bが誤り理由(ダミー)
+    en: Why choice B is incorrect (dummy)
+  mistakeTags:
+  - compliance
+- id: c
+  text:
+    ja: 茶室惑星染物湿原渓流羅針盤舞台噴水果樹園時計塔時計塔劇
+    en: Dummy choice C of Q-4.1-0033
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - scalability
+- id: d
+  text:
+    ja: 石畳宿場雪原庭園草原羅針盤流
+    en: Dummy choice D of Q-4.1-0033
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - availability
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

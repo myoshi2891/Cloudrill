@@ -1,0 +1,7 @@
+description: ケースが無効な試験の問題に caseStudy(exam.yaml にないので CI-09 も検出する)
+expect:
+  CI-12:
+  - error
+  CI-09:
+  - error
+options: {}

@@ -536,6 +536,13 @@ git status --short content | grep -c '^R'                         # 移動した
 
 **完了条件**: `(cd content && .venv/bin/pytest)` が通り、`validate.py` が error 0 件。
 
+**実装メモ**(実装時に本書と変えた点。1〜2 項目めは P0-S05 で解消済み):
+
+- `ExamContext` の導入前なので、`Context` に試験ごとの設定(`exam_config(exam_id)`)と、`exam.yaml` のサブ項目(`sub_objectives(exam_id)`)の読み替えを置いた。CI-02 の問題数も `exam.yaml` の `format.mockExam.questionCount` から読む。
+- CI-07 の類似度はまだ試験をまたいで比較しているため、全体の閾値を使う。
+- 全体の設定に `examSet` があっても `ConfigError` にする(試験ごとの設定にだけ書ける)。
+- P0-S08 の `export()` での `validation.yaml` の除外と `test_export_skips_validation_yaml` を先に実装した(fixture に試験ごとの `validation.yaml` が入り、valid-json に `validation.json` が出力されるため)。
+
 ---
 
 ### P0-S05 試験ごとの検証コンテキストと既存ルールの移行
@@ -586,6 +593,15 @@ content/.venv/bin/python content/scripts/validate.py                   # error 0
 content/.venv/bin/python content/scripts/validate.py --exam gcp-pca --format json | python3 -c 'import json,sys; assert all(i["file"].startswith("exams/gcp-pca/") or "/" not in i["file"] for i in json.load(sys.stdin))'
 ```
 
+**実装メモ**(実装時に本書と変えた点):
+
+- ユーザーの判断により、P0-S09 の一部を前倒しした。Schema の試験語彙の固定(`Domain` の上限、`CaseStudyID`・`WAFPillarID` の列挙)を外すと Swift の enum と食い違い、`weights.yaml` を消すと `DomainWeights` のテストが壊れるため、同じ変更で次を行った: `Identifiers.swift`(`StringIdentifier`、`ExamID`、`VendorID`、`CaseStudyID`、`WAFPillarID`、`ExamScoped`)と `IdentifierTests`、enum の `CaseStudyID`・`WAFPillar` と `DomainWeights` の削除、`Exam`・`Vendor`・`Manifest` の ID の型付け。P0-S09 に残るのは、`ExamDefinition` などへの改名、`QuestionKind` の統合、`domainBySubObjective`、`ExamDefinitionTests`、試験ごとの fixture の列挙。
+- `Rule` の `scope` は、`check`(`ExamContext` を取る)と `check_global`(`GlobalContext` を取る)のどちらを持つかで決まる(型の安全のため、`scope` を別の引数にしていない)。
+- CI-11 も全体のルールにした。`vendors.yaml` の `trademarkNotice` など、試験に属さないファイルの英語訳も確認するため。
+- CI-01 は、`domain` が `exam.yaml` にない場合も整合を確認しない(CI-09 だけが報告する。二重報告の防止)。
+- invalid ケースの名前は既存のものを使った(`CI-02-cases-per-set` → `CI-02-case-studies-per-set`、`CI-02-set-number-range` → `CI-02-set-count`)。`CI-10-exam-weights` は `weights.yaml` との照合がなくなったので削除した。`CI-02-case-mismatch` は、ケースが `exam.yaml` にないと CI-09 も検出するため、overlay で `cymbal` を `exam.yaml` とケースのファイルに追加した。
+- `ExamContext.require_definition()` は作らず、各ルールで `ctx.definition is None` なら早期リターンする形にした(補助関数より読みやすいため)。
+
 ---
 
 ### P0-S06 CI-12「試験定義の整合」の新設
@@ -626,6 +642,14 @@ FEATURE_KINDS: dict[str, Kind] = {
 
 **完了条件**: `(cd content && .venv/bin/pytest)` が通り、`validate.py` が error 0 件。`validate.py --only CI-12` で、`gcp-pca` の版の不一致が warning で列挙される(問題がすべて 6.1 なら 0 件)。
 
+**実装メモ**(実装時に本書と変えた点):
+
+- 条件 1(`id` とディレクトリ名の一致)は先に CI-01 に実装していたので、CI-12 に移した。invalid ケースは `CI-01-exam-id-mismatch` から `CI-12-exam-id-mismatch` に改名した。
+- `CI-12-case-list-mismatch` は、`test-alpha` のケースが `ehr` と `altostrat` だけなので、「`caseStudies` から `cymbal` を外す」ではなく「`caseStudies` にない `cases/cymbal.yaml` を置く」(条件 5 の逆方向)で作った。
+- 条件 2 は、`vendors.yaml` が欠落または Schema 違反のときは確認しない(誤報の防止。原因は CI-01 が報告する)。条件 5 は、Schema 違反のケースのファイルも ID が読めれば数える(欠落の誤報の防止)。
+- CI-12 の導入で、`gcp-pca` の `caseStudies` に `cases/` のないケースが 3 件(`altostrat`・`cymbal`・`knightMotives`)あることが分かった。ユーザーの判断で、`caseStudies` を `[ehr]` に絞った(ケースを作成したら戻す)。模試 1(draft)の `caseStudies: [ehr, altostrat]` を検出するルールは当時なかった。後のレビュー対応で、CI-09 が模試の `caseStudies` も `exam.yaml` と照合するようにし、`gcp-pca` の模試 1 を `[ehr]`、`caseStudiesPerSet` を暫定で 1 にした(ケースを追加したら戻す)。
+- Refactor の `FEATURE_KINDS` は、使う条件 6・7 と一緒に P0-S07 で作る。
+
 ---
 
 ### P0-S07 2つ目の fixture 試験(拡張性の受け入れテスト)
@@ -656,6 +680,15 @@ FEATURE_KINDS: dict[str, Kind] = {
 
 **完了条件**: `(cd content && .venv/bin/pytest)` が通る。`git diff --stat` で、`contentvalidate/` の変更が「値をコードから定義へ移す」ものだけであることをレビューで確認する。
 
+**実装メモ**(実装時に本書と変えた点):
+
+- `test-beta` は、検証ツールのコードを変えずに valid のまま全ルールを 0 件で通った。`contentvalidate/` の変更は、CI-12 の条件 6〜8 と `FEATURE_KINDS` の追加だけ。
+- Refactor は Green と同時に行った。`generate.py` に試験の仕様 `ExamSpec`(`ALPHA_SPEC`、`BETA_SPEC`)を置き、`build_exam_files(spec)` が両方の試験を作る。`test-alpha` の生成結果は変わっていない(バイト単位で同じ)。
+- `test-beta` の上の invalid ケースは `BETA_INVALID_CASES` に分けた(overlay の基準が `test-beta` のファイルになるため)。
+- `test_same_id_in_other_exam_is_allowed` は、valid の2試験に同じ問題 ID(例: `Q-1.1-0001`)が自然にあるので、valid をそのまま使って確かめる形にした。P0-S05 で追加した同じ趣旨のテストは削除した。2つ目の試験を複製するテスト(`--exam`、リンク確認)は、複製先を `test-gamma` に変えた。
+- `test-beta` の `guideVersion` は `1.0`、`guideURL` は `https://example.com/certification/beta`(架空)。
+- `features.caseStudies: false` の試験に `cases/*.yaml` があると、条件 5(`caseStudies` との不一致)と条件 7(無効な機能のファイル)の両方が報告される。どちらも CI-12 なので、まとめていない。
+
 ---
 
 ### P0-S08 Swift 用 JSON の出力の対応
@@ -679,6 +712,11 @@ FEATURE_KINDS: dict[str, Kind] = {
 **Refactor**: なし(変更が小さいため)。
 
 **完了条件**: `(cd content && .venv/bin/pytest tests/test_generated.py)` が通る。
+
+**実装メモ**(実装時に本書と変えた点):
+
+- Green の内容は、先行するステップで実装済みだった。`exams/<examID>/…` の構成での出力は P0-S03、`validation.yaml` の除外と `test_export_skips_validation_yaml` は P0-S04。既存の `test_valid_json_matches_export` に相当するテストは `test_swift_fixtures_are_up_to_date`。
+- このステップでは `test_export_includes_exam_and_vendors` だけを追加した。実装が先にあったので、Red の段階はない(追加した時点で通った)。
 
 ---
 
@@ -721,6 +759,14 @@ swift test --package-path packages/DomainModels                            # す
 git grep -n -e 'gcp-pca' -e 'knightMotives' -- packages/DomainModels/Sources   # 0 件(試験固有の値がコードにない)
 ```
 
+**実装メモ**(実装時に本書と変えた点):
+
+- `Identifiers.swift`、`IdentifierTests`、`Common.swift` の enum の削除、`Manifest` の型付けは P0-S05 で前倒しした(P0-S05 の実装メモを参照)。このステップでは残りの、`Exam.swift` から `ExamDefinition.swift` への改名(型名を 3.7 のとおりにそろえる)、`QuestionKind` の `Question.swift` への移動と `QuestionType.kind`、`domainBySubObjective`、`ExamFeatures` の `decodeIfPresent ?? false`、`ExamDefinitionTests`、試験ごとの fixture の列挙を行った。
+- `TaxonomyEntry` は `TaxonomyEntry<ID: StringIdentifier>` のジェネリック型にした(WAF の柱以外の語彙を追加するときに、同じ型を使えるようにするため)。
+- `ExamFeatures` は、追加する機能だけでなく既存の 5 つのフラグもすべて `decodeIfPresent ?? false` で読む(すべて同じ規則にしたほうが読みやすいため。Schema では 5 つとも必須なので、配信されるパックには影響しない)。
+- `FixtureDecodingTests` の試験固有の値の確認(問題数、ケースの組み合わせなど)は `test-alpha` のまま残し、全ファイルのデコードと id の一致だけを全試験で行う。
+- 完了条件の grep で、`Identifiers.swift` のドキュメントコメントの例(`gcp-pca`)が見つかったので、例を一般的な書き方に変えた。
+
 ---
 
 ### P0-S10 CI とドキュメントの更新
@@ -751,6 +797,21 @@ TDD の対象外(ワークフローとドキュメント)。代わりに次の�
    - 命名(表示名 Cloudrill と、識別子の方針)
 
 **完了条件**: PR 上で、全ワークフローが通る。
+
+**実装メモ**(2026-10-21 時点の状況):
+
+- 手順 1: ワークフローの変更は不要だった。`content-validate.yml` の `paths` は `content/**` で、`content/exams/**` と `content/vendors.yaml` を含む。`domainmodels-test.yml` は `content/schemas/**` と `content/tests/fixtures/**`(valid-json を含む)を対象にしている。`content-link-check.yml` は `--exam` を付けずに全試験を確認する。
+- 手順 4・5: README、`content/README.md`、CLAUDE.md は、各ステップの中で随時更新した(Schema の一覧、ルールの一覧、`--exam`、前提と判断の 12・19、検証ツールの構成)。このステップでは、概要の文言、`--exam` のコマンド例、コンテンツのパス、試験 ID の命名、リリースタグ(`content/<examID>/vX.Y.Z`)を更新した。
+- 手順 2・3(PR 上での CI の確認と、`content-link-check` の手動実行)は、push と PR の作成が必要なので未実施。
+
+**フェーズの完了条件の確認状況**(2026-10-21 時点):
+
+| No. | 結果 | 備考 |
+|---|---|---|
+| 1 | 一部未達 | `test-alpha`・`test-beta` は `--strict` で 0 件。`gcp-pca` は、模試 1(draft、2 問)の CI-02 の warning が 7 件あり、`--strict` の終了コードが 1。コードではなくコンテンツ(問題の作成)の課題 |
+| 2 | 達成 | `test_validator_has_no_exam_specific_literals` が通り、P0-S09 の grep が 0 件 |
+| 3 | 達成 | P0-S00 の grep が 0 件 |
+| 4 | レビュー待ち | |
 
 ---
 

@@ -1,11 +1,11 @@
-"""CI-07: ID の重複(error)と、問題文の類似(warning)。"""
+"""CI-07: 試験内の ID の重複(error)と、問題文の類似(warning)。試験が異なれば同じ ID でもよい。"""
 
 from __future__ import annotations
 
 import unicodedata
 from collections.abc import Iterator
 
-from ..context import Context, Rule, ja_of
+from ..context import ExamContext, Rule, ja_of
 from ..model import Issue, JsonPath, Kind, Severity, SourceDoc, get_list, get_str
 
 RULE_ID = "CI-07"
@@ -35,7 +35,7 @@ def _ids(doc: SourceDoc) -> Iterator[tuple[str, JsonPath]]:
             yield value, (key, i, "id")
 
 
-def _duplicate_ids(ctx: Context) -> Iterator[Issue]:
+def _duplicate_ids(ctx: ExamContext) -> Iterator[Issue]:
     for kind, label in _LABELS.items():
         first: dict[str, SourceDoc] = {}
         for doc in ctx.of_kind(kind, valid_only=False):
@@ -53,9 +53,10 @@ def ngrams(text: str, n: int) -> frozenset[str]:
     return frozenset(normalized[i : i + n] for i in range(len(normalized) - n + 1))
 
 
-def _similar_stems(ctx: Context) -> Iterator[Issue]:
-    threshold = ctx.config.jaccard_threshold
-    items = [(ngrams(ja_of(doc.data.get("stem")), ctx.config.ngram), doc) for doc in ctx.questions]
+def _similar_stems(ctx: ExamContext) -> Iterator[Issue]:
+    cfg = ctx.config.thresholds
+    threshold = cfg.jaccard_threshold
+    items = [(ngrams(ja_of(doc.data.get("stem")), cfg.ngram), doc) for doc in ctx.questions]
     items = [(grams, doc) for grams, doc in items if grams]
     # サイズ昇順に並べ、|A|/|B| <= 閾値 になった時点で以降の組は Jaccard <= 閾値 なので打ち切る
     items.sort(key=lambda x: (len(x[0]), x[1].path))
@@ -74,7 +75,7 @@ def _similar_stems(ctx: Context) -> Iterator[Issue]:
                 )
 
 
-def check(ctx: Context) -> Iterator[Issue]:
+def check(ctx: ExamContext) -> Iterator[Issue]:
     yield from _duplicate_ids(ctx)
     yield from _similar_stems(ctx)
 

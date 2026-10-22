@@ -1,0 +1,61 @@
+id: Q-NET.1-0918
+revision: 1
+examGuideVersion: '1.0'
+domain: 1
+subObjective: NET.1
+caseStudy: null
+type:
+  kind: single
+difficulty: 4
+wafPillars:
+- resilience
+keywords:
+- ダミー
+- 渡り鳥
+examSets: []
+stem:
+  ja: 【ダミー】鍾乳石・彗星・砂丘・火山・氷河に関する設問。
+  en: Dummy question stem for Q-NET.1-0918.
+choices:
+- id: a
+  text:
+    ja: 山脈陶器宿場月面草原宿場織機砂丘湿原草原羅針盤灯台果樹園羅
+    en: Dummy choice A of Q-NET.1-0918
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - requirementMismatch
+- id: b
+  text:
+    ja: 劇場草原滝壺峡谷画廊刺繍彫刻惑星織機噴水滝壺洞窟太
+    en: Dummy choice B of Q-NET.1-0918
+  isCorrect: true
+  rationale:
+    ja: 選択肢Bが正しい理由(ダミー)
+    en: Why choice B is correct (dummy)
+- id: c
+  text:
+    ja: 峡谷惑星鍵盤氷河海溝山脈
+    en: Dummy choice C of Q-NET.1-0918
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - cost
+- id: d
+  text:
+    ja: 化石時計塔刺繍楽譜水路海溝雪原宿場庭園木版
+    en: Dummy choice D of Q-NET.1-0918
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - opsOverhead
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

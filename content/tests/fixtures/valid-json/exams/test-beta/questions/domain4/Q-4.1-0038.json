@@ -1,0 +1,92 @@
+{
+  "id": "Q-4.1-0038",
+  "revision": 1,
+  "examGuideVersion": "1.0",
+  "domain": 4,
+  "subObjective": "4.1",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 4,
+  "wafPillars": [
+    "governance"
+  ],
+  "keywords": [
+    "ダミー",
+    "海溝"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】合唱・庭園・温室・風車・笛吹に関する設問。",
+    "en": "Dummy question stem for Q-4.1-0038."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "山脈蜂蜜珊瑚竹林舞台樹氷洞窟画廊染物羅針盤銀河楽譜",
+        "en": "Dummy choice A of Q-4.1-0038"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Aが正しい理由(ダミー)",
+        "en": "Why choice A is correct (dummy)"
+      }
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "流星宿場織機果樹園笛吹洞窟染",
+        "en": "Dummy choice B of Q-4.1-0038"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "deprecated"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "珊瑚劇場劇場竹林宿場灯台樹氷樹氷水路",
+        "en": "Dummy choice C of Q-4.1-0038"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "cost"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "渓流温室宿場染物宿場茶室合唱流星山脈時計塔琥珀",
+        "en": "Dummy choice D of Q-4.1-0038"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Dが誤り理由(ダミー)",
+        "en": "Why choice D is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "opsOverhead"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

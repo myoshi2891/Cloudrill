@@ -7,13 +7,13 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 
-from ..context import Context, Rule, choices_of
+from ..context import ExamContext, Rule, choices_of
 from ..model import Issue, Kind, Severity, get_str
 
 RULE_ID = "CI-05"
 
 
-def check(ctx: Context) -> Iterator[Issue]:
+def check(ctx: ExamContext) -> Iterator[Issue]:
     for doc in ctx.of_kind(Kind.QUESTION, valid_only=False):
         for i, choice in enumerate(choices_of(doc.data)):
             rationale = choice.get("rationale")

@@ -33,7 +33,6 @@ _GLOBAL_REQUIRED: tuple[tuple[Kind, str], ...] = ((Kind.VENDORS, "vendors.yaml")
 _EXAM_REQUIRED: tuple[tuple[Kind, str], ...] = (
     (Kind.EXAM, "exam.yaml"),
     (Kind.EXAM_SETS, "exam-sets.yaml"),
-    (Kind.WEIGHTS, "weights.yaml"),
 )
 
 
@@ -167,7 +166,8 @@ def _load_required(
         result.add(*_load_file(root, file, kind, exam_id))
 
 
-def load_content(root: Path) -> LoadResult:
+def load_content(root: Path, exam_ids: frozenset[str] | None = None) -> LoadResult:
+    """全体のファイルと試験ディレクトリを読み込む。exam_ids を指定すると、その試験だけを読み込む。"""
     result = LoadResult([], [])
     _load_required(root, root, _GLOBAL_REQUIRED, None, result)
 
@@ -178,6 +178,8 @@ def load_content(root: Path) -> LoadResult:
 
     for exam_dir in exams:
         exam_id = exam_dir.name
+        if exam_ids is not None and exam_id not in exam_ids:
+            continue
         _load_required(root, exam_dir, _EXAM_REQUIRED, exam_id, result)
         for kind, file in iter_sources(exam_dir):
             result.add(*_load_file(root, file, kind, exam_id))

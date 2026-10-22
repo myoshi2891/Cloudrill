@@ -1,0 +1,5 @@
+description: exam.yaml にないケース acmeBank の問題
+expect:
+  CI-09:
+  - error
+options: {}

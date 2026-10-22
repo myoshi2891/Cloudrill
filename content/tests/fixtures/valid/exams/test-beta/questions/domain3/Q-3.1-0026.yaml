@@ -1,0 +1,62 @@
+id: Q-3.1-0026
+revision: 1
+examGuideVersion: '1.0'
+domain: 3
+subObjective: '3.1'
+caseStudy: null
+type:
+  kind: single
+difficulty: 2
+wafPillars:
+- governance
+keywords:
+- ダミー
+- 宿場
+examSets:
+- 1
+stem:
+  ja: 【ダミー】刺繍・海溝・月面・草原・鍾乳石に関する設問。
+  en: Dummy question stem for Q-3.1-0026.
+choices:
+- id: a
+  text:
+    ja: 彫刻帆船茶室刺繍彗星製本琥珀銀河灯
+    en: Dummy choice A of Q-3.1-0026
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - compliance
+- id: b
+  text:
+    ja: 棚田雪原風車温室宿場製本月面帆船彗星果樹園
+    en: Dummy choice B of Q-3.1-0026
+  isCorrect: false
+  rationale:
+    ja: 選択肢Bが誤り理由(ダミー)
+    en: Why choice B is incorrect (dummy)
+  mistakeTags:
+  - scalability
+- id: c
+  text:
+    ja: 楽譜鍵盤峡谷山脈山脈棚田洞窟惑星渓流宿場銀河渡り鳥樹氷茶室山脈
+    en: Dummy choice C of Q-3.1-0026
+  isCorrect: true
+  rationale:
+    ja: 選択肢Cが正しい理由(ダミー)
+    en: Why choice C is correct (dummy)
+- id: d
+  text:
+    ja: 渡り鳥湿原青銅時計塔砂丘珊瑚陶器鍵盤風車草原製
+    en: Dummy choice D of Q-3.1-0026
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - latency
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

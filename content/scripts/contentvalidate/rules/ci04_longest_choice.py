@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 from typing import Any
 
-from ..context import Context, Rule, choices_of, ja_of, set_questions, status_severity
+from ..context import ExamContext, Rule, choices_of, ja_of, set_questions, status_severity
 from ..model import Issue, SourceDoc
 
 RULE_ID = "CI-04"
@@ -22,15 +22,15 @@ def longest_is_correct(question: object, count_ties: bool) -> bool:
     return any(top)
 
 
-def check(ctx: Context) -> Iterator[Issue]:
+def check(ctx: ExamContext) -> Iterator[Issue]:
     for doc, exam_sets in ctx.exam_sets:
         yield from _check_exam(ctx, doc, exam_sets)
 
 
-def _check_exam(ctx: Context, doc: SourceDoc, exam_sets: list[tuple[int, dict[str, Any]]]) -> Iterator[Issue]:
-    cfg = ctx.config
+def _check_exam(ctx: ExamContext, doc: SourceDoc, exam_sets: list[tuple[int, dict[str, Any]]]) -> Iterator[Issue]:
+    cfg = ctx.config.thresholds
     for i, exam_set in exam_sets:
-        questions = set_questions(ctx, doc.exam_id, exam_set)
+        questions = set_questions(ctx, exam_set)
         total = len(questions)
         if total == 0:
             continue

@@ -1,0 +1,62 @@
+id: Q-NET.2-0022
+revision: 1
+examGuideVersion: '1.0'
+domain: 2
+subObjective: NET.2
+caseStudy: null
+type:
+  kind: single
+difficulty: 3
+wafPillars:
+- efficiency
+keywords:
+- ダミー
+- 噴水
+examSets:
+- 1
+stem:
+  ja: 【ダミー】水路・木版画・太鼓・砂丘・海溝に関する設問。
+  en: Dummy question stem for Q-NET.2-0022.
+choices:
+- id: a
+  text:
+    ja: 竹林惑星洞窟樹氷峡谷竹林竹林竹
+    en: Dummy choice A of Q-NET.2-0022
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - requirementMismatch
+- id: b
+  text:
+    ja: 青銅棚田山脈合唱果樹園風車合唱宿場
+    en: Dummy choice B of Q-NET.2-0022
+  isCorrect: false
+  rationale:
+    ja: 選択肢Bが誤り理由(ダミー)
+    en: Why choice B is incorrect (dummy)
+  mistakeTags:
+  - deprecated
+- id: c
+  text:
+    ja: 笛吹画廊楽譜琥珀渓流化石望遠鏡彗星竹林珊瑚湿
+    en: Dummy choice C of Q-NET.2-0022
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - cost
+- id: d
+  text:
+    ja: 製本灯籠雪原製本化石太鼓劇場刺繍草原石
+    en: Dummy choice D of Q-NET.2-0022
+  isCorrect: true
+  rationale:
+    ja: 選択肢Dが正しい理由(ダミー)
+    en: Why choice D is correct (dummy)
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

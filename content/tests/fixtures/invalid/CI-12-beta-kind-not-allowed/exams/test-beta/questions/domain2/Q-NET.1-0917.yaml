@@ -1,0 +1,70 @@
+id: Q-NET.1-0917
+revision: 1
+examGuideVersion: '1.0'
+domain: 2
+subObjective: NET.1
+caseStudy: null
+type:
+  kind: multiple
+  count: 2
+difficulty: 3
+wafPillars:
+- governance
+keywords:
+- ダミー
+- 峡谷
+examSets: []
+stem:
+  ja: 【ダミー】噴水・竹林・山脈・滝壺・温室に関する設問。
+  en: Dummy question stem for Q-NET.1-0917.
+choices:
+- id: a
+  text:
+    ja: 水路水路峡谷渓流鍵盤舞台蜂蜜陶器鍵盤星座
+    en: Dummy choice A of Q-NET.1-0917
+  isCorrect: true
+  rationale:
+    ja: 選択肢Aが正しい理由(ダミー)
+    en: Why choice A is correct (dummy)
+- id: b
+  text:
+    ja: 渡り鳥陶器織機山脈樹氷洞窟惑星彫刻織機帆船噴水水路時計塔滝壺染
+    en: Dummy choice B of Q-NET.1-0917
+  isCorrect: false
+  rationale:
+    ja: 選択肢Bが誤り理由(ダミー)
+    en: Why choice B is incorrect (dummy)
+  mistakeTags:
+  - requirementMismatch
+- id: c
+  text:
+    ja: 灯台茶室星座滝壺製本蜂蜜灯籠温室楽譜湿原鍵盤
+    en: Dummy choice C of Q-NET.1-0917
+  isCorrect: true
+  rationale:
+    ja: 選択肢Cが正しい理由(ダミー)
+    en: Why choice C is correct (dummy)
+- id: d
+  text:
+    ja: 月面鍵盤洞窟画廊棚田羅針盤画廊宿
+    en: Dummy choice D of Q-NET.1-0917
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - cost
+- id: e
+  text:
+    ja: 噴水惑星潮汐石畳洞窟鐘楼刺繍風車羅
+    en: Dummy choice E of Q-NET.1-0917
+  isCorrect: false
+  rationale:
+    ja: 選択肢Eが誤り理由(ダミー)
+    en: Why choice E is incorrect (dummy)
+  mistakeTags:
+  - opsOverhead
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

@@ -6,51 +6,36 @@ from collections import Counter
 from collections.abc import Iterator
 from typing import Any
 
-from ..context import Context, Rule, set_questions, status_severity
+from ..context import ExamContext, Rule, set_questions, status_severity
 from ..model import Issue, Severity, SourceDoc, get_list, get_str
 
 RULE_ID = "CI-02"
 
 
-def _case_studies_per_set(ctx: Context, exam_id: str | None) -> int | None:
-    """exam.yaml の format.mockExam.caseStudiesPerSet。exam.yaml が Schema 違反なら None。"""
-    exam = ctx.exam_by_id.get(exam_id)
-    if exam is None:
-        return None
-    value = exam.data["format"]["mockExam"]["caseStudiesPerSet"]
-    return value if isinstance(value, int) else None
-
-
-def _set_count(ctx: Context, exam_id: str | None) -> int | None:
-    """exam.yaml の format.mockExam.setCount。exam.yaml が Schema 違反なら None。"""
-    exam = ctx.exam_by_id.get(exam_id)
-    if exam is None:
-        return None
-    value = exam.data["format"]["mockExam"]["setCount"]
-    return value if isinstance(value, int) else None
-
-
-def check(ctx: Context) -> Iterator[Issue]:
+def check(ctx: ExamContext) -> Iterator[Issue]:
     for doc, exam_sets in ctx.exam_sets:
         yield from _check_exam(ctx, doc, exam_sets)
 
 
-def _check_exam(ctx: Context, doc: SourceDoc, exam_sets: list[tuple[int, dict[str, Any]]]) -> Iterator[Issue]:
-    cfg = ctx.config
-    exam_id = doc.exam_id
-    question_by_id = ctx.question_by_id(exam_id)
+def _check_exam(ctx: ExamContext, doc: SourceDoc, exam_sets: list[tuple[int, dict[str, Any]]]) -> Iterator[Issue]:
+    # 試験ごとの validation.yaml に examSet がなければ、配分・ケース問題数・既定の割り当ての確認を省略する
+    policy = ctx.config.exam_set_policy
+    # exam.yaml が Schema 違反なら、exam.yaml の値を使う確認を省略する
+    definition = ctx.definition
+    question_by_id = ctx.question_by_id
     sets_by_id = {s.get("id"): (i, s) for i, s in exam_sets}
-    per_set = _case_studies_per_set(ctx, exam_id)
-    set_count = _set_count(ctx, exam_id)
+    question_count = definition.mock_question_count if definition is not None else None
+    per_set = definition.case_studies_per_set if definition is not None else None
+    set_count = definition.mock_set_count if definition is not None else None
     # ケースがない試験(caseStudiesPerSet: 0)ではケース問題も 0 問
-    case_min, case_max = (0, 0) if per_set == 0 else (cfg.case_min, cfg.case_max)
+    case_range = (0, 0) if per_set == 0 else (policy.case_min, policy.case_max) if policy is not None else None
 
     for i, exam_set in exam_sets:
         set_id = exam_set.get("id")
         sev = status_severity(exam_set)
         base = ("examSets", i)
         label = f"模試 {set_id}({exam_set.get('status')})"
-        questions = set_questions(ctx, exam_id, exam_set)
+        questions = set_questions(ctx, exam_set)
 
         if set_count is not None and isinstance(set_id, int) and set_id > set_count:
             yield doc.issue(
@@ -59,11 +44,11 @@ def _check_exam(ctx: Context, doc: SourceDoc, exam_sets: list[tuple[int, dict[st
                 (*base, "id"),
             )
 
-        if len(questions) != cfg.question_count:
-            yield doc.issue(RULE_ID, sev, f"{label}: 問題数が {len(questions)} です(期待値 {cfg.question_count})", (*base, "questionIDs"))
+        if question_count is not None and len(questions) != question_count:
+            yield doc.issue(RULE_ID, sev, f"{label}: 問題数が {len(questions)} です(期待値 {question_count})", (*base, "questionIDs"))
 
         by_domain = Counter(q.data.get("domain") for q in questions)
-        for domains, expected in cfg.domain_distribution:
+        for domains, expected in policy.domain_distribution if policy is not None else ():
             actual = sum(by_domain.get(d, 0) for d in domains)
             if actual != expected:
                 name = "+".join(f"D{d}" for d in domains)
@@ -79,10 +64,10 @@ def _check_exam(ctx: Context, doc: SourceDoc, exam_sets: list[tuple[int, dict[st
 
         allowed = set(case_studies)
         case_questions = [q for q in questions if q.data.get("caseStudy") is not None]
-        if not case_min <= len(case_questions) <= case_max:
+        if case_range is not None and not case_range[0] <= len(case_questions) <= case_range[1]:
             yield doc.issue(
                 RULE_ID, sev,
-                f"{label}: ケース問題数が {len(case_questions)} です(期待範囲 {case_min}〜{case_max})",
+                f"{label}: ケース問題数が {len(case_questions)} です(期待範囲 {case_range[0]}〜{case_range[1]})",
                 (*base, "caseStudies"),
             )
         for q in case_questions:
@@ -99,7 +84,7 @@ def _check_exam(ctx: Context, doc: SourceDoc, exam_sets: list[tuple[int, dict[st
             if q is not None and set_id not in get_list(q.data, "examSets"):
                 yield doc.issue(RULE_ID, sev, f"{label}: {qid} の examSets に {set_id} がありません", (*base, "questionIDs", j))
 
-        default = cfg.default_assignments.get(set_id) if isinstance(set_id, int) else None
+        default = policy.default_assignments.get(set_id) if policy is not None and isinstance(set_id, int) else None
         if default is not None:
             if frozenset(allowed) != default.case_studies:
                 yield doc.issue(
@@ -114,10 +99,8 @@ def _check_exam(ctx: Context, doc: SourceDoc, exam_sets: list[tuple[int, dict[st
                     (*base, "level"),
                 )
 
-    # 問題 → exam-sets.yaml の方向(同じ試験の問題だけ)
+    # 問題 → exam-sets.yaml の方向
     for q in ctx.questions:
-        if q.exam_id != exam_id:
-            continue
         qid = get_str(q.data, "id")
         for k, set_id in enumerate(get_list(q.data, "examSets")):
             entry = sets_by_id.get(set_id)

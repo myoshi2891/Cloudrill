@@ -32,5 +32,5 @@ jobs:
           persist-credentials: false
       - name: Swift version
         run: swift --version
-      - name: Run Swift tests
+      - name: Run Swift tests (DomainModels)
         run: swift test --package-path packages/DomainModels

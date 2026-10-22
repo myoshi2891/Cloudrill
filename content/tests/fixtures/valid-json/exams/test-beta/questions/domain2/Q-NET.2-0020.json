@@ -1,0 +1,92 @@
+{
+  "id": "Q-NET.2-0020",
+  "revision": 1,
+  "examGuideVersion": "1.0",
+  "domain": 2,
+  "subObjective": "NET.2",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 1,
+  "wafPillars": [
+    "governance"
+  ],
+  "keywords": [
+    "ダミー",
+    "木版画"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】木版画・製本・彗星・織機・雪原に関する設問。",
+    "en": "Dummy question stem for Q-NET.2-0020."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "月面渡り鳥蜂蜜洞窟望遠鏡木版画織機峡谷潮汐琥珀木版画",
+        "en": "Dummy choice A of Q-NET.2-0020"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "availability"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "湿原灯台画廊潮汐庭園渓流水路草原山脈舞台棚田羅針盤画廊",
+        "en": "Dummy choice B of Q-NET.2-0020"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "latency"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "楽譜鍵盤氷河棚田惑星渓流火山棚田噴水竹",
+        "en": "Dummy choice C of Q-NET.2-0020"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "requirementMismatch"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "山脈鐘楼氷河流星湿原染物刺繍陶器蜂蜜渓流染",
+        "en": "Dummy choice D of Q-NET.2-0020"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Dが正しい理由(ダミー)",
+        "en": "Why choice D is correct (dummy)"
+      }
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

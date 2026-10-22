@@ -1,0 +1,62 @@
+id: Q-1.1-0009
+revision: 1
+examGuideVersion: '1.0'
+domain: 1
+subObjective: '1.1'
+caseStudy: null
+type:
+  kind: single
+difficulty: 5
+wafPillars:
+- resilience
+keywords:
+- ダミー
+- 羅針盤
+examSets:
+- 1
+stem:
+  ja: 【ダミー】流星・火山・楽譜・惑星・砂丘に関する設問。
+  en: Dummy question stem for Q-1.1-0009.
+choices:
+- id: a
+  text:
+    ja: 琥珀蜂蜜氷河青銅太鼓画廊樹氷刺繍竹林織機山脈染物草原画廊水路
+    en: Dummy choice A of Q-1.1-0009
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - opsOverhead
+- id: b
+  text:
+    ja: 流星羅針盤茶室氷河画廊氷河青銅
+    en: Dummy choice B of Q-1.1-0009
+  isCorrect: false
+  rationale:
+    ja: 選択肢Bが誤り理由(ダミー)
+    en: Why choice B is incorrect (dummy)
+  mistakeTags:
+  - compliance
+- id: c
+  text:
+    ja: 山脈火山帆船時計塔星座流星果樹園渡り鳥彫刻織機茶室月面
+    en: Dummy choice C of Q-1.1-0009
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - scalability
+- id: d
+  text:
+    ja: 鐘楼庭園洞窟鍾乳石月面湿原劇場星座茶室星座峡谷氷
+    en: Dummy choice D of Q-1.1-0009
+  isCorrect: true
+  rationale:
+    ja: 選択肢Dが正しい理由(ダミー)
+    en: Why choice D is correct (dummy)
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

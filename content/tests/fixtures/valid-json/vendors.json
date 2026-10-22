@@ -8,6 +8,15 @@
         "en": "Dummy trademark notice"
       },
       "defaultReferenceLicense": "CC-BY-4.0"
+    },
+    {
+      "id": "example-cloud",
+      "name": "Example Cloud",
+      "trademarkNotice": {
+        "ja": "ダミーの商標表示(架空のベンダー)",
+        "en": "Dummy trademark notice (fictitious vendor)"
+      },
+      "defaultReferenceLicense": "link-only"
     }
   ]
 }

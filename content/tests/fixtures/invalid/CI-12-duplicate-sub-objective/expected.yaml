@@ -1,0 +1,5 @@
+description: 2 つのドメインにサブ項目 1.1
+expect:
+  CI-12:
+  - error
+options: {}

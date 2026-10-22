@@ -1,0 +1,61 @@
+id: Q-2.1-0912
+revision: 1
+examGuideVersion: '6.1'
+domain: 7
+subObjective: '2.1'
+caseStudy: null
+type:
+  kind: single
+difficulty: 3
+wafPillars:
+- operationalExcellence
+keywords:
+- ダミー
+- 製本
+examSets: []
+stem:
+  ja: 【ダミー】峡谷・鍾乳石・舞台・製本・帆船に関する設問。
+  en: Dummy question stem for Q-2.1-0912.
+choices:
+- id: a
+  text:
+    ja: 陶器楽譜雪原製本陶器帆船惑星彫
+    en: Dummy choice A of Q-2.1-0912
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - cost
+- id: b
+  text:
+    ja: 刺繍製本氷河織機鍾乳石鍾乳石鍵盤鍵盤棚田惑星棚田
+    en: Dummy choice B of Q-2.1-0912
+  isCorrect: true
+  rationale:
+    ja: 選択肢Bが正しい理由(ダミー)
+    en: Why choice B is correct (dummy)
+- id: c
+  text:
+    ja: 流星砂丘滝壺笛吹青銅灯籠鍾乳石刺繍
+    en: Dummy choice C of Q-2.1-0912
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - compliance
+- id: d
+  text:
+    ja: 木版画峡谷火山渓流琥珀山脈製本火山潮汐風車銀河楽譜
+    en: Dummy choice D of Q-2.1-0912
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - scalability
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

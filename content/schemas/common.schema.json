@@ -19,13 +19,12 @@
       "additionalProperties": false
     },
     "Domain": {
-      "description": "ドメイン番号。上限は exam.yaml の domains との照合(CI-09)と Swift 側の対応がそろうまで固定する(P0-S05)。",
+      "description": "ドメイン番号。exam.yaml の domains に実在するかは CI-09 が確認する。",
       "type": "integer",
-      "minimum": 1,
-      "maximum": 6
+      "minimum": 1
     },
     "SubObjective": {
-      "description": "試験ガイドのサブ項目(例: 3.2、NET.1)。validation.yaml の examGuide.subObjectives に含まれるかは CI-09 が確認する。QuestionID と CardID のパターンは、この正規表現を Q- / C- と -NNNN で挟んだもの(JSON Schema では正規表現を合成できないため、変更するときは3つをそろえる)。",
+      "description": "試験ガイドのサブ項目(例: 3.2、NET.1)。exam.yaml に実在するかは CI-09 が確認する。QuestionID と CardID のパターンは、この正規表現を Q- / C- と -NNNN で挟んだもの(JSON Schema では正規表現を合成できないため、変更するときは3つをそろえる)。",
       "type": "string",
       "pattern": "^[0-9A-Za-z]+(\\.[0-9A-Za-z]+)*$"
     },
@@ -79,21 +78,14 @@
       "enum": ["single", "multiple"]
     },
     "CaseStudyID": {
-      "description": "ケーススタディの ID(試験語彙)。exam.yaml の caseStudies との照合(CI-09・CI-12)と Swift 側の対応がそろうまで列挙で固定する(P0-S05)。",
+      "description": "ケーススタディの ID(試験語彙)。exam.yaml の caseStudies に実在するかは CI-09・CI-12 が確認する。",
       "type": "string",
-      "enum": ["ehr", "altostrat", "cymbal", "knightMotives"]
+      "pattern": "^[a-z][A-Za-z0-9]*$"
     },
     "WAFPillarID": {
-      "description": "Well-Architected Framework の柱の ID(試験語彙)。exam.yaml の taxonomies.wafPillars との照合(CI-09)と Swift 側の対応がそろうまで列挙で固定する(P0-S05)。",
+      "description": "Well-Architected Framework の柱の ID(試験語彙)。exam.yaml の taxonomies.wafPillars に実在するかは CI-09 が確認する。",
       "type": "string",
-      "enum": [
-        "operationalExcellence",
-        "security",
-        "reliability",
-        "costOptimization",
-        "performance",
-        "sustainability"
-      ]
+      "pattern": "^[a-z][A-Za-z0-9]*$"
     },
     "MistakeTag": {
       "type": "string",

@@ -1,0 +1,92 @@
+{
+  "id": "Q-1.1-0007",
+  "revision": 1,
+  "examGuideVersion": "1.0",
+  "domain": 1,
+  "subObjective": "1.1",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 3,
+  "wafPillars": [
+    "efficiency"
+  ],
+  "keywords": [
+    "ダミー",
+    "風車"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】湿原・蜂蜜・染物・竹林・噴水に関する設問。",
+    "en": "Dummy question stem for Q-1.1-0007."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "時計塔木版画棚田茶室灯台竹林石",
+        "en": "Dummy choice A of Q-1.1-0007"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "deprecated"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "氷河流星洞窟潮汐羅針盤氷河合唱灯台",
+        "en": "Dummy choice B of Q-1.1-0007"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "cost"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "雪原帆船羅針盤太鼓海溝合唱潮汐青銅星座雪原果",
+        "en": "Dummy choice C of Q-1.1-0007"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "opsOverhead"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "風車月面琥珀刺繍砂丘山脈木版画珊瑚庭園月",
+        "en": "Dummy choice D of Q-1.1-0007"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Dが正しい理由(ダミー)",
+        "en": "Why choice D is correct (dummy)"
+      }
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 
-from ..context import Context, Rule, walk
+from ..context import GlobalContext, Rule, walk
 from ..model import Issue, Severity, format_path
 
 RULE_ID = "CI-11"
@@ -15,7 +15,7 @@ def _is_localized(value: object) -> bool:
     return isinstance(value, dict) and "ja" in value and set(value) <= _LOCALIZED_KEYS
 
 
-def check(ctx: Context) -> Iterator[Issue]:
+def check(ctx: GlobalContext) -> Iterator[Issue]:
     for doc in ctx.docs:
         if not doc.schema_ok:
             continue
@@ -27,4 +27,5 @@ def check(ctx: Context) -> Iterator[Issue]:
                 yield doc.issue(RULE_ID, Severity.WARNING, f"英語訳(en)がありません: {format_path(path)}", path)
 
 
-RULE = Rule(RULE_ID, "英語訳の欠落", check)
+# 全体のファイル(vendors.yaml の商標表示など)も対象にするため、全体のルールにする
+RULE = Rule(RULE_ID, "英語訳の欠落", check_global=check)

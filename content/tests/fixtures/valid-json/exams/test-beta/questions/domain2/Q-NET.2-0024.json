@@ -1,0 +1,92 @@
+{
+  "id": "Q-NET.2-0024",
+  "revision": 1,
+  "examGuideVersion": "1.0",
+  "domain": 2,
+  "subObjective": "NET.2",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 5,
+  "wafPillars": [
+    "resilience"
+  ],
+  "keywords": [
+    "ダミー",
+    "竹林"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】彗星・温室・竹林・棚田・望遠鏡に関する設問。",
+    "en": "Dummy question stem for Q-NET.2-0024."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "織機温室舞台温室劇場織機草原庭園木版画時計塔峡",
+        "en": "Dummy choice A of Q-NET.2-0024"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Aが正しい理由(ダミー)",
+        "en": "Why choice A is correct (dummy)"
+      }
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "灯台惑星風車舞台滝壺水路時計塔棚田",
+        "en": "Dummy choice B of Q-NET.2-0024"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "opsOverhead"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "氷河石畳砂丘彗星茶室笛吹鍾乳石時計塔合唱氷河化石噴水海溝染物洞",
+        "en": "Dummy choice C of Q-NET.2-0024"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "compliance"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "庭園灯台星座染物楽譜灯籠銀河製本劇場木版画羅針盤陶",
+        "en": "Dummy choice D of Q-NET.2-0024"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Dが誤り理由(ダミー)",
+        "en": "Why choice D is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "scalability"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

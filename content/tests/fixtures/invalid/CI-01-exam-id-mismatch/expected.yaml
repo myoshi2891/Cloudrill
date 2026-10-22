@@ -1,5 +1,0 @@
-description: exam.yaml の id がディレクトリ名と異なる
-expect:
-  CI-01:
-  - error
-options: {}

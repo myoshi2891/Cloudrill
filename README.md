@@ -14,8 +14,8 @@ google-cloud-professional-cloud-architect/
 │   └── DomainModels/                                # コンテンツの値型(SwiftPM、Swift Testing)
 ├── content/                                         # 学習コンテンツ、JSON Schema、検証ツール
 │   ├── schemas/                                     # JSON Schema(Draft 2020-12)
-│   ├── questions/ flashcards/ cases/ decisions/ drills/ docs/
-│   ├── exam-sets.yaml  weights.yaml  validation.yaml
+│   ├── vendors.yaml  validation.yaml                # ベンダー定義、検証の閾値(全体)
+│   ├── exams/<examID>/                              # 試験ごと: exam.yaml、validation.yaml、問題などのコンテンツ
 │   ├── scripts/                                     # validate.py、export_json.py
 │   └── tests/                                       # pytest と fixture(valid-json/ は Swift テストも使う)
 ├── .github/
@@ -28,7 +28,7 @@ google-cloud-professional-cloud-architect/
 | ディレクトリ | 役割 |
 |---|---|
 | `ExamPrepApp/` と `ExamPrepApp.xcodeproj` | iOS アプリ本体。ホーム画面の表示名は「Cloudrill」(`INFOPLIST_KEY_CFBundleDisplayName`) |
-| `Documentation.docc/` | 要件定義書と基本設計書 |
+| `Documentation.docc/` | 要件定義書、基本設計書、詳細設計書 |
 | `packages/DomainModels/` | `content/schemas` に対応する Swift の値型(`Question`、`Choice`、`Flashcard`、`CaseStudy` など) |
 | `content/` | 学習コンテンツ(YAML / Markdown)、JSON Schema、検証スクリプト。詳細は [content/README.md](content/README.md) |
 | `.github/workflows/` | CI。変更されたパスに応じて、必要なワークフローだけが動きます |
@@ -46,6 +46,7 @@ uv sync --project content
 
 # コンテンツの検証(どのディレクトリから実行しても対象は content/)
 content/.venv/bin/python content/scripts/validate.py
+content/.venv/bin/python content/scripts/validate.py --exam gcp-pca  # 試験を絞る
 content/.venv/bin/python content/scripts/validate.py --check-links   # リンク切れの確認も行う
 
 # Swift のテスト
@@ -68,10 +69,10 @@ swift test --package-path packages/DomainModels
 
 | 対象 | 形式 | 例 |
 |---|---|---|
-| コンテンツ | `content-vX.Y.Z` | `content-v1.2.0` |
+| コンテンツ(試験ごと) | `content/<examID>/vX.Y.Z` | `content/gcp-pca/v1.2.0` |
 | アプリ | `app-vX.Y.Z` | `app-v1.0.0` |
 
-コンテンツのバージョンは、配信パックの `manifest.json` の `packVersion` と一致させます。
+コンテンツは試験ごとにパックを作り、版を管理します。バージョンは、その試験の配信パックの `manifest.json` の `packVersion` と一致させます。
 
 ## 運用ルール
 

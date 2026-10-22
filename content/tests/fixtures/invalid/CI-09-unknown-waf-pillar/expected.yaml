@@ -1,0 +1,5 @@
+description: exam.yaml にない WAF の柱 resilience の問題
+expect:
+  CI-09:
+  - error
+options: {}

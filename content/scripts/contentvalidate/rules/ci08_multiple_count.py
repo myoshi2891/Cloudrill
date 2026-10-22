@@ -4,13 +4,13 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 
-from ..context import Context, Rule, correct_indices, kind_of
+from ..context import ExamContext, Rule, correct_indices, kind_of
 from ..model import Issue, Severity
 
 RULE_ID = "CI-08"
 
 
-def check(ctx: Context) -> Iterator[Issue]:
+def check(ctx: ExamContext) -> Iterator[Issue]:
     for doc in ctx.questions:
         if kind_of(doc.data) != "multiple":
             continue

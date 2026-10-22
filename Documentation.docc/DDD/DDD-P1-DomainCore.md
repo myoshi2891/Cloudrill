@@ -220,6 +220,14 @@ public final class ManualTimeSource: TimeSource {
 
 **完了条件**: `swift test --package-path packages/Domain --filter DomainTestSupportTests` が通る。
 
+**実装メモ**(実装時に本書と変えた点):
+
+- `Package.swift` には、3.1 のターゲットのうち `StudyModels`、`DomainTestSupport`、`DomainTestSupportTests` だけを宣言した。SwiftPM は空のターゲットをエラーにするので、残りのターゲットは各ステップで追加する。
+- DomainModels の値型(`ExamDefinition` とその構成要素、`Question`)に public な init を追加した。memberwise init は `internal` なので、別のモジュールにあるビルダーから組み立てられないため(追加だけで、既存の API は変えていない)。
+- ビルダーは、値を `with(\.keyPath, value)` で差し替える形にした。`.alphaLike()` は fixture の形(ドメイン、サブ項目、比重、形式、機能)に合わせた。ただし、ベンダー ID とケース ID は、実在の試験の語彙を避けて中立な値(`test-vendor`、`case-a`、`case-b`)にした。
+- `SystemTimeSourceTests` と `Duration.timeInterval`、`FixedTimeSource`、`approximatelyEqual` のテストも `DomainTestSupportTests` に置いた(`StudyModelsTests` は P1-S02 で作る)。
+- 完了条件 3 の grep(`55|120`)は `Sources/DomainTestSupport/ExamDefinitionBuilder.swift` を検出する。これはテストデータで、試験の値ではない。
+
 ---
 
 ### P1-S02 学習記録の値型(StudyModels)
@@ -298,6 +306,13 @@ public struct QuestionOrder: Codable, Hashable, Sendable {
 
 **完了条件**: `swift test --package-path packages/Domain --filter StudyModelsTests` が通る。
 
+**実装メモ**(実装時に本書と変えた点):
+
+- `QuestionOrderError` は `unsupportedVersion(Int)` と `invalidData(underlying: any Error)` の2つにした。デコードのエラーは握りつぶさず、元のエラーを保持する。このため、テスト `QuestionOrderTests.rejectsCorruptedData` を追加した。
+- `decode(from:)` は、`version` だけを先に読んで版を確かめ、その後で全体を読む。未来の版で `items` の形が変わっていても、デコードエラーではなく `unsupportedVersion` として報告するため。
+- `QuestionOrder.init(items:)` は、`version` に `currentVersion` を入れる。ほかの型には public な init を追加した(memberwise init は `internal` のため)。
+- `StudyMode` は `String` の raw value と `Codable` を持たせ、`AnswerFact.swift` に置いた。`AnswerFact` を Codable にするかどうかは、保存の形を決める P3 で判断する。
+
 ---
 
 ### P1-S03 解答の判定(AnswerEvaluator)
@@ -350,6 +365,13 @@ public struct AnswerEvaluatorRegistry: Sendable {
 
 **完了条件**: `swift test --package-path packages/Domain --filter AnswerEvaluatorTests` が通る。
 
+**実装メモ**(実装時に本書と変えた点):
+
+- `QuestionKind` は P0-S09 の時点で `CaseIterable` だったので、DomainModels は変更していない。
+- `standard` は、重複を確かめない private な init で作る(`try!` を避けるため)。全形式に対応していることは `registryCoversAllKinds` で確かめる。
+- Refactor: single と multiple の判定を、`AnswerSelection.matchesExactly(_:)`(選択の集合と正解の集合の一致)にまとめた。single は正解が1つなので、2つ選ぶと自動的に不一致になる。型は本書のとおり別のまま残した。
+- Package.swift に `ExamEngine` と `ExamEngineTests` を追加した。
+
 ---
 
 ### P1-S04 採点(ScoringPolicy)
@@ -397,6 +419,14 @@ public enum ScoringPolicies {
 **Refactor**: 集計(ドメイン別、ケース別)を、汎用の `tally(by:)` 関数にまとめる。
 
 **完了条件**: `swift test --package-path packages/Domain --filter ScoringTests` が通る。
+
+**実装メモ**(実装時に本書と変えた点):
+
+- 未対応の出題形式は、未解答の問題も含めて採点の前に確かめる。解答の有無で、エラーになるかどうかが変わらないようにするため。
+- `byDomain` は試験定義の全ドメインを 0/0 で初期化する。`byCaseStudy` は、出題のあったケースだけを持つ(テスト `byCaseStudy` の期待値のとおり)。
+- テストのケース ID は、`ehr` ではなく `alphaLike` の `case-a` を使った(P1-S01 の実装メモを参照)。
+- Refactor: 集計は、`Sequence<QuestionOutcome>.tally(by:initialKeys:)`(internal)にまとめた。キーが nil の問題(ケースなしの問題)は数えない。
+- `ScoringPolicies.policy(for:)` は `switch` で書いた。`ScoringPolicyKind` に case を追加すると、コンパイルエラーで実装漏れが分かる。
 
 ---
 
@@ -470,6 +500,14 @@ public struct ExamSession: Hashable, Sendable {
 
 **完了条件**: `swift test --package-path packages/Domain --filter ExamSession` が通る。遷移表のテストが 48 件実行されていることを、テストの出力で確認する。
 
+**実装メモ**(実装時に本書と変えた点):
+
+- `select` を inProgress 以外で呼んだときのエラーは、`invalidTransition` ではなく、新しく追加した `ExamSessionError.operationNotAllowed(ExamSessionState)` にした。`select` は `ExamSessionEvent` にないので、`event` に入れる値がない。また、イベントに足すと遷移表が 48 マスでなくなる。`toggleFlag` と `move` は、inProgress と reviewing のときだけ受け付ける。
+- `ExamTimer` は、状態機械が使う部分(`init(startedAt:duration:)`、`remaining`、`isExpired`、`pause`、`resume`)だけをこのステップで作った。`init(startedAt:definition:)`、`crossedThreshold`、`ExamTimerTests` は P1-S06 で作る。
+- 遷移表のテストは、各マスで期限内と期限切れの両方を確かめる(条件付きのマス: inProgress・reviewing の tick と、suspended の resume)。状態は notStarted からイベントを送って作る(submitted は `submitted(.user)`)。
+- テストを2件追加した: `transitionTableHasAllCells`(表が 48 マスで重複がないこと)と `invalidTransitionKeepsTimer`(× の遷移でタイマーも変わらないこと)。`handle` はタイマーの写しで判定してから確定する。
+- `ExamSessionState` の Codable は自動合成を使った(`Snapshot` に入れるため)。保存の形は P3 で見直す。`Snapshot` はタイマーのポリシーを含めない(設定なので、復元時に渡す)。
+
 ---
 
 ### P1-S06 タイマー(ExamTimer)
@@ -523,6 +561,12 @@ public struct ExamTimer: Codable, Hashable, Sendable {
 
 **完了条件**: `swift test --package-path packages/Domain --filter ExamTimerTests` が通る。
 
+**実装メモ**(実装時に本書と変えた点):
+
+- `crossedThreshold` は「前回の残り > しきい値 ≧ 今回の残り」で判定する。しきい値ちょうどに達した場合も越えたとみなす。複数を一度に越えたときは、短い方(より切迫した方)を返す。この2つを、表形式のテストのケースに追加した。
+- 一時停止中は残り時間が変わらないので、`crossedThreshold` は nil を返し、`isExpired` も false になる。
+- Refactor: StudyModels に `Date.adding(_:)` と `Date.duration(since:)` を追加した。`ExamTimer` と `ManualTimeSource` は、これを使って変換する。
+
 ---
 
 ### P1-S07 出題順と選択肢のシャッフル
@@ -563,6 +607,14 @@ public enum ExamOrderBuilder {
 **Refactor**: `DeterministicShuffle` を StudyModels に置き、QuestionSelector(P1-S10)からも使えるようにする。
 
 **完了条件**: `swift test --package-path packages/Domain --filter ExamOrderBuilderTests` が通る。
+
+**実装メモ**(実装時に本書と変えた点):
+
+- `DeterministicShuffle` は、Fisher–Yates に加えて、上限付きの乱数(Lemire の方法と棄却)も自前で実装した。標準ライブラリの `random(in:using:)` も、版の間で結果が同じとは限らないため。
+- ゴールデンの期待値(`shuffleGolden`、`fisherYatesDoesNotUseStdlibShuffle`)は、Swift の出力を記録するのではなく、同じアルゴリズムの Python の参照実装(SplitMix64、Lemire、Fisher–Yates)で求めた。実装の誤りを期待値として固定しないため。Swift の結果は、初回から一致した。
+- `QuestionOrderError` に `missingQuestion(String)` と `choicesMismatch(questionID:)` を追加した。`make` と `validate` は、出題順にある問題がコンテンツになければ `missingQuestion` を投げる。このためのテスト `missingQuestion` を追加した。
+- `validate` は、選択肢 ID の集合(並べ替えた配列)を比べる。シャッフル後の並びは問わない。
+- Refactor は不要だった(`DeterministicShuffle` は最初から StudyModels に置いた)。
 
 ---
 
@@ -626,6 +678,18 @@ public enum ExamOrderBuilder {
 - `python3 scripts/fsrs_vectors.py --out packages/Domain/Tests/FSRSTests/Vectors/fsrs-vectors.json` を2回実行し、結果が同じであること(決定論)。
 - `swift test --package-path packages/Domain --filter FSRSVectorTests` が「既知の問題」として報告されること。
 
+**実装メモ**(2026-10-21 にユーザーの確認を取って決めた点と、本書と変えた点):
+
+- 決めたこと: `fsrs`(py-fsrs)**6.3.2**(FSRS-6、MIT、2026-08-09 公開)を採用した。パラメータは既定値(21 個)、目標保持率 0.90、学習ステップは既定値(learning 1 分・10 分、relearning 10 分)、最大間隔 36500 日、fuzz は無効。
+- 依存の置き場所: `scripts/requirements-dev.txt` ではなく、`content/pyproject.toml` の uv 依存グループ `fsrs` にした(既存の Python の依存管理に合わせる)。既定の `uv sync` には含まれないので、CI には入らない。スクリプトは `content/scripts/fsrs_vectors.py` に置いた。
+  - 再生成: `uv sync --project content --group fsrs` の後に `content/.venv/bin/python content/scripts/fsrs_vectors.py --out packages/Domain/Tests/FSRSTests/Vectors/fsrs-vectors.json`
+- ベクタは 15 ケース(4 種類の初回評価、Good・Easy・Hard の連続、忘却 3 系列、早い復習と遅い復習、同じ日の2回目、評価の混在)。期待値には、本書の形式に加えて学習ステップの位置 `step` を含めた。2回生成して一致することを確認した。
+- py-fsrs 6 には new の段階がなく、新規カードは learning の step 0 から始まる。`CardPhase.new` はアプリ側だけの段階として残し、ベクタの期待値には現れない。
+- py-fsrs の `get_card_retrievability` は、経過日数を整数(`timedelta.days`、切り捨て)で数える。P1-S08b の `ForgettingCurve` を `retrievabilityAtDue` と一致させるときに注意する。
+- Red は2段階で確認した。仮の実装がない状態でコンパイルエラーになること。仮の実装(カードを変えずに返す)では、`withKnownIssue` を一時的に外すと assertion で失敗すること。
+- 仮の型(`Rating`、`CardPhase`、`FSRSCard`、`ReviewOutcome`、`FSRSParameters`、`FSRSError`、`FSRSScheduler`)は、P1-S08b・c の定義の形で置いた。`FSRSParameters.init` は `throws(FSRSError)` だが、範囲の確認は P1-S08b で実装する。
+- ベクタが読めることと、必要な系列があることを確かめるテスト `vectorsAreWellFormed` を追加した(このステップで通る)。
+
 ---
 
 ### P1-S08b FSRS: 記憶保持率と間隔
@@ -659,6 +723,15 @@ public enum ExamOrderBuilder {
 **Refactor**: 日数の計算(`Date` の差を日単位の `Double` にする)を1か所にまとめる。
 
 **完了条件**: `swift test --package-path packages/Domain --filter ForgettingCurveTests` が通る。
+
+**実装メモ**(実装時に本書と変えた点):
+
+- 間隔は2つの関数に分けた。`rawInterval(desiredRetention:stability:)` は丸める前の日数を返す。`interval(desiredRetention:stability:maximumInterval:)` は、それを日単位に丸め、1 日以上・上限以下にする。上限は引数で受け取る。
+- 丸めは偶数への丸め(`.toNearestOrEven`)にした。リファレンス実装は Python の `round`(2.5 → 2、3.5 → 4)を使うので、Swift の既定の `.rounded()`(0 から遠い方へ丸める)では一致しない。これを確かめるテスト `intervalRoundsHalfToEven` を追加した。
+- `FSRSParameters.init` は、目標保持率の範囲(0.80〜0.95)に加えて、重みの個数(21)も確かめる(`FSRSError.invalidWeightCount`)。`ForgettingCurve(parameters:)` が `w[20]` を読むときにクラッシュしないようにするため。
+- `FSRSParameters` の init は、すべての引数に既定値(py-fsrs 6.3.2 の既定値)を持つ。既定値がテストベクタと一致することを `defaultsMatchVectors` で確かめる。
+- `ForgettingCurve.fsrs5`(DECAY = −0.5)も用意し、FSRS-5 と FSRS-6 の両方で `R(S, S) = 0.9` になることを確かめた。
+- Refactor: 日数の計算を `ElapsedDays`(internal)にまとめた。`whole` は py-fsrs の `timedelta.days` と同じく、-∞ 方向への切り捨て。`FSRSScheduler.retrievability` での使用は P1-S08c で行う。
 
 ---
 
@@ -715,6 +788,16 @@ public struct FSRSScheduler: Sendable {
 
 **完了条件**: `swift test --package-path packages/Domain --filter InitialReviewTests` が通る。
 
+**実装メモ**(実装時に本書と変えた点):
+
+- 初回の評価は、リファレンス実装と同じく learning の step 0 として扱う。安定度と難易度の初期値を決めた後、学習ステップの規則で期限を決める(Again: step 0・1 分後、Hard: step 0・最初の2ステップの平均 5.5 分後、Good: step 1・10 分後、Easy: review に移り日単位の間隔)。
+- 学習ステップの遷移(`scheduleLearningStep`)と review への移行(`graduate`)は、P1-S08d の learning の段階でも使えるように、段階によらない関数にした。learning・review・relearning の更新式は P1-S08d で実装する。それまでは、カードを変えずに返す。
+- `retrievability(of:at:)` は、最後の評価からの経過日数を切り捨ての整数日にして計算する(`ElapsedDays.whole`)。未学習のカードは 0。
+- テストを2件追加した: 学習ステップの期限(`learningSteps`)と、回数・時刻の記録(`recordsReviewFacts`)。ベクタとの照合処理は `replay(_:with:)` に切り出し、`FSRSVectorTests.allVectors` と共有した。
+- Refactor: 重みの添字に名前を付けた(`FSRSWeights.swift` の `initialStability(for:)`、`initialDifficultyBase`、`initialDifficultyScale`)。
+- FSRS ターゲットは StudyModels に依存しない(3.1)ので、`Duration.timeInterval` を internal の拡張として FSRS にも置いた。
+- 全体の照合の既知の問題は 438 件から 369 件に減った(初回の評価の分)。
+
 ---
 
 ### P1-S08d FSRS: 2回目以降の評価
@@ -741,6 +824,15 @@ public struct FSRSScheduler: Sendable {
 **Refactor**: `review` を、フェーズごとの関数(`reviewNew`、`reviewLearning`、`reviewReview`)に分ける。
 
 **完了条件**: `swift test --package-path packages/Domain --filter FSRS` がすべて通り、既知の問題が 0 件。
+
+**実装メモ**(実装時に本書と変えた点):
+
+- テストベクタの 15 ケースは、初回の実装で全項目(phase、step、stability、difficulty、due、retrievability)が許容誤差の範囲で一致した。`withKnownIssue` を外し、既知の問題は 0 件になった。
+- 「同じ日」は、リファレンス実装と同じく、前回の評価からの経過が切り捨ての整数日で 0(24 時間未満)かどうかで判定する。暦日ではない。
+- `lapses` はアプリ独自の値(py-fsrs のカードにはない)。review の段階での Again だけを数え、relearning の段階での Again は数えない。このためのテスト `againInRelearningDoesNotIncrementLapses` を追加した。経過日数の記録を確かめる `recordsElapsedDays` も追加した。
+- `sameDayReview` は、テストベクタの `same-day-review` ケースを再生して確かめる(短期の安定度の式の結果が、リファレンス実装と一致すること)。
+- Refactor: `review` を段階ごとの関数(`reviewNew`、`reviewLearning`、`reviewReview`、`reviewRelearning`)に分けた。learning と relearning は、使うステップの一覧だけが違うので、期限の決め方は `scheduleStep(_:rating:steps:at:)` を共有する。安定度と難易度の更新は `updateMemory` にまとめた。
+- 重みの名前(`FSRSWeights.swift`)を w[6]〜w[19] まで追加した。
 
 ---
 
@@ -795,6 +887,14 @@ public struct DailyQueueBuilder: Sendable {
 **Refactor**: タプルの引数を、名前付きの型(`ScheduledCard`)に置き換える。
 
 **完了条件**: `swift test --package-path packages/Domain --filter DailyQueueBuilderTests` が通る。
+
+**実装メモ**(実装時に本書と変えた点):
+
+- Refactor の `ScheduledCard` は、公開する API の形なので、最初から使った(タプルの引数は作っていない)。
+- 「今日」は、注入した `Calendar` での翌日の 0:00 より前とする。期限がそれより前の学習済みのカードを、復習の対象にする。learning・relearning の段階のカード(分単位の期限)も含む。未学習(`.new`)のカードが候補に混じっていても、対象外にする。
+- 復習の上限は、新規と同じく、今日すでに復習した枚数を引く(`reviewedToday`)。負の値は 0 として扱う。
+- 同じ期限のカードは、候補の順を保つ(元の位置で並べる。Swift の `sorted` は安定ソートを保証しないため)。
+- `DailyQueue.cardIDs`(復習の後に新規)を追加した。テストを3件追加した: `reviewLimitConsidersToday`、`phasesInReviewCandidates`、`negativeLimitsAreZero`。
 
 ---
 
@@ -872,6 +972,15 @@ public struct ReadinessCalculator: Sendable {
 **Refactor**: ドメインごとの計算を `domainReadiness(...)` に切り出し、合算と分ける。
 
 **完了条件**: `swift test --package-path packages/Domain --filter ReadinessCalculatorTests` が通る。
+
+**実装メモ**(実装時に本書と変えた点):
+
+- 対象にする解答は、`mode` が `exam`・`practice` であることに加えて、`examID` が試験定義の ID と一致するものに限った(ドメイン番号は試験ごとに意味が違うため)。テスト `otherExamAnswersExcluded` を追加した。モードは許可リスト(`countedModes`)で判定し、`StudyMode` が増えても準備度に含めないようにした。
+- `ReadinessParameters.init` は、重みの合計に加えて、半減期と網羅度の目標が正の値であることも確かめる(`nonPositiveHalfLife`、`nonPositiveCoverageTarget`。0 での除算を防ぐため)。重みの合計の比較は誤差 1e-9 まで許す。テスト `nonPositiveParametersAreRejected` と `defaultParameters` を追加した。
+- `DomainReadiness.retention` は、解答が 0 件のドメインでも、カードがあれば計算して返す(表示に使えるように)。`score` は BDD 6.6 のとおり 0。
+- 経過日数は 86400 秒を 1 日とする小数(FSRS の `ElapsedDays` と同じ数え方。Readiness は FSRS に依存しないので、共有はしない)。
+- `halfLife` と `futureAnswerTreatedAsNow` は、internal の `recencyWeight(answeredAt:now:)` を直接確かめる。exam と practice を合わせて数えることを確かめる `examAndPracticeCount` も追加した。
+- Refactor の `domainReadiness(...)` は、最初から切り出して書いた。
 
 ---
 
@@ -972,6 +1081,18 @@ public struct QuestionSelector: Sendable {
 
 **完了条件**: `swift test --package-path packages/Domain --filter QuestionSelectorTests` が通る。
 
+**実装メモ**(実装時に本書と変えた点):
+
+- `PracticeHistory` は `AnswerFact` を直接受け取らないので、テスト用の `AnswerFact` のビルダーは DomainTestSupport に追加しなかった。
+- 弱点優先の鍵は、`u^(1/w)` と同じ順になる `log(u) / w` にした(w が小さいときのアンダーフローを避けるため)。`u` は 53 ビットの (0, 1] の乱数(`unitRandom`)で、標準ライブラリの `random(in:using:)` は使わない(DDD 6.3 と同じ理由)。鍵が同じなら ID 順。
+- `domainScores` にないドメイン(準備度をまだ算出していない)は score 0、つまり最も弱いとして扱う。テスト `missingDomainScoreIsWeakest` を追加した。
+- fresh が足りないときの並びは、fresh(選び方の順)の後に recent(出題の古い順。同時刻なら ID 順)。`.all` を指定したときも同じで、recent は最後に並ぶ。
+- recent は「出題からの経過が `recentExclusion` 未満」。ちょうど 24 時間前は fresh とする(テスト `servedExactlyAtBoundaryIsFresh`)。
+- `weaknessFirstStillPicksStrongDomain` は、ドメイン2の score を 1.0 にして確かめた(0.9 では重みが 0.1 で、`minimumWeight` が効いていることを確かめられないため)。
+- 重みとボーナスの掛け算を確かめる `weightIncludesBonuses` を追加した。`noDuplicates`、`excludesRecentWhenEnough`、`inputOrderDoesNotMatter` は、ランダムと弱点優先の両方で確かめる。
+- `SelectionParameters.init` は、ボーナスと `minimumWeight` が正の値であることを `precondition` で確かめる(`.init()` を既定の引数に使うため throws にしない。値はコードで決めるもので、利用者の入力ではない)。
+- Refactor の分割(`filter`、`splitByRecency`、`draw`)は、最初からその形で書いた。
+
 ---
 
 ### P1-S11 カバレッジの確認と CI
@@ -1000,6 +1121,15 @@ scripts/coverage.sh packages/Domain 80
 
 **完了条件**: `domain-test.yml` が PR 上で通り、カバレッジが 80% 以上。
 
+**実装メモ**(実装時に本書と変えた点):
+
+- SwiftPM(Xcode 同梱の版)は、テストターゲットごとに `*.xctest` を作る。テストの後に書き出す `codecov/Domain.json` は、そのうち1つのバンドル(DomainTestSupportTests)の分しか集計していなかった。そのため `coverage.sh` は、`--show-bin-path` の下のすべてのテストバンドルを `llvm-cov report` / `export` に渡して集計する(最初のバイナリは位置引数、残りは `-object`)。
+- 集計の対象は `<パッケージ>/Sources` に限る(位置引数で指定)。これで Tests/、依存パッケージ(DomainModels)、生成されたファイルが外れる。`*TestSupport/` は `-ignore-filename-regex` で除く。合計の値は `llvm-cov export -summary-only` の JSON から python3 で読む。
+- 終了コードは validate.py に合わせた: 0 = 最低値以上 / 1 = 最低値未満、またはテストや集計の失敗 / 2 = 引数の誤り。
+- 結果: 行カバレッジ **97.59%**(831 行のうち未実行 20 行)。検証手順 2 では、テストのない 10 行の関数を足すと 96.43% に下がり、そのファイルが 0.00% と表示されることを確かめた(確かめた後に削除した)。
+- `domainmodels-test.yml` は、P1-S01 から Domain の `swift test` も実行していた。これを `domain-test.yml` に移し、`domainmodels-test.yml` のトリガーから `packages/Domain/**` を外した(同じテストを2回実行しないため)。CLAUDE.md のコマンドと CI の節も更新した。
+- 検証手順 4(PR でワークフローが通ること)は、PR を作るときに確かめる。
+
 ---
 
 ## 5. フェーズの完了条件
@@ -1022,5 +1152,9 @@ scripts/coverage.sh packages/Domain 80
 | P2 | `QuestionSelector` は `QuestionSummary` の配列を受け取る。パックの `questions/index.json`(P2-S01)は、この型に直接デコードできる形にする |
 | P3 | `ExamSession.Snapshot` と `QuestionOrder` を、`ExamAttempt` に JSON で保存する。`AnswerSelection` の Codable の形式(`kind` + `choiceIDs`)を、`AnswerRecord` の `selectedChoiceIDs` の代わりに使う(列名は `selectionJSON`) |
 | P3 | `FSRSCard` を `CardState` に、`ReviewOutcome` を `ReviewLog` に対応させる |
+| P3 | `PracticeHistory.lastServedAt` は**出題した**時刻(解答した時刻ではない)。解答せずに次へ進んだ問題も、直近 24 時間の除外の対象にするため、出題の時刻を記録する |
+| P3 | `ReadinessInput.cardRetentions` は、ドメインごとの復習済みカード(`.new` 以外)について `FSRSScheduler.retrievability(of:at:)` で計算する。対象にする解答は `examID` が試験定義と一致するものだけなので、複数の試験の解答をまとめて渡してよい |
+| P4 | 弱点優先の `domainScores` には `ReadinessResult.ready` の `DomainReadiness.score` を渡す。`.collecting` のときは空の辞書でよい(すべてのドメインを score 0 として扱う) |
+| P2 以降 | 新しいパッケージのカバレッジも `scripts/coverage.sh` で測る。SwiftPM が書き出す `codecov/*.json` は、テストターゲットが複数あると一部しか集計しないので使わない |
 | P4 | 準備度の画面は `.collecting` のときに数値を出さない。数値には常に「目安」を併記する(LG-05) |
 | P4 | タイマーの表示は `TimelineView(.periodic(by: 1))` の各回で `ExamSession.handle(.tick, at:)` を呼ぶ。警告は `crossedThreshold` で判定する |

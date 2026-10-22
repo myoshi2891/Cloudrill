@@ -10,7 +10,7 @@ import httpx
 import pytest
 import yaml
 
-from contentvalidate.config import Config, load_config
+from contentvalidate.config import GlobalConfig, load_config
 
 CONTENT_ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = CONTENT_ROOT / "tests" / "fixtures"
@@ -47,6 +47,17 @@ def materialize(case: str | None, dest: Path) -> Path:
     return root
 
 
+def copy_exam(root: Path, exam_id: str, source: str = "test-alpha") -> Path:
+    """root/exams/<source>/ を root/exams/<exam_id>/ に複製し、exam.yaml の id を書き換える。"""
+    dest = root / "exams" / exam_id
+    shutil.copytree(root / "exams" / source, dest)
+    exam_file = dest / "exam.yaml"
+    exam = yaml.safe_load(exam_file.read_text(encoding="utf-8"))
+    exam["id"] = exam_id
+    exam_file.write_text(yaml.safe_dump(exam, allow_unicode=True, sort_keys=False), encoding="utf-8")
+    return dest
+
+
 def link_handler(request: httpx.Request) -> httpx.Response:
     """リンク確認用のモック。ネットワークには出ない。"""
     host = request.url.host
@@ -60,7 +71,7 @@ def link_handler(request: httpx.Request) -> httpx.Response:
 
 
 @pytest.fixture(scope="session")
-def config() -> Config:
+def config() -> GlobalConfig:
     return load_config(CONTENT_ROOT / "validation.yaml")
 
 

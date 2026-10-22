@@ -1,0 +1,92 @@
+{
+  "id": "Q-NET.2-0016",
+  "revision": 1,
+  "examGuideVersion": "1.0",
+  "domain": 2,
+  "subObjective": "NET.2",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 2,
+  "wafPillars": [
+    "efficiency"
+  ],
+  "keywords": [
+    "ダミー",
+    "氷河"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】宿場・染物・果樹園・鍵盤・潮汐に関する設問。",
+    "en": "Dummy question stem for Q-NET.2-0016."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "刺繍峡谷火山鍾乳石画廊劇場洞窟峡谷鐘楼竹林海溝樹氷木版画",
+        "en": "Dummy choice A of Q-NET.2-0016"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "cost"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "茶室彫刻蜂蜜洞窟画廊笛吹銀河雪原火",
+        "en": "Dummy choice B of Q-NET.2-0016"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "opsOverhead"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "星座石畳木版画月面海溝惑星",
+        "en": "Dummy choice C of Q-NET.2-0016"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "compliance"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "海溝染物月面湿原草原陶器",
+        "en": "Dummy choice D of Q-NET.2-0016"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Dが正しい理由(ダミー)",
+        "en": "Why choice D is correct (dummy)"
+      }
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

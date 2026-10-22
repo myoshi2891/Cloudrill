@@ -1,0 +1,92 @@
+{
+  "id": "Q-NET.2-0018",
+  "revision": 1,
+  "examGuideVersion": "1.0",
+  "domain": 2,
+  "subObjective": "NET.2",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 4,
+  "wafPillars": [
+    "resilience"
+  ],
+  "keywords": [
+    "ダミー",
+    "渡り鳥"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】太鼓・陶器・滝壺・果樹園・琥珀に関する設問。",
+    "en": "Dummy question stem for Q-NET.2-0018."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "彫刻蜂蜜温室鍾乳石刺繍木版画宿場流星海溝蜂蜜温室化石織機海溝",
+        "en": "Dummy choice A of Q-NET.2-0018"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "compliance"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "銀河惑星望遠鏡氷河劇場太鼓琥珀雪",
+        "en": "Dummy choice B of Q-NET.2-0018"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Bが正しい理由(ダミー)",
+        "en": "Why choice B is correct (dummy)"
+      }
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "滝壺雪原火山灯籠噴水氷河噴水",
+        "en": "Dummy choice C of Q-NET.2-0018"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "availability"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "琥珀蜂蜜惑星星座蜂蜜砂丘渓流水",
+        "en": "Dummy choice D of Q-NET.2-0018"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Dが誤り理由(ダミー)",
+        "en": "Why choice D is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "latency"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

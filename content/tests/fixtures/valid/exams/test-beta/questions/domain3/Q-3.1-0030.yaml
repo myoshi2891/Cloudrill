@@ -1,0 +1,62 @@
+id: Q-3.1-0030
+revision: 1
+examGuideVersion: '1.0'
+domain: 3
+subObjective: '3.1'
+caseStudy: null
+type:
+  kind: single
+difficulty: 1
+wafPillars:
+- resilience
+keywords:
+- ダミー
+- 銀河
+examSets:
+- 1
+stem:
+  ja: 【ダミー】氷河・劇場・樹氷・月面・化石に関する設問。
+  en: Dummy question stem for Q-3.1-0030.
+choices:
+- id: a
+  text:
+    ja: 帆船染物劇場星座庭園劇場望遠鏡灯籠陶
+    en: Dummy choice A of Q-3.1-0030
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - requirementMismatch
+- id: b
+  text:
+    ja: 石畳化石草原青銅太鼓惑星太鼓氷河刺繍灯台滝壺舞台銀河流
+    en: Dummy choice B of Q-3.1-0030
+  isCorrect: false
+  rationale:
+    ja: 選択肢Bが誤り理由(ダミー)
+    en: Why choice B is incorrect (dummy)
+  mistakeTags:
+  - deprecated
+- id: c
+  text:
+    ja: 渡り鳥望遠鏡草原砂丘珊瑚染物滝壺樹氷海
+    en: Dummy choice C of Q-3.1-0030
+  isCorrect: true
+  rationale:
+    ja: 選択肢Cが正しい理由(ダミー)
+    en: Why choice C is correct (dummy)
+- id: d
+  text:
+    ja: 温室画廊彗星竹林石畳山脈海溝火山茶室楽譜織機彫刻鍾乳石琥珀棚
+    en: Dummy choice D of Q-3.1-0030
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - opsOverhead
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

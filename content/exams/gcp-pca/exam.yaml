@@ -15,7 +15,8 @@ format:
   mockExam:
     questionCount: 55
     setCount: 6
-    caseStudiesPerSet: 2
+    # 本来は 2。cases/ にケースが ehr しかない間の暫定値(ケースを追加したら 2 に戻す)
+    caseStudiesPerSet: 1
 scoring:
   policy: allOrNothing
 # 比重は旧 weights.yaml の値。合計が 1.0(誤差 ±0.001)であること(CI-10)
@@ -168,5 +169,5 @@ taxonomies:
       name: { ja: パフォーマンスの最適化, en: Performance optimization }
     - id: sustainability
       name: { ja: サステナビリティ, en: Sustainability }
-# 表示順。cases/*.yaml の id と一致させる(CI-12、P0-S06)。現時点で cases/ にあるのは ehr のみ
-caseStudies: [ehr, altostrat, cymbal, knightMotives]
+# 表示順。cases/*.yaml の id と一致させる(CI-12)。altostrat・cymbal・knightMotives は、cases/ に追加したらここにも加える
+caseStudies: [ehr]

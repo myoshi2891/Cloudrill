@@ -1,0 +1,90 @@
+{
+  "id": "Q-NET.2-0101",
+  "revision": 1,
+  "examGuideVersion": "1.0",
+  "domain": 2,
+  "subObjective": "NET.2",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 2,
+  "wafPillars": [
+    "governance"
+  ],
+  "keywords": [
+    "ダミー",
+    "雪原"
+  ],
+  "examSets": [],
+  "stem": {
+    "ja": "【ダミー】石畳・劇場・渡り鳥・水路・望遠鏡に関する設問。",
+    "en": "Dummy question stem for Q-NET.2-0101."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "織機彫刻化石銀河木版画茶室珊瑚雪原茶室草原太鼓彗星鍵盤潮汐",
+        "en": "Dummy choice A of Q-NET.2-0101"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "latency"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "渡り鳥果樹園潮汐望遠鏡楽",
+        "en": "Dummy choice B of Q-NET.2-0101"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Bが正しい理由(ダミー)",
+        "en": "Why choice B is correct (dummy)"
+      }
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "陶器星座月面樹氷楽譜珊瑚楽譜",
+        "en": "Dummy choice C of Q-NET.2-0101"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Cが誤り理由(ダミー)",
+        "en": "Why choice C is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "deprecated"
+      ]
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "笛吹彗星宿場温室滝壺庭園惑星風車石畳鍵盤化石渓流氷河羅針盤湿原",
+        "en": "Dummy choice D of Q-NET.2-0101"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Dが誤り理由(ダミー)",
+        "en": "Why choice D is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "cost"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

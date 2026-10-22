@@ -1,0 +1,61 @@
+id: Q-2.1-0914
+revision: 1
+examGuideVersion: '6.1'
+domain: 2
+subObjective: '2.1'
+caseStudy: null
+type:
+  kind: single
+difficulty: 5
+wafPillars:
+- resilience
+keywords:
+- ダミー
+- 織機
+examSets: []
+stem:
+  ja: 【ダミー】樹氷・滝壺・海溝・果樹園・風車に関する設問。
+  en: Dummy question stem for Q-2.1-0914.
+choices:
+- id: a
+  text:
+    ja: 惑星陶器峡谷望遠鏡茶室竹林時計塔棚田笛吹砂
+    en: Dummy choice A of Q-2.1-0914
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - compliance
+- id: b
+  text:
+    ja: 竹林滝壺渓流灯台星座楽譜青銅染物山脈珊瑚陶器
+    en: Dummy choice B of Q-2.1-0914
+  isCorrect: true
+  rationale:
+    ja: 選択肢Bが正しい理由(ダミー)
+    en: Why choice B is correct (dummy)
+- id: c
+  text:
+    ja: 庭園舞台月面蜂蜜羅針盤果樹園銀河温室棚田劇場氷河望遠鏡星座渓
+    en: Dummy choice C of Q-2.1-0914
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - availability
+- id: d
+  text:
+    ja: 刺繍月面石畳火山棚田鍵盤星座星座珊瑚風車月面珊瑚太鼓氷河
+    en: Dummy choice D of Q-2.1-0914
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - latency
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

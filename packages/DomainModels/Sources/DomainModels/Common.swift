@@ -18,24 +18,6 @@ public struct LocalizedText: Codable, Hashable, Sendable {
     }
 }
 
-/// common.schema.json#/$defs/CaseStudyID
-public enum CaseStudyID: String, Codable, Hashable, Sendable, CaseIterable {
-    case ehr
-    case altostrat
-    case cymbal
-    case knightMotives
-}
-
-/// common.schema.json#/$defs/WAFPillar
-public enum WAFPillar: String, Codable, Hashable, Sendable, CaseIterable {
-    case operationalExcellence
-    case security
-    case reliability
-    case costOptimization
-    case performance
-    case sustainability
-}
-
 /// common.schema.json#/$defs/MistakeTag
 public enum MistakeTag: String, Codable, Hashable, Sendable, CaseIterable {
     case cost

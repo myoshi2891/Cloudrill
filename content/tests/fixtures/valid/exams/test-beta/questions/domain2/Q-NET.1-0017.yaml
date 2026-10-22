@@ -1,0 +1,62 @@
+id: Q-NET.1-0017
+revision: 1
+examGuideVersion: '1.0'
+domain: 2
+subObjective: NET.1
+caseStudy: null
+type:
+  kind: single
+difficulty: 3
+wafPillars:
+- governance
+keywords:
+- ダミー
+- 峡谷
+examSets:
+- 1
+stem:
+  ja: 【ダミー】氷河・宿場・火山・彗星・鍾乳石に関する設問。
+  en: Dummy question stem for Q-NET.1-0017.
+choices:
+- id: a
+  text:
+    ja: 石畳噴水峡谷彗星彗星海溝舞台青銅太
+    en: Dummy choice A of Q-NET.1-0017
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - opsOverhead
+- id: b
+  text:
+    ja: 画廊惑星彗星氷河灯台砂丘陶器噴水陶器滝壺珊瑚海溝滝壺羅針盤木
+    en: Dummy choice B of Q-NET.1-0017
+  isCorrect: false
+  rationale:
+    ja: 選択肢Bが誤り理由(ダミー)
+    en: Why choice B is incorrect (dummy)
+  mistakeTags:
+  - compliance
+- id: c
+  text:
+    ja: 帆船峡谷舞台陶器青銅樹氷草原樹氷水路望遠鏡蜂蜜峡谷湿原水路果樹
+    en: Dummy choice C of Q-NET.1-0017
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - scalability
+- id: d
+  text:
+    ja: 化石織機渡り鳥樹氷山脈渓流火山湿原宿場風車灯
+    en: Dummy choice D of Q-NET.1-0017
+  isCorrect: true
+  rationale:
+    ja: 選択肢Dが正しい理由(ダミー)
+    en: Why choice D is correct (dummy)
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

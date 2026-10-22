@@ -1,0 +1,62 @@
+id: Q-4.1-0036
+revision: 1
+examGuideVersion: '1.0'
+domain: 4
+subObjective: '4.1'
+caseStudy: null
+type:
+  kind: single
+difficulty: 2
+wafPillars:
+- resilience
+keywords:
+- ダミー
+- 潮汐
+examSets:
+- 1
+stem:
+  ja: 【ダミー】水路・星座・染物・青銅・山脈に関する設問。
+  en: Dummy question stem for Q-4.1-0036.
+choices:
+- id: a
+  text:
+    ja: 山脈噴水羅針盤彫刻木版画月面羅針盤海溝
+    en: Dummy choice A of Q-4.1-0036
+  isCorrect: true
+  rationale:
+    ja: 選択肢Aが正しい理由(ダミー)
+    en: Why choice A is correct (dummy)
+- id: b
+  text:
+    ja: 蜂蜜庭園太鼓銀河劇場刺繍火山化石火山化石太
+    en: Dummy choice B of Q-4.1-0036
+  isCorrect: false
+  rationale:
+    ja: 選択肢Bが誤り理由(ダミー)
+    en: Why choice B is incorrect (dummy)
+  mistakeTags:
+  - latency
+- id: c
+  text:
+    ja: 刺繍宿場惑星湿原琥珀笛吹鍾乳石
+    en: Dummy choice C of Q-4.1-0036
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - requirementMismatch
+- id: d
+  text:
+    ja: 雪原樹氷彫刻刺繍宿場流星彫刻火山洞窟灯籠
+    en: Dummy choice D of Q-4.1-0036
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - deprecated
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

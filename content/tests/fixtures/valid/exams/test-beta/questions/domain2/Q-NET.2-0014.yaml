@@ -1,0 +1,62 @@
+id: Q-NET.2-0014
+revision: 1
+examGuideVersion: '1.0'
+domain: 2
+subObjective: NET.2
+caseStudy: null
+type:
+  kind: single
+difficulty: 5
+wafPillars:
+- governance
+keywords:
+- ダミー
+- 織機
+examSets:
+- 1
+stem:
+  ja: 【ダミー】染物・宿場・鍾乳石・灯台・湿原に関する設問。
+  en: Dummy question stem for Q-NET.2-0014.
+choices:
+- id: a
+  text:
+    ja: 星座砂丘草原合唱火山茶室峡谷潮汐氷河潮汐惑星鍾乳石流星洞窟彫
+    en: Dummy choice A of Q-NET.2-0014
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - requirementMismatch
+- id: b
+  text:
+    ja: 草原果樹園惑星望遠鏡劇場氷河
+    en: Dummy choice B of Q-NET.2-0014
+  isCorrect: true
+  rationale:
+    ja: 選択肢Bが正しい理由(ダミー)
+    en: Why choice B is correct (dummy)
+- id: c
+  text:
+    ja: 砂丘星座灯籠木版画鐘楼草原温室洞窟風車太鼓鐘楼織
+    en: Dummy choice C of Q-NET.2-0014
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - cost
+- id: d
+  text:
+    ja: 峡谷潮汐刺繍舞台化石羅針盤温室蜂蜜果樹園噴
+    en: Dummy choice D of Q-NET.2-0014
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - opsOverhead
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

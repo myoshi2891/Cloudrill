@@ -1,0 +1,61 @@
+id: Q-NET.1-0916
+revision: 1
+examGuideVersion: '1.0'
+domain: 2
+subObjective: NET.1
+caseStudy: ehr
+type:
+  kind: single
+difficulty: 2
+wafPillars:
+- efficiency
+keywords:
+- ダミー
+- 氷河
+examSets: []
+stem:
+  ja: 【ダミー】合唱・峡谷・珊瑚・渓流・石畳に関する設問。
+  en: Dummy question stem for Q-NET.1-0916.
+choices:
+- id: a
+  text:
+    ja: 時計塔湿原宿場銀河山脈木版画草原劇場青銅灯籠染物羅針盤竹
+    en: Dummy choice A of Q-NET.1-0916
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - availability
+- id: b
+  text:
+    ja: 楽譜宿場渓流合唱洞窟太鼓楽譜棚田太鼓彫刻鍵
+    en: Dummy choice B of Q-NET.1-0916
+  isCorrect: true
+  rationale:
+    ja: 選択肢Bが正しい理由(ダミー)
+    en: Why choice B is correct (dummy)
+- id: c
+  text:
+    ja: 果樹園望遠鏡果樹園合唱砂丘火山渡り鳥風
+    en: Dummy choice C of Q-NET.1-0916
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - requirementMismatch
+- id: d
+  text:
+    ja: 笛吹織機砂丘惑星珊瑚惑星茶室温室帆船渓流琥珀峡谷庭園棚田流星草
+    en: Dummy choice D of Q-NET.1-0916
+  isCorrect: false
+  rationale:
+    ja: 選択肢Dが誤り理由(ダミー)
+    en: Why choice D is incorrect (dummy)
+  mistakeTags:
+  - deprecated
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

@@ -1,0 +1,92 @@
+{
+  "id": "Q-1.2-0008",
+  "revision": 1,
+  "examGuideVersion": "1.0",
+  "domain": 1,
+  "subObjective": "1.2",
+  "caseStudy": null,
+  "type": {
+    "kind": "single"
+  },
+  "difficulty": 4,
+  "wafPillars": [
+    "governance"
+  ],
+  "keywords": [
+    "ダミー",
+    "望遠鏡"
+  ],
+  "examSets": [
+    1
+  ],
+  "stem": {
+    "ja": "【ダミー】灯台・草原・竹林・劇場・果樹園に関する設問。",
+    "en": "Dummy question stem for Q-1.2-0008."
+  },
+  "choices": [
+    {
+      "id": "a",
+      "text": {
+        "ja": "灯籠珊瑚流星雪原銀河果樹園化石陶",
+        "en": "Dummy choice A of Q-1.2-0008"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Aが誤り理由(ダミー)",
+        "en": "Why choice A is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "cost"
+      ]
+    },
+    {
+      "id": "b",
+      "text": {
+        "ja": "噴水彫刻氷河棚田羅針盤湿原渓流海溝海溝棚田峡谷星座笛吹舞台鍾",
+        "en": "Dummy choice B of Q-1.2-0008"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Bが誤り理由(ダミー)",
+        "en": "Why choice B is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "opsOverhead"
+      ]
+    },
+    {
+      "id": "c",
+      "text": {
+        "ja": "庭園珊瑚鍾乳石陶器羅針盤彗星噴",
+        "en": "Dummy choice C of Q-1.2-0008"
+      },
+      "isCorrect": true,
+      "rationale": {
+        "ja": "選択肢Cが正しい理由(ダミー)",
+        "en": "Why choice C is correct (dummy)"
+      }
+    },
+    {
+      "id": "d",
+      "text": {
+        "ja": "鍵盤樹氷琥珀舞台銀河砂丘染物鍵盤樹氷鍵盤洞窟灯籠時計塔",
+        "en": "Dummy choice D of Q-1.2-0008"
+      },
+      "isCorrect": false,
+      "rationale": {
+        "ja": "選択肢Dが誤り理由(ダミー)",
+        "en": "Why choice D is incorrect (dummy)"
+      },
+      "mistakeTags": [
+        "scalability"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Google Cloud ドキュメント",
+      "url": "https://cloud.google.com/docs",
+      "license": "link-only"
+    }
+  ]
+}

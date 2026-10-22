@@ -1,0 +1,62 @@
+id: Q-4.1-0037
+revision: 1
+examGuideVersion: '1.0'
+domain: 4
+subObjective: '4.1'
+caseStudy: null
+type:
+  kind: single
+difficulty: 3
+wafPillars:
+- efficiency
+keywords:
+- ダミー
+- 珊瑚
+examSets:
+- 1
+stem:
+  ja: 【ダミー】流星・月面・洞窟・望遠鏡・水路に関する設問。
+  en: Dummy question stem for Q-4.1-0037.
+choices:
+- id: a
+  text:
+    ja: 樹氷灯台彗星氷河青銅茶室望遠鏡噴水太
+    en: Dummy choice A of Q-4.1-0037
+  isCorrect: false
+  rationale:
+    ja: 選択肢Aが誤り理由(ダミー)
+    en: Why choice A is incorrect (dummy)
+  mistakeTags:
+  - latency
+- id: b
+  text:
+    ja: 星座渡り鳥製本惑星彫刻氷河
+    en: Dummy choice B of Q-4.1-0037
+  isCorrect: false
+  rationale:
+    ja: 選択肢Bが誤り理由(ダミー)
+    en: Why choice B is incorrect (dummy)
+  mistakeTags:
+  - requirementMismatch
+- id: c
+  text:
+    ja: 笛吹舞台湿原織機洞窟渡り鳥水路琥珀山脈火山
+    en: Dummy choice C of Q-4.1-0037
+  isCorrect: false
+  rationale:
+    ja: 選択肢Cが誤り理由(ダミー)
+    en: Why choice C is incorrect (dummy)
+  mistakeTags:
+  - deprecated
+- id: d
+  text:
+    ja: 刺繍織機染物水路青銅果樹園太鼓温室蜂蜜渡り鳥茶室鍵
+    en: Dummy choice D of Q-4.1-0037
+  isCorrect: true
+  rationale:
+    ja: 選択肢Dが正しい理由(ダミー)
+    en: Why choice D is correct (dummy)
+references:
+- title: Google Cloud ドキュメント
+  url: https://cloud.google.com/docs
+  license: link-only

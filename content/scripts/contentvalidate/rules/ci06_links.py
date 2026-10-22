@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import httpx
 
-from ..context import Context, Rule, walk
+from ..context import GlobalContext, Rule, walk
 from ..model import Issue, JsonPath, Kind, Severity, SourceDoc
 
 RULE_ID = "CI-06"
@@ -17,7 +17,7 @@ _URL_KEYS = frozenset({"url", "officialURL"})
 _TARGET_KINDS = frozenset({Kind.QUESTION, Kind.CASE, Kind.DOCS})
 
 
-def collect_urls(ctx: Context) -> dict[str, list[tuple[SourceDoc, JsonPath]]]:
+def collect_urls(ctx: GlobalContext) -> dict[str, list[tuple[SourceDoc, JsonPath]]]:
     found: dict[str, list[tuple[SourceDoc, JsonPath]]] = defaultdict(list)
     for doc in ctx.docs:
         if doc.kind not in _TARGET_KINDS or not doc.schema_ok:
@@ -44,10 +44,11 @@ def probe(client: httpx.Client, url: str, retry_get_on: frozenset[int]) -> str |
     return None
 
 
-def check(ctx: Context) -> Iterator[Issue]:
+def check(ctx: GlobalContext) -> Iterator[Issue]:
     if not ctx.check_links:
         return
-    cfg = ctx.config
+    cfg = ctx.config.thresholds
+    # 同じ URL は、試験をまたいで1回だけ確認し、結果をすべての出現箇所に報告する
     urls = collect_urls(ctx)
     if not urls:
         return
@@ -67,4 +68,4 @@ def check(ctx: Context) -> Iterator[Issue]:
                 yield doc.issue(RULE_ID, Severity.WARNING, f"リンク切れの可能性: {url}({reason})", path)
 
 
-RULE = Rule(RULE_ID, "リンク切れ", check)
+RULE = Rule(RULE_ID, "リンク切れ", check_global=check)
