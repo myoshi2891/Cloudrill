@@ -115,6 +115,19 @@ def _int(section: Mapping[str, Any], key: str, where: str, source: str = DEFAULT
     return value
 
 
+def _bool(
+    section: Mapping[str, Any], key: str, where: str, source: str = DEFAULT_CONFIG_NAME, *, default: bool
+) -> bool:
+    """キーがなければ default。source はエラーメッセージに出すファイル名。"""
+    if key not in section:
+        return default
+    value = section[key]
+    # bool() で変換すると "false" などの文字列が True になるため、真偽値以外は誤りにする
+    if not isinstance(value, bool):
+        raise ConfigError(f"{source}: {where}.{key} は true または false で指定してください")
+    return value
+
+
 def _int_key(key: object, where: str, source: str = DEFAULT_CONFIG_NAME) -> int:
     """YAML のキー("1" または 1)を整数に変換する。source はエラーメッセージに出すファイル名。"""
     if isinstance(key, bool):
@@ -203,7 +216,7 @@ def _thresholds(raw: Mapping[str, Any], where: str) -> Thresholds:
         position_min=_num(pos, "minRatio", "answerPosition", where),
         position_max=_num(pos, "maxRatio", "answerPosition", where),
         longest_max=_num(longest, "maxRatio", "longestChoice", where),
-        longest_count_ties=bool(longest.get("countTies", True)),
+        longest_count_ties=_bool(longest, "countTies", "longestChoice", where, default=True),
         ngram=_int(sim, "ngram", "similarity", where),
         jaccard_threshold=_num(sim, "jaccardThreshold", "similarity", where),
         weights_sum=_num(weights, "expectedSum", "weights", where),

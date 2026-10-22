@@ -138,6 +138,18 @@ def test_exam_config_rejects_bool_as_number(tmp_path: Path) -> None:
         load_exam_config(_global(tmp_path), exam_dir)
 
 
+@pytest.mark.parametrize("value", ["false", 0, None])
+def test_exam_config_rejects_non_bool_count_ties(tmp_path: Path, value: object) -> None:
+    exam_dir = _exam_dir(tmp_path, {"longestChoice": {"countTies": value}})
+    with pytest.raises(ConfigError, match=re.escape(f"{exam_dir / 'validation.yaml'}: longestChoice.countTies")):
+        load_exam_config(_global(tmp_path), exam_dir)
+
+
+def test_count_ties_defaults_to_true_when_absent(tmp_path: Path) -> None:
+    config = _global(tmp_path, {"longestChoice": {"maxRatio": 0.35}})
+    assert config.thresholds.longest_count_ties is True
+
+
 @pytest.mark.parametrize(
     "exam_set",
     [
