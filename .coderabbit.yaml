@@ -17,11 +17,6 @@ reviews:
     # 構造と整合は Schema と validate.py(CI-01〜CI-12)が content-validate.yml で検証する
     - "!content/exams/**"
 
-    # ---- 文書 ----
-    # 設計書や README は人がレビューする
-    - "!**/*.md"
-    - "!Documentation.docc/**"
-
     # ---- テスト補助(テストからだけ使う部品とそのテスト) ----
     - "!packages/**/*TestSupport/**"
     - "!packages/**/*TestSupportTests/**"
