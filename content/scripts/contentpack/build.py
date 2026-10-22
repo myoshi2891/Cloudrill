@@ -196,6 +196,14 @@ def _manifest(exam: dict[str, Any], version: str, min_app_version: str, key_id: 
     return manifest
 
 
+def _ensure_absent(target: Path) -> None:
+    """出力先がすでにあれば BuildError(上書きしない)。
+    exists() はリンクをたどるので、リンク先のないシンボリックリンクも is_symlink() で拒否する。
+    """
+    if target.exists() or target.is_symlink():
+        raise BuildError(f"出力先 {target} がすでにあります")
+
+
 def _write(target: Path, files: dict[str, bytes]) -> None:
     """一時ディレクトリに書いてから rename する(途中で失敗しても、不完全なパックを残さない)。"""
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -205,6 +213,8 @@ def _write(target: Path, files: dict[str, bytes]) -> None:
             file = staging / path
             file.parent.mkdir(parents=True, exist_ok=True)
             file.write_bytes(data)
+        # 検証の間に出力先ができていないかを確認し直す(POSIX の rename は空のディレクトリを上書きするため)
+        _ensure_absent(target)
         staging.rename(target)
     except BaseException:
         shutil.rmtree(staging, ignore_errors=True)
@@ -225,8 +235,7 @@ def build_pack(
     """<out>/<examID>/<version>/ にパックを作る。出力先がすでにあれば BuildError(上書きしない)。"""
     _check_arguments(root, exam_id, version, min_app_version, key_id, epoch)
     target = out / exam_id / version
-    if target.exists():
-        raise BuildError(f"出力先 {target} がすでにあります")
+    _ensure_absent(target)
     warnings = _validate(root, exam_id, config_path)
 
     loaded = load_content(root, frozenset({exam_id}))

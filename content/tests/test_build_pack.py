@@ -11,6 +11,7 @@ import pytest
 
 from build_pack import main
 from conftest import CONTENT_ROOT, VALID, materialize
+from contentpack.build import BuildError, _write
 from contentvalidate.schemas import validator_for
 from test_extensibility import EXAM_SPECIFIC, _string_constants
 
@@ -104,6 +105,33 @@ def test_build_refuses_existing_output(tmp_path: Path, monkeypatch: pytest.Monke
     # Act / Assert: 上書きしない
     assert main(_args(VALID, "test-alpha", tmp_path)) == 2
     assert _files(existing) == {"keep.txt": b"keep"}
+
+
+@pytest.mark.parametrize("dangling", [True, False])
+def test_build_refuses_symlinked_output(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, dangling: bool) -> None:
+    # Arrange: 出力先がシンボリックリンク(リンク先なし / 空のディレクトリ)
+    monkeypatch.setenv("SOURCE_DATE_EPOCH", EPOCH)
+    link_target = tmp_path / "elsewhere"
+    if not dangling:
+        link_target.mkdir()
+    link = tmp_path / "test-alpha" / "1.0.0"
+    link.parent.mkdir()
+    link.symlink_to(link_target, target_is_directory=True)
+    # Act / Assert: 終了コード 2 で、リンクもリンク先も変えない
+    assert main(_args(VALID, "test-alpha", tmp_path)) == 2
+    assert link.is_symlink()
+    assert dangling or list(link_target.iterdir()) == []
+
+
+def test_write_refuses_output_created_after_check(tmp_path: Path) -> None:
+    # Arrange: 最初の確認の後(検証中)に、空のディレクトリができた場合
+    target = tmp_path / "pack"
+    target.mkdir()
+    # Act / Assert: rename で上書きせず、一時ディレクトリも残さない
+    with pytest.raises(BuildError):
+        _write(target, {"manifest.json": b"{}"})
+    assert list(target.iterdir()) == []
+    assert [p.name for p in tmp_path.iterdir()] == ["pack"]
 
 
 @pytest.mark.parametrize(
