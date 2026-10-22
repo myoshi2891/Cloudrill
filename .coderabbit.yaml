@@ -30,3 +30,4 @@ reviews:
     - "!**/xcuserdata/**"
     - "!**/*.xcodeproj/project.xcworkspace/**"
     # *.xcassets はアイコンや色の定義(Contents.json)を人が編集するため、除外しない
+    - "!docs/reports/2026-10-22-implementation-report.md"
