@@ -130,4 +130,16 @@ struct ExamSessionAnswerTests {
         #expect(restored == session)
         #expect(restored.timer?.pausedRemaining == .seconds(80 * 60))
     }
+
+    @Test("Snapshot の位置が範囲外なら出題順の範囲に丸めて復元する", arguments: [(5, 99, 4), (5, -3, 0), (0, 2, 0)])
+    func restoreClampsIndex(count: Int, savedIndex: Int, expected: Int) {
+        // Arrange
+        let order = count == 0 ? QuestionOrder(items: []) : makeOrder(count: count)
+        var snapshot = ExamSession(order: order, duration: .seconds(90 * 60), timerPolicy: ExamTimerPolicy()).snapshot
+        snapshot.currentIndex = savedIndex
+        // Act
+        let restored = ExamSession(snapshot: snapshot, timerPolicy: ExamTimerPolicy())
+        // Assert
+        #expect(restored.currentIndex == expected)
+    }
 }

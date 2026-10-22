@@ -154,7 +154,8 @@ public struct ExamSession: Hashable, Sendable {
         timer = snapshot.timer
         answers = snapshot.answers
         flags = snapshot.flags
-        currentIndex = snapshot.currentIndex
+        // 保存データが壊れていても範囲外の位置で復元しないよう丸める(出題順が空なら 0)
+        currentIndex = min(max(snapshot.currentIndex, 0), max(snapshot.order.items.count - 1, 0))
         order = snapshot.order
         duration = snapshot.duration
         self.timerPolicy = timerPolicy
