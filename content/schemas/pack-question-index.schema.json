@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://examprep-content.invalid/schemas/pack-question-index.schema.json",
+  "title": "配信パックの問題の索引(questions/index.json)",
+  "description": "全問題の要約。起動時に読み、問題の本文(questions/domain{N}.json)は必要なときだけ読む(NFR-01、NFR-02)。生成は build_pack.py。",
+  "type": "array",
+  "items": { "$ref": "#/$defs/QuestionIndexEntry" },
+  "$defs": {
+    "QuestionIndexEntry": {
+      "description": "各項目の制約は question.schema.json の同名の項目と同じ。type は kind だけを持つ。",
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/QuestionID" },
+        "revision": { "type": "integer", "minimum": 1 },
+        "domain": { "$ref": "common.schema.json#/$defs/Domain" },
+        "subObjective": { "$ref": "common.schema.json#/$defs/SubObjective" },
+        "caseStudy": {
+          "anyOf": [{ "$ref": "common.schema.json#/$defs/CaseStudyID" }, { "type": "null" }]
+        },
+        "difficulty": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "kind": { "$ref": "common.schema.json#/$defs/QuestionKind" },
+        "examSets": {
+          "type": "array",
+          "items": { "$ref": "common.schema.json#/$defs/ExamSetNumber" },
+          "uniqueItems": true
+        }
+      },
+      "required": ["id", "revision", "domain", "subObjective", "caseStudy", "difficulty", "kind", "examSets"],
+      "additionalProperties": false
+    }
+  }
+}

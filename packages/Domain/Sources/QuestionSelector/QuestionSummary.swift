@@ -18,6 +18,14 @@ public struct QuestionSummary: Hashable, Sendable {
         self.difficulty = difficulty
         self.kind = kind
     }
+
+    /// パックの questions/index.json の1件から作る(DDD-P2 3.1)
+    public init(_ entry: QuestionIndexEntry) {
+        self.init(
+            id: entry.id, domain: entry.domain, subObjective: entry.subObjective, caseStudy: entry.caseStudy,
+            difficulty: entry.difficulty, kind: entry.kind
+        )
+    }
 }
 
 /// 練習の履歴(呼び出し側が解答の記録から作る)

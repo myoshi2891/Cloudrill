@@ -237,4 +237,21 @@ struct QuestionSelectorTests {
         // Assert
         #expect(weight == 1)
     }
+
+    @Test("パックの索引の1件から要約を作れる(revision と examSets は使わない)", arguments: [
+        CaseStudyID?.some("ehr"), nil,
+    ])
+    func summaryFromIndexEntry(caseStudy: CaseStudyID?) {
+        // Arrange
+        let entry = QuestionIndexEntry(
+            id: "Q-3.2-0147", revision: 2, domain: 3, subObjective: "3.2", caseStudy: caseStudy, difficulty: 4,
+            kind: .multiple, examSets: [1]
+        )
+        // Act
+        let summary = QuestionSummary(entry)
+        // Assert
+        #expect(summary == QuestionSummary(
+            id: "Q-3.2-0147", domain: 3, subObjective: "3.2", caseStudy: caseStudy, difficulty: 4, kind: .multiple
+        ))
+    }
 }

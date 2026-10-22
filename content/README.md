@@ -109,6 +109,10 @@ tests/                    pytest と fixture(valid-json/ は Swift テストが�
 | `exam-sets` | `exam-sets.yaml` | 模試の定義(`caseStudies` は `minItems: 0`。個数が `caseStudiesPerSet` と一致するかは CI-02 が確認する。`questionIDs` は重複なし) |
 | `docs-frontmatter` | `docs/*.md` のフロントマター | `title`、`subObjective`、`references`(1つ以上) |
 | `manifest` | 配信パックの `manifest.json` | 定義のみ。生成と署名はこのリポジトリの対象外 |
+| `pack-question-index` | 配信パックの `questions/index.json` | 問題の要約(`QuestionIndexEntry`)の配列。各項目の制約は `question` と同じで、`type` の代わりに `kind` だけを持つ |
+| `pack-docs-index` | 配信パックの `docs/index.json` | `DocEntry`(フロントマターの内容と本文の `path`)の配列。`path` は `docs/` 直下の `.md` に限る |
+| `catalog` | 配信する試験の一覧 `catalog.json` | `status` は `available` / `comingSoon` / `retired`。パックがまだない試験は `latestPackVersion`・`minAppVersion` が `null` |
+| `catalog-source` | `catalog.yaml` | カタログの元データ(`id`、`status`、`productIDs`)。試験 ID の実在と重複は Schema では確認しない |
 
 ### Schema と validate.py の役割分担
 

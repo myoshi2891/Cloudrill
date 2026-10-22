@@ -258,6 +258,16 @@ public enum PackVerificationError: Error, Equatable, Sendable {
 
 **完了条件**: `(cd content && .venv/bin/pytest tests/test_schemas.py)` と `swift test --package-path packages/DomainModels` が通る。
 
+**実装メモ**(実装時に本書と変えた点):
+
+- `CatalogTests` は `PackIndexTests.swift` に入れず、`Tests/DomainModelsTests/CatalogTests.swift` に分けた(テスト名とファイル名をそろえるため)。
+- カタログの `latestPackVersion` と `minAppVersion` は、`SemVer` か `null` にした(どちらも必須のキー)。P2-S03 の `test_catalog_from_source`(`--previous` なし)では、パックがまだないので `null` になる。Swift の型では `String?`。
+- `docs/index.json` の `path` は、Schema で `docs/` 直下の `.md` に限った(`^docs/[A-Za-z0-9_-][A-Za-z0-9._-]*\.md$`)。パスの安全性は manifest の `files` と同じく P2-S05 でも確かめる。
+- `CatalogStatus` は `catalog.schema.json#/$defs/CatalogStatus` に置き、`catalog-source.schema.json` から参照する。試験 ID の実在と重複は CI-13(P2-S03)が確かめるので、`catalog-source` の Schema では確かめない。
+- `QuestionIndexEntry` には public の init を付けた(Domain のテストと、P2-S07 のテストで値を作るため)。`DocEntry`・`Catalog` はデコードだけで使うので付けていない。
+- 本書の Red に加えて、次のテストを足した: 索引の `caseStudy: null` の受理と `caseStudy` キーの欠落の拒否、docs の `path` が `docs/` の外を指す場合の拒否、カタログの未配信の試験(版が `null`)の受理、`catalog-source` の未知の status の拒否、Swift の `unknownKindFails`・`decodeDocEntry`・`unreleasedExam`、Domain の `summaryFromIndexEntry`。
+- 新しい Schema は、ソースの YAML(`Kind`)に対応しないので、fixture と `export_json.py` は変えていない。
+
 ---
 
 ### P2-S02 パックのビルド(build_pack.py)
