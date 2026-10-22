@@ -18,8 +18,9 @@ public struct FSRSParameters: Hashable, Sendable {
         1.4835, 0.0614, 0.2629, 1.6483, 0.6014, 1.8729, 0.5425, 0.0912, 0.0658, 0.1542,
     ]
 
-    public var w: [Double]
-    public var desiredRetention: Double
+    // 初期化での検証を後から崩せないよう、検証する値は外から変更させない
+    public private(set) var w: [Double]
+    public private(set) var desiredRetention: Double
     public var learningSteps: [Duration]
     public var relearningSteps: [Duration]
     /// review の段階の間隔の上限(日)
