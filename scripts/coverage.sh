@@ -56,14 +56,16 @@ cov_args+=("$package/Sources")
 
 "${llvm_cov[@]}" report "${cov_args[@]}"
 
+# 比較には丸めない値を使い(79.996 を 80.00 に丸めて通さないため)、表示だけ小数 2 桁に丸める
 percent=$("${llvm_cov[@]}" export -summary-only "${cov_args[@]}" | python3 -c '
 import json, sys
 lines = json.load(sys.stdin)["data"][0]["totals"]["lines"]
-print("%.2f" % lines["percent"])
+print(repr(float(lines["percent"])))
 ')
-echo "line coverage: ${percent}%"
+percent_display=$(printf '%.2f' "$percent")
+echo "line coverage: ${percent_display}%"
 
 if [[ -n "$minimum" ]] && ! awk -v p="$percent" -v m="$minimum" 'BEGIN { exit !(p >= m) }'; then
-    echo "error: 行カバレッジ ${percent}% が最低値 ${minimum}% を下回った" >&2
+    echo "error: 行カバレッジ ${percent_display}% が最低値 ${minimum}% を下回った" >&2
     exit 1
 fi
