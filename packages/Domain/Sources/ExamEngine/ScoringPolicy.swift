@@ -39,7 +39,11 @@ extension Sequence<QuestionOutcome> {
     /// キーごとに正答数と出題数を数える。キーが nil の問題は数えない。
     /// `initialKeys` は出題がなくても 0/0 で結果に含めるキー。
     func tally<Key: Hashable>(by key: (Question) -> Key?, initialKeys: [Key] = []) -> [Key: ScoreTally] {
-        var result = Dictionary(uniqueKeysWithValues: initialKeys.map { ($0, ScoreTally(correct: 0, total: 0)) })
+        // initialKeys に重複があっても trap しない(最初の値を残す。ReadinessCalculator と同じ扱い)
+        var result = Dictionary(
+            initialKeys.map { ($0, ScoreTally(correct: 0, total: 0)) },
+            uniquingKeysWith: { first, _ in first }
+        )
         for outcome in self {
             guard let value = key(outcome.question) else { continue }
             var tally = result[value, default: ScoreTally(correct: 0, total: 0)]
