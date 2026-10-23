@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://examprep-content.invalid/schemas/catalog.schema.json",
+  "title": "配信する試験の一覧(catalog.json)",
+  "description": "CDN の /catalog.json。署名は付けない(DDD 4.8)。生成は build_catalog.py。",
+  "type": "object",
+  "properties": {
+    "formatVersion": { "type": "integer", "minimum": 1 },
+    "generatedAt": {
+      "description": "秒精度・小数秒なしの RFC 3339(manifest.schema.json の createdAt と同じ)。",
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "exams": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/CatalogEntry" }
+    }
+  },
+  "required": ["formatVersion", "generatedAt", "exams"],
+  "additionalProperties": false,
+  "$defs": {
+    "CatalogStatus": {
+      "description": "available = 配信中 / comingSoon = 一覧に出すが取得できない / retired = 取得済みの端末でだけ閲覧できる。",
+      "enum": ["available", "comingSoon", "retired"]
+    },
+    "CatalogEntry": {
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/ExamID" },
+        "vendor": { "$ref": "common.schema.json#/$defs/VendorID" },
+        "name": { "$ref": "common.schema.json#/$defs/LocalizedText" },
+        "shortName": { "$ref": "common.schema.json#/$defs/NonEmptyString" },
+        "status": { "$ref": "#/$defs/CatalogStatus" },
+        "latestPackVersion": {
+          "description": "まだパックを配信していなければ null。",
+          "anyOf": [{ "$ref": "common.schema.json#/$defs/SemVer" }, { "type": "null" }]
+        },
+        "minAppVersion": {
+          "description": "latestPackVersion の manifest の minAppVersion。パックがなければ null。",
+          "anyOf": [{ "$ref": "common.schema.json#/$defs/SemVer" }, { "type": "null" }]
+        },
+        "productIDs": {
+          "type": "array",
+          "items": { "$ref": "common.schema.json#/$defs/NonEmptyString" },
+          "uniqueItems": true
+        }
+      },
+      "required": ["id", "vendor", "name", "shortName", "status", "latestPackVersion", "minAppVersion", "productIDs"],
+      "additionalProperties": false,
+      "if": {
+        "description": "配信中(available)の試験はパックがあるので、版を null にできない。",
+        "properties": { "status": { "const": "available" } },
+        "required": ["status"]
+      },
+      "then": {
+        "properties": {
+          "latestPackVersion": { "$ref": "common.schema.json#/$defs/SemVer" },
+          "minAppVersion": { "$ref": "common.schema.json#/$defs/SemVer" }
+        }
+      }
+    }
+  }
+}

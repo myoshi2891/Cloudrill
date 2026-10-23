@@ -258,6 +258,16 @@ public enum PackVerificationError: Error, Equatable, Sendable {
 
 **完了条件**: `(cd content && .venv/bin/pytest tests/test_schemas.py)` と `swift test --package-path packages/DomainModels` が通る。
 
+**実装メモ**(実装時に本書と変えた点):
+
+- `CatalogTests` は `PackIndexTests.swift` に入れず、`Tests/DomainModelsTests/CatalogTests.swift` に分けた(テスト名とファイル名をそろえるため)。
+- カタログの `latestPackVersion` と `minAppVersion` は、`SemVer` か `null` にした(どちらも必須のキー)。P2-S03 の `test_catalog_from_source`(`--previous` なし)では、パックがまだないので `null` になる。Swift の型では `String?`。
+- `docs/index.json` の `path` は、Schema で `docs/` 直下の `.md` に限った(`^docs/[A-Za-z0-9_-][A-Za-z0-9._-]*\.md$`)。パスの安全性は manifest の `files` と同じく P2-S05 でも確かめる。
+- `CatalogStatus` は `catalog.schema.json#/$defs/CatalogStatus` に置き、`catalog-source.schema.json` から参照する。試験 ID の実在と重複は CI-13(P2-S03)が確かめるので、`catalog-source` の Schema では確かめない。
+- `QuestionIndexEntry` には public の init を付けた(Domain のテストと、P2-S07 のテストで値を作るため)。`DocEntry`・`Catalog` はデコードだけで使うので付けていない。
+- 本書の Red に加えて、次のテストを足した: 索引の `caseStudy: null` の受理と `caseStudy` キーの欠落の拒否、docs の `path` が `docs/` の外を指す場合の拒否、カタログの未配信の試験(版が `null`)の受理、`catalog-source` の未知の status の拒否、Swift の `unknownKindFails`・`decodeDocEntry`・`unreleasedExam`、Domain の `summaryFromIndexEntry`。
+- 新しい Schema は、ソースの YAML(`Kind`)に対応しないので、fixture と `export_json.py` は変えていない。
+
 ---
 
 ### P2-S02 パックのビルド(build_pack.py)
@@ -300,6 +310,20 @@ content/scripts/build_pack.py --exam <examID> --version <X.Y.Z> --min-app-versio
 **Refactor**: ファイルごとの変換(問題の分割、カードの結合、docs の分離)を、`Kind` ごとの関数の表にまとめる。新しい種別を追加するときは、表に1行足せばよいようにする。
 
 **完了条件**: `(cd content && .venv/bin/pytest tests/test_build_pack.py)` が通る。
+
+**実装メモ**(実装時に本書と変えた点):
+
+- `build_pack` は `Path` ではなく `BuiltPack(path, warnings)` を返す。CLI が warning を標準エラーに出すため。error があるときは `ContentInvalid(issues)`(終了コード 1)、引数・環境の不備と出力先がすでにあるときは `BuildError`(終了コード 2)を送出する。全体の設定ファイルを指定できるように、validate.py と同じ `--config` も受け付ける。
+- 検証は `engine.run(..., exam_ids={exam_id})` を、読み込みは `loader.load_content`(内部で `parse_yaml`)を再利用した。docs の本文を取り出すために、`loader` に `strip_frontmatter` を追加した(フロントマターの判定は `split_frontmatter` と共有)。本文の先頭の空行も除く。
+- 出力は、出力先と同じディレクトリの一時ディレクトリに書いてから rename する。途中で失敗しても、不完全なパックを残さない。引数の検証と内容の検証は書き込みの前に行うので、終了コードが 1 か 2 のときは何も作らない。
+- `--version` と `--min-app-version` は `common.schema.json` の `SemVer` の正規表現で確かめる(正規表現を Schema から読み、コードに複製しない)。作った manifest は書き込む前に `manifest.schema.json` で検証する。
+- `questions/domain{N}.json` は、`exam.yaml` のすべてのドメインについて出力する(問題がなければ空の配列)。読み込み側(P2-S06)がファイルの有無で分岐しなくて済むようにするため。
+- `docs/index.json` は `features.docs` が false でも空の配列で出力する(起動時に必ず読むため)。本文は `docs/<subObjective>.md` に置き、同じ `subObjective` の docs が2つあれば `BuildError` にする。
+- 配列(問題、カード、ケース、ツリー、ドリル、docs)は ID(docs は `subObjective`)の昇順に並べる。カードとドリルは、ファイルをまたいで1つのラッパー(`{ cards: [...] }`、`{ drills: [...] }`)にまとめる。
+- `assets/` はまだ作らない。図の元データの置き場所がコンテンツの規約にないため(図を追加するときに、置き場所と一緒に決める)。
+- 本書の Red に加えて、次のテストを足した: 引数の不備(存在しない試験、SemVer でない版)、`SOURCE_DATE_EPOCH` が空・数値でない・負の場合、各ファイルの Schema への適合(索引、docs の索引、exam、exam-sets、flashcards)、JSON の書式、`test-alpha` で有効な機能のファイルがあること。
+- `manifest.schema.json` と `content/README.md` の「生成と署名はこのリポジトリの対象外」という記述を直した(生成は build_pack.py、署名は P2-S03 の sign_manifest.py)。
+- 実データ(`gcp-pca`)でもビルドできることを確かめた(warning は既存の CI-02 の 7 件だけ)。
 
 ---
 

@@ -290,3 +290,114 @@ def test_manifest_schema_requires_exam_id_and_format_version(field: str) -> None
 def test_manifest_schema_rejects_signature_field() -> None:
     # 署名は manifest.sig に分離した(DDD C-06)
     assert _errors("manifest", {**MANIFEST, "signature": "c2lnbmF0dXJl"})
+
+
+# 配信パックの索引とカタログ(DDD-P2 3.1・3.2、DDD 4.8)
+INDEX_ENTRY = {
+    "id": "Q-3.2-0147",
+    "revision": 2,
+    "domain": 3,
+    "subObjective": "3.2",
+    "caseStudy": "ehr",
+    "difficulty": 3,
+    "kind": "single",
+    "examSets": [1],
+}
+
+DOC_ENTRY = {
+    "subObjective": "3.2",
+    "title": "可用性の設計",
+    "references": [{"title": "Docs", "url": "https://cloud.google.com/docs", "license": "CC-BY-4.0"}],
+    "path": "docs/3.2.md",
+}
+
+CATALOG = {
+    "formatVersion": 1,
+    "generatedAt": "2026-11-01T00:00:00Z",
+    "exams": [
+        {
+            "id": "gcp-pca",
+            "vendor": "google-cloud",
+            "name": {
+                "ja": "Google Cloud Professional Cloud Architect",
+                "en": "Google Cloud Professional Cloud Architect",
+            },
+            "shortName": "PCA",
+            "status": "available",
+            "latestPackVersion": "1.2.0",
+            "minAppVersion": "1.0.0",
+            "productIDs": [],
+        }
+    ],
+}
+
+
+def test_question_index_schema_accepts_entry() -> None:
+    assert _errors("pack-question-index", [INDEX_ENTRY]) == []
+
+
+def test_question_index_schema_accepts_null_case_study() -> None:
+    assert _errors("pack-question-index", [{**INDEX_ENTRY, "caseStudy": None}]) == []
+
+
+@pytest.mark.parametrize("field", ["kind", "caseStudy"])
+def test_question_index_schema_rejects_missing_kind(field: str) -> None:
+    # caseStudy はケース問題でなくても null で必須(Question と同じ)
+    assert _errors("pack-question-index", [{k: v for k, v in INDEX_ENTRY.items() if k != field}])
+
+
+def test_docs_index_schema_accepts_entry() -> None:
+    assert _errors("pack-docs-index", [DOC_ENTRY]) == []
+
+
+def test_docs_index_schema_requires_path() -> None:
+    assert _errors("pack-docs-index", [{k: v for k, v in DOC_ENTRY.items() if k != "path"}])
+
+
+@pytest.mark.parametrize("path", ["../3.2.md", "docs/../exam.json", "docs/3.2.json", "3.2.md"])
+def test_docs_index_schema_rejects_path_outside_docs(path: str) -> None:
+    assert _errors("pack-docs-index", [{**DOC_ENTRY, "path": path}])
+
+
+def test_catalog_schema_accepts_example() -> None:
+    assert _errors("catalog", CATALOG) == []
+
+
+def test_catalog_schema_accepts_unreleased_exam() -> None:
+    # build_catalog.py は --previous がなければ版を null にする(P2-S03)
+    entry = {**CATALOG["exams"][0], "status": "comingSoon", "latestPackVersion": None, "minAppVersion": None}
+    assert _errors("catalog", {**CATALOG, "exams": [entry]}) == []
+
+
+@pytest.mark.parametrize(
+    "versions",
+    [
+        {"latestPackVersion": None, "minAppVersion": None},
+        {"latestPackVersion": None},
+        {"minAppVersion": None},
+    ],
+)
+def test_catalog_schema_rejects_available_without_pack(versions: dict[str, Any]) -> None:
+    # 配信中の試験はパックがあるので、版は null にできない
+    entry = {**CATALOG["exams"][0], **versions}
+    assert _errors("catalog", {**CATALOG, "exams": [entry]})
+
+
+@pytest.mark.parametrize("status", ["comingSoon", "retired"])
+def test_catalog_schema_accepts_null_versions_unless_available(status: str) -> None:
+    entry = {**CATALOG["exams"][0], "status": status, "latestPackVersion": None, "minAppVersion": None}
+    assert _errors("catalog", {**CATALOG, "exams": [entry]}) == []
+
+
+def test_catalog_schema_rejects_unknown_status() -> None:
+    entry = {**CATALOG["exams"][0], "status": "beta"}
+    assert _errors("catalog", {**CATALOG, "exams": [entry]})
+
+
+def test_catalog_source_schema_accepts_minimal() -> None:
+    source = yaml.safe_load("exams: [{ id: gcp-pca, status: comingSoon, productIDs: [] }]")
+    assert _errors("catalog-source", source) == []
+
+
+def test_catalog_source_schema_rejects_unknown_status() -> None:
+    assert _errors("catalog-source", {"exams": [{"id": "gcp-pca", "status": "beta", "productIDs": []}]})

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://examprep-content.invalid/schemas/manifest.schema.json",
   "title": "配信パックのマニフェスト(manifest.json)",
-  "description": "生成と署名は build_pack.py / sign_manifest.py の責務(本リポジトリでは未実装)。",
+  "description": "生成は build_pack.py、署名は sign_manifest.py(manifest.sig に分離する)。",
   "type": "object",
   "properties": {
     "formatVersion": {

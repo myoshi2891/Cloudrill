@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://examprep-content.invalid/schemas/pack-docs-index.schema.json",
+  "title": "配信パックのドキュメントの索引(docs/index.json)",
+  "description": "docs/*.md のフロントマターと、フロントマターを除いた本文のパス。生成は build_pack.py。",
+  "type": "array",
+  "items": { "$ref": "#/$defs/DocEntry" },
+  "$defs": {
+    "DocEntry": {
+      "description": "subObjective・title・references は docs-frontmatter.schema.json と同じ。",
+      "type": "object",
+      "properties": {
+        "subObjective": { "$ref": "common.schema.json#/$defs/SubObjective" },
+        "title": { "$ref": "common.schema.json#/$defs/NonEmptyString" },
+        "references": { "$ref": "common.schema.json#/$defs/References" },
+        "path": {
+          "description": "本文のパック内の相対パス。docs/ の直下の .md に限る。",
+          "type": "string",
+          "pattern": "^docs/[A-Za-z0-9_-][A-Za-z0-9._-]*\\.md$"
+        }
+      },
+      "required": ["subObjective", "title", "references", "path"],
+      "additionalProperties": false
+    }
+  }
+}

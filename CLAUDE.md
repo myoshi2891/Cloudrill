@@ -31,6 +31,9 @@ content/.venv/bin/python content/scripts/validate.py --only CI-02,CI-03 --format
 content/.venv/bin/python content/scripts/validate.py --exam gcp-pca   # 試験を絞る(カンマ区切り。存在しない ID は終了コード 2)
 content/.venv/bin/python content/scripts/validate.py --check-links   # CI-06(ネットワークアクセスあり)
 
+# 配信パックのビルド(SOURCE_DATE_EPOCH は必須。終了コード 0 = 成功 / 1 = 検証 error / 2 = 引数の不備・出力先がすでにある)
+SOURCE_DATE_EPOCH=1793491200 content/.venv/bin/python content/scripts/build_pack.py --exam gcp-pca --version 1.0.0 --min-app-version 1.0.0 --key-id test-2026 --out <出力先>
+
 # fixture と Swift 用 JSON の再生成(生成物はコミット対象)
 content/.venv/bin/python content/tests/fixtures/generate.py
 content/.venv/bin/python content/scripts/export_json.py
