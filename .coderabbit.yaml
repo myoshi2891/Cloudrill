@@ -10,6 +10,7 @@ reviews:
     - "!content/tests/fixtures/valid/**"
     - "!content/tests/fixtures/invalid/**"
     - "!content/tests/fixtures/valid-json/**"
+    - "!content/tests/fixtures/packs/**"
     # content/scripts/fsrs_vectors.py が py-fsrs から生成する(FSRSVectorTests が照合する)
     - "!packages/Domain/Tests/FSRSTests/Vectors/**"
 
