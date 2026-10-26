@@ -458,6 +458,14 @@ content/tests/fixtures/packs/
 
 **完了条件**: `swift test --package-path packages/Data --filter PackVerifierTests` と `SemanticVersionTests` が通る。`data-test.yml` を追加し、PR で通ることを確認する。
 
+**実装メモ**:
+
+- Data パッケージを追加。外部の暗号ライブラリを増やさず、CryptoKit の Ed25519 と SHA-256 を使用した。
+- `PublicKeyRing(data:)` は JSON の鍵 ID → Base64 公開鍵を読み、鍵 ID の空文字・Base64・32バイト長を検証する。
+- `SemanticVersion` は任意桁数の整数を文字列で比較する。build metadata は比較・等価性・ハッシュに含めず、description には元の表記を保持する。
+- Python の `expected.json` を直接読み、正常3パックと改ざん9種類の契約を検証する。追加でメタデータ欠落、ファイルと親ディレクトリのシンボリックリンク、不正なSemVer、公開鍵不備を確認する。
+- ローカルでは `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer` を指定して実行した。`data-test.yml` は追加済み。リモートの PR CI は push / PR 作成後に確認する。
+
 ---
 
 ### P2-S06 パックの読み込み(PackLoader と ExamContentProvider)

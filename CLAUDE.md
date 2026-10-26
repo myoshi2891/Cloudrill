@@ -50,6 +50,7 @@ content/.venv/bin/python content/scripts/fsrs_vectors.py --out packages/Domain/T
 # Swift テスト
 swift test --package-path packages/DomainModels
 swift test --package-path packages/Domain
+swift test --package-path packages/Data
 swift test --package-path packages/DomainModels --filter FixtureDecodingTests   # 単一テスト
 
 # 行カバレッジ(Sources の *TestSupport/ を除く。最低値を下回ると終了コード 1)
@@ -103,6 +104,7 @@ validate.py の終了コード: `0` = error なし / `1` = error あり(`--stric
 - `domainmodels-test.yml` — `swift test --package-path packages/DomainModels`(macOS。`packages/DomainModels/**`、`content/schemas/**`、`content/tests/fixtures/**` の変更時)
 - `domain-test.yml` — `scripts/coverage.sh packages/Domain 80`(macOS。`swift test` と行カバレッジ 80% の確認。`packages/Domain/**`、`packages/DomainModels/**` の変更時。Domain は DomainModels に依存するので、DomainModels の変更でも実行する)
 - `content-link-check.yml` — 毎週、`--only CI-06 --check-links --strict`
+- `data-test.yml` — `swift test --package-path packages/Data`。Data・Domain・DomainModels・契約 fixture の変更時に、Python が生成した署名付きパックを CryptoKit で検証する。
 
 ## 命名とリリース
 
