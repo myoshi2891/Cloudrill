@@ -519,6 +519,13 @@ public final class PackContent: ExamContentProvider {
 
 **完了条件**: `swift test --package-path packages/Data --filter PackLoaderTests` と `swift test --package-path packages/Domain` が通る。
 
+**実装メモ**:
+
+- Domain に `DomainInterfaces` を追加し、`ExamContentProvider` と型付き `ContentError` を定義した。`IntegrityViolation` は ContentError が参照するため、Data ではなく DomainInterfaces に置く（詳細は P2-S07）。
+- 起動時の読み込みは exam、vendor、問題索引、模試、docs索引の5ファイル。本文は `QuestionBodyCache` actor でドメイン単位にキャッシュする。ファイル I/O は `FileReading.swift` に分離した。
+- 問題要求の順序・重複を保持し、索引にない ID は I/O 前にエラーにする。同時10要求でも本文の読み込みが1回であることを確認する。無効機能は明示的なエラー、索引外の DocEntry も拒否する。
+- 55問の読み込み時間はローカルMacで約5ms（記録のみ。実機のしきい値ではない）。Data 全24テストを確認した。
+
 ---
 
 ### P2-S07 内容の整合チェック(ContentIntegrityChecker)

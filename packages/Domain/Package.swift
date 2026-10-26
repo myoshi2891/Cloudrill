@@ -7,6 +7,7 @@ let package = Package(
     name: "Domain",
     platforms: [.iOS(.v18), .macOS(.v15)],
     products: [
+        .library(name: "DomainInterfaces", targets: ["DomainInterfaces"]),
         .library(name: "StudyModels", targets: ["StudyModels"]),
         .library(name: "ExamEngine", targets: ["ExamEngine"]),
         .library(name: "FSRS", targets: ["FSRS"]),
@@ -18,6 +19,7 @@ let package = Package(
         .package(path: "../DomainModels"),
     ],
     targets: [
+        .target(name: "DomainInterfaces", dependencies: ["DomainModels"]),
         .target(name: "StudyModels", dependencies: ["DomainModels"]),
         .target(name: "ExamEngine", dependencies: ["StudyModels", "DomainModels"]),
         // FSRS は学習内容に依存しないアルゴリズムなので、DomainModels にも依存させない
