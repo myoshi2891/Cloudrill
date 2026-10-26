@@ -628,6 +628,14 @@ public actor PackStore {
 
 **完了条件**: `swift test --package-path packages/Data --filter PackStoreTests` が通る。
 
+**実装メモ**:
+
+- `PackStore` actor が状態操作を直列化し、`PackStateFile` が JSON の読み書きを担当する。状態をメモリにキャッシュせず、アトミックな書き込みが失敗した場合にも旧状態を保持する。
+- `pins` は Swift では `[UUID: String]`、JSON では設計どおり UUID 文字列をキーにしたオブジェクトにする。同じ場所の再有効化は previous を変更しない。
+- `install` は同じ試験の `staging/<UUID>` 直下にある検証済みパックを移動する。既存版を上書きしない。署名・整合検証は呼び出し側で行う。
+- 試験 ID・版・シンボリックリンクを確認し、存在しないインストール版の有効化を拒否する。このため `directory(for:examID:bundledRoot:)` も設計例に加えて `throws(ContentError)` とした。
+- chmod で状態ディレクトリを書き込み不可にしてアトミック性を確認した。固定版保持→固定解除→不要版削除、再オープン、ロールバック、試験分離も確認済み。Data 全48テストが通過。
+
 ---
 
 ### P2-S09 同梱パックとカタログ(ExamCatalogService)

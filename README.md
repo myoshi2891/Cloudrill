@@ -11,7 +11,9 @@ google-cloud-professional-cloud-architect/
 ├── ExamPrepApp.xcodeproj                            # DomainModels をローカルパッケージとして参照
 ├── Documentation.docc/                              # 要件定義書(RDD.md)、基本設計書(BDD.md)
 ├── packages/
-│   └── DomainModels/                                # コンテンツの値型(SwiftPM、Swift Testing)
+│   ├── DomainModels/                                # コンテンツの値型(SwiftPM、Swift Testing)
+│   ├── Domain/                                      # 学習・採点ロジック、DomainInterfaces
+│   └── Data/                                        # ContentKit: パック検証・読み込み・整合チェック・保存
 ├── content/                                         # 学習コンテンツ、JSON Schema、検証ツール
 │   ├── schemas/                                     # JSON Schema(Draft 2020-12)
 │   ├── vendors.yaml  validation.yaml                # ベンダー定義、検証の閾値(全体)
@@ -30,6 +32,8 @@ google-cloud-professional-cloud-architect/
 | `ExamPrepApp/` と `ExamPrepApp.xcodeproj` | iOS アプリ本体。ホーム画面の表示名は「Cloudrill」(`INFOPLIST_KEY_CFBundleDisplayName`) |
 | `Documentation.docc/` | 要件定義書、基本設計書、詳細設計書 |
 | `packages/DomainModels/` | `content/schemas` に対応する Swift の値型(`Question`、`Choice`、`Flashcard`、`CaseStudy` など) |
+| `packages/Domain/` | 学習・採点ロジックとコンテンツ提供のインターフェース |
+| `packages/Data/` | `ContentKit`。署名付きパックの検証、遅延読み込み、整合チェック、保存・ロールバック |
 | `content/` | 学習コンテンツ(YAML / Markdown)、JSON Schema、検証スクリプト。詳細は [content/README.md](content/README.md) |
 | `.github/workflows/` | CI。変更されたパスに応じて、必要なワークフローだけが動きます |
 
@@ -51,6 +55,8 @@ content/.venv/bin/python content/scripts/validate.py --check-links   # リンク
 
 # Swift のテスト
 swift test --package-path packages/DomainModels
+swift test --package-path packages/Domain
+swift test --package-path packages/Data
 ```
 
 `swift test` が `plugin for module 'TestingMacros' not found` で失敗する場合は、Xcode のツールチェーンを指定してください。
@@ -63,6 +69,7 @@ swift test --package-path packages/DomainModels
 |---|---|---|
 | `content-validate.yml` | PR、`main` への push(`content/**`、`packages/DomainModels/**` の変更時) | `pytest` と `validate.py --format github` |
 | `domainmodels-test.yml` | PR、`main` への push(`packages/DomainModels/**`、`content/schemas/**`、`content/tests/fixtures/**` の変更時) | `swift test --package-path packages/DomainModels`(macOS) |
+| `data-test.yml` | PR、`main` への push（Data・Domain・DomainModels・fixture の変更時） | `swift test --package-path packages/Data`。Python製パックをSwiftで検証 |
 | `content-link-check.yml` | 毎週月曜 00:00 UTC、手動実行 | 参照 URL のリンク切れ確認 |
 
 ## リリースタグの命名規則
