@@ -96,6 +96,8 @@ SOURCE_DATE_EPOCH=<秒> python content/scripts/build_catalog.py --root content -
 
 配信前後の検証は `contentpack.verify.verify_pack(directory, key_ring=..., expected_exam_id=..., app_version=..., current_version=...)` を使います。鍵リングは鍵 ID → `Ed25519PublicKey` の辞書です。署名 → デコード → 形式の版 → アプリの版 → 試験 ID → 版戻し → 各ファイルの安全なパス・存在・サイズ・SHA-256 の順で検証し、`VerificationError.code` に Swift のエラー名に対応する snake_case を返します。
 
+契約 fixture は `content/.venv/bin/python content/tests/fixtures/generate_packs.py` で再生成します。`tests/fixtures/packs/` に正常な3パック、改ざん9種類、公開鍵、カタログを置きます。`--out <生成専用ディレクトリ>` も指定できます（既存の出力は置き換えます）。生成には固定 epoch を使い、`test_generated.py` がバイト単位の一致と期待する検証結果を確認します。Swift のテストはこのディレクトリを直接参照します。
+
 ## ディレクトリ構成(`content/` 配下)
 
 ```

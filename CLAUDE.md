@@ -41,6 +41,7 @@ SOURCE_DATE_EPOCH=1793491200 content/.venv/bin/python content/scripts/build_cata
 # fixture と Swift 用 JSON の再生成(生成物はコミット対象)
 content/.venv/bin/python content/tests/fixtures/generate.py
 content/.venv/bin/python content/scripts/export_json.py
+content/.venv/bin/python content/tests/fixtures/generate_packs.py  # Python / Swift 共通の署名付き契約パック
 
 # FSRS のテストベクタの再生成(開発時のみ。py-fsrs は依存グループ fsrs。生成物はコミット対象)
 uv sync --project content --group fsrs
@@ -85,6 +86,7 @@ validate.py の終了コード: `0` = error なし / `1` = error あり(`--stric
 - invalid fixture は valid に対する差分(overlay)。`expected.yaml` に、検出されるべきルール ID と深刻度を書く。`_delete.txt` に列挙したファイルは valid から削除される。
 - CI-13 は任意の全体ファイル `catalog.yaml` の試験 ID の実在・重複を確認する。構文・Schema は CI-01。`--exam` で絞っても、実在の確認には全試験ディレクトリを使う。
 - `contentpack/` はビルド・署名・検証・カタログ生成を担当する。署名は `cryptography` の Ed25519。検証は署名の成功後にだけ JSON を解析する。鍵リングは鍵 ID → `Ed25519PublicKey`。テスト用 seed は `contentpack.testing.test_signing_key(label)` で導出し、ファイルに保存しない。
+- `fixtures/packs/` は `generate_packs.py` で再生成する。epoch は固定の `1793491200`。正常3パックと改ざん9種類を持ち、`tampered/expected.json` の `directory`・`error`・`expectedExamID` を Python / Swift の両方が使う。生成済みパックは手編集しない。
 
 ## コンテンツの規約
 

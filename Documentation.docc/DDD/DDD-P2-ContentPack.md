@@ -418,6 +418,13 @@ content/tests/fixtures/packs/
 
 **完了条件**: `(cd content && .venv/bin/pytest tests/test_generated.py)` が通る。
 
+**実装メモ**:
+
+- `generate_packs.py [--out <packs>]` は一時ディレクトリで元の fixture を生成し、製品の build/sign/catalog を通して出力する。元の valid fixture は変更しない。生成が完了してから出力先を置き換える。
+- `test-alpha/1.1.0` は先頭の問題1件の revision と日英の解説を改訂する。正常なパックは3つ、改ざんは設計どおり9種類。
+- `tampered/expected.json` は `{directory, error, expectedExamID}` の配列。`exam-mismatch` は beta の内容に alpha の examID を付け、期待する試験を beta として検証する。hash-mismatch はファイルサイズを変えずに改ざんする。
+- 生成物の一致に加えて、再生成時の古いファイルの除去、改訂が1問だけであること、カタログの Schema・試験・版をテストする。公開鍵だけを保存し、秘密鍵は保存しない。
+
 ---
 
 ### P2-S05 パックの検証(PackVerifier)
