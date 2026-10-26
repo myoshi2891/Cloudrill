@@ -16,6 +16,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from .files import canonical_json
+
 from contentvalidate.config import ConfigError, load_config, resolve_config_path
 from contentvalidate.engine import run
 from contentvalidate.loader import exam_dirs, load_content, strip_frontmatter
@@ -46,11 +48,6 @@ class BuiltPack:
     path: Path
     # error でない検出結果(warning)。ビルドは止めない
     warnings: list[Issue]
-
-
-def canonical_json(data: Any) -> bytes:
-    """パックの JSON の書式: キーを並べ替え、空白なし、UTF-8、末尾に改行なし。"""
-    return json.dumps(data, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
 
 
 # ---- 種別ごとの変換 ---------------------------------------------------------

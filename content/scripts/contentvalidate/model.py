@@ -27,6 +27,7 @@ class Kind(StrEnum):
     DOCS = "docs-frontmatter"
     EXAM = "exam"
     VENDORS = "vendors"
+    CATALOG_SOURCE = "catalog-source"
 
 
 @dataclass(frozen=True, order=True)

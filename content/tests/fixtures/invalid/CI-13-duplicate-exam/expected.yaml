@@ -1,0 +1,5 @@
+description: CI-13-duplicate-exam
+expect:
+  CI-13:
+  - error
+options: {}

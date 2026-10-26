@@ -1,0 +1,4 @@
+exams:
+- id: unknown-exam
+  status: comingSoon
+  productIDs: []

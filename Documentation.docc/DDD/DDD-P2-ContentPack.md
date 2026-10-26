@@ -365,6 +365,15 @@ CI-13 は全体ルール(`scope=GLOBAL`)とする。`catalog.yaml` は任意の�
 
 **完了条件**: `(cd content && .venv/bin/pytest)` が通り、`validate.py` が error 0 件。
 
+**実装メモ**:
+
+- `cryptography==50.0.2` を直接依存として固定した。署名 CLI は manifest の Schema と鍵 ID を確認し、manifest を変更せずに署名する。署名・カタログとも一時ファイルからアトミックに置き換える。
+- `verify_pack` は鍵 ID → `Ed25519PublicKey` の辞書を受け取る。`VerificationError.code` は Swift の case に対応する snake_case。署名・デコード・版・ファイルの検証を関数に分け、SHA-256 は1MBずつ読む。パスの Schema 違反はファイル検証段階の `unsafe_path` として扱う。
+- カタログの `generatedAt` にも必須の `SOURCE_DATE_EPOCH` を使う。パックが未配信の場合は `comingSoon` と版 `null` を使い、`available` かつ版なしは既存 Schema に従って拒否する。初期の `content/catalog.yaml` は `comingSoon`。
+- `catalog.yaml` を任意の全体ソースとして loader に追加した。構文・Schema 違反は CI-01、試験 ID の実在・重複は CI-13。`--exam` で絞っても全試験の実在を調べる。CI-13 の invalid fixture は生成スクリプトからルート直下への overlay として生成する。
+- 追加確認: 鍵のローテーション、署名検証前の JSON 解析禁止、鍵 ID の不一致、存在・サイズ・hash、パスと親ディレクトリのシンボリックリンク、SemVer の prerelease と build metadata、環境変数の不備、秘密値を出さないエラー、書き込み失敗時の旧ファイル保持。Schema の SemVer 正規表現で許容される空の識別子・数値 prerelease の先頭ゼロも、比較処理では拒否する。
+- 作業ブランチは利用者の指定により `dev` を継続する。
+
 ---
 
 ### P2-S04 契約 fixture
