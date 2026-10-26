@@ -568,6 +568,12 @@ public struct ContentIntegrityChecker: Sendable {
 
 **完了条件**: `swift test --package-path packages/Data --filter ContentIntegrityCheckerTests` が通る。
 
+**実装メモ**:
+
+- `IntegrityViolation` は DomainInterfaces に置き、`ContentError` から参照できるようにした。ContentKit から ExamEngine への依存は追加していない。
+- 索引と本文に共通する語彙チェックは共有し、CI-09・CI-12 の対応をコメントで明記した。本文側では WAF の柱も検査する。
+- 設計のテストに加え、未知のサブ項目・模試ケース、ドメイン連番、サブ項目重複、チェック時に本文を読まないことを確認した。
+
 ---
 
 ### P2-S08 パックの保存(PackStore)

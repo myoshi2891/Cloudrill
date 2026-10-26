@@ -24,6 +24,3 @@ public enum ContentError: Error, Equatable, Sendable {
     case integrityViolations([IntegrityViolation])
     case storage(String)
 }
-
-// P2-S07 で内容を追加する。ContentError が使うので Data ではなく DomainInterfaces に置く。
-public enum IntegrityViolation: Equatable, Sendable {}
