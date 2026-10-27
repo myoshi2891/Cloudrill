@@ -9,8 +9,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `ExamPrepApp/` + `ExamPrepApp.xcodeproj` — iOS アプリ(SwiftUI、表示名 Cloudrill)。`packages/DomainModels` をローカルパッケージ(相対パス)として参照
 - `packages/DomainModels/` — コンテンツの値型(SwiftPM、Swift 6、Swift Testing)
 - `packages/Domain/` — 学習・採点ロジックと `DomainInterfaces`（コンテンツ提供・永続化リポジトリのプロトコル、エラー、受験スナップショットなどの値型）
-- `packages/Data/` — `ContentKit`。署名検証、索引と本文の読み込み、整合チェック、パック保存、同梱カタログと起動処理。テストは `content/tests/fixtures/packs/` を直接参照する
-- `packages/Data` の `Persistence` は P3-S01〜S09 の実装・ローカル検証完了（リモート CI は未確認）。10モデル、コンテナ、各 ModelActor リポジトリ、重複統合、エクスポート／削除、V1 の移行計画を実装済み。`Storage.write` が保存の1回再試行と rollback を共用する。App Group の URL は `storeDirectory` に渡し、インメモリでは CloudKit を無効にする。詳細と最終検証は `Documentation.docc/DDD/DDD-P3-Persistence.md` の各節・第5節を参照
+- `packages/Data/` — `ContentKit` と `Persistence` を提供する。`ContentKit` は署名検証、索引と本文の読み込み、整合チェック、パック保存、同梱カタログと起動処理を担当し、テストは `content/tests/fixtures/packs/` を直接参照する。`Persistence` は SwiftData による学習履歴・設定の永続化を担当する
+- `packages/Data` の `Persistence` は P3-S01〜S09 の実装・ローカル検証完了（リモート CI は未確認）。10モデル、コンテナ、`SwiftDataExamAttemptRepository`・`SwiftDataAnswerHistoryRepository` を含む各 ModelActor リポジトリ、重複統合、エクスポート／削除、V1 の移行計画を実装済み。`Storage.write` が保存の1回再試行と rollback を共用する。App Group の URL は `storeDirectory` に渡し、インメモリでは CloudKit を無効にする。詳細と最終検証は `Documentation.docc/DDD/DDD-P3-Persistence.md` の各節・第5節を参照
 - `SyncDeduplicator.run()` は値型の計画を返し、`notifyUser` が true なら受験統合の通知が必要。`DataManagement.export(examID:)`・`deleteAll(examID:)` は nil なら全体、試験指定なら UserSettings を除く当該試験のみを扱う。エクスポートは版付き JSON（Date は Unix 秒、Data は Base64、リレーションは UUID）。内部の `PersistenceRows` が取得を共用する。`ModelContainerFactory` は `ExamPrepMigrationPlan` を指定し、移行計画導入前の V1 ストアを開き直すテストを備える
 - `content/` — 学習コンテンツ(YAML / Markdown)、JSON Schema(Draft 2020-12)、Python の検証ツール。詳細仕様は `content/README.md`
   - `content/vendors.yaml`(全試験で共通のベンダー定義)と `content/validation.yaml`(検証の閾値、全体)

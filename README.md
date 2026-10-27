@@ -13,7 +13,7 @@ google-cloud-professional-cloud-architect/
 ├── packages/
 │   ├── DomainModels/                                # コンテンツの値型(SwiftPM、Swift Testing)
 │   ├── Domain/                                      # 学習・採点ロジック、DomainInterfaces
-│   └── Data/                                        # ContentKit: パック検証・読み込み・保存・起動処理
+│   └── Data/                                        # ContentKit と Persistence: パック管理・学習履歴の永続化
 ├── content/                                         # 学習コンテンツ、JSON Schema、検証ツール
 │   ├── schemas/                                     # JSON Schema(Draft 2020-12)
 │   ├── vendors.yaml  validation.yaml                # ベンダー定義、検証の閾値(全体)
@@ -33,13 +33,13 @@ google-cloud-professional-cloud-architect/
 | `Documentation.docc/` | 要件定義書、基本設計書、詳細設計書 |
 | `packages/DomainModels/` | `content/schemas` に対応する Swift の値型(`Question`、`Choice`、`Flashcard`、`CaseStudy` など) |
 | `packages/Domain/` | 学習・採点ロジックとコンテンツ提供のインターフェース |
-| `packages/Data/` | `ContentKit`。署名付きパックの検証、遅延読み込み、整合チェック、保存・ロールバック、同梱カタログと起動処理 |
+| `packages/Data/` | `ContentKit`（署名付きパックの検証・読み込み・保存・起動処理）と `Persistence`（SwiftData による学習履歴・設定の永続化） |
 | `content/` | 学習コンテンツ(YAML / Markdown)、JSON Schema、検証スクリプト。詳細は [content/README.md](content/README.md) |
 | `.github/workflows/` | CI。変更されたパスに応じて、必要なワークフローだけが動きます |
 
 起動時は同梱版と現在有効なインストール版を SemVer で比較し、新しい方を使います。同じ優先順位ならインストール版を維持し、内容の整合確認後に有効化します。実装状況と検証結果は [P2 コンテンツパック](Documentation.docc/DDD/DDD-P2-ContentPack.md) を参照してください。
 
-永続化層は [P3-S01〜S09](Documentation.docc/DDD/DDD-P3-Persistence.md) の実装・ローカル検証を完了しています。モデル・コンテナ生成、受験記録・練習履歴・カード・ブックマーク／既読・設定のリポジトリ、同期後の重複統合、JSON エクスポート・削除、V1 の移行計画を備えています。保存には1回の再試行と失敗時の取り消しを設けています。ディスク保存先にはアプリ側で解決した App Group の URL を渡します。リモート CI の確認は別途必要です。
+永続化層は [P3-S01〜S09](Documentation.docc/DDD/DDD-P3-Persistence.md) の実装・ローカル検証を完了しています。モデル・コンテナ生成、受験記録（`SwiftDataExamAttemptRepository`）・解答履歴（`SwiftDataAnswerHistoryRepository`）・カード・ブックマーク／既読・設定のリポジトリ、同期後の重複統合、JSON エクスポート・削除、V1 の移行計画を備えています。保存には1回の再試行と失敗時の取り消しを設けています。ディスク保存先にはアプリ側で解決した App Group の URL を渡します。リモート CI の確認は別途必要です。
 
 ## ローカルでの検証
 
