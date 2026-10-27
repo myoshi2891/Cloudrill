@@ -81,14 +81,13 @@ public struct ExamCatalogService: Sendable {
         let bundledLocation = try bundled.location(for: examID)
         let current = try await store.state(for: examID).current
         // 旧アプリの bundled 状態は、現在のバンドルに存在する版で置き換える。
-        guard let current, current.source == .installed else { return bundledLocation }
-        let directory = try await store.directory(for: current, examID: examID, bundledRoot: bundled.root)
-        guard (try? directory.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true else { return bundledLocation }
-        if let bundledLocation,
-           let bundledVersion = SemanticVersion(bundledLocation.version),
-           let installedVersion = SemanticVersion(current.version), bundledVersion > installedVersion {
-            return bundledLocation
+        var installedLocation: PackLocation?
+        if let current, current.source == .installed {
+            let directory = try await store.directory(for: current, examID: examID, bundledRoot: bundled.root)
+            if (try? directory.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true {
+                installedLocation = current
+            }
         }
-        return current
+        return resolveActiveLocation(bundled: bundledLocation, installed: installedLocation)
     }
 }
