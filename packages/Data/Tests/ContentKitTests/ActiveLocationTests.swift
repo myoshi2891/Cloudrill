@@ -46,6 +46,11 @@ struct ActiveLocationTests {
         .init("1.0.0", "1.0.0+installed", .installed),
     ]
 
+    @Test(arguments: scenarios)
+    func resolvesWithoutIO(scenario: Scenario) {
+        #expect(resolveActiveLocation(bundled: scenario.bundled, installed: scenario.installed) == scenario.expected)
+    }
+
     // 版の選択はディレクトリの存在だけを調べ、パックの本文を読まず、状態も変更しない。
     @Test(arguments: scenarios)
     func serviceSelectsVersion(scenario: Scenario) async throws {
