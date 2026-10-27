@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `packages/DomainModels/` — コンテンツの値型(SwiftPM、Swift 6、Swift Testing)
 - `packages/Domain/` — 学習・採点ロジックと `DomainInterfaces`（`ExamContentProvider`、`ContentError`、`IntegrityViolation`）
 - `packages/Data/` — `ContentKit`。署名検証、索引と本文の読み込み、整合チェック、パック保存、同梱カタログと起動処理。テストは `content/tests/fixtures/packs/` を直接参照する
-- `packages/Data` の `Persistence` は P3-S01 の Red 段階。`SchemaV1Tests` を先行追加し、`SchemaV1`・`ModelContainerFactory` は未実装。再開手順は `Documentation.docc/DDD/DDD-P3-Persistence.md` の S01 引き継ぎを参照。現在の Data テストは意図的にコンパイル失敗する
+- `packages/Data` の `Persistence` は P3-S01 完了。`SchemaV1` の10モデルと `ModelContainerFactory` を実装済み。ディスク保存にはアプリ側で解決した App Group の URL を `storeDirectory` に渡す。インメモリでは CloudKit を無効にする。リポジトリ（S02 以降）と移行計画（S09）は未実装。詳細は `Documentation.docc/DDD/DDD-P3-Persistence.md` を参照
 - `content/` — 学習コンテンツ(YAML / Markdown)、JSON Schema(Draft 2020-12)、Python の検証ツール。詳細仕様は `content/README.md`
   - `content/vendors.yaml`(全試験で共通のベンダー定義)と `content/validation.yaml`(検証の閾値、全体)
   - `content/exams/<examID>/` — 試験ごとのディレクトリ。`exam.yaml`(試験定義)、`validation.yaml`(試験ごとの検証設定)、`exam-sets.yaml`、問題などのコンテンツ

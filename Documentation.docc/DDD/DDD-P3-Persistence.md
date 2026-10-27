@@ -6,7 +6,7 @@
 | 作成日 | 2026-10-21 |
 | 上位文書 | [詳細設計書(索引・共通設計)](../DDD.md) |
 | 対象 | `packages/Data` の `Persistence`、`packages/Domain` の `DomainInterfaces`(リポジトリのプロトコル) |
-| ステータス | P3-S01 の先行テストを追加し、型未定義による Red を確認。実装前の引き継ぎ |
+| ステータス | P3-S01 の Red → Green → Refactor とローカル検証完了。P3-S02 以降は未着手 |
 
 ---
 
@@ -197,7 +197,7 @@ public protocol CardStateRepository: Sendable {
 | 並行性 | 各リポジトリは `@ModelActor` の actor にする。`ModelContext` を actor の外に出さない |
 | 返す値 | `@Model` のオブジェクトではなく、StudyModels の値型(`AnswerFact`、`AttemptSnapshot` など)に変換して返す |
 | 保存 | 書き込みのたびに `save()` する(NFR-04)。失敗したら1回だけ再試行し、それでも失敗したら `PersistenceError.saveFailed` を投げる(E-05) |
-| コンテナ | `ModelContainerFactory.make(inMemory: Bool, cloudKitContainer: String?)`。テストはインメモリ、アプリは App Group のストアを使う |
+| コンテナ | `ModelContainerFactory.make(inMemory:cloudKitContainer:storeDirectory:)`。テストはインメモリ、アプリは App Group の URL を `storeDirectory` に渡す。ディスク保存で保存先を省略するとエラー |
 
 ---
 
@@ -227,26 +227,35 @@ public protocol CardStateRepository: Sendable {
 
 **完了条件**: `swift test --package-path packages/Data --filter SchemaV1Tests` が通る。
 
-**実装状況・引き継ぎ**(2026-10-27、Red で停止):
+**実装メモ**(2026-10-27、P3-S01 完了):
 
-- P2 の実装・ローカル検証を終え、P4 の前提になる P3-S01 に着手した。利用者の「次のコミットで引き継ぎ」の指示により、本ステップの先行テストとこのメモを1コミットにまとめて停止する。P3-S02 以降は未着手。
-- `packages/Data/Package.swift` に `Persistence` の library/target と `PersistenceTests` を追加した。`Sources/Persistence/Persistence.swift` はターゲットを認識させるためのコメントだけの空ファイルで、製品の実装はまだない。
-- `SchemaV1Tests.swift` に設計の5テストと `schemaContainsAllColumns` を追加した。10モデルの登録・列、引数なしの生成、Schema 上の既定値または Optional、unique 制約なし、双方向の Optional リレーション、インメモリと指定ディレクトリのストアを確認する。既定値の検査は引数なしで初期化できることだけでは済ませず、`Schema.Attribute.defaultValue` も検査する。
-- 次のコマンドを実行し、終了コード 1、`cannot find 'ModelContainerFactory' in scope` と `cannot find 'SchemaV1' in scope` を確認した。これは型が存在しない最初のコンパイル Red（DDD 7.1）。型推論の連鎖エラーも発生している。テスト本体はまだ実行できておらず、assertion の Red・Green は未確認。
+- `Persistence` の library/target と `PersistenceTests` を追加した。空のターゲット用ファイルは削除し、`SchemaV1.swift` と `ModelContainerFactory.swift` に置き換えた。
+- `SchemaV1` は 3.1 の10モデルと全列を持つ。構造値は Data、列挙値は文字列で保存する。`currentExamID`、`examDate`、`caseStudy`、提出情報、最終復習日時など、未設定がある列は Optional にした。UUID はレコードごとに生成する。
+- `ExamAttempt.answers` ↔ `AnswerRecord.attempt`、`CardState.reviewLogs` ↔ `ReviewLog.cardState` のリレーションを明示し、両側を Optional にした。削除規則は `.nullify`（同期後の重複統合で親を削除しても追記のみの履歴を巻き添えにしないため）。CloudKit の実同期は P6-S15 で確認する。
+- 引数なしのモデル生成に加えて、`Schema.Attribute.defaultValue` または Optional、unique 制約なし、逆リレーションをテストした。共通の空文字・Data・日時は内部の `SchemaV1Defaults` に集約した。JSON の初期値は空の Data なので、S02 以降のリポジトリが保存前に実際の値をエンコードして設定する。
+- ファクトリーは `storeDirectory: URL? = nil` を追加した。ディスクでは指定先に `StudyHistory.store` を作る。保存先なしは `ModelContainerFactoryError.storeDirectoryRequired`、非 file URL は `.invalidStoreDirectory`。ディレクトリ作成や SwiftData の I/O エラーは呼び出し側へ伝える。App Group の URL は P4 のアプリ側で解決する。
+- インメモリでは保存先の指定があってもファイルを作らず、CloudKit も無効にする。ディスクでは `cloudKitContainer: nil` を明示的な同期無効として扱い、ID があるときは private database の設定に渡す。実アカウントを使った同期は今回のテスト対象外。
+
+TDD の確認記録:
+
+| コミット | 段階・結果 |
+|---|---|
+| `528d461` | 6テストを先行追加。型未定義の最初のコンパイル Red |
+| `87d5180` | 最小モデルと常にインメモリを返す仮実装で assertion Red を確認。列不足10件、リレーション不足1件、保存設定の不一致2件。既存 ContentKit 70テストは成功 |
+| `a9698b0` | 保存先の指定漏れ・非 file URL・再オープン後のデータ保持を追加し、3テスト4件の assertion 失敗を確認。インメモリでファイルも CloudKit 接続も作らないテストも追加 |
+| `ca10468` | 10モデルとコンテナ生成を実装。SchemaV1Tests 10件と既存 ContentKit 70件が成功 |
+| `45bd033` | 共通の既定値を整理し、同じ全80テストの成功を再確認 |
+
+最初の仮実装で型が解決した際、Swift Testing のマクロ展開で `allSatisfy(\.isOptional)` がコンパイルエラーになったため、同じ条件の明示的なクロージャへ変更した。期待値は変更していない。
+
+検証コマンド:
 
 ```sh
 env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --package-path packages/Data --filter SchemaV1Tests
+env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --package-path packages/Data
 ```
 
-再開手順（TDD と段階コミットを継続）:
-
-1. `SchemaV1.swift` と `ModelContainerFactory.swift` にコンパイル可能な仮実装を置く。上の空ファイルは不要になった時点で削除する。まず最小のモデルと誤ったコンテナ設定などで、登録する列や保存先の **assertion が意図した理由で失敗することを確認してコミット**する。コンパイルエラーだけで Green へ進めない。
-2. 3.1 の10モデルを `enum SchemaV1: VersionedSchema` に定義し、全プロパティの既定値または Optional、unique 制約なし、Optional の逆リレーションを実装する。列挙値は文字列、構造値は Data の列として持つ。テストが使う `SchemaV1.Flag.examID` と `questionID` も実装する。
-3. ファクトリーには設計例の2引数に加え、`storeDirectory: URL? = nil` を受ける入口を用意する。App Group の実際の URL の解決は P4 のアプリ側で行い、今回のテストでは一時ディレクトリを渡す。App Group ID を仮の値で固定しない。`cloudKitContainer: nil` の場合は同期を明示的に無効にし、ローカルテストから実アカウントに接続しない。保存先未指定時などの扱いを増やす際は、そのテストを先に追加する。
-4. 6テストの Green、既定値の整理、Data 全体の回帰確認を行い、段階ごとにコミットする。移行計画の配線は P3-S09、リポジトリの実装は S02 以降で行う。
-5. README・CLAUDE.md と本節を実装結果に更新する。プッシュやリモート CI の操作は利用者に任せる。
-
-このコミットでは Data 全体も新しいテストのコンパイルで失敗する。直前の P2 検証結果（Data 70件、DomainModels 38件、Python 351件成功、Domain カバレッジ 97.54%）は P2 の記録であり、今回の Red コミットの成功結果ではない。ContentKit の製品コード・既存テストと生成 fixture は変更していない。
+P3-S02 以降のリポジトリと P3-S09 の移行計画は未実装。リモート CI は利用者が実施する。P3 フェーズ全体の完了条件はまだ満たしていない。
 
 ---
 
