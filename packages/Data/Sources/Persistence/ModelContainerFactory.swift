@@ -1,6 +1,11 @@
 import Foundation
 import SwiftData
 
+public enum ModelContainerFactoryError: Error, Equatable, Sendable {
+    case storeDirectoryRequired
+    case invalidStoreDirectory
+}
+
 /// P3-S01 の assertion Red 用。ディスク指定でもメモリに作る仮実装。
 public enum ModelContainerFactory {
     public static func make(

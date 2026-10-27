@@ -106,4 +106,53 @@ struct SchemaV1Tests {
         try context.save()
         #expect(FileManager.default.fileExists(atPath: configuration.url.path))
     }
+
+    @Test func diskStoreRequiresExplicitDirectory() {
+        #expect(throws: ModelContainerFactoryError.storeDirectoryRequired) {
+            try ModelContainerFactory.make(inMemory: false, cloudKitContainer: nil)
+        }
+    }
+
+    @Test func diskStoreRejectsNonFileURL() throws {
+        let directory = try #require(URL(string: "https://example.invalid/store"))
+        #expect(throws: ModelContainerFactoryError.invalidStoreDirectory) {
+            try ModelContainerFactory.make(inMemory: false, cloudKitContainer: nil, storeDirectory: directory)
+        }
+    }
+
+    @Test func inMemoryDoesNotCreateFilesOrEnableCloudKit() throws {
+        let directory = FileManager.default.temporaryDirectory.appending(path: "SchemaV1Tests-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let container = try ModelContainerFactory.make(
+            inMemory: true, cloudKitContainer: "iCloud.example.tests", storeDirectory: directory
+        )
+        let configuration = try #require(container.configurations.first)
+        #expect(configuration.isStoredInMemoryOnly)
+        #expect(configuration.cloudKitContainerIdentifier == nil)
+        #expect(!FileManager.default.fileExists(atPath: directory.path))
+    }
+
+    @Test func diskStoreReopensRecords() throws {
+        let directory = FileManager.default.temporaryDirectory.appending(path: "SchemaV1Tests-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let id = UUID()
+        do {
+            let container = try ModelContainerFactory.make(inMemory: false, cloudKitContainer: nil, storeDirectory: directory)
+            let context = ModelContext(container)
+            let flag = SchemaV1.Flag()
+            flag.id = id
+            flag.examID = "test-alpha"
+            flag.questionID = "Q-1.1-0001"
+            context.insert(flag)
+            try context.save()
+        }
+        let reopened = try ModelContainerFactory.make(inMemory: false, cloudKitContainer: nil, storeDirectory: directory)
+        let records = try ModelContext(reopened).fetch(FetchDescriptor<SchemaV1.Flag>())
+        #expect(records.count == 1)
+        let record = try #require(records.first)
+        #expect(record.id == id)
+        #expect(record.examID == "test-alpha")
+        #expect(record.questionID == "Q-1.1-0001")
+    }
 }
