@@ -31,9 +31,9 @@ def build(root, **kwargs):
     return build_catalog(root, epoch=1793491200, **kwargs)
 
 
-def update_file(tmp_path, version="1.1.0", exam="test-alpha"):
+def update_file(tmp_path, version="1.1.0", exam="test-alpha", min_app="1.0.1"):
     path = tmp_path / "update.json"
-    path.write_text(json.dumps({**MANIFEST, "examID": exam, "packVersion": version, "minAppVersion": "1.0.1"}), encoding="utf-8")
+    path.write_text(json.dumps({**MANIFEST, "examID": exam, "packVersion": version, "minAppVersion": min_app}), encoding="utf-8")
     return path
 
 
@@ -71,6 +71,13 @@ def test_catalog_rejects_downgrade(root, tmp_path, monkeypatch, version):
     out.write_bytes(b"previous output")
     assert main(args(root, out) + ["--previous", str(previous), "--update", f"test-alpha={update_file(tmp_path, version)}"]) == 2
     assert out.read_bytes() == b"previous output"
+
+
+@pytest.mark.parametrize(("version", "min_app"), [("1.0.0-01", "1.0.1"), ("1.0.0", "1.0.0-01")])
+def test_first_catalog_rejects_invalid_semver(root, tmp_path, version, min_app):
+    # 前回のカタログがない初回の登録でも、Schema が通す不正な SemVer を拒否する
+    with pytest.raises(CatalogError, match="SemVer ではありません"):
+        build(root, updates={"test-alpha": update_file(tmp_path, version, min_app=min_app)})
 
 
 def test_catalog_is_deterministic(root, tmp_path, monkeypatch):

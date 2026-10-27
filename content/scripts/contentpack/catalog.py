@@ -71,7 +71,14 @@ def build_catalog(
             manifest = _read(updates[exam_id], "manifest")
             if manifest["examID"] != exam_id:
                 raise CatalogError(f"manifest の試験 ID が一致しません: {exam_id}")
-            if version is not None and version_key(manifest["packVersion"]) < version_key(version):
+            # Schema の SemVer は prerelease の先頭ゼロなどを通すので、初回の登録でも検証する
+            try:
+                pack_key = version_key(manifest["packVersion"])
+                version_key(manifest["minAppVersion"])
+                prior_key = version_key(version) if version is not None else None
+            except ValueError as error:
+                raise CatalogError(f"版が SemVer ではありません: {exam_id}") from error
+            if prior_key is not None and pack_key < prior_key:
                 raise CatalogError(f"パックの版を巻き戻せません: {exam_id}")
             version, minimum = manifest["packVersion"], manifest["minAppVersion"]
         entries.append({**entry, **{k: definition[k] for k in ("name", "shortName", "vendor")},
