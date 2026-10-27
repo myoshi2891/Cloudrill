@@ -88,6 +88,19 @@ def test_packs_match_generator(tmp_path: Path) -> None:
     assert _tree(out) == _tree(PACKS)
 
 
+def test_generate_packs_refuses_unrelated_output(tmp_path: Path) -> None:
+    file = tmp_path / "file.txt"
+    file.write_text("keep", encoding="utf-8")
+    other = tmp_path / "other"
+    other.mkdir()
+    (other / "keep.txt").write_text("keep", encoding="utf-8")
+    for target in (file, other):
+        with pytest.raises(ValueError):
+            generate_packs(target)
+    assert file.read_text(encoding="utf-8") == "keep"
+    assert (other / "keep.txt").read_text(encoding="utf-8") == "keep"
+
+
 @pytest.mark.parametrize("exam,version", VALID_PACKS)
 def test_valid_packs_verify(exam: str, version: str) -> None:
     manifest = verify_pack(PACKS / "valid" / exam / version, key_ring=_key_ring(), expected_exam_id=exam)

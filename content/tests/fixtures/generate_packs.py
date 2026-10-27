@@ -109,7 +109,18 @@ def _build_valid(source: Path, out: Path) -> dict[tuple[str, str], Path]:
     return packs
 
 
+def _ensure_replaceable(out: Path) -> None:
+    """生成物と判別できない既存の出力先は削除しない。空のディレクトリは置き換えてよい。"""
+    if not out.exists() and not out.is_symlink():
+        return
+    if out.is_symlink() or not out.is_dir():
+        raise ValueError(f"出力先がディレクトリではありません: {out}")
+    if any(out.iterdir()) and not (out / "test-keys.json").is_file():
+        raise ValueError(f"生成済みの契約パックではないため置き換えません: {out}")
+
+
 def generate_packs(out: Path = HERE / "packs") -> None:
+    _ensure_replaceable(out)
     with tempfile.TemporaryDirectory(prefix="content-contract-") as temporary:
         working = Path(temporary)
         generate(working / "fixtures")
@@ -144,5 +155,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, default=HERE / "packs")
     args = parser.parse_args()
-    generate_packs(args.out)
+    try:
+        generate_packs(args.out)
+    except ValueError as error:
+        parser.error(str(error))
     print(f"generated: {args.out}")
