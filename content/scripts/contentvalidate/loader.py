@@ -187,6 +187,9 @@ def load_content(root: Path, exam_ids: frozenset[str] | None = None) -> LoadResu
     """全体のファイルと試験ディレクトリを読み込む。exam_ids を指定すると、その試験だけを読み込む。"""
     result = LoadResult([], [])
     _load_required(root, root, _GLOBAL_REQUIRED, None, result)
+    catalog = root / "catalog.yaml"
+    if catalog.exists():
+        result.add(*_load_file(root, catalog, Kind.CATALOG_SOURCE, None))
 
     exams = exam_dirs(root)
     if not exams:

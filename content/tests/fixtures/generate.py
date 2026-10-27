@@ -852,6 +852,16 @@ def generate(out: Path = HERE) -> None:
             files["expected.yaml"] = {"description": description, "expect": expect, "options": options}
             write_tree(out / "invalid" / name, files)
 
+    # 全体のファイルへの overlay は試験ディレクトリの外に置く。
+    for name, ids in (
+        ("CI-13-unknown-exam", ["unknown-exam"]),
+        ("CI-13-duplicate-exam", ["test-alpha", "test-alpha"]),
+    ):
+        write_tree(out / "invalid" / name, {
+            "catalog.yaml": {"exams": [{"id": id_, "status": "comingSoon", "productIDs": []} for id_ in ids]},
+            "expected.yaml": {"description": name, "expect": {"CI-13": ["error"]}, "options": {}},
+        })
+
 
 if __name__ == "__main__":
     generate()

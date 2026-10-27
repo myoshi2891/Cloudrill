@@ -365,6 +365,15 @@ CI-13 は全体ルール(`scope=GLOBAL`)とする。`catalog.yaml` は任意の�
 
 **完了条件**: `(cd content && .venv/bin/pytest)` が通り、`validate.py` が error 0 件。
 
+**実装メモ**:
+
+- `cryptography==50.0.2` を直接依存として固定した。署名 CLI は manifest の Schema と鍵 ID を確認し、manifest を変更せずに署名する。署名・カタログとも一時ファイルからアトミックに置き換える。
+- `verify_pack` は鍵 ID → `Ed25519PublicKey` の辞書を受け取る。`VerificationError.code` は Swift の case に対応する snake_case。署名・デコード・版・ファイルの検証を関数に分け、SHA-256 は1MBずつ読む。パスの Schema 違反はファイル検証段階の `unsafe_path` として扱う。
+- カタログの `generatedAt` にも必須の `SOURCE_DATE_EPOCH` を使う。パックが未配信の場合は `comingSoon` と版 `null` を使い、`available` かつ版なしは既存 Schema に従って拒否する。初期の `content/catalog.yaml` は `comingSoon`。
+- `catalog.yaml` を任意の全体ソースとして loader に追加した。構文・Schema 違反は CI-01、試験 ID の実在・重複は CI-13。`--exam` で絞っても全試験の実在を調べる。CI-13 の invalid fixture は生成スクリプトからルート直下への overlay として生成する。
+- 追加確認: 鍵のローテーション、署名検証前の JSON 解析禁止、鍵 ID の不一致、存在・サイズ・hash、パスと親ディレクトリのシンボリックリンク、SemVer の prerelease と build metadata、環境変数の不備、秘密値を出さないエラー、書き込み失敗時の旧ファイル保持。Schema の SemVer 正規表現で許容される空の識別子・数値 prerelease の先頭ゼロも、比較処理では拒否する。
+- 作業ブランチは利用者の指定により `dev` を継続する。
+
 ---
 
 ### P2-S04 契約 fixture
@@ -409,6 +418,13 @@ content/tests/fixtures/packs/
 
 **完了条件**: `(cd content && .venv/bin/pytest tests/test_generated.py)` が通る。
 
+**実装メモ**:
+
+- `generate_packs.py [--out <packs>]` は一時ディレクトリで元の fixture を生成し、製品の build/sign/catalog を通して出力する。元の valid fixture は変更しない。生成が完了してから出力先を置き換える。
+- `test-alpha/1.1.0` は先頭の問題1件の revision と日英の解説を改訂する。正常なパックは3つ、改ざんは設計どおり9種類。
+- `tampered/expected.json` は `{directory, error, expectedExamID}` の配列。`exam-mismatch` は beta の内容に alpha の examID を付け、期待する試験を beta として検証する。hash-mismatch はファイルサイズを変えずに改ざんする。
+- 生成物の一致に加えて、再生成時の古いファイルの除去、改訂が1問だけであること、カタログの Schema・試験・版をテストする。公開鍵だけを保存し、秘密鍵は保存しない。
+
 ---
 
 ### P2-S05 パックの検証(PackVerifier)
@@ -441,6 +457,14 @@ content/tests/fixtures/packs/
 **Refactor**: 検証の各段階を、`private func checkSignature`、`checkVersions`、`checkFiles` に分ける。
 
 **完了条件**: `swift test --package-path packages/Data --filter PackVerifierTests` と `SemanticVersionTests` が通る。`data-test.yml` を追加し、PR で通ることを確認する。
+
+**実装メモ**:
+
+- Data パッケージを追加。外部の暗号ライブラリを増やさず、CryptoKit の Ed25519 と SHA-256 を使用した。
+- `PublicKeyRing(data:)` は JSON の鍵 ID → Base64 公開鍵を読み、鍵 ID の空文字・Base64・32バイト長を検証する。
+- `SemanticVersion` は任意桁数の整数を文字列で比較する。build metadata は比較・等価性・ハッシュに含めず、description には元の表記を保持する。
+- Python の `expected.json` を直接読み、正常3パックと改ざん9種類の契約を検証する。追加でメタデータ欠落、ファイルと親ディレクトリのシンボリックリンク、不正なSemVer、公開鍵不備を確認する。
+- ローカルでは `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer` を指定して実行した。`data-test.yml` は追加済み。リモートの PR CI は push / PR 作成後に確認する。
 
 ---
 
@@ -495,6 +519,13 @@ public final class PackContent: ExamContentProvider {
 
 **完了条件**: `swift test --package-path packages/Data --filter PackLoaderTests` と `swift test --package-path packages/Domain` が通る。
 
+**実装メモ**:
+
+- Domain に `DomainInterfaces` を追加し、`ExamContentProvider` と型付き `ContentError` を定義した。`IntegrityViolation` は ContentError が参照するため、Data ではなく DomainInterfaces に置く（詳細は P2-S07）。
+- 起動時の読み込みは exam、vendor、問題索引、模試、docs索引の5ファイル。本文は `QuestionBodyCache` actor でドメイン単位にキャッシュする。ファイル I/O は `FileReading.swift` に分離した。
+- 問題要求の順序・重複を保持し、索引にない ID は I/O 前にエラーにする。同時10要求でも本文の読み込みが1回であることを確認する。無効機能は明示的なエラー、索引外の DocEntry も拒否する。
+- 55問の読み込み時間はローカルMacで約5ms（記録のみ。実機のしきい値ではない）。Data 全24テストを確認した。
+
 ---
 
 ### P2-S07 内容の整合チェック(ContentIntegrityChecker)
@@ -536,6 +567,12 @@ public struct ContentIntegrityChecker: Sendable {
 **Refactor**: 確認の条件を、P0 の [3.4](DDD-P0-MultiExamContent.md#34-ci-12試験定義の整合) と [3.5](DDD-P0-MultiExamContent.md#35-既存ルールの変更) の表と同じ順に並べ、各条件のコメントに、対応する CI のルール ID を書く。
 
 **完了条件**: `swift test --package-path packages/Data --filter ContentIntegrityCheckerTests` が通る。
+
+**実装メモ**:
+
+- `IntegrityViolation` は DomainInterfaces に置き、`ContentError` から参照できるようにした。ContentKit から ExamEngine への依存は追加していない。
+- 索引と本文に共通する語彙チェックは共有し、CI-09・CI-12 の対応をコメントで明記した。本文側では WAF の柱も検査する。
+- 設計のテストに加え、未知のサブ項目・模試ケース、ドメイン連番、サブ項目重複、チェック時に本文を読まないことを確認した。
 
 ---
 
@@ -583,13 +620,21 @@ public actor PackStore {
     public func pin(_ version: String, for examID: ExamID, attemptID: UUID) throws(ContentError)
     public func unpin(attemptID: UUID, for examID: ExamID) throws(ContentError)
     public func garbageCollect(for examID: ExamID) throws(ContentError)
-    public func directory(for location: PackLocation, examID: ExamID, bundledRoot: URL) -> URL
+    public func directory(for location: PackLocation, examID: ExamID, bundledRoot: URL) throws(ContentError) -> URL
 }
 ```
 
 **Refactor**: `state.json` の読み書きを `PackStateFile` に分ける。
 
 **完了条件**: `swift test --package-path packages/Data --filter PackStoreTests` が通る。
+
+**実装メモ**:
+
+- `PackStore` actor が状態操作を直列化し、`PackStateFile` が JSON の読み書きを担当する。状態をメモリにキャッシュせず、アトミックな書き込みが失敗した場合にも旧状態を保持する。
+- `pins` は Swift では `[UUID: String]`、JSON では設計どおり UUID 文字列をキーにしたオブジェクトにする。同じ場所の再有効化は previous を変更しない。
+- `install` は同じ試験の `staging/<UUID>` 直下にある検証済みパックを移動する。既存版を上書きしない。署名・整合検証は呼び出し側で行う。
+- 試験 ID・版・シンボリックリンクを確認し、存在しないインストール版の有効化を拒否する。このため `directory(for:examID:bundledRoot:)` も設計例に加えて `throws(ContentError)` とした。
+- chmod で状態ディレクトリを書き込み不可にしてアトミック性を確認した。固定版保持→固定解除→不要版削除、再オープン、ロールバック、試験分離も確認済み。Data 全48テストが通過。
 
 ---
 
@@ -640,6 +685,29 @@ public struct ContentBootstrapResult: Sendable {
 
 **完了条件**: `swift test --package-path packages/Data` がすべて通る。
 
+**実装状況・引き継ぎ**(2026-10-27、P2-S09 の途中):
+
+- 作業ブランチは既存の実装メモに従い `dev` を継続。起動処理の Red を `0a78dff` で引き継ぎ、再開後は利用者の指示により、次の Green コミットで作業を区切る。
+- カタログ部分は Red → Green を完了した。`d2e3af1` でテストを追加し、`BundledPacks` 未定義のコンパイル失敗を確認。`d401d5c` で `BundledPacks`・`ExamCatalogService`・`ExamCatalogItem` を実装し、`ExamCatalogServiceTests` 全9テストが成功した。着手前の Data 全48テストも成功済み。
+- `BundledPacks(root:)` は `root/catalog.json` を読む。契約 fixture は catalog と valid のディレクトリが分かれているため、テストでは `BundledPacks(root:catalog:)` を使う。同梱版は同梱カタログから決め、キャッシュの `latestPackVersion` は同梱版の選択に使わない。
+- `ExamCatalogService.activeLocation(for:)` は読み取りだけで状態を変更しない。現在有効な installed 版と同梱版を比較し、同じ版なら installed を保持する。`load(for:loader:integrityChecker:)` は manifest の試験 ID・版、試験定義の ID・ベンダーの一致、`ContentIntegrityChecker` の結果を確認してから `PackStore.activate` を呼ぶ。整合確認の失敗時は旧状態を維持する。
+- 起動処理は **Red → Green 完了**。再開時に `ContentBootstrapper` 未定義のコンパイル失敗を再確認してから実装した。先行テストは変更せず、`ContentBootstrapperTests` 全9テスト(識別情報の不一致4ケースを含む)と Data 全66テスト・8スイートが成功した。
+- `ContentBootstrapper(catalogService:loader:integrityChecker:)` の loader は既定値あり。結果は設計の `available`・`failures` に加え、`available` が空なら `.storage("no usable exam")` を返す計算プロパティ `fatalError: ContentError?` を持つ(E-01 用)。comingSoon は起動対象外、未取得の retired はスキップする。comingSoon と未知の試験への明示的な load は `.storage("not available")`。
+- 壊れた `state.json` や不正なコンテンツは試験ごとに失敗を収集する。`entries()` 全体の失敗で起動を止めない。起動時に読むのは各試験の manifest と5つの索引・定義ファイルで、問題本文や署名の全再検証は行わない。新しい同梱版への切替で installed 版を previous に残し、再起動でも previous が維持されることを確認した。
+
+```sh
+env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --package-path packages/Data --filter ContentBootstrapperTests
+env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --package-path packages/Data
+```
+
+次の担当者は以下の順で続けること(TDD を継続し、段階ごとにコミット):
+
+1. 版の選択を純粋関数 `resolveActiveLocation(bundled:installed:)` に抽出し、SemVer・同版・片方なしなどの表形式テストを追加する。これはまだ未着手。既存の振る舞いをテストで固定したうえで Refactor する。
+2. Refactor 後に Data 全体を検証し、Python 全体と `validate.py`、秘密鍵の非混入など P2 の共通・固有の完了条件を確認する。今回の Green では Swift Data のみ検証済み。リモート CI は未実行で、P2 完了とはまだ扱わない。
+3. README・CLAUDE.md は起動処理の追加を反映済み。本書の実装状況を最終結果に更新する。アプリのリソース組み込みと起動時の呼び出しは P4-S01 の担当で、今回の変更には含めていない。
+
+SwiftPM はサンドボックス内でユーザーのキャッシュへの書き込みを拒否されたため、上記の Swift テストは権限を拡張して実行した。生成済みの契約 fixture は変更していない。異常系の変更はテストの一時コピーだけに行う。
+
 ---
 
 ## 5. フェーズの完了条件
@@ -659,7 +727,7 @@ public struct ContentBootstrapResult: Sendable {
 
 | 宛先 | 内容 |
 |---|---|
-| P4 | アプリの起動時に `ContentBootstrapper.bootstrap()` を呼ぶ。`failures` があれば、その試験だけを使えない状態にする。全滅なら E-01 を表示する |
+| P4 | アプリの起動時に `ContentBootstrapper(catalogService:loader:integrityChecker:).bootstrap()` を呼ぶ。checker の supportedKinds はアプリの `AnswerEvaluatorRegistry` から渡す。`failures` があれば、その試験だけを使えない状態にする。`fatalError != nil` なら E-01 を表示する |
 | P4 | 同梱するパックは、ビルドの前に `build_pack.py` で作り、`ExamPrepApp/Resources/Packs/` に置く。公開鍵(`PublicKeyRing`)はアプリ本体の定数にする。テスト用の鍵は DEBUG 構成でだけ含める |
 | P5 | `PackUpdater` は、`staging/<UUID>/` に取得したファイルを置き、`PackVerifier.verify` → `ContentIntegrityChecker.check` → `PackStore.install` → `activate` の順に呼ぶ。模試の受験中は `activate` を遅らせる |
 | P5 | 差分の算出には、現在のパックの manifest と、新しい manifest の `sha256` を比べる。変わっていないファイルは、`versions/<現在の版>/` からハードリンク(できなければコピー)する |

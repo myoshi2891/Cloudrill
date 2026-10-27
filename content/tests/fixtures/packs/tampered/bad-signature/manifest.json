@@ -1,0 +1,90 @@
+{   "createdAt": "2026-11-01T00:00:00Z",
+  "examGuideVersion": "6.1",
+  "examID": "test-alpha",
+  "files": [
+    {
+      "path": "cases.json",
+      "sha256": "9271ac8f32655b74a6488fc60670c844c5d28482d338e623ede7699bb284258e",
+      "size": 1621
+    },
+    {
+      "path": "decisions.json",
+      "sha256": "336f509c285aaef98dd872af9a6a20500b7b5262bb5d1cf430eada767bb453c2",
+      "size": 690
+    },
+    {
+      "path": "docs/1.1.md",
+      "sha256": "d90446c2ac6c69c6c198883f0c2e357b0ab98c0e60a0342c200379e9050c2732",
+      "size": 62
+    },
+    {
+      "path": "docs/index.json",
+      "sha256": "509f31e16194ba3119e29538cc43a438a1afe0fa6a89e022865d1058b086956a",
+      "size": 205
+    },
+    {
+      "path": "drills.json",
+      "sha256": "6f5688f76bd27acddcecef8e5156d469ebfe528f50ce0040ef017c8f0a5f7d6d",
+      "size": 416
+    },
+    {
+      "path": "exam-sets.json",
+      "sha256": "d9e6a048cea6d521bb997124d54dc464bde357c56d77a3e44e502c7ad7c9f4b5",
+      "size": 824
+    },
+    {
+      "path": "exam.json",
+      "sha256": "bafb969158969e461657ebed2f659530b11727ebfc866b5ca5da9fec0b619137",
+      "size": 3929
+    },
+    {
+      "path": "flashcards.json",
+      "sha256": "5784d5a21bfb13c10e0fb7e070d0b3268080880f1cde94e8c75b3fd4215c36f8",
+      "size": 455
+    },
+    {
+      "path": "questions/domain1.json",
+      "sha256": "f02b93b47234184ba84c5d3757e65a9f564f96e63a37f461424ad15b1ceade53",
+      "size": 22234
+    },
+    {
+      "path": "questions/domain2.json",
+      "sha256": "160b3643a7dff75e37c1d4e94e52324aeb0c34607974ef0b0d8ff1ddcff17b1a",
+      "size": 17316
+    },
+    {
+      "path": "questions/domain3.json",
+      "sha256": "e510af7eb880898989ac6a146e1fe0d2631bfcad1ddac2148bf7acc74458c681",
+      "size": 15843
+    },
+    {
+      "path": "questions/domain4.json",
+      "sha256": "d443483b1ca26c3346d856f51ac75798589db297ad4beec25da8e58b03a8431b",
+      "size": 14338
+    },
+    {
+      "path": "questions/domain5.json",
+      "sha256": "a1f9b11df8c5eab5a14504ed9154e4e22683f4d65017504d759f6678ec59c7f7",
+      "size": 11202
+    },
+    {
+      "path": "questions/domain6.json",
+      "sha256": "4dd3576e1a23aaa5abe0cd26ddca6276058b76269644a52ceaac163af913621b",
+      "size": 11466
+    },
+    {
+      "path": "questions/index.json",
+      "sha256": "f6ea8d11afd3e74412457f9b2a4816c1a4a5c6c63368223700b294a5d3fb70a1",
+      "size": 7481
+    },
+    {
+      "path": "vendor.json",
+      "sha256": "d61326c348fb26d79025cd7e2f127c32d1f3da9dd5cfd83775f1bb1246bd93c4",
+      "size": 163
+    }
+  ],
+  "formatVersion": 1,
+  "keyID": "test-2026",
+  "minAppVersion": "1.0.0",
+  "packVersion": "1.0.0"
+}

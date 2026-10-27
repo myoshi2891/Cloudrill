@@ -8,6 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - `ExamPrepApp/` + `ExamPrepApp.xcodeproj` — iOS アプリ(SwiftUI、表示名 Cloudrill)。`packages/DomainModels` をローカルパッケージ(相対パス)として参照
 - `packages/DomainModels/` — コンテンツの値型(SwiftPM、Swift 6、Swift Testing)
+- `packages/Domain/` — 学習・採点ロジックと `DomainInterfaces`（`ExamContentProvider`、`ContentError`、`IntegrityViolation`）
+- `packages/Data/` — `ContentKit`。署名検証、索引と本文の読み込み、整合チェック、パック保存、同梱カタログと起動処理。テストは `content/tests/fixtures/packs/` を直接参照する
 - `content/` — 学習コンテンツ(YAML / Markdown)、JSON Schema(Draft 2020-12)、Python の検証ツール。詳細仕様は `content/README.md`
   - `content/vendors.yaml`(全試験で共通のベンダー定義)と `content/validation.yaml`(検証の閾値、全体)
   - `content/exams/<examID>/` — 試験ごとのディレクトリ。`exam.yaml`(試験定義)、`validation.yaml`(試験ごとの検証設定)、`exam-sets.yaml`、問題などのコンテンツ
@@ -32,11 +34,17 @@ content/.venv/bin/python content/scripts/validate.py --exam gcp-pca   # 試験�
 content/.venv/bin/python content/scripts/validate.py --check-links   # CI-06(ネットワークアクセスあり)
 
 # 配信パックのビルド(SOURCE_DATE_EPOCH は必須。終了コード 0 = 成功 / 1 = 検証 error / 2 = 引数の不備・出力先がすでにある)
-SOURCE_DATE_EPOCH=1793491200 content/.venv/bin/python content/scripts/build_pack.py --exam gcp-pca --version 1.0.0 --min-app-version 1.0.0 --key-id test-2026 --out <出力先>
+SOURCE_DATE_EPOCH=<リリース時刻の epoch> content/.venv/bin/python content/scripts/build_pack.py --exam gcp-pca --version 1.0.0 --min-app-version 1.0.0 --key-id <本番鍵 ID> --out <出力先>
+
+# 署名とカタログ生成(成功 0 / 入力・I/O の不備 2)
+content/.venv/bin/python content/scripts/sign_manifest.py --manifest <manifest.json> --key-id <本番鍵 ID> --key-env <環境変数名>
+content/.venv/bin/python content/scripts/sign_manifest.py --manifest <manifest.json> --key-id test-2026 --test-key test-2026   # テスト署名
+SOURCE_DATE_EPOCH=<リリース時刻の epoch> content/.venv/bin/python content/scripts/build_catalog.py --out <catalog.json> [--previous <catalog.json>] [--update <examID>=<manifest.json> ...]
 
 # fixture と Swift 用 JSON の再生成(生成物はコミット対象)
 content/.venv/bin/python content/tests/fixtures/generate.py
 content/.venv/bin/python content/scripts/export_json.py
+content/.venv/bin/python content/tests/fixtures/generate_packs.py  # Python / Swift 共通の署名付き契約パック
 
 # FSRS のテストベクタの再生成(開発時のみ。py-fsrs は依存グループ fsrs。生成物はコミット対象)
 uv sync --project content --group fsrs
@@ -45,6 +53,7 @@ content/.venv/bin/python content/scripts/fsrs_vectors.py --out packages/Domain/T
 # Swift テスト
 swift test --package-path packages/DomainModels
 swift test --package-path packages/Domain
+swift test --package-path packages/Data
 swift test --package-path packages/DomainModels --filter FixtureDecodingTests   # 単一テスト
 
 # 行カバレッジ(Sources の *TestSupport/ を除く。最低値を下回ると終了コード 1)
@@ -71,14 +80,19 @@ validate.py の終了コード: `0` = error なし / `1` = error あり(`--stric
 ## 検証ツールの構成(`content/scripts/contentvalidate/`)
 
 - `validate.py`(CLI)→ `engine.run()` → `context.build_context()`(ロード、Schema 検証、行番号の付与)→ `rules.ALL_RULES` → `report` で text / json / github 形式に整形する。
-- コンテキストは2種類。`GlobalContext`(全ファイルと全試験)は全体のルール(CI-01、CI-06、CI-11)に1回、`ExamContext`(1試験のファイル、試験ごとの設定、`exam.yaml` から作る `ExamDefinitionView`)は試験ごとのルールに試験の数だけ渡す。`definition` が `None`(`exam.yaml` が Schema 違反)の試験では、試験定義を使うルールは何も報告しない。`--exam` で対象の試験を絞れる。
+- コンテキストは2種類。`GlobalContext`(全ファイルと全試験)は全体のルール(CI-01、CI-06、CI-11、CI-13)に1回、`ExamContext`(1試験のファイル、試験ごとの設定、`exam.yaml` から作る `ExamDefinitionView`)は試験ごとのルールに試験の数だけ渡す。`definition` が `None`(`exam.yaml` が Schema 違反)の試験では、試験定義を使うルールは何も報告しない。`--exam` で対象の試験を絞れる。
 - Schema の `$id` は `https://examprep-content.invalid/schemas/<name>.schema.json`。`referencing.Registry` に全 Schema を事前に登録し、オフラインで解決する。共通の定義は `common.schema.json#/$defs/...` に置く。すべてのオブジェクトに `additionalProperties: false` を付けている。
-- 役割分担: 1ファイル内の構造は Schema が担当する。Schema で表しにくい条件と、ファイル間の整合(模試の構成、統計、重複、参照)はルール CI-01〜CI-12 が担当する(CI-12 は試験定義と、ディレクトリ名・vendors.yaml・試験のコンテンツとの整合)。閾値は `content/validation.yaml`(全体)に置き、試験ごとの `exams/<examID>/validation.yaml` を深いマージで重ねる(模試の構成 `examSet` は試験側にだけ書ける。サブ項目と模試の問題数は `exam.yaml` が正)。
+- 役割分担: 1ファイル内の構造は Schema が担当する。Schema で表しにくい条件と、ファイル間の整合(模試の構成、統計、重複、参照)はルール CI-01〜CI-13 が担当する(CI-12 は試験定義と、ディレクトリ名・vendors.yaml・試験のコンテンツとの整合)。閾値は `content/validation.yaml`(全体)に置き、試験ごとの `exams/<examID>/validation.yaml` を深いマージで重ねる(模試の構成 `examSet` は試験側にだけ書ける。サブ項目と模試の問題数は `exam.yaml` が正)。
 - Schema に違反したファイルは、ファイル間ルールの対象から外す(違反の連鎖を防ぐため)。`--only` で CI-01 を外しても、Schema 検証自体は常に行う。
 - 例外として、`choices[*].rationale` に関する Schema 違反は CI-01 では報告せず、CI-05 だけが報告する。
 - ルールを追加する手順: `rules/ciNN_xxx.py` に `check(ctx) -> Iterable[Issue]` と `RULE = Rule("CI-NN", ..., check)`(全体のルールは `check_global=check`)を定義する → `rules/__init__.py` の `ALL_RULES` に追加する → `generate.py` の `INVALID_CASES`(`test-beta` の上で作るケースは `BETA_INVALID_CASES`)に違反ケースを追加し、fixture を再生成する。
 - valid fixture は形の違う2試験(`test-alpha` は PCA と同じ形、`test-beta` はケースなし・single のみ・ドメイン 4)を持つ。試験ごとの値は `generate.py` の `ExamSpec` に置く。検証ツールに試験ごとの分岐や試験固有の値を書かない(`test_extensibility.py` が確認する)。
 - invalid fixture は valid に対する差分(overlay)。`expected.yaml` に、検出されるべきルール ID と深刻度を書く。`_delete.txt` に列挙したファイルは valid から削除される。
+- CI-13 は任意の全体ファイル `catalog.yaml` の試験 ID の実在・重複を確認する。構文・Schema は CI-01。`--exam` で絞っても、実在の確認には全試験ディレクトリを使う。
+- `contentpack/` はビルド・署名・検証・カタログ生成を担当する。署名は `cryptography` の Ed25519。検証は署名の成功後にだけ JSON を解析する。鍵リングは鍵 ID → `Ed25519PublicKey`。テスト用 seed は `contentpack.testing.test_signing_key(label)` で導出し、ファイルに保存しない。
+- `fixtures/packs/` は `generate_packs.py` で再生成する。epoch は固定の `1793491200`。正常3パックと改ざん9種類を持ち、`tampered/expected.json` の `directory`・`error`・`expectedExamID` を Python / Swift の両方が使う。生成済みパックは手編集しない。
+- `PackStore(root:)` の root は Content 保存先。インストール元は `<root>/<examID>/staging/<UUID>/` に置き、検証・整合チェック後に `install` → `activate` を呼ぶ。受験中の版は `pin` で保持し、`garbageCollect` は current・previous・pins にないインストール版だけを削除する。`directory(...)` は `throws(ContentError)`。
+- `BundledPacks(root:)` はアプリの `Packs/` と `catalog.json` を読む。`ContentBootstrapper(catalogService:loader:integrityChecker:)` を起動時に呼び、`available` を利用する。`failures` は試験ごとの失敗、`fatalError` は全試験が利用不可の場合の E-01 用。起動時には本文や署名を全再検証せず、manifest・試験定義・ベンダーの一致と索引の整合を確認してから有効化する。`ExamCatalogService.activeLocation(for:)` は選択だけ、`load(for:loader:integrityChecker:)` は整合確認と有効化まで行う。
 
 ## コンテンツの規約
 
@@ -95,6 +109,7 @@ validate.py の終了コード: `0` = error なし / `1` = error あり(`--stric
 - `domainmodels-test.yml` — `swift test --package-path packages/DomainModels`(macOS。`packages/DomainModels/**`、`content/schemas/**`、`content/tests/fixtures/**` の変更時)
 - `domain-test.yml` — `scripts/coverage.sh packages/Domain 80`(macOS。`swift test` と行カバレッジ 80% の確認。`packages/Domain/**`、`packages/DomainModels/**` の変更時。Domain は DomainModels に依存するので、DomainModels の変更でも実行する)
 - `content-link-check.yml` — 毎週、`--only CI-06 --check-links --strict`
+- `data-test.yml` — `swift test --package-path packages/Data`。Data・Domain・DomainModels・契約 fixture の変更時に、Python が生成した署名付きパックを CryptoKit で検証する。
 
 ## 命名とリリース
 

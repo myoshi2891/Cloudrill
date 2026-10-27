@@ -1,0 +1,38 @@
+name: data-test
+
+on:
+  pull_request:
+    paths:
+      - "packages/Data/**"
+      - "packages/Domain/**"
+      - "packages/DomainModels/**"
+      - "content/tests/fixtures/**"
+      - ".github/workflows/data-test.yml"
+  push:
+    branches: [main]
+    paths:
+      - "packages/Data/**"
+      - "packages/Domain/**"
+      - "packages/DomainModels/**"
+      - "content/tests/fixtures/**"
+      - ".github/workflows/data-test.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: data-test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  swift:
+    name: ContentKit contract tests
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Swift version
+        run: swift --version
+      - name: Run Swift tests (Data)
+        run: swift test --package-path packages/Data

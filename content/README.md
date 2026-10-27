@@ -80,12 +80,31 @@ SOURCE_DATE_EPOCH=<秒> python content/scripts/build_pack.py --exam <examID> --v
 | 決定論 | 同じ入力と `SOURCE_DATE_EPOCH` なら、全ファイルのバイト列が一致する。`createdAt` は `SOURCE_DATE_EPOCH` から作る |
 | 機能 | `exam.yaml` の `features` が false の種別(`cases.json` など)は出力しない。`docs/index.json` は常に出力する(`features.docs` が false なら空の配列) |
 
+### sign_manifest.py / build_catalog.py
+
+```sh
+python content/scripts/sign_manifest.py --manifest <manifest.json> --key-id <ID> --key-env <環境変数名>
+# ローカルのテスト専用。秘密鍵ファイルは作らない
+python content/scripts/sign_manifest.py --manifest <manifest.json> --key-id test-2026 --test-key test-2026
+SOURCE_DATE_EPOCH=<秒> python content/scripts/build_catalog.py --root content --out <catalog.json> \
+    [--previous <catalog.json>] [--update <examID>=<manifest.json> ...]
+```
+
+署名には `cryptography` の Ed25519 を使います。`--key-env` は32バイトの seed を標準 Base64 で設定した環境変数の名前です。manifest 自体は変更せず、そのバイト列への署名を改行なしの Base64 として `manifest.sig` に書きます。`--key-id` が manifest の `keyID` と異なる場合は失敗します。
+
+カタログの表示情報は `catalog.yaml` と `exam.yaml`、版は `--previous` と `--update` から作ります。`generatedAt` は `SOURCE_DATE_EPOCH` で固定します。更新しない試験の版は保持し、SemVer の優先順位で版戻しを拒否します。`available` には版が必要なので、未配信の試験は `comingSoon` にしてください。署名・カタログの終了コードは成功が `0`、入力・I/O の不備が `2` です。書き込みはアトミックに置き換えます。
+
+配信前後の検証は `contentpack.verify.verify_pack(directory, key_ring=..., expected_exam_id=..., app_version=..., current_version=...)` を使います。鍵リングは鍵 ID → `Ed25519PublicKey` の辞書です。署名 → デコード → 形式の版 → アプリの版 → 試験 ID → 版戻し → 各ファイルの安全なパス・存在・サイズ・SHA-256 の順で検証し、`VerificationError.code` に Swift のエラー名に対応する snake_case を返します。
+
+契約 fixture は `content/.venv/bin/python content/tests/fixtures/generate_packs.py` で再生成します。`tests/fixtures/packs/` に正常な3パック、改ざん9種類、公開鍵、カタログを置きます。`--out <生成専用ディレクトリ>` も指定できます（既存の出力は置き換えます）。生成には固定 epoch を使い、`test_generated.py` がバイト単位の一致と期待する検証結果を確認します。Swift のテストはこのディレクトリを直接参照します。
+
 ## ディレクトリ構成(`content/` 配下)
 
 ```
 schemas/                  JSON Schema(Draft 2020-12)
 validation.yaml           検証の閾値(全体)
 vendors.yaml              ベンダーの定義(全試験で共通)
+catalog.yaml              カタログの元データ(検証時は任意、生成時は必須)
 exams/<examID>/           試験ごとのディレクトリ(例: exams/gcp-pca/)
   exam.yaml               試験の定義(ドメインと比重、形式、機能、語彙)
   validation.yaml         試験ごとの検証設定(模試の構成 examSet、閾値の上書き。任意)
@@ -99,6 +118,8 @@ exams/<examID>/           試験ごとのディレクトリ(例: exams/gcp-pca/)
 scripts/validate.py       検証 CLI(実装は scripts/contentvalidate/)
 scripts/export_json.py    YAML → JSON 変換(tests/fixtures/valid-json/ の生成)
 scripts/build_pack.py     配信パックのビルド CLI(実装は scripts/contentpack/)
+scripts/sign_manifest.py  Ed25519 署名 CLI
+scripts/build_catalog.py  配信カタログの生成 CLI
 tests/                    pytest と fixture(valid-json/ は Swift テストが直接参照する)
 ```
 
@@ -169,12 +190,13 @@ tests/                    pytest と fixture(valid-json/ は Swift テストが�
 | CI-11 | `LocalizedText` の `en` の欠落(空文字を含む) | warning | — |
 | CI-12 | 試験定義の整合: `exam.yaml` の `id` がディレクトリ名と一致する、`vendor` が `vendors.yaml` にある、`domains[*].id` が 1 から始まる連番、サブ項目 ID が試験内で一意、`caseStudies` と `cases/*.yaml` の id の集合が一致する、無効な機能(`features.*: false`)のファイルがない(ケースが無効なら、問題の `caseStudy` と模試の `caseStudies` も空)、問題の `type.kind` が `format.questionKinds` に含まれる | error | — |
 | CI-12 | 問題の `examGuideVersion` が `exam.yaml` の `guideVersion` と一致する。試験ガイドの改訂時は、`guideVersion` を上げてから `--exam <examID> --only CI-12` を実行すると、見直しが必要な問題の一覧が得られる | warning | — |
+| CI-13 | `catalog.yaml` にある試験 ID が `exams/` に実在し、重複しない。全体ルールで、`--exam` による絞り込みの対象外。ファイルがない場合は何も報告しない。構文・Schema 違反は CI-01 | error | — |
 
 ### ルールの追加方法
 
 1. `scripts/contentvalidate/rules/ciNN_xxx.py` を作成し、`check` 関数と `RULE` を定義する
    - 試験ごとのルール(既定): `check(ctx: ExamContext) -> Iterable[Issue]` と `RULE = Rule("CI-NN", "名前", check)`。試験の数だけ実行される
-   - 全体のルール(CI-01、CI-06、CI-11): `check(ctx: GlobalContext)` と `RULE = Rule("CI-NN", "名前", check_global=check)`。1回だけ実行される
+   - 全体のルール(CI-01、CI-06、CI-11、CI-13): `check(ctx: GlobalContext)` と `RULE = Rule("CI-NN", "名前", check_global=check)`。1回だけ実行される
 2. `scripts/contentvalidate/rules/__init__.py` の `ALL_RULES` に1行追加する
 3. `tests/fixtures/generate.py` の `INVALID_CASES`(`test-beta` の上で作るケースは `BETA_INVALID_CASES`)に違反ケースを追加し、fixture を再生成する
 
@@ -203,6 +225,7 @@ fixture は `tests/fixtures/generate.py` が固定 seed で決定論的に生成
 |---|---|---|
 | `content-validate.yml` | `pull_request`、`main` への push(`content/**`、`packages/DomainModels/**` の変更時) | Python 3.14 で `pytest` と `validate.py --format github` を実行する |
 | `domainmodels-test.yml` | `pull_request`、`main` への push(`packages/DomainModels/**`、`content/schemas/**`、`content/tests/fixtures/**` の変更時) | macOS で `swift test --package-path packages/DomainModels` を実行する |
+| `data-test.yml` | `pull_request`、`main` への push(`packages/Data/**`、`packages/Domain/**`、`packages/DomainModels/**`、`content/tests/fixtures/**` の変更時) | macOS で `swift test --package-path packages/Data` を実行する(Python が生成した署名付きの契約パックを CryptoKit で検証する) |
 | `content-link-check.yml` | 毎週月曜 00:00 UTC、手動実行 | `validate.py --only CI-06 --check-links --strict --format github` を実行する(リンク切れがあればジョブが失敗する) |
 | `dependabot.yml` | 毎週 | pip と GitHub Actions のバージョン更新 PR を作る |
 
@@ -241,7 +264,7 @@ fixture は `tests/fixtures/generate.py` が固定 seed で決定論的に生成
 
 ## 未対応事項
 
-- manifest の生成と署名、配信パックのビルド(`build_pack.py`、`sign_manifest.py`、`release.yml`)
+- 配信用リリースワークフロー(`release.yml`、P5-S01)
 - ディシジョンツリーの循環検出と、到達できないノードの検出
 - `questions/domainN/` のディレクトリと `domain` の一致、ファイル名と `id` の一致のチェック
 - docs のフロントマターに対応する Swift モデル(アプリ側で Markdown と一緒に扱う想定)

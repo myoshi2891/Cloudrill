@@ -1,0 +1,5 @@
+# パックを初めて配信するときに available に変更する。
+exams:
+  - id: gcp-pca
+    status: comingSoon
+    productIDs: []
