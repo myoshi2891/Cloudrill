@@ -82,7 +82,7 @@ struct SchemaV1Tests {
             #expect(relationship.inverseName != nil, "\(source) → \(destination) の逆リレーション")
         }
         for entity in schema.entities {
-            #expect(entity.relationships.allSatisfy(\.isOptional))
+            #expect(entity.relationships.allSatisfy { $0.isOptional })
         }
     }
 
