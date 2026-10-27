@@ -17,16 +17,18 @@ class CatalogError(ValueError):
 
 
 def _read(path: Path, schema: str, *, yaml: bool = False) -> dict[str, Any]:
+    duplicates: list[tuple[str, int]] = []
     try:
         raw = path.read_text(encoding="utf-8")
         if yaml:
             data, _, duplicates = parse_yaml(raw)
-            if duplicates:
-                raise CatalogError(f"{path}: YAML キーが重複しています")
         else:
             data = json.loads(raw)
     except (OSError, ValueError, UnicodeError, YamlLoadError) as error:
         raise CatalogError(f"{path}: 読み込めません") from error
+    # CatalogError は ValueError のサブクラスなので、try の外で判定する
+    if duplicates:
+        raise CatalogError(f"{path}: YAML キーが重複しています")
     if not validator_for(schema).is_valid(data):
         raise CatalogError(f"{path}: {schema} Schema に適合しません")
     return data

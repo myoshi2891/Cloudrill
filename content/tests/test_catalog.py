@@ -8,7 +8,7 @@ import yaml
 
 from build_catalog import main
 from conftest import materialize
-from contentpack.catalog import build_catalog
+from contentpack.catalog import CatalogError, build_catalog
 from contentvalidate.engine import run
 from contentvalidate.schemas import validator_for
 from test_schemas import MANIFEST
@@ -110,6 +110,12 @@ def test_catalog_requires_valid_epoch(root, tmp_path, monkeypatch, epoch):
     else:
         monkeypatch.setenv("SOURCE_DATE_EPOCH", epoch)
     assert main(args(root, tmp_path / "out.json")) == 2
+
+
+def test_catalog_rejects_duplicate_yaml_keys(root):
+    (root / "catalog.yaml").write_text("exams: []\nexams: []\n", encoding="utf-8")
+    with pytest.raises(CatalogError, match="YAML キーが重複しています"):
+        build(root)
 
 
 def test_catalog_source_is_required(root, tmp_path, monkeypatch):
