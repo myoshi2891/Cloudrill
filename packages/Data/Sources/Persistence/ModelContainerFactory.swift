@@ -14,7 +14,7 @@ public enum ModelContainerFactory {
         cloudKitContainer: String?,
         storeDirectory: URL? = nil
     ) throws -> ModelContainer {
-        let schema = Schema(SchemaV1.models)
+        let schema = Schema(versionedSchema: SchemaV1.self)
         let configuration: ModelConfiguration
         if inMemory {
             configuration = ModelConfiguration(
@@ -30,6 +30,6 @@ public enum ModelContainerFactory {
                 cloudKitDatabase: cloudKitContainer.map { .private($0) } ?? .none
             )
         }
-        return try ModelContainer(for: schema, configurations: [configuration])
+        return try ModelContainer(for: schema, migrationPlan: ExamPrepMigrationPlan.self, configurations: [configuration])
     }
 }
