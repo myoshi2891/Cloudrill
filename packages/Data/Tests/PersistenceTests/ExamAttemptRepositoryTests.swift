@@ -55,6 +55,19 @@ final class FailingSaver: Saver, @unchecked Sendable {
         try await repo.save(snapshot: changed, for: id)
         #expect(try await repo.inProgress(examID: "test-alpha")?.snapshot == changed)
     }
+    @Test(arguments: [ExamSessionState.inProgress, .reviewing, .suspended])
+    func saveRejectsActiveSnapshotWithoutTimer(state: ExamSessionState) async throws {
+        let repo = SwiftDataExamAttemptRepository(modelContainer: try PersistenceFixtures.container())
+        let snapshot = try PersistenceFixtures.snapshot()
+        let id = try await repo.start(examID: "test-alpha", examSet: 1, packVersion: "1.0.0", snapshot: snapshot)
+        var invalid = snapshot
+        invalid.state = state
+        invalid.timer = nil
+        await #expect(throws: PersistenceError.corrupted("invalid active snapshot")) {
+            try await repo.save(snapshot: invalid, for: id)
+        }
+        #expect(try await repo.inProgress(examID: "test-alpha")?.snapshot == snapshot)
+    }
     @Test func recordEachAnswerAndFinalize() async throws {
         let container = try PersistenceFixtures.container()
         let repo = SwiftDataExamAttemptRepository(modelContainer: container)
@@ -107,8 +120,12 @@ final class FailingSaver: Saver, @unchecked Sendable {
             _ = try await repo.start(examID: "test-alpha", examSet: 1, packVersion: "1.0.0", snapshot: PersistenceFixtures.snapshot())
             #expect(try await repo.inProgress(examID: "test-alpha") != nil)
         } else {
-            await #expect(throws: PersistenceError.self) {
-                try await repo.start(examID: "test-alpha", examSet: 1, packVersion: "1.0.0", snapshot: PersistenceFixtures.snapshot())
+            do {
+                _ = try await repo.start(examID: "test-alpha", examSet: 1, packVersion: "1.0.0", snapshot: PersistenceFixtures.snapshot())
+                Issue.record("Expected start to throw PersistenceError.saveFailed")
+            } catch PersistenceError.saveFailed {
+            } catch {
+                Issue.record("Expected PersistenceError.saveFailed, got \(error)")
             }
             #expect(try await repo.inProgress(examID: "test-alpha") == nil)
         }

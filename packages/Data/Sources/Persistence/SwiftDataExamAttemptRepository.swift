@@ -35,7 +35,7 @@ import ExamEngine
     public func save(snapshot: ExamSession.Snapshot, for attemptID: UUID) throws(PersistenceError) {
         try Storage.write(modelContext, saver: saver) {
             let row = try active(attemptID)
-            guard [.inProgress, .reviewing, .suspended].contains(snapshot.state) else { throw PersistenceError.corrupted("invalid active snapshot") }
+            guard snapshot.timer != nil, [.inProgress, .reviewing, .suspended].contains(snapshot.state) else { throw PersistenceError.corrupted("invalid active snapshot") }
             row.sessionSnapshotJSON = try Storage.encode(snapshot)
         }
     }
