@@ -6,7 +6,7 @@
 | 作成日 | 2026-10-21 |
 | 上位文書 | [詳細設計書(索引・共通設計)](../DDD.md) |
 | 対象 | `packages/Data` の `Persistence`、`packages/Domain` の `DomainInterfaces`(リポジトリのプロトコル) |
-| ステータス | P3-S01〜S06 の実装・ローカル検証完了。P3-S07〜S09 を継続して実装する |
+| ステータス | P3-S01〜S09 の実装・ローカル検証完了。リモート CI は利用者側で確認する |
 
 ---
 
@@ -255,7 +255,7 @@ env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --packag
 env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --package-path packages/Data
 ```
 
-P3-S02〜S06 の進捗は各節と S06 末尾の検証記録を参照。リモート CI は利用者が実施する。P3 フェーズ全体の完了条件はまだ満たしていない。
+P3-S02〜S09 の実装内容は各節、最終検証は第5節を参照。リモート CI は利用者が実施するため、フェーズ全体の完了判定はその確認後に行う。
 
 ---
 
@@ -426,31 +426,9 @@ P3-S02〜S06 の進捗は各節と S06 末尾の検証記録を参照。リモ�
 
 **実装メモ**:
 
-- `aa9cd56` で4テスト・7件の assertion Red を確認し、本コミットで Green。空のストアの既定値、選択中の試験の保存、試験日の分離、重複設定の最新版の選択、未知の保存言語の拒否を確認した。保持率のテストは 0.99・0.79・NaN の3ケース。
+- `aa9cd56` で4テスト・7件の assertion Red を確認し、`bdbf40f` で Green。空のストアの既定値、選択中の試験の保存、試験日の分離、重複設定の最新版の選択、未知の保存言語の拒否を確認した。保持率のテストは 0.99・0.79・NaN の3ケース。
 - `StudyModels.UserSettings` と `ExamPreference` は値型。保持率とカード数は外から直接変更できず、初期化時に検証する。SchemaV1 の試験設定の既定値も `ExamPreference.default` を参照する。スキーマの列は変えていない。
 - 公開 API は `settings()`、`preference(examID:)`、`save(settings:at:)`、`save(preference:examID:at:)`。全体設定のみ試験 ID で絞らず、試験設定は必ず絞る。重複時は updatedAt の新しい行、同日時は UUID の小さい行を使う。重複の削除は S07。
-
-**検証記録と残作業**(2026-10-28、S06 Green):
-
-- 作業ブランチは `dev`。プッシュ・PR 操作とリモート CI は利用者が担当する。S02〜S06 は先行テストと仮実装の assertion Red をコミットしてから実装した。次の作業は **P3-S07**。
-- 現時点の検証は Data 全99テスト（Persistence 29、ContentKit 70）、DomainModels 全38テスト、Domain 全148テストが成功。Domain の行カバレッジは 95.96%（下限80%）。Python 全351テスト成功、validate.py は error 0 件・既存の CI-02 warning 7 件。
-- `SchemaV1Tests` の10テストも回帰確認済み。全リポジトリは ModelActor の中で ModelContext を使い、公開操作は値型を返す。`#Predicate` をレビューし、試験単位の検索には examID を付けた。例外は前述の受験 UUID による操作と全体設定。
-
-```sh
-env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --package-path packages/Data
-env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer bash scripts/coverage.sh packages/Domain 80
-env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --package-path packages/DomainModels
-(cd content && .venv/bin/pytest -q)
-content/.venv/bin/python content/scripts/validate.py
-```
-
-再開時の順序:
-
-1. S07 の `SyncMerge`（値型入力から削除・更新対象を決める純粋関数）と `SyncDeduplicator` の先行テストを追加し、仮実装で assertion Red を確認してコミットする。現時点ではどちらも未作成。異なる試験を混ぜないこと、同時刻の決定論、追記のみの記録を消さないことを確認する。ReadMark の時刻列は `createdAt` ではなく **`readAt`**。
-2. S07 の Green では、CardState の重複を削除しても ReviewLog が残ること、進行中の受験の一方を abandoned にするときは snapshot の状態もそろうことを確認する。保存には `Storage.write` を使い、失敗時の取り消しを維持する。
-3. S08 のエクスポート・全削除を TDD で実装する。全10モデルと全列（JSON の Data とリレーションをどう表現するかも含む）をテストし、試験指定の削除では他試験と UserSettings を残す。今のリポジトリだけではこの機能は未提供。
-4. S09 の `ExamPrepMigrationPlan` を追加してファクトリーへ配線し、既存の V1 ストアを開き直す。現時点のファクトリーは migrationPlan を指定していない。
-5. P3 全体の完了条件を再確認し、README・CLAUDE.md・本書を更新する。リモート CI と実機の CloudKit 確認が済んだと誤って扱わない。
 
 ---
 
@@ -470,7 +448,7 @@ content/.venv/bin/python content/scripts/validate.py
 | `ExamPreference` | `examID` | `updatedAt` が新しい方 |
 | `UserSettings` | 常に1件 | `updatedAt` が新しい方 |
 | `ExamAttempt`(進行中) | `(examID, examSet)` かつ `statusRaw == inProgress` | スナップショットの `currentIndex` が大きい方。もう一方は `abandoned` にし、利用者に通知する(BDD 6.9) |
-| `Flag`、`Bookmark`、`ReadMark` | `(examID, 対象)` | `createdAt` が古い方 |
+| `Flag`、`Bookmark`、`ReadMark` | `(examID, 対象)` | `createdAt`（`ReadMark` は `readAt`）が古い方 |
 | `AnswerRecord`、`ReviewLog`、`PracticeServeLog` | 統合しない(UUID で区別され、追記のみ) | — |
 
 **Red**:
@@ -489,6 +467,13 @@ content/.venv/bin/python content/scripts/validate.py
 **Refactor**: 種類ごとの規則を、キーと比較関数の組の表にする。
 
 **完了条件**: `swift test --package-path packages/Data --filter SyncMergeTests` が通る。
+
+**実装メモ**(2026-10-28):
+
+- `be43ebf` で7テスト・22件の assertion Red、`7b6b880` で統合テストを含む8テストが Green。`SyncMerge` は値型から計画を返し、`SyncDeduplicator` が ModelActor 内で適用する。
+- 種類ごとの比較規則を表にまとめた。同時刻・同進捗は UUID の小さい行を残し、計画内の ID も整列する。`lastReview == nil` は実日時より古い。試験と対象の複合キーを使い、異なる試験を統合しない。
+- 追記のみの記録と完了済み受験は残す。重複した CardState の削除後も ReviewLog は残る。受験の放棄は `statusRaw` とスナップショットの状態を同時に変更し、`Plan.notifyUser` で通知の必要性を返す。
+- 変更前に進行中の全スナップショットを読み取り、破損時は削除・更新しない。保存は `Storage.write` を使う。全件の取得は、S08 と共用する内部型 `PersistenceRows` に集約した。
 
 ---
 
@@ -519,6 +504,13 @@ CloudKit 上のデータも消えることは、同期を有効にする P6-S15 
 
 **完了条件**: `swift test --package-path packages/Data --filter DataManagementTests` が通る。
 
+**実装メモ**(2026-10-28):
+
+- `87ac42b` で4テストの assertion Red、`e1048f8` で Green。表の検証項目を4テストにまとめ、全10モデルの全属性・リレーション、試験間の分離、決定論、削除失敗時の取り消しを確認した。
+- `DataManagementRepository` の `export(examID:)` は Data、`deleteAll(examID:)` は Void を返す。`nil` は全試験と UserSettings が対象。試験指定時は各検索を examID で絞り、エクスポートにも削除にも UserSettings を含めない。
+- JSON は `exportVersion: 1`、`schema: "V1"`、`entities` にモデル名をキーとする配列を持つ。属性名は SchemaV1 と一致し、Date は小数を含む Unix 秒、Data は Base64、リレーションは UUID または UUID の配列、未設定値は null。レコードとリレーションの配列は UUID 順、オブジェクトのキーも整列する。
+- `PersistenceRows` が取得を共用し、`ExportDocument` が JSON に変換する。削除には `Storage.write` の再試行・rollback を使い、保存が2回失敗しても元の全データが同一コンテキストと別のリポジトリの両方から読めることを確認した。
+
 ---
 
 ### P3-S09 移行計画の配線
@@ -534,7 +526,7 @@ CloudKit 上のデータも消えることは、同期を有効にする P6-S15 
 | テスト | 条件(Arrange) | 期待(Assert) |
 |---|---|---|
 | `planListsSchemas` | `ExamPrepMigrationPlan.schemas` | `[SchemaV1.self]` |
-| `containerUsesPlan` | `ModelContainerFactory.make` で作ったコンテナ | 移行計画を指定して開いている(ファクトリーの引数を記録する `Spy` で確認) |
+| `containerUsesPlan` | `ModelContainerFactory.make` で作ったコンテナ | 実コンテナの `migrationPlan` が `ExamPrepMigrationPlan`、スキーマの版が V1 |
 | `reopenExistingStore` | V1 で作ったストアのファイルを、計画つきで開き直す | データが残っている |
 
 **Green**: `enum ExamPrepMigrationPlan: SchemaMigrationPlan` を定義し、`stages` は空にする。
@@ -542,6 +534,11 @@ CloudKit 上のデータも消えることは、同期を有効にする P6-S15 
 **Refactor**: なし。
 
 **完了条件**: `swift test --package-path packages/Data` がすべて通る。
+
+**実装メモ**(2026-10-28):
+
+- `10674ef` で3テストの assertion Red、`de04959` で Green。`ExamPrepMigrationPlan.schemas` は V1 のみ、`stages` は空。ファクトリーは `Schema(versionedSchema: SchemaV1.self)` と移行計画を指定する。
+- 当初予定の Spy に代えて、SwiftData が公開する実コンテナの `migrationPlan` を確認した。移行計画導入前と同じ方法で作ったディスク上の V1 ストアを新ファクトリーで開き、既存レコードが残ることも確認した。
 
 モデルを変更するとき(V2 の追加)の手順:
 
@@ -557,9 +554,31 @@ CloudKit 上のデータも消えることは、同期を有効にする P6-S15 
 
 | No. | 条件 | 確認方法 |
 |---|---|---|
-| 1 | すべての検索が `examID` で絞り込まれている | `git grep -n '#Predicate' -- packages/Data/Sources/Persistence` の各箇所をレビューする |
+| 1 | 試験単位の検索が `examID` で絞り込まれている | `#Predicate` をレビューする。受験 UUID による操作、全体設定、全体を対象とする統合・エクスポート・削除は例外 |
 | 2 | リポジトリが `@Model` のオブジェクトを外に返していない | 公開 API の戻り値の型をレビューする |
 | 3 | CloudKit の制約を満たしている | P3-S01 のテスト |
+
+**最終ローカル検証**(2026-10-28):
+
+| 対象 | 結果 |
+|---|---|
+| Data | 全114テスト成功（Persistence 44、ContentKit 70）。行カバレッジ 97.74% |
+| Domain | 全148テスト成功。行カバレッジ 95.96%（下限80%） |
+| DomainModels | 全38テスト成功 |
+| Python | 全351テスト成功 |
+| コンテンツ検証 | error 0 件、既存の CI-02 warning 7 件（draft 試験の問題不足） |
+
+```sh
+env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer bash scripts/coverage.sh packages/Data
+env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer bash scripts/coverage.sh packages/Domain 80
+env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --package-path packages/DomainModels
+(cd content && .venv/bin/pytest -q)
+content/.venv/bin/python content/scripts/validate.py
+```
+
+`SchemaV1Tests` の10テストを含め回帰確認済み。試験単位の検索条件と公開 API の戻り値をレビューした。永続化操作は ModelActor 内で ModelContext を使い、公開操作は値型または Data を返す。`PersistenceRows` のモデルは内部でのみ扱う。
+
+P3-S01〜S09 の実装とローカル検証は完了。S02〜S09 は先行テストと仮実装による assertion Red を確認・コミットしてから Green をコミットした。ブランチは `dev` のまま。プッシュ・PR 操作とリモート CI は利用者が担当するため、リモート CI を含むフェーズ全体の完了判定は未実施。CloudKit の実機確認は P6-S15 で行う。
 
 ---
 
@@ -568,5 +587,8 @@ CloudKit 上のデータも消えることは、同期を有効にする P6-S15 
 | 宛先 | 内容 |
 |---|---|
 | P4 | 模試の画面は、解答を選ぶたびに `ExamAttemptRepository.record` と `save(snapshot:)` を呼ぶ。開始時に `PackStore.pin`、提出・放棄時に `unpin` を呼ぶ |
-| P4 | 起動時(と、同期の通知を受けたとき)に `SyncDeduplicator.run()` を呼ぶ。進行中の受験を統合した場合は、利用者に通知する |
+| P4 | 起動時(と、同期の通知を受けたとき)に `SyncDeduplicator.run()` を呼ぶ。返された `Plan.notifyUser` が true の場合は、進行中の受験を統合したことを利用者に通知する |
+| P4 | `DataManagementRepository.export(examID:)`・`deleteAll(examID:)` の `nil` は全体、指定時はその試験のみ。試験指定時は UserSettings を除外する。エクスポート形式は S08 の実装メモを参照 |
+| P4 | App Group の保存先 URL はアプリ側で解決し、`ModelContainerFactory.make` の `storeDirectory` に渡す |
+| モデル変更時 | V2 の追加、移行計画への登録、既存ストアを使う先行テストは S09 の手順に従う |
 | P6-S15 | 同期を有効にするときは、`ModelContainerFactory.make` に CloudKit のコンテナ ID(`iCloud.<逆ドメイン>.examprep`)を渡す。全削除が CloudKit 上でも反映されることを実機で確認する |
