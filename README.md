@@ -37,6 +37,8 @@ google-cloud-professional-cloud-architect/
 | `content/` | 学習コンテンツ(YAML / Markdown)、JSON Schema、検証スクリプト。詳細は [content/README.md](content/README.md) |
 | `.github/workflows/` | CI。変更されたパスに応じて、必要なワークフローだけが動きます |
 
+起動時は同梱版と現在有効なインストール版を SemVer で比較し、新しい方を使います。同じ優先順位ならインストール版を維持し、内容の整合確認後に有効化します。実装状況と検証結果は [P2 コンテンツパック](Documentation.docc/DDD/DDD-P2-ContentPack.md) を参照してください。
+
 ## ローカルでの検証
 
 ```sh

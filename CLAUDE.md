@@ -93,6 +93,7 @@ validate.py の終了コード: `0` = error なし / `1` = error あり(`--stric
 - `fixtures/packs/` は `generate_packs.py` で再生成する。epoch は固定の `1793491200`。正常3パックと改ざん9種類を持ち、`tampered/expected.json` の `directory`・`error`・`expectedExamID` を Python / Swift の両方が使う。生成済みパックは手編集しない。
 - `PackStore(root:)` の root は Content 保存先。インストール元は `<root>/<examID>/staging/<UUID>/` に置き、検証・整合チェック後に `install` → `activate` を呼ぶ。受験中の版は `pin` で保持し、`garbageCollect` は current・previous・pins にないインストール版だけを削除する。`directory(...)` は `throws(ContentError)`。
 - `BundledPacks(root:)` はアプリの `Packs/` と `catalog.json` を読む。`ContentBootstrapper(catalogService:loader:integrityChecker:)` を起動時に呼び、`available` を利用する。`failures` は試験ごとの失敗、`fatalError` は全試験が利用不可の場合の E-01 用。起動時には本文や署名を全再検証せず、manifest・試験定義・ベンダーの一致と索引の整合を確認してから有効化する。`ExamCatalogService.activeLocation(for:)` は選択だけ、`load(for:loader:integrityChecker:)` は整合確認と有効化まで行う。
+- 版の選択は `ActiveLocation.swift` の内部純粋関数 `resolveActiveLocation(bundled:installed:)` に集約する。サービスが存在・パス・版を確認した候補を渡し、SemVer で新しい方を選ぶ。同順位（build metadata だけの差を含む）なら installed を維持する。`ActiveLocationTests` の表でサービスと純粋関数の両方を確認する。
 
 ## コンテンツの規約
 

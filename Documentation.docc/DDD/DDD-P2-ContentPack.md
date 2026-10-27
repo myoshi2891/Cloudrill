@@ -6,7 +6,7 @@
 | 作成日 | 2026-10-21 |
 | 上位文書 | [詳細設計書(索引・共通設計)](../DDD.md) |
 | 対象 | `content/scripts/contentpack/`(ビルド・署名・カタログ)、`packages/Data` の `ContentKit`、`packages/Domain` の `DomainInterfaces`(コンテンツ提供のプロトコル) |
-| ステータス | レビュー待ち |
+| ステータス | P2-S01〜S09 実装・ローカル検証済み。リモート CI の確認待ち |
 
 ---
 
@@ -55,7 +55,7 @@ flowchart LR
 
 - P0 が完了している。Swift 側(P2-S05 以降)は、P1 の完了も前提にする(`QuestionKind` の対応一覧を `AnswerEvaluatorRegistry` から得るため)。
 - 外部依存 `cryptography` の採用を確認済みである([DDD 8 章](../DDD.md#8-外部依存の候補))。
-- ブランチは `feat/p2-content-pack`。
+- ブランチは利用者の指定により `dev` を維持する。
 
 ---
 
@@ -685,26 +685,40 @@ public struct ContentBootstrapResult: Sendable {
 
 **完了条件**: `swift test --package-path packages/Data` がすべて通る。
 
-**実装状況・引き継ぎ**(2026-10-27、P2-S09 の途中):
+**実装状況・引き継ぎ**(2026-10-27、P2-S09 の Refactor とローカル検証まで完了):
 
-- 作業ブランチは既存の実装メモに従い `dev` を継続。起動処理の Red を `0a78dff` で引き継ぎ、再開後は利用者の指示により、次の Green コミットで作業を区切る。
+- 作業ブランチは利用者の指定により `dev` を継続。起動処理の Green までの引き継ぎに続き、版の選択の Refactor と P2 全体のローカル検証を実施した。
 - カタログ部分は Red → Green を完了した。`d2e3af1` でテストを追加し、`BundledPacks` 未定義のコンパイル失敗を確認。`d401d5c` で `BundledPacks`・`ExamCatalogService`・`ExamCatalogItem` を実装し、`ExamCatalogServiceTests` 全9テストが成功した。着手前の Data 全48テストも成功済み。
 - `BundledPacks(root:)` は `root/catalog.json` を読む。契約 fixture は catalog と valid のディレクトリが分かれているため、テストでは `BundledPacks(root:catalog:)` を使う。同梱版は同梱カタログから決め、キャッシュの `latestPackVersion` は同梱版の選択に使わない。
 - `ExamCatalogService.activeLocation(for:)` は読み取りだけで状態を変更しない。現在有効な installed 版と同梱版を比較し、同じ版なら installed を保持する。`load(for:loader:integrityChecker:)` は manifest の試験 ID・版、試験定義の ID・ベンダーの一致、`ContentIntegrityChecker` の結果を確認してから `PackStore.activate` を呼ぶ。整合確認の失敗時は旧状態を維持する。
 - 起動処理は **Red → Green 完了**。再開時に `ContentBootstrapper` 未定義のコンパイル失敗を再確認してから実装した。先行テストは変更せず、`ContentBootstrapperTests` 全9テスト(識別情報の不一致4ケースを含む)と Data 全66テスト・8スイートが成功した。
 - `ContentBootstrapper(catalogService:loader:integrityChecker:)` の loader は既定値あり。結果は設計の `available`・`failures` に加え、`available` が空なら `.storage("no usable exam")` を返す計算プロパティ `fatalError: ContentError?` を持つ(E-01 用)。comingSoon は起動対象外、未取得の retired はスキップする。comingSoon と未知の試験への明示的な load は `.storage("not available")`。
 - 壊れた `state.json` や不正なコンテンツは試験ごとに失敗を収集する。`entries()` 全体の失敗で起動を止めない。起動時に読むのは各試験の manifest と5つの索引・定義ファイルで、問題本文や署名の全再検証は行わない。新しい同梱版への切替で installed 版を previous に残し、再起動でも previous が維持されることを確認した。
+- `ActiveLocation.swift` の内部関数 `resolveActiveLocation(bundled:installed:)` に版の選択を抽出した。存在・パス・版の確認と状態の読み取りは `ExamCatalogService` が担当する。同じ優先順位なら installed を保持し、build metadata は順位に影響しない。
+- `f39439b` で既存サービスの振る舞いを17行の表形式テストで固定した（両方なし、片方なし、同版、major/minor/patch、prerelease、build metadata）。保存先の消失時の同梱版へのフォールバックと、選択時に状態を書き換えないことも確認した。
+- `a5dbc32` で同じ表を純粋関数へ適用するテストを先行追加し、未定義関数によるコンパイル失敗を確認した。`ae72dd9` で抽出し、Data 全70テスト・9スイートが成功した。補足検証として、その後に仮実装 `installed ?? bundled` で5ケースの assertion 失敗も確認し、実装を戻して Data 全体を再検証した（仮実装はコミットしない）。
 
 ```sh
-env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --package-path packages/Data --filter ContentBootstrapperTests
+env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --package-path packages/Data --filter ActiveLocationTests
 env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --package-path packages/Data
+env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --package-path packages/DomainModels
+env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer bash scripts/coverage.sh packages/Domain 80
+(cd content && .venv/bin/pytest -q)
+content/.venv/bin/python content/scripts/validate.py
 ```
 
-次の担当者は以下の順で続けること(TDD を継続し、段階ごとにコミット):
+ローカル検証結果:
 
-1. 版の選択を純粋関数 `resolveActiveLocation(bundled:installed:)` に抽出し、SemVer・同版・片方なしなどの表形式テストを追加する。これはまだ未着手。既存の振る舞いをテストで固定したうえで Refactor する。
-2. Refactor 後に Data 全体を検証し、Python 全体と `validate.py`、秘密鍵の非混入など P2 の共通・固有の完了条件を確認する。今回の Green では Swift Data のみ検証済み。リモート CI は未実行で、P2 完了とはまだ扱わない。
-3. README・CLAUDE.md は起動処理の追加を反映済み。本書の実装状況を最終結果に更新する。アプリのリソース組み込みと起動時の呼び出しは P4-S01 の担当で、今回の変更には含めていない。
+| 対象 | 結果 |
+|---|---|
+| Data | 全70テスト・9スイート成功。契約パックの正常3種・改ざん9種の検証を含む |
+| DomainModels | 全38テスト・6スイート成功 |
+| Domain | 全テスト成功、行カバレッジ 97.54%（最低値 80%） |
+| Python | 全351テスト成功。ビルドの決定性、生成 fixture の一致、無効機能の省略を含む |
+| validate.py | error 0 件、既存の CI-02 warning 7 件（draft 模試の問題数不足） |
+| 秘密鍵 | 秘密鍵ヘッダーの検出 0 件、追跡対象の `.pem`・`.key`・`.p12`・`.pfx` も 0 件 |
+
+残作業は変更後のリモート CI の成功確認（DDD 7.8 の共通条件5）。ローカルで CI 相当の検証は通過したが、リモート CI は未実行なので P2 全体の完了とはまだ扱わない。README・CLAUDE.md に版選択の規則を反映済み。アプリのリソース組み込みと起動時の呼び出しは P4-S01 で行う。
 
 SwiftPM はサンドボックス内でユーザーのキャッシュへの書き込みを拒否されたため、上記の Swift テストは権限を拡張して実行した。生成済みの契約 fixture は変更していない。異常系の変更はテストの一時コピーだけに行う。
 
@@ -719,7 +733,9 @@ SwiftPM はサンドボックス内でユーザーのキャッシュへの書き
 | 1 | Python で作った契約 fixture を、Swift がすべて期待どおりに検証できる | `swift test --package-path packages/Data --filter PackVerifierTests` |
 | 2 | パックのビルドが決定論的である | `test_build_is_deterministic`、`test_packs_match_generator` |
 | 3 | `test-beta` のパックが、ケースなどの無効な機能を含まずに作られ、アプリで読める | `test_beta_pack_has_no_disabled_features`、`bundledPacksAreListed` |
-| 4 | 秘密鍵がリポジトリにない | `git grep -n -I -e 'PRIVATE KEY' -e 'BEGIN OPENSSH'` が 0 件 |
+| 4 | 秘密鍵がリポジトリにない | `git grep -l -I -E -- '-----BEGIN ([A-Z0-9]+ )*PRIVATE KEY-----'` が出力なし（終了コード 1）。鍵ファイルの追跡有無も確認する |
+
+秘密鍵の確認コマンドは、従来の検索語ではこの設計書のコマンド例自身が一致するため、秘密鍵ヘッダーを検出する正規表現に変更した。
 
 ---
 
