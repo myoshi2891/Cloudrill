@@ -11,7 +11,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 from conftest import VALID
 from contentpack.build import build_pack
-from contentpack.sign import sign_manifest
+from contentpack.sign import SigningError, sign_manifest
 from contentpack.testing import test_signing_key as signing_key
 from contentpack.verify import VerificationError, verify_pack
 from sign_manifest import main
@@ -235,6 +235,23 @@ def test_sign_write_failure_preserves_signature(pack, monkeypatch):
 
 @pytest.mark.parametrize("field", ["packVersion", "minAppVersion"])
 def test_invalid_semver_in_signed_manifest(pack, field):
-    rewrite(pack, **{field: "1.0.0-01"})
+    # sign_manifest は不正な版を拒否するので、鍵で直接署名する。
+    path = pack / "manifest.json"
+    manifest = json.loads(path.read_bytes())
+    manifest[field] = "1.0.0-01"
+    path.write_text(json.dumps(manifest), encoding="utf-8")
+    (pack / "manifest.sig").write_bytes(base64.b64encode(signing_key("test-2026").sign(path.read_bytes())))
     with pytest.raises(VerificationError, match="manifest_undecodable"):
         verify(pack)
+
+
+@pytest.mark.parametrize("field", ["packVersion", "minAppVersion"])
+def test_sign_rejects_invalid_semver(pack, field):
+    path = pack / "manifest.json"
+    manifest = json.loads(path.read_bytes())
+    manifest[field] = "1.0.0-01"
+    path.write_text(json.dumps(manifest), encoding="utf-8")
+    before = (pack / "manifest.sig").read_bytes()
+    with pytest.raises(SigningError):
+        sign_manifest(path, "test-2026", signing_key("test-2026"))
+    assert (pack / "manifest.sig").read_bytes() == before
