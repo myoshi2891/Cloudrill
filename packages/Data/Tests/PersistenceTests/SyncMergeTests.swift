@@ -122,4 +122,26 @@ import DomainInterfaces
         await #expect(throws: PersistenceError.self) { try await SyncDeduplicator(modelContainer: container).run() }
         #expect(try ModelContext(container).fetchCount(FetchDescriptor<SchemaV1.Flag>()) == 2)
     }
+
+    @Test func deduplicatorKeepsLatestSettingsAndOldestMarkers() async throws {
+        let container = try PersistenceFixtures.container(), context: ModelContext
+        context = ModelContext(container)
+        for offset in [0, 1] {
+            let date = PersistenceFixtures.now.addingTimeInterval(Double(offset))
+            let preference = SchemaV1.ExamPreference(); preference.examID = "alpha"; preference.updatedAt = date
+            preference.dailyNewCards = 20 + offset; context.insert(preference)
+            let settings = SchemaV1.UserSettings(); settings.updatedAt = date; settings.shuffleChoices = offset == 1; context.insert(settings)
+            let flag = SchemaV1.Flag(); flag.examID = "alpha"; flag.questionID = "Q1"; flag.createdAt = date; context.insert(flag)
+            let bookmark = SchemaV1.Bookmark(); bookmark.examID = "alpha"; bookmark.targetID = "Q1"; bookmark.createdAt = date; context.insert(bookmark)
+            let read = SchemaV1.ReadMark(); read.examID = "alpha"; read.docSubObjective = "1.1"; read.readAt = date; context.insert(read)
+        }
+        try context.save()
+        #expect(try await SyncDeduplicator(modelContainer: container).run().deleted.count == 5)
+        let read = ModelContext(container)
+        #expect(try read.fetch(FetchDescriptor<SchemaV1.ExamPreference>()).map(\.dailyNewCards) == [21])
+        #expect(try read.fetch(FetchDescriptor<SchemaV1.UserSettings>()).map(\.shuffleChoices) == [true])
+        #expect(try read.fetch(FetchDescriptor<SchemaV1.Flag>()).map(\.createdAt) == [PersistenceFixtures.now])
+        #expect(try read.fetch(FetchDescriptor<SchemaV1.Bookmark>()).map(\.createdAt) == [PersistenceFixtures.now])
+        #expect(try read.fetch(FetchDescriptor<SchemaV1.ReadMark>()).map(\.readAt) == [PersistenceFixtures.now])
+    }
 }
