@@ -620,7 +620,7 @@ public actor PackStore {
     public func pin(_ version: String, for examID: ExamID, attemptID: UUID) throws(ContentError)
     public func unpin(attemptID: UUID, for examID: ExamID) throws(ContentError)
     public func garbageCollect(for examID: ExamID) throws(ContentError)
-    public func directory(for location: PackLocation, examID: ExamID, bundledRoot: URL) -> URL
+    public func directory(for location: PackLocation, examID: ExamID, bundledRoot: URL) throws(ContentError) -> URL
 }
 ```
 

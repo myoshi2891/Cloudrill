@@ -196,7 +196,7 @@ tests/                    pytest と fixture(valid-json/ は Swift テストが�
 
 1. `scripts/contentvalidate/rules/ciNN_xxx.py` を作成し、`check` 関数と `RULE` を定義する
    - 試験ごとのルール(既定): `check(ctx: ExamContext) -> Iterable[Issue]` と `RULE = Rule("CI-NN", "名前", check)`。試験の数だけ実行される
-   - 全体のルール(CI-01、CI-06、CI-11): `check(ctx: GlobalContext)` と `RULE = Rule("CI-NN", "名前", check_global=check)`。1回だけ実行される
+   - 全体のルール(CI-01、CI-06、CI-11、CI-13): `check(ctx: GlobalContext)` と `RULE = Rule("CI-NN", "名前", check_global=check)`。1回だけ実行される
 2. `scripts/contentvalidate/rules/__init__.py` の `ALL_RULES` に1行追加する
 3. `tests/fixtures/generate.py` の `INVALID_CASES`(`test-beta` の上で作るケースは `BETA_INVALID_CASES`)に違反ケースを追加し、fixture を再生成する
 
@@ -225,6 +225,7 @@ fixture は `tests/fixtures/generate.py` が固定 seed で決定論的に生成
 |---|---|---|
 | `content-validate.yml` | `pull_request`、`main` への push(`content/**`、`packages/DomainModels/**` の変更時) | Python 3.14 で `pytest` と `validate.py --format github` を実行する |
 | `domainmodels-test.yml` | `pull_request`、`main` への push(`packages/DomainModels/**`、`content/schemas/**`、`content/tests/fixtures/**` の変更時) | macOS で `swift test --package-path packages/DomainModels` を実行する |
+| `data-test.yml` | `pull_request`、`main` への push(`packages/Data/**`、`packages/Domain/**`、`packages/DomainModels/**`、`content/tests/fixtures/**` の変更時) | macOS で `swift test --package-path packages/Data` を実行する(Python が生成した署名付きの契約パックを CryptoKit で検証する) |
 | `content-link-check.yml` | 毎週月曜 00:00 UTC、手動実行 | `validate.py --only CI-06 --check-links --strict --format github` を実行する(リンク切れがあればジョブが失敗する) |
 | `dependabot.yml` | 毎週 | pip と GitHub Actions のバージョン更新 PR を作る |
 
