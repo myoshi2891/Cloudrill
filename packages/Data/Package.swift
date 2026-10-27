@@ -12,7 +12,11 @@ let package = Package(
     targets: [
         .target(name: "ContentKit", dependencies: ["DomainModels", .product(name: "DomainInterfaces", package: "Domain")]),
         .testTarget(name: "ContentKitTests", dependencies: ["ContentKit"]),
-        .target(name: "Persistence"),
+        .target(name: "Persistence", dependencies: [
+            "DomainModels", .product(name: "DomainInterfaces", package: "Domain"),
+            .product(name: "StudyModels", package: "Domain"), .product(name: "ExamEngine", package: "Domain"),
+            .product(name: "FSRS", package: "Domain"), .product(name: "QuestionSelector", package: "Domain"),
+        ]),
         .testTarget(name: "PersistenceTests", dependencies: ["Persistence"]),
     ],
     swiftLanguageModes: [.v6]
