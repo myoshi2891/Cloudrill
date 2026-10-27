@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `ExamPrepApp/` + `ExamPrepApp.xcodeproj` — iOS アプリ(SwiftUI、表示名 Cloudrill)。`packages/DomainModels` をローカルパッケージ(相対パス)として参照
 - `packages/DomainModels/` — コンテンツの値型(SwiftPM、Swift 6、Swift Testing)
 - `packages/Domain/` — 学習・採点ロジックと `DomainInterfaces`（`ExamContentProvider`、`ContentError`、`IntegrityViolation`）
-- `packages/Data/` — `ContentKit`。署名検証、索引と本文の読み込み、整合チェック、パック保存。テストは `content/tests/fixtures/packs/` を直接参照する
+- `packages/Data/` — `ContentKit`。署名検証、索引と本文の読み込み、整合チェック、パック保存、同梱カタログと起動処理。テストは `content/tests/fixtures/packs/` を直接参照する
 - `content/` — 学習コンテンツ(YAML / Markdown)、JSON Schema(Draft 2020-12)、Python の検証ツール。詳細仕様は `content/README.md`
   - `content/vendors.yaml`(全試験で共通のベンダー定義)と `content/validation.yaml`(検証の閾値、全体)
   - `content/exams/<examID>/` — 試験ごとのディレクトリ。`exam.yaml`(試験定義)、`validation.yaml`(試験ごとの検証設定)、`exam-sets.yaml`、問題などのコンテンツ
@@ -91,6 +91,7 @@ validate.py の終了コード: `0` = error なし / `1` = error あり(`--stric
 - `contentpack/` はビルド・署名・検証・カタログ生成を担当する。署名は `cryptography` の Ed25519。検証は署名の成功後にだけ JSON を解析する。鍵リングは鍵 ID → `Ed25519PublicKey`。テスト用 seed は `contentpack.testing.test_signing_key(label)` で導出し、ファイルに保存しない。
 - `fixtures/packs/` は `generate_packs.py` で再生成する。epoch は固定の `1793491200`。正常3パックと改ざん9種類を持ち、`tampered/expected.json` の `directory`・`error`・`expectedExamID` を Python / Swift の両方が使う。生成済みパックは手編集しない。
 - `PackStore(root:)` の root は Content 保存先。インストール元は `<root>/<examID>/staging/<UUID>/` に置き、検証・整合チェック後に `install` → `activate` を呼ぶ。受験中の版は `pin` で保持し、`garbageCollect` は current・previous・pins にないインストール版だけを削除する。`directory(...)` は `throws(ContentError)`。
+- `BundledPacks(root:)` はアプリの `Packs/` と `catalog.json` を読む。`ContentBootstrapper(catalogService:loader:integrityChecker:)` を起動時に呼び、`available` を利用する。`failures` は試験ごとの失敗、`fatalError` は全試験が利用不可の場合の E-01 用。起動時には本文や署名を全再検証せず、manifest・試験定義・ベンダーの一致と索引の整合を確認してから有効化する。`ExamCatalogService.activeLocation(for:)` は選択だけ、`load(for:loader:integrityChecker:)` は整合確認と有効化まで行う。
 
 ## コンテンツの規約
 

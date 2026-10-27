@@ -687,23 +687,24 @@ public struct ContentBootstrapResult: Sendable {
 
 **実装状況・引き継ぎ**(2026-10-27、P2-S09 の途中):
 
-- 作業ブランチは既存の実装メモに従い `dev` を継続。利用者の指示により、起動処理の Red コミットで作業を区切る。
+- 作業ブランチは既存の実装メモに従い `dev` を継続。起動処理の Red を `0a78dff` で引き継ぎ、再開後は利用者の指示により、次の Green コミットで作業を区切る。
 - カタログ部分は Red → Green を完了した。`d2e3af1` でテストを追加し、`BundledPacks` 未定義のコンパイル失敗を確認。`d401d5c` で `BundledPacks`・`ExamCatalogService`・`ExamCatalogItem` を実装し、`ExamCatalogServiceTests` 全9テストが成功した。着手前の Data 全48テストも成功済み。
 - `BundledPacks(root:)` は `root/catalog.json` を読む。契約 fixture は catalog と valid のディレクトリが分かれているため、テストでは `BundledPacks(root:catalog:)` を使う。同梱版は同梱カタログから決め、キャッシュの `latestPackVersion` は同梱版の選択に使わない。
-- `ExamCatalogService.activeLocation(for:)` は読み取りだけで状態を変更しない。新しい同梱版の有効化は、これから追加する読み込み・整合確認の成功後に行う。現在有効な installed 版と同梱版を比較し、同じ版なら installed を保持する。
-- 起動処理は **Red 確認済み・未実装**。`ContentBootstrapperTests.swift` を追加し、下記コマンドが `cannot find type 'ContentBootstrapper' in scope` で失敗することを確認した。現時点では Data のテスト全体もコンパイルできない。Green は未確認。
+- `ExamCatalogService.activeLocation(for:)` は読み取りだけで状態を変更しない。現在有効な installed 版と同梱版を比較し、同じ版なら installed を保持する。`load(for:loader:integrityChecker:)` は manifest の試験 ID・版、試験定義の ID・ベンダーの一致、`ContentIntegrityChecker` の結果を確認してから `PackStore.activate` を呼ぶ。整合確認の失敗時は旧状態を維持する。
+- 起動処理は **Red → Green 完了**。再開時に `ContentBootstrapper` 未定義のコンパイル失敗を再確認してから実装した。先行テストは変更せず、`ContentBootstrapperTests` 全9テスト(識別情報の不一致4ケースを含む)と Data 全66テスト・8スイートが成功した。
+- `ContentBootstrapper(catalogService:loader:integrityChecker:)` の loader は既定値あり。結果は設計の `available`・`failures` に加え、`available` が空なら `.storage("no usable exam")` を返す計算プロパティ `fatalError: ContentError?` を持つ(E-01 用)。comingSoon は起動対象外、未取得の retired はスキップする。comingSoon と未知の試験への明示的な load は `.storage("not available")`。
+- 壊れた `state.json` や不正なコンテンツは試験ごとに失敗を収集する。`entries()` 全体の失敗で起動を止めない。起動時に読むのは各試験の manifest と5つの索引・定義ファイルで、問題本文や署名の全再検証は行わない。新しい同梱版への切替で installed 版を previous に残し、再起動でも previous が維持されることを確認した。
 
 ```sh
 env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --package-path packages/Data --filter ContentBootstrapperTests
+env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --package-path packages/Data
 ```
 
 次の担当者は以下の順で続けること(TDD を継続し、段階ごとにコミット):
 
-1. 追加済みの起動テストを読み、`ContentBootstrapper` と `ContentBootstrapResult`、`ExamCatalogService.load(for:loader:integrityChecker:)` を実装する。テストが想定する初期化は `ContentBootstrapper(catalogService:loader:integrityChecker:)`(`loader` は既定値あり)。結果は設計の `available`・`failures` に加え、全試験が利用不可の場合に E-01 へ接続する `fatalError: ContentError?` を持つ。期待値は `.storage("no usable exam")`。
-2. 選択したパックの manifest を読み、試験 ID・版、読み込んだ試験定義の ID・ベンダーの一致、`ContentIntegrityChecker` の結果を確認してから `PackStore.activate` を呼ぶ。失敗時は旧状態を維持する。comingSoon と未知の試験への明示的な load は `.storage("not available")`。起動時に問題本文や署名の全再検証は行わない。
-3. 試験ごとに失敗を収集して他の試験を利用可能にする。特に壊れた `state.json` も試験単位で扱う(`entries()` 全体の失敗で全試験を止めない)。新しい同梱版への切替で installed 版を previous に残すこと、再起動で previous を失わないことも追加テストの対象。
-4. 起動処理の Green を確認・コミット後、版の選択を純粋関数 `resolveActiveLocation(bundled:installed:)` に抽出し、SemVer・同版・片方なしなどの表形式テストを追加する。これはまだ未着手。
-5. Data 全体、Python 全体と `validate.py`、P2 の完了条件を検証し、README・CLAUDE.md・本書の実装メモと申し送りを更新する。リモート CI は未実行で、P2 完了とはまだ扱わない。
+1. 版の選択を純粋関数 `resolveActiveLocation(bundled:installed:)` に抽出し、SemVer・同版・片方なしなどの表形式テストを追加する。これはまだ未着手。既存の振る舞いをテストで固定したうえで Refactor する。
+2. Refactor 後に Data 全体を検証し、Python 全体と `validate.py`、秘密鍵の非混入など P2 の共通・固有の完了条件を確認する。今回の Green では Swift Data のみ検証済み。リモート CI は未実行で、P2 完了とはまだ扱わない。
+3. README・CLAUDE.md は起動処理の追加を反映済み。本書の実装状況を最終結果に更新する。アプリのリソース組み込みと起動時の呼び出しは P4-S01 の担当で、今回の変更には含めていない。
 
 SwiftPM はサンドボックス内でユーザーのキャッシュへの書き込みを拒否されたため、上記の Swift テストは権限を拡張して実行した。生成済みの契約 fixture は変更していない。異常系の変更はテストの一時コピーだけに行う。
 
@@ -726,7 +727,7 @@ SwiftPM はサンドボックス内でユーザーのキャッシュへの書き
 
 | 宛先 | 内容 |
 |---|---|
-| P4 | アプリの起動時に `ContentBootstrapper.bootstrap()` を呼ぶ。`failures` があれば、その試験だけを使えない状態にする。全滅なら E-01 を表示する |
+| P4 | アプリの起動時に `ContentBootstrapper(catalogService:loader:integrityChecker:).bootstrap()` を呼ぶ。checker の supportedKinds はアプリの `AnswerEvaluatorRegistry` から渡す。`failures` があれば、その試験だけを使えない状態にする。`fatalError != nil` なら E-01 を表示する |
 | P4 | 同梱するパックは、ビルドの前に `build_pack.py` で作り、`ExamPrepApp/Resources/Packs/` に置く。公開鍵(`PublicKeyRing`)はアプリ本体の定数にする。テスト用の鍵は DEBUG 構成でだけ含める |
 | P5 | `PackUpdater` は、`staging/<UUID>/` に取得したファイルを置き、`PackVerifier.verify` → `ContentIntegrityChecker.check` → `PackStore.install` → `activate` の順に呼ぶ。模試の受験中は `activate` を遅らせる |
 | P5 | 差分の算出には、現在のパックの manifest と、新しい manifest の `sha256` を比べる。変わっていないファイルは、`versions/<現在の版>/` からハードリンク(できなければコピー)する |

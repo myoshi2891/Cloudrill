@@ -13,7 +13,7 @@ google-cloud-professional-cloud-architect/
 ├── packages/
 │   ├── DomainModels/                                # コンテンツの値型(SwiftPM、Swift Testing)
 │   ├── Domain/                                      # 学習・採点ロジック、DomainInterfaces
-│   └── Data/                                        # ContentKit: パック検証・読み込み・整合チェック・保存
+│   └── Data/                                        # ContentKit: パック検証・読み込み・保存・起動処理
 ├── content/                                         # 学習コンテンツ、JSON Schema、検証ツール
 │   ├── schemas/                                     # JSON Schema(Draft 2020-12)
 │   ├── vendors.yaml  validation.yaml                # ベンダー定義、検証の閾値(全体)
@@ -33,7 +33,7 @@ google-cloud-professional-cloud-architect/
 | `Documentation.docc/` | 要件定義書、基本設計書、詳細設計書 |
 | `packages/DomainModels/` | `content/schemas` に対応する Swift の値型(`Question`、`Choice`、`Flashcard`、`CaseStudy` など) |
 | `packages/Domain/` | 学習・採点ロジックとコンテンツ提供のインターフェース |
-| `packages/Data/` | `ContentKit`。署名付きパックの検証、遅延読み込み、整合チェック、保存・ロールバック |
+| `packages/Data/` | `ContentKit`。署名付きパックの検証、遅延読み込み、整合チェック、保存・ロールバック、同梱カタログと起動処理 |
 | `content/` | 学習コンテンツ(YAML / Markdown)、JSON Schema、検証スクリプト。詳細は [content/README.md](content/README.md) |
 | `.github/workflows/` | CI。変更されたパスに応じて、必要なワークフローだけが動きます |
 

@@ -45,6 +45,29 @@ public struct ExamCatalogService: Sendable {
         return try await localLocation(for: examID)
     }
 
+    /// 起動時の読み込み。検証済みの installed とアプリ同梱のパックだけを扱う。
+    /// 内容の整合確認に成功するまでは、現在の版と previous を変更しない。
+    public func load(
+        for examID: ExamID,
+        loader: PackLoader = PackLoader(),
+        integrityChecker: ContentIntegrityChecker
+    ) async throws(ContentError) -> PackContent {
+        guard let location = try await activeLocation(for: examID) else { throw .storage("not available") }
+        let directory = try await store.directory(for: location, examID: examID, bundledRoot: bundled.root)
+        let manifest = try loader.manifest(packAt: directory)
+        guard manifest.examID == examID, manifest.packVersion == location.version else {
+            throw .storage("pack manifest identity mismatch")
+        }
+        let content = try loader.load(packAt: directory, manifest: manifest)
+        guard content.definition.id == examID, content.vendor.id == content.definition.vendor else {
+            throw .storage("pack content identity mismatch")
+        }
+        let violations = integrityChecker.check(content)
+        guard violations.isEmpty else { throw .integrityViolations(violations) }
+        try await store.activate(location, for: examID)
+        return content
+    }
+
     private func localLocation(for examID: ExamID) async throws(ContentError) -> PackLocation? {
         let bundledLocation = try bundled.location(for: examID)
         let current = try await store.state(for: examID).current
