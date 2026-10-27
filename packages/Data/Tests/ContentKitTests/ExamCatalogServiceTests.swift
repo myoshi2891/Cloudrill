@@ -95,6 +95,18 @@ struct ExamCatalogServiceTests {
         #expect(try await service.activeLocation(for: "test-beta") == nil)
     }
 
+    @Test func brokenStateIsIsolatedPerEntry() async throws {
+        let root = PackFixtures.temporary()
+        defer { try? FileManager.default.removeItem(at: root) }
+        try FileManager.default.createDirectory(at: root.appending(path: "test-alpha"), withIntermediateDirectories: true)
+        try Data("{".utf8).write(to: root.appending(path: "test-alpha/state.json"))
+        let service = try ExamCatalogService(bundled: CatalogFixtures.bundled(), store: PackStore(root: root), cachedCatalog: nil)
+        let entries = try await service.entries()
+        #expect(entries.map(\.id) == ["test-alpha", "test-beta"])
+        #expect(entries[0].failure != nil && !entries[0].isInstalled)
+        #expect(entries[1].failure == nil && entries[1].isAvailable)
+    }
+
     @Test func staleBundledStateUsesActualBundle() async throws {
         let root = PackFixtures.temporary()
         defer { try? FileManager.default.removeItem(at: root) }

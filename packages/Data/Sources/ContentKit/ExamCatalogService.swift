@@ -5,6 +5,8 @@ import DomainInterfaces
 public struct ExamCatalogItem: Sendable, Identifiable {
     public let entry: CatalogEntry
     public let activeLocation: PackLocation?
+    /// 状態を読めなかった場合のエラー。このとき activeLocation は nil。
+    public let failure: ContentError?
     public var id: ExamID { entry.id }
     /// 同梱パックも取得済みとして扱う。
     public var isInstalled: Bool { activeLocation != nil }
@@ -31,10 +33,17 @@ public struct ExamCatalogService: Sendable {
 
     public func entries() async throws(ContentError) -> [ExamCatalogItem] {
         var items: [ExamCatalogItem] = []
+        // 1試験の state.json が壊れていても、他の試験の一覧は返す。失敗は項目に残す。
         for entry in catalogEntries {
-            let location = try await localLocation(for: entry.id)
+            let location: PackLocation?
+            do {
+                location = try await localLocation(for: entry.id)
+            } catch {
+                items.append(ExamCatalogItem(entry: entry, activeLocation: nil, failure: error))
+                continue
+            }
             guard entry.status != .retired || location != nil else { continue }
-            items.append(ExamCatalogItem(entry: entry, activeLocation: location))
+            items.append(ExamCatalogItem(entry: entry, activeLocation: location, failure: nil))
         }
         return items
     }
