@@ -39,6 +39,8 @@ google-cloud-professional-cloud-architect/
 
 起動時は同梱版と現在有効なインストール版を SemVer で比較し、新しい方を使います。同じ優先順位ならインストール版を維持し、内容の整合確認後に有効化します。実装状況と検証結果は [P2 コンテンツパック](Documentation.docc/DDD/DDD-P2-ContentPack.md) を参照してください。
 
+永続化層は [P3-S01 の Red 段階](Documentation.docc/DDD/DDD-P3-Persistence.md#p3-s01-schemav1-とコンテナ)です。先行テストを追加した状態で引き継いでおり、`SchemaV1`・`ModelContainerFactory` の実装までは Data パッケージのテストがコンパイル失敗します。
+
 ## ローカルでの検証
 
 ```sh

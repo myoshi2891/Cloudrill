@@ -6,7 +6,7 @@
 | 作成日 | 2026-10-21 |
 | 上位文書 | [詳細設計書(索引・共通設計)](../DDD.md) |
 | 対象 | `packages/Data` の `Persistence`、`packages/Domain` の `DomainInterfaces`(リポジトリのプロトコル) |
-| ステータス | レビュー待ち |
+| ステータス | P3-S01 の先行テストを追加し、型未定義による Red を確認。実装前の引き継ぎ |
 
 ---
 
@@ -36,7 +36,7 @@
 
 - P1 が完了している(`AnswerFact`、`ExamSession.Snapshot`、`FSRSCard`、`ReviewOutcome` を使う)。
 - P2 と並行して進めてよい。
-- ブランチは `feat/p3-persistence`。
+- ブランチは利用者の指定により `dev` を維持する。プッシュ・PR 操作は利用者が担当する。
 
 ---
 
@@ -226,6 +226,27 @@ public protocol CardStateRepository: Sendable {
 **Refactor**: 既定値(空文字、`.distantPast`)を定数にまとめる。
 
 **完了条件**: `swift test --package-path packages/Data --filter SchemaV1Tests` が通る。
+
+**実装状況・引き継ぎ**(2026-10-27、Red で停止):
+
+- P2 の実装・ローカル検証を終え、P4 の前提になる P3-S01 に着手した。利用者の「次のコミットで引き継ぎ」の指示により、本ステップの先行テストとこのメモを1コミットにまとめて停止する。P3-S02 以降は未着手。
+- `packages/Data/Package.swift` に `Persistence` の library/target と `PersistenceTests` を追加した。`Sources/Persistence/Persistence.swift` はターゲットを認識させるためのコメントだけの空ファイルで、製品の実装はまだない。
+- `SchemaV1Tests.swift` に設計の5テストと `schemaContainsAllColumns` を追加した。10モデルの登録・列、引数なしの生成、Schema 上の既定値または Optional、unique 制約なし、双方向の Optional リレーション、インメモリと指定ディレクトリのストアを確認する。既定値の検査は引数なしで初期化できることだけでは済ませず、`Schema.Attribute.defaultValue` も検査する。
+- 次のコマンドを実行し、終了コード 1、`cannot find 'ModelContainerFactory' in scope` と `cannot find 'SchemaV1' in scope` を確認した。これは型が存在しない最初のコンパイル Red（DDD 7.1）。型推論の連鎖エラーも発生している。テスト本体はまだ実行できておらず、assertion の Red・Green は未確認。
+
+```sh
+env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --package-path packages/Data --filter SchemaV1Tests
+```
+
+再開手順（TDD と段階コミットを継続）:
+
+1. `SchemaV1.swift` と `ModelContainerFactory.swift` にコンパイル可能な仮実装を置く。上の空ファイルは不要になった時点で削除する。まず最小のモデルと誤ったコンテナ設定などで、登録する列や保存先の **assertion が意図した理由で失敗することを確認してコミット**する。コンパイルエラーだけで Green へ進めない。
+2. 3.1 の10モデルを `enum SchemaV1: VersionedSchema` に定義し、全プロパティの既定値または Optional、unique 制約なし、Optional の逆リレーションを実装する。列挙値は文字列、構造値は Data の列として持つ。テストが使う `SchemaV1.Flag.examID` と `questionID` も実装する。
+3. ファクトリーには設計例の2引数に加え、`storeDirectory: URL? = nil` を受ける入口を用意する。App Group の実際の URL の解決は P4 のアプリ側で行い、今回のテストでは一時ディレクトリを渡す。App Group ID を仮の値で固定しない。`cloudKitContainer: nil` の場合は同期を明示的に無効にし、ローカルテストから実アカウントに接続しない。保存先未指定時などの扱いを増やす際は、そのテストを先に追加する。
+4. 6テストの Green、既定値の整理、Data 全体の回帰確認を行い、段階ごとにコミットする。移行計画の配線は P3-S09、リポジトリの実装は S02 以降で行う。
+5. README・CLAUDE.md と本節を実装結果に更新する。プッシュやリモート CI の操作は利用者に任せる。
+
+このコミットでは Data 全体も新しいテストのコンパイルで失敗する。直前の P2 検証結果（Data 70件、DomainModels 38件、Python 351件成功、Domain カバレッジ 97.54%）は P2 の記録であり、今回の Red コミットの成功結果ではない。ContentKit の製品コード・既存テストと生成 fixture は変更していない。
 
 ---
 

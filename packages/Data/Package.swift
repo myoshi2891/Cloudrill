@@ -4,11 +4,16 @@ import PackageDescription
 let package = Package(
     name: "Data",
     platforms: [.iOS(.v18), .macOS(.v15)],
-    products: [.library(name: "ContentKit", targets: ["ContentKit"])],
+    products: [
+        .library(name: "ContentKit", targets: ["ContentKit"]),
+        .library(name: "Persistence", targets: ["Persistence"]),
+    ],
     dependencies: [.package(path: "../DomainModels"), .package(path: "../Domain")],
     targets: [
         .target(name: "ContentKit", dependencies: ["DomainModels", .product(name: "DomainInterfaces", package: "Domain")]),
         .testTarget(name: "ContentKitTests", dependencies: ["ContentKit"]),
+        .target(name: "Persistence"),
+        .testTarget(name: "PersistenceTests", dependencies: ["Persistence"]),
     ],
     swiftLanguageModes: [.v6]
 )
