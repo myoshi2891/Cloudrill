@@ -98,9 +98,11 @@ push・PR作成・リモートCIの確認は行っていない。`data-test.yml`
 
 ## 次のステップ：P2-S09
 
-`BundledPacks`、`ExamCatalogService`、`ContentBootstrapper` とテストを **Red から**追加する。
+本書の作成後、`BundledPacks`、`ExamCatalogService`、`ContentBootstrapper` とテストは **Green まで実装済み**（`d2e3af1`〜`dccfeb6`）。
 
-設計の受け入れ条件：
+**残作業**：有効版の選択を純粋関数 `resolveActiveLocation(bundled:installed:)` に切り出す Refactor。SemVer の大小・同じ版・片方なしなどを表形式のテストで確認する（受け入れ条件 7）。既存の振る舞いをテストで固定してから抽出する。
+
+設計の受け入れ条件（7 以外は実装済み）：
 
 1. 同梱の2試験が利用可能・インストール済みとして一覧に出る。
 2. 初回は同梱パックをコピーせず使う。
@@ -112,7 +114,7 @@ push・PR作成・リモートCIの確認は行っていない。`data-test.yml`
 
 テストで同梱1.0.0だけの状態が必要なときは、契約 fixture から一時ディレクトリに対象版だけをコピーする。`packs/valid/` 全体には alpha 1.1.0 もあるため、そのまま使うと初回1.0.0の前提にならない。
 
-設計上の要確認点：`bootstrap() async -> ContentBootstrapResult` というシグネチャと、「全滅なら ContentError を返す」というテスト条件が併記されている。全滅の表現方法をテストで明示して実装メモに残す。P2-S09の実装はまだない。
+全滅時の表現：`bootstrap() async -> ContentBootstrapResult` は例外を投げない。全試験が利用不能のときは `fatalError`（`ContentError`）に E-01 用のエラーを入れる。
 
 ## 環境・作業上の補足
 
