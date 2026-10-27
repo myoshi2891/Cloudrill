@@ -34,10 +34,11 @@ content/.venv/bin/python content/scripts/validate.py --exam gcp-pca   # 試験�
 content/.venv/bin/python content/scripts/validate.py --check-links   # CI-06(ネットワークアクセスあり)
 
 # 配信パックのビルド(SOURCE_DATE_EPOCH は必須。終了コード 0 = 成功 / 1 = 検証 error / 2 = 引数の不備・出力先がすでにある)
-SOURCE_DATE_EPOCH=<リリース時刻の epoch> content/.venv/bin/python content/scripts/build_pack.py --exam gcp-pca --version 1.0.0 --min-app-version 1.0.0 --key-id test-2026 --out <出力先>
+SOURCE_DATE_EPOCH=<リリース時刻の epoch> content/.venv/bin/python content/scripts/build_pack.py --exam gcp-pca --version 1.0.0 --min-app-version 1.0.0 --key-id <本番鍵 ID> --out <出力先>
 
-# 署名とカタログ生成(成功 0 / 入力・I/O の不備 2)。本番署名は --test-key の代わりに --key-env <環境変数名>
-content/.venv/bin/python content/scripts/sign_manifest.py --manifest <manifest.json> --key-id test-2026 --test-key test-2026
+# 署名とカタログ生成(成功 0 / 入力・I/O の不備 2)
+content/.venv/bin/python content/scripts/sign_manifest.py --manifest <manifest.json> --key-id <本番鍵 ID> --key-env <環境変数名>
+content/.venv/bin/python content/scripts/sign_manifest.py --manifest <manifest.json> --key-id test-2026 --test-key test-2026   # テスト署名
 SOURCE_DATE_EPOCH=<リリース時刻の epoch> content/.venv/bin/python content/scripts/build_catalog.py --out <catalog.json> [--previous <catalog.json>] [--update <examID>=<manifest.json> ...]
 
 # fixture と Swift 用 JSON の再生成(生成物はコミット対象)
