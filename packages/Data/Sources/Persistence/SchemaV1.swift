@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import StudyModels
 
 /// 構造値の JSON と日時は、リポジトリが記録を作るときに実値へ置き換える。
 /// UUID はここに集約せず、各レコードの初期化時に生成する。
@@ -125,10 +126,10 @@ public enum SchemaV1: VersionedSchema {
         public var id: UUID = UUID()
         public var examID: String = SchemaV1Defaults.emptyText
         public var examDate: Date? = nil
-        public var dailyNewCards: Int = 20
-        public var dailyReviewLimit: Int = 200
-        public var desiredRetention: Double = 0.90
-        public var autoCardFromMistakes: Bool = true
+        public var dailyNewCards: Int = StudyModels.ExamPreference.default.dailyNewCards
+        public var dailyReviewLimit: Int = StudyModels.ExamPreference.default.dailyReviewLimit
+        public var desiredRetention: Double = StudyModels.ExamPreference.default.desiredRetention
+        public var autoCardFromMistakes: Bool = StudyModels.ExamPreference.default.autoCardFromMistakes
         public var updatedAt: Date = SchemaV1Defaults.unsetDate
         public init() {}
     }

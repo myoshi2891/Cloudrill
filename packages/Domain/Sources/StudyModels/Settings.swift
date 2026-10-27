@@ -20,7 +20,10 @@ public struct ExamPreference: Hashable, Sendable {
     public var autoCardFromMistakes: Bool = true
     public static let `default` = ExamPreference()
     public init() {}
-    public init(desiredRetention: Double, examDate: Date? = nil, dailyNewCards: Int = 20, dailyReviewLimit: Int = 200, autoCardFromMistakes: Bool = true) throws(SettingsError) {
+    public init(desiredRetention: Double, examDate: Date? = nil, dailyNewCards: Int = ExamPreference.default.dailyNewCards,
+                dailyReviewLimit: Int = ExamPreference.default.dailyReviewLimit,
+                autoCardFromMistakes: Bool = ExamPreference.default.autoCardFromMistakes) throws(SettingsError) {
+        guard (0.80...0.95).contains(desiredRetention), dailyNewCards >= 0, dailyReviewLimit >= 0 else { throw .outOfRange }
         self.desiredRetention = desiredRetention; self.examDate = examDate; self.dailyNewCards = dailyNewCards
         self.dailyReviewLimit = dailyReviewLimit; self.autoCardFromMistakes = autoCardFromMistakes
     }

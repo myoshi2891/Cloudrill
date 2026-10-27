@@ -39,7 +39,7 @@ google-cloud-professional-cloud-architect/
 
 起動時は同梱版と現在有効なインストール版を SemVer で比較し、新しい方を使います。同じ優先順位ならインストール版を維持し、内容の整合確認後に有効化します。実装状況と検証結果は [P2 コンテンツパック](Documentation.docc/DDD/DDD-P2-ContentPack.md) を参照してください。
 
-永続化層は [P3-S01](Documentation.docc/DDD/DDD-P3-Persistence.md#p3-s01-schemav1-とコンテナ) の SwiftData モデルとコンテナ生成まで実装済みです。ディスク保存先にはアプリ側で解決した App Group の URL を渡し、テストではインメモリまたは一時ディレクトリを使います。学習履歴のリポジトリは P3-S02 以降で実装します。
+永続化層は [P3-S01〜S06](Documentation.docc/DDD/DDD-P3-Persistence.md) のモデル・コンテナ生成と、受験記録・練習履歴・カード・ブックマーク／既読・設定のリポジトリを実装済みです。保存には1回の再試行と失敗時の取り消しを設けています。ディスク保存先にはアプリ側で解決した App Group の URL を渡します。重複統合・エクスポート／削除・移行計画（S07〜S09）は未実装です。
 
 ## ローカルでの検証
 

@@ -6,7 +6,7 @@
 | 作成日 | 2026-10-21 |
 | 上位文書 | [詳細設計書(索引・共通設計)](../DDD.md) |
 | 対象 | `packages/Data` の `Persistence`、`packages/Domain` の `DomainInterfaces`(リポジトリのプロトコル) |
-| ステータス | P3-S01 の Red → Green → Refactor とローカル検証完了。P3-S02 以降は未着手 |
+| ステータス | P3-S01〜S06 の実装・ローカル検証完了。P3-S07〜S09 を継続して実装する |
 
 ---
 
@@ -255,7 +255,7 @@ env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --packag
 env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --package-path packages/Data
 ```
 
-P3-S02 以降のリポジトリと P3-S09 の移行計画は未実装。リモート CI は利用者が実施する。P3 フェーズ全体の完了条件はまだ満たしていない。
+P3-S02〜S06 の進捗は各節と S06 末尾の検証記録を参照。リモート CI は利用者が実施する。P3 フェーズ全体の完了条件はまだ満たしていない。
 
 ---
 
@@ -291,6 +291,14 @@ P3-S02 以降のリポジトリと P3-S09 の移行計画は未実装。リモ�
 
 **完了条件**: `swift test --package-path packages/Data --filter ExamAttemptRepositoryTests` が通る。
 
+**実装メモ**:
+
+- `24a0ccb` の仮実装で6テスト・15件の assertion 失敗を確認し、`788af27` で Green。テストは表の関連する条件をまとめて確認する（再開・スナップショット・版の保持、3件の解答と提出、提出後の再提出拒否、履歴の順序と放棄の除外、ファイルストアの再オープン、保存の再試行、試験の取り違え・存在しない受験）。
+- `SwiftDataExamAttemptRepository` は `@ModelActor`。`AttemptMapper`・`AnswerMapper` がモデルと値型の変換を担当する。開始日時は開始時の snapshot の `timer.deadline - duration` から復元する。開始 API は模試開始時に呼び、後から既存の受験を作り直す用途には使わない。
+- `AttemptSnapshot`・`AttemptSummary` は `DomainInterfaces` に置いた。`ExamSession.Snapshot` を参照するため、StudyModels に置くと ExamEngine との循環依存になる。DomainInterfaces の依存に ExamEngine・StudyModels・FSRS・QuestionSelector を追加した。ContentKit の検証器から採点レジストリを直接参照する変更はしていない。
+- `Storage.write` を各リポジトリで共用する。自動保存を止め、actor 内の同期処理で変更と保存を行い、保存は1回だけ再試行する。最終失敗では `rollback()` して `.saveFailed` を返す。`Saver` を受験リポジトリの初期化時に差し替え、失敗後に未保存の受験が残らないことも確認した。
+- 試験の一覧検索は `examID` で絞る。`save`・`record`・`finalize`・`abandon` は設計の API に従って受験 UUID で検索する例外で、`record` は受験の試験 ID と解答の試験 ID・モード・問題 ID も確認する。未知の status・submitReason・JSON は `.corrupted` にする。
+
 ---
 
 ### P3-S03 練習の解答履歴(AnswerHistoryRepository)
@@ -317,6 +325,11 @@ P3-S02 以降のリポジトリと P3-S09 の移行計画は未実装。リモ�
 **Refactor**: 検索条件(`#Predicate`)の組み立てを補助関数にまとめる。
 
 **完了条件**: `swift test --package-path packages/Data --filter AnswerHistoryRepositoryTests` が通る。
+
+**実装メモ**:
+
+- `cb9ebda` で3テスト・6件の assertion Red、`4137202` で Green。練習・模試・ドリルの全モードを読み、直近の解答結果・出題時刻・フラグを試験ごとに返す。未知の保存モードは `.corrupted`。
+- 出題時刻は24時間より古いものも返し、期間の判定を QuestionSelector に任せる。フラグの重複設定は増殖させず、解除では同期後の重複行もすべて消す。解答は時刻と UUID で決定論的に並べる。
 
 ---
 
@@ -346,6 +359,12 @@ P3-S02 以降のリポジトリと P3-S09 の移行計画は未実装。リモ�
 
 **完了条件**: `swift test --package-path packages/Data --filter CardStateRepositoryTests` が通る。
 
+**実装メモ**:
+
+- `637489c` で3テスト・8件の assertion Red、`c462d80` で Green。FSRSCard の往復、状態1件に対するログの追記、due 列との一致、問題カードの重複防止、試験分離を確認した。
+- 日別の新規数はカードごとの最初の復習ログが範囲に入る件数、復習数は範囲内の残りのログ数とする。範囲は `start <= reviewedAt < end`。過去のログも参照して新規かどうかを判定するため、昨日に導入したカードを今日の新規には数えない。
+- 同期直後の重複した CardState は `lastReview` が新しい行（同時刻なら UUID の小さい行）を読んで更新する。重複行自体の削除は S07。ログの rating が未知なら `.corrupted` にする。
+
 ---
 
 ### P3-S05 ブックマークと既読
@@ -371,6 +390,11 @@ P3-S02 以降のリポジトリと P3-S09 の移行計画は未実装。リモ�
 **Refactor**: なし。
 
 **完了条件**: `swift test --package-path packages/Data --filter BookmarkRepositoryTests` が通る。
+
+**実装メモ**:
+
+- `4c823ac` で3テスト・8件の assertion Red、`3bd433d` で Green。`BookmarkTarget` は question/doc、公開 API は `toggleBookmark(targetType:targetID:examID:at:)`、`bookmarks(examID:type:)`、`markRead(_:examID:at:)`、`isRead(_:examID:)` とした。
+- `toggleBookmark` は追加時 true、解除時 false を返す。既読は何度呼んでも1件。種別・試験分離・未知の保存種別の拒否を確認した。返り値はモデルではなく `BookmarkEntry`。
 
 ---
 
@@ -399,6 +423,34 @@ P3-S02 以降のリポジトリと P3-S09 の移行計画は未実装。リモ�
 **Refactor**: 既定値を `ExamPreference.default` に集める。
 
 **完了条件**: `swift test --package-path packages/Data --filter SettingsRepositoryTests` が通る。
+
+**実装メモ**:
+
+- `aa9cd56` で4テスト・7件の assertion Red を確認し、本コミットで Green。空のストアの既定値、選択中の試験の保存、試験日の分離、重複設定の最新版の選択、未知の保存言語の拒否を確認した。保持率のテストは 0.99・0.79・NaN の3ケース。
+- `StudyModels.UserSettings` と `ExamPreference` は値型。保持率とカード数は外から直接変更できず、初期化時に検証する。SchemaV1 の試験設定の既定値も `ExamPreference.default` を参照する。スキーマの列は変えていない。
+- 公開 API は `settings()`、`preference(examID:)`、`save(settings:at:)`、`save(preference:examID:at:)`。全体設定のみ試験 ID で絞らず、試験設定は必ず絞る。重複時は updatedAt の新しい行、同日時は UUID の小さい行を使う。重複の削除は S07。
+
+**検証記録と残作業**(2026-10-28、S06 Green):
+
+- 作業ブランチは `dev`。プッシュ・PR 操作とリモート CI は利用者が担当する。S02〜S06 は先行テストと仮実装の assertion Red をコミットしてから実装した。次の作業は **P3-S07**。
+- 現時点の検証は Data 全99テスト（Persistence 29、ContentKit 70）、DomainModels 全38テスト、Domain 全148テストが成功。Domain の行カバレッジは 95.96%（下限80%）。Python 全351テスト成功、validate.py は error 0 件・既存の CI-02 warning 7 件。
+- `SchemaV1Tests` の10テストも回帰確認済み。全リポジトリは ModelActor の中で ModelContext を使い、公開操作は値型を返す。`#Predicate` をレビューし、試験単位の検索には examID を付けた。例外は前述の受験 UUID による操作と全体設定。
+
+```sh
+env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --package-path packages/Data
+env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer bash scripts/coverage.sh packages/Domain 80
+env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --package-path packages/DomainModels
+(cd content && .venv/bin/pytest -q)
+content/.venv/bin/python content/scripts/validate.py
+```
+
+再開時の順序:
+
+1. S07 の `SyncMerge`（値型入力から削除・更新対象を決める純粋関数）と `SyncDeduplicator` の先行テストを追加し、仮実装で assertion Red を確認してコミットする。現時点ではどちらも未作成。異なる試験を混ぜないこと、同時刻の決定論、追記のみの記録を消さないことを確認する。ReadMark の時刻列は `createdAt` ではなく **`readAt`**。
+2. S07 の Green では、CardState の重複を削除しても ReviewLog が残ること、進行中の受験の一方を abandoned にするときは snapshot の状態もそろうことを確認する。保存には `Storage.write` を使い、失敗時の取り消しを維持する。
+3. S08 のエクスポート・全削除を TDD で実装する。全10モデルと全列（JSON の Data とリレーションをどう表現するかも含む）をテストし、試験指定の削除では他試験と UserSettings を残す。今のリポジトリだけではこの機能は未提供。
+4. S09 の `ExamPrepMigrationPlan` を追加してファクトリーへ配線し、既存の V1 ストアを開き直す。現時点のファクトリーは migrationPlan を指定していない。
+5. P3 全体の完了条件を再確認し、README・CLAUDE.md・本書を更新する。リモート CI と実機の CloudKit 確認が済んだと誤って扱わない。
 
 ---
 

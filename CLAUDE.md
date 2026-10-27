@@ -8,9 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - `ExamPrepApp/` + `ExamPrepApp.xcodeproj` — iOS アプリ(SwiftUI、表示名 Cloudrill)。`packages/DomainModels` をローカルパッケージ(相対パス)として参照
 - `packages/DomainModels/` — コンテンツの値型(SwiftPM、Swift 6、Swift Testing)
-- `packages/Domain/` — 学習・採点ロジックと `DomainInterfaces`（`ExamContentProvider`、`ContentError`、`IntegrityViolation`）
+- `packages/Domain/` — 学習・採点ロジックと `DomainInterfaces`（コンテンツ提供・永続化リポジトリのプロトコル、エラー、受験スナップショットなどの値型）
 - `packages/Data/` — `ContentKit`。署名検証、索引と本文の読み込み、整合チェック、パック保存、同梱カタログと起動処理。テストは `content/tests/fixtures/packs/` を直接参照する
-- `packages/Data` の `Persistence` は P3-S01 完了。`SchemaV1` の10モデルと `ModelContainerFactory` を実装済み。ディスク保存にはアプリ側で解決した App Group の URL を `storeDirectory` に渡す。インメモリでは CloudKit を無効にする。リポジトリ（S02 以降）と移行計画（S09）は未実装。詳細は `Documentation.docc/DDD/DDD-P3-Persistence.md` を参照
+- `packages/Data` の `Persistence` は P3-S01〜S06 完了。10モデル、コンテナ、受験・解答履歴・カード・ブックマーク／既読・設定の ModelActor リポジトリを実装済み。`Storage.write` が保存の1回再試行と rollback を共用する。App Group の URL は `storeDirectory` に渡し、インメモリでは CloudKit を無効にする。重複統合・エクスポート／削除・移行計画（S07〜S09）は未実装。詳細は `Documentation.docc/DDD/DDD-P3-Persistence.md` の S06 末尾の検証記録を参照
 - `content/` — 学習コンテンツ(YAML / Markdown)、JSON Schema(Draft 2020-12)、Python の検証ツール。詳細仕様は `content/README.md`
   - `content/vendors.yaml`(全試験で共通のベンダー定義)と `content/validation.yaml`(検証の閾値、全体)
   - `content/exams/<examID>/` — 試験ごとのディレクトリ。`exam.yaml`(試験定義)、`validation.yaml`(試験ごとの検証設定)、`exam-sets.yaml`、問題などのコンテンツ
