@@ -6,7 +6,8 @@ public enum ModelContainerFactoryError: Error, Equatable, Sendable {
     case invalidStoreDirectory
 }
 
-/// P3-S01 の assertion Red 用。ディスク指定でもメモリに作る仮実装。
+/// App Group の保存先 URL はアプリ側で解決して渡す。
+/// インメモリのストアは CloudKit を使わず、ディスクには書き込まない。
 public enum ModelContainerFactory {
     public static func make(
         inMemory: Bool,
@@ -14,10 +15,21 @@ public enum ModelContainerFactory {
         storeDirectory: URL? = nil
     ) throws -> ModelContainer {
         let schema = Schema(SchemaV1.models)
-        let configuration = ModelConfiguration(
-            "P3S01Red", schema: schema, isStoredInMemoryOnly: true,
-            groupContainer: .none, cloudKitDatabase: .none
-        )
+        let configuration: ModelConfiguration
+        if inMemory {
+            configuration = ModelConfiguration(
+                "StudyHistory", schema: schema, isStoredInMemoryOnly: true,
+                groupContainer: .none, cloudKitDatabase: .none
+            )
+        } else {
+            guard let storeDirectory else { throw ModelContainerFactoryError.storeDirectoryRequired }
+            guard storeDirectory.isFileURL else { throw ModelContainerFactoryError.invalidStoreDirectory }
+            try FileManager.default.createDirectory(at: storeDirectory, withIntermediateDirectories: true)
+            configuration = ModelConfiguration(
+                "StudyHistory", schema: schema, url: storeDirectory.appending(path: "StudyHistory.store"),
+                cloudKitDatabase: cloudKitContainer.map { .private($0) } ?? .none
+            )
+        }
         return try ModelContainer(for: schema, configurations: [configuration])
     }
 }
