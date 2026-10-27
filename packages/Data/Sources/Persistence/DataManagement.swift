@@ -10,7 +10,14 @@ import DomainInterfaces
         self.saver = saver
     }
     public func export(examID: ExamID?) throws(PersistenceError) -> Data {
-        Data(#"{"exportVersion":1,"schema":"V1","entities":{}}"#.utf8)
+        try Storage.read {
+            let rows = try PersistenceRows(context: modelContext, examID: examID?.rawValue)
+            return try Storage.encode(rows.exportDocument())
+        }
     }
-    public func deleteAll(examID: ExamID?) throws(PersistenceError) {}
+    public func deleteAll(examID: ExamID?) throws(PersistenceError) {
+        try Storage.write(modelContext, saver: saver) {
+            try PersistenceRows(context: modelContext, examID: examID?.rawValue).deleteAll(in: modelContext)
+        }
+    }
 }
