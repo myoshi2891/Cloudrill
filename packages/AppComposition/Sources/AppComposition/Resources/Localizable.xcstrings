@@ -1,0 +1,83 @@
+{
+  "sourceLanguage": "ja",
+  "strings": {
+    "loading": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "読み込み中"
+          }
+        }
+      }
+    },
+    "chooseExam": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "試験を選択"
+          }
+        }
+      }
+    },
+    "comingSoon": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "近日公開"
+          }
+        }
+      }
+    },
+    "domains": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "学習ドメイン"
+          }
+        }
+      }
+    },
+    "error.contentLoadFailed": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "データの読み込みに失敗しました。再インストールしてください"
+          }
+        }
+      }
+    },
+    "error.examUnavailable": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この試験のデータを読み込めませんでした"
+          }
+        }
+      }
+    },
+    "error.persistenceFailed": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存に失敗しました"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
