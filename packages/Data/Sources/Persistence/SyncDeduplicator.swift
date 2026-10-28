@@ -28,7 +28,14 @@ import ExamEngine
                 snapshot.state = .abandoned
                 row.sessionSnapshotJSON = try Storage.encode(snapshot); row.statusRaw = AttemptStatus.abandoned.rawValue
             }
-            for row in rows.cardStates where deleted.contains(row.id) { modelContext.delete(row) }
+            let keptStates = rows.cardStates.filter { !deleted.contains($0.id) }
+            for row in rows.cardStates where deleted.contains(row.id) {
+                guard let kept = keptStates.first(where: { $0.examID == row.examID && $0.cardID == row.cardID }) else {
+                    throw PersistenceError.corrupted("missing retained card state")
+                }
+                for log in row.reviewLogs ?? [] { log.cardState = kept }
+                modelContext.delete(row)
+            }
             for row in rows.examPreferences where deleted.contains(row.id) { modelContext.delete(row) }
             for row in rows.userSettings where deleted.contains(row.id) { modelContext.delete(row) }
             for row in rows.flags where deleted.contains(row.id) { modelContext.delete(row) }
