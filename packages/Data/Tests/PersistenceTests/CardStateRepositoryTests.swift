@@ -5,6 +5,32 @@ import FSRS
 @testable import Persistence
 
 @MainActor struct CardStateRepositoryTests {
+    @Test func singleCardLookupAndApplyPreserveOtherCardsAndExams() async throws {
+        let container = try PersistenceFixtures.container()
+        let context = ModelContext(container)
+        let now = PersistenceFixtures.now
+        var rows: [SchemaV1.CardState] = []
+        for (exam, cardID, offset) in [("test-alpha", "C1", 0.0), ("test-alpha", "C1", 60.0),
+                                       ("test-alpha", "C2", 120.0), ("test-beta", "C1", 180.0)] {
+            let row = SchemaV1.CardState()
+            row.examID = exam; row.cardID = cardID
+            row.lastReview = now.addingTimeInterval(offset)
+            row.fsrsCardJSON = try Storage.encode(FSRSCard.new(at: now.addingTimeInterval(offset)))
+            context.insert(row); rows.append(row)
+        }
+        try context.save()
+        let original = rows.map(\.fsrsCardJSON)
+        let repo = SwiftDataCardStateRepository(modelContainer: container)
+        #expect(try await repo.card(id: "C1", examID: "test-alpha") == .new(at: now.addingTimeInterval(60)))
+        let outcome = FSRSScheduler(parameters: try .init()).review(.new(at: now), rating: .good, at: now.addingTimeInterval(300))
+        try await repo.apply(outcome, cardID: "C1", examID: "test-alpha")
+        let saved = try ModelContext(container).fetch(FetchDescriptor<SchemaV1.CardState>())
+        #expect(saved.count == 4)
+        for index in rows.indices {
+            let row = try #require(saved.first { $0.id == rows[index].id })
+            #expect(row.fsrsCardJSON == (index == 1 ? try Storage.encode(outcome.card) : original[index]))
+        }
+    }
     @Test func applyRoundTripsAndAppendsLogs() async throws {
         let container = try PersistenceFixtures.container()
         let repo = SwiftDataCardStateRepository(modelContainer: container)

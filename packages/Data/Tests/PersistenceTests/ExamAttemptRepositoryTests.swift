@@ -97,20 +97,52 @@ final class FailingSaver: Saver, @unchecked Sendable {
         #expect(try await repo.history(examID: "test-alpha").map(\.id) == [ids[1], ids[0]])
         #expect(try await repo.history(examID: "test-beta").isEmpty == true)
     }
-    @Test func recordSurvivesNewContainer() async throws {
+    @Test(arguments: [AnswerSelection.choices(["b"]), .choices([])])
+    func recordSurvivesNewContainer(selection: AnswerSelection) async throws {
         let root = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: root) }
         let snapshot = try PersistenceFixtures.snapshot()
+        var answer = PersistenceFixtures.answer()
+        answer.selection = selection
+        var expected = snapshot
+        if case let .choices(ids) = selection {
+            expected.answers[answer.questionID] = ids.isEmpty ? nil : selection
+        }
         do {
             let container = try ModelContainerFactory.make(inMemory: false, cloudKitContainer: nil, storeDirectory: root)
             let repo = SwiftDataExamAttemptRepository(modelContainer: container)
             let id = try await repo.start(examID: "test-alpha", examSet: 1, packVersion: "1.0.0", snapshot: snapshot)
-            try await repo.record(PersistenceFixtures.answer(), in: id)
+            try await repo.record(answer, in: id)
         }
         let reopened = try ModelContainerFactory.make(inMemory: false, cloudKitContainer: nil, storeDirectory: root)
         let repo = SwiftDataExamAttemptRepository(modelContainer: reopened)
-        #expect(try await repo.inProgress(examID: "test-alpha")?.snapshot == snapshot)
+        #expect(try await repo.inProgress(examID: "test-alpha")?.snapshot == expected)
         #expect(try ModelContext(reopened).fetchCount(FetchDescriptor<SchemaV1.AnswerRecord>()) == 1)
+    }
+    @Test(arguments: [0, 1, 2]) func recordSavesSnapshotAtomically(failures: Int) async throws {
+        let container = try PersistenceFixtures.container()
+        let initial = try PersistenceFixtures.snapshot()
+        let starter = SwiftDataExamAttemptRepository(modelContainer: container)
+        let id = try await starter.start(examID: "test-alpha", examSet: 1, packVersion: "1.0.0", snapshot: initial)
+        let saver = FailingSaver(failures: failures)
+        let repo = SwiftDataExamAttemptRepository(modelContainer: container, saver: saver)
+        var answer = PersistenceFixtures.answer()
+        answer.selection = .choices(["b"])
+        if failures == 2 {
+            do {
+                try await repo.record(answer, in: id)
+                Issue.record("Expected record to fail")
+            } catch PersistenceError.saveFailed {}
+        } else {
+            try await repo.record(answer, in: id)
+        }
+        var expected = initial
+        if failures < 2 { expected.answers["Q1"] = answer.selection }
+        let reader = SwiftDataExamAttemptRepository(modelContainer: container)
+        #expect(try await reader.inProgress(examID: "test-alpha")?.snapshot == expected)
+        #expect(try await repo.inProgress(examID: "test-alpha")?.snapshot == expected)
+        #expect(try ModelContext(container).fetchCount(FetchDescriptor<SchemaV1.AnswerRecord>()) == (failures < 2 ? 1 : 0))
+        #expect(saver.count == (failures == 0 ? 1 : 2))
     }
     @Test(arguments: [1, 2]) func saveRetriesAndRollsBack(failures: Int) async throws {
         let container = try PersistenceFixtures.container()

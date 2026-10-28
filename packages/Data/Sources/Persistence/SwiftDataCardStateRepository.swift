@@ -11,12 +11,21 @@ import FSRS
             return left == right ? $0.id.uuidString < $1.id.uuidString : left > right
         }
     }
+    private func state(cardID: String, examID: ExamID) throws -> SchemaV1.CardState? {
+        let exam = examID.rawValue
+        return try modelContext.fetch(FetchDescriptor<SchemaV1.CardState>(predicate: #Predicate {
+            $0.examID == exam && $0.cardID == cardID
+        })).sorted {
+            let left = $0.lastReview ?? .distantPast, right = $1.lastReview ?? .distantPast
+            return left == right ? $0.id.uuidString < $1.id.uuidString : left > right
+        }.first
+    }
     public func card(id: String, examID: ExamID) throws(PersistenceError) -> FSRSCard? {
-        try Storage.read { try states(examID).first { $0.cardID == id }.map { try Storage.decode(FSRSCard.self, $0.fsrsCardJSON) } }
+        try Storage.read { try state(cardID: id, examID: examID).map { try Storage.decode(FSRSCard.self, $0.fsrsCardJSON) } }
     }
     public func apply(_ outcome: ReviewOutcome, cardID: String, examID: ExamID) throws(PersistenceError) {
         try Storage.write(modelContext, saver: ContextSaver()) {
-            let row = try states(examID).first { $0.cardID == cardID } ?? SchemaV1.CardState()
+            let row = try state(cardID: cardID, examID: examID) ?? SchemaV1.CardState()
             row.examID = examID.rawValue; row.cardID = cardID
             row.fsrsCardJSON = try Storage.encode(outcome.card); row.due = outcome.card.due; row.lastReview = outcome.card.lastReview
             modelContext.insert(row)

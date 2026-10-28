@@ -42,12 +42,19 @@ import ExamEngine
     public func record(_ answer: AnswerFact, in attemptID: UUID) throws(PersistenceError) {
         try Storage.write(modelContext, saver: saver) {
             let attempt = try active(attemptID)
-            let snapshot = try AttemptMapper.snapshot(attempt).snapshot
+            var snapshot = try AttemptMapper.snapshot(attempt).snapshot
             guard answer.examID.rawValue == attempt.examID, answer.mode == .exam,
                   snapshot.order.items.contains(where: { $0.questionID == answer.questionID }) else {
                 throw PersistenceError.corrupted("answer does not belong to attempt")
             }
             let row = try AnswerMapper.record(answer)
+            // Keep restoration in the same transaction as the answer history.
+            // Empty selections follow ExamSession.select's unanswered representation.
+            switch answer.selection {
+            case let .choices(ids):
+                snapshot.answers[answer.questionID] = ids.isEmpty ? nil : answer.selection
+            }
+            attempt.sessionSnapshotJSON = try Storage.encode(snapshot)
             modelContext.insert(row); row.attempt = attempt
         }
     }
