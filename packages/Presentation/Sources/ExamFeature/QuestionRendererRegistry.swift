@@ -1,5 +1,6 @@
 import SwiftUI
 import DomainModels
+import DesignSystem
 
 /// 正誤を表示しない解答用レンダラー。選択制約はセッション側で管理する。
 public struct QuestionRendererRegistry: Sendable {
@@ -12,11 +13,9 @@ public struct QuestionRendererRegistry: Sendable {
         VStack(alignment: .leading, spacing: 16) {
             Text(question.stem.ja)
             ForEach(question.choices) { choice in
-                Button { select(choice.id) } label: {
-                    Label(choice.text.ja, systemImage: selected.contains(choice.id) ? "checkmark.circle.fill" : "circle")
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                ChoiceRow(id: choice.id, text: choice.text.ja, isSelected: selected.contains(choice.id)) {
+                    select(choice.id)
                 }
-                .accessibilityAddTraits(selected.contains(choice.id) ? [.isSelected] : [])
             }
         }
     }
