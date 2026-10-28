@@ -3,6 +3,9 @@ import SwiftData
 import DomainInterfaces
 
 enum Storage {
+    // Separate repository contexts share this barrier, including bulk deletion.
+    // Hold it through save retries and rollback so deletion cannot miss an in-flight write.
+    private static let writeLock = NSLock()
     static func read<T>(_ body: () throws -> T) throws(PersistenceError) -> T {
         do { return try body() }
         catch let error as PersistenceError { throw error }
@@ -10,6 +13,8 @@ enum Storage {
     }
     /// actor 内で同期実行し、変更から save の間に再入されない。再試行は1回だけ。
     static func write<T>(_ context: ModelContext, saver: any Saver, _ body: () throws -> T) throws(PersistenceError) -> T {
+        writeLock.lock()
+        defer { writeLock.unlock() }
         context.autosaveEnabled = false
         do {
             let result = try body()
