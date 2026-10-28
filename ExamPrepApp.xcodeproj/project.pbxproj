@@ -6,22 +6,34 @@
 	objectVersion = 90;
 	objects = {
 
+/* Begin PBXTargetDependency section */
+		0000000000000000000000C9 = {isa = PBXTargetDependency; target = 000000000000000100000000; targetProxy = 0000000000000000000000CA; };
+/* End PBXTargetDependency section */
+
+/* Begin PBXContainerItemProxy section */
+		0000000000000000000000CA = {isa = PBXContainerItemProxy; containerPortal = 000000000000000000000000; proxyType = 1; remoteGlobalIDString = 000000000000000100000000; remoteInfo = ExamPrepApp; };
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXBuildFile section */
 		0000000000000000000000A2 /* DomainModels in Frameworks */ = {isa = PBXBuildFile; productRef = 0000000000000000000000A1 /* DomainModels */; };
 		4030C7093087A91500A5EE86 /* Documentation.docc in Sources */ = {isa = PBXBuildFile; fileRef = 4030C7083087A91500A5EE86 /* Documentation.docc */; };
+		0000000000000000000000B2 /* AppComposition in Frameworks */ = {isa = PBXBuildFile; productRef = 0000000000000000000000B1 /* AppComposition */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		000000000000000000000120 /* ExamPrepApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ExamPrepApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4030C7083087A91500A5EE86 /* Documentation.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = Documentation.docc; sourceTree = "<group>"; };
+		0000000000000000000000C1 /* ExamPrepAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = ExamPrepAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		000000000000000000000010 /* ExamPrepApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = ExamPrepApp;
+			explicitFolders = ("Resources/Packs",);
 			sourceTree = "<group>";
 		};
+		0000000000000000000000C2 /* ExamPrepAppUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; path = ExamPrepAppUITests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -29,8 +41,10 @@
 			isa = PBXFrameworksBuildPhase;
 			files = (
 				0000000000000000000000A2 /* DomainModels in Frameworks */,
+				0000000000000000000000B2 /* AppComposition in Frameworks */,
 			);
 		};
+		0000000000000000000000C4 = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -39,6 +53,7 @@
 			children = (
 				4030C7083087A91500A5EE86 /* Documentation.docc */,
 				000000000000000000000010 /* ExamPrepApp */,
+				0000000000000000000000C2 /* ExamPrepAppUITests */,
 				000000000000000000000020 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -47,6 +62,7 @@
 			isa = PBXGroup;
 			children = (
 				000000000000000000000120 /* ExamPrepApp.app */,
+				0000000000000000000000C1 /* ExamPrepAppUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -70,10 +86,23 @@
 			name = ExamPrepApp;
 			packageProductDependencies = (
 				0000000000000000000000A1 /* DomainModels */,
+				0000000000000000000000B1 /* AppComposition */,
 			);
 			productName = ExamPrepApp;
 			productReference = 000000000000000000000120 /* ExamPrepApp.app */;
 			productType = "com.apple.product-type.application";
+		};
+		0000000000000000000000C0 /* ExamPrepAppUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0000000000000000000000C6;
+			buildPhases = (0000000000000000000000C3, 0000000000000000000000C4, 0000000000000000000000C5);
+			buildRules = ();
+			dependencies = (0000000000000000000000C9);
+			fileSystemSynchronizedGroups = (0000000000000000000000C2);
+			name = ExamPrepAppUITests;
+			productName = ExamPrepAppUITests;
+			productReference = 0000000000000000000000C1;
+			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
 
@@ -101,6 +130,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				0000000000000000000000A0 /* XCLocalSwiftPackageReference "packages/DomainModels" */,
+				0000000000000000000000B0 /* XCLocalSwiftPackageReference "packages/AppComposition" */,
 			);
 			preferredProjectObjectVersion = 90;
 			productRefGroup = 000000000000000000000020 /* Products */;
@@ -108,6 +138,7 @@
 			projectRoot = "";
 			targets = (
 				000000000000000100000000 /* ExamPrepApp */,
+				0000000000000000000000C0 /* ExamPrepAppUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -118,6 +149,7 @@
 			files = (
 			);
 		};
+		0000000000000000000000C5 = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -127,6 +159,7 @@
 				4030C7093087A91500A5EE86 /* Documentation.docc in Sources */,
 			);
 		};
+		0000000000000000000000C3 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
@@ -184,7 +217,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 27.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -248,7 +281,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 27.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -290,13 +323,13 @@
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -328,13 +361,43 @@
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		0000000000000000000000C7 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.cloudrill.ExamPrepAppUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = ExamPrepApp;
+			};
+			name = Debug;
+		};
+		0000000000000000000000C8 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.cloudrill.ExamPrepAppUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = ExamPrepApp;
 			};
 			name = Release;
 		};
@@ -357,12 +420,17 @@
 			);
 			defaultConfigurationName = Release;
 		};
+		0000000000000000000000C6 = {isa = XCConfigurationList; buildConfigurations = (0000000000000000000000C7, 0000000000000000000000C8); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
 		0000000000000000000000A0 /* XCLocalSwiftPackageReference "packages/DomainModels" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = packages/DomainModels;
+		};
+		0000000000000000000000B0 /* XCLocalSwiftPackageReference "packages/AppComposition" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = packages/AppComposition;
 		};
 /* End XCLocalSwiftPackageReference section */
 
@@ -371,6 +439,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 0000000000000000000000A0 /* XCLocalSwiftPackageReference "packages/DomainModels" */;
 			productName = DomainModels;
+		};
+		0000000000000000000000B1 /* AppComposition */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0000000000000000000000B0;
+			productName = AppComposition;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
