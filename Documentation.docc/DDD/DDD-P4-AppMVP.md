@@ -78,6 +78,15 @@ env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --packag
 
 `ExamPrepAppUITests`を追加し、共有Schemeから試験選択と切り替え、単一試験の自動選択、不正な起動引数のエラー表示を検証する。UI検証で翻訳キーが表示される不具合を確認し、AppCompositionの`defaultLocalization`を`ja`に修正した。CIのアプリビルドはPRでも実行し、UIテストはmainへのpush・手動実行で実行する。
 
+### 継続実装: P4-S04 デザインシステム（2026-10-28）
+
+- 本番 App Group ID は利用者確認により未定のまま保留する。Debug の開発用保存先で P4 を継続できる。本番 plist・entitlement・コンテナの対応、本番識別子・本番パック、リモート CI の確認は残作業。
+- `packages/Presentation/Sources/DesignSystem` に `DomainPalette`、`ChoiceRow`、`DomainBadge`、`CaseBadge`、`ResultBadge`、`TimerLabel`、`MistakeTagChip`、`ReferenceLink` を追加した。`MarkdownView` は引き続き S12 で実装する。
+- ドメイン色は試験定義の並び順から割り当てる。6色を循環させ、周回ごとに記号を変更する。バッジの背景はライトで白・ダークで黒に固定し、全6色の文字コントラスト比が両モードで4.5以上であることを独立した相対輝度計算で検証した。正誤は色・アイコン・文言で表示する。
+- 選択肢は最小44ptのタップ領域、Dynamic Type、アクセシビリティサイズでの縦並び、選択状態と本文を含む VoiceOver ラベルを備える。既存の `QuestionRendererRegistry` を `ChoiceRow` に接続した。解答中の正誤表示は追加しない。
+- タイマーの表示は秒単位、アクセシビリティラベルは分単位。翻訳は DesignSystem の String Catalog に置く。全共通部品を含むライト・ダーク・最大文字サイズの Preview を追加した。Preview の目視・VoiceOver の実機確認は未実施。
+- テストを先行追加し、型が未実装のコンパイル失敗を確認した。実装後に検出した誤答タグの翻訳キー表示を修正し、Presentation 全20テスト（DesignSystem 6、既存14）と AppComposition 全7テストが成功した。アプリ全体の Debug・iOS Simulator 向けビルド（署名なし）も成功した。次の実装ステップは S05 のホーム。
+
 ### 設計時の前提（未完了項目を含む）
 
 - P2 と P3 が完了している。
