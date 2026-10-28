@@ -13,7 +13,8 @@ google-cloud-professional-cloud-architect/
 ├── packages/
 │   ├── DomainModels/                                # コンテンツの値型(SwiftPM、Swift Testing)
 │   ├── Domain/                                      # 学習・採点ロジック、DomainInterfaces
-│   └── Data/                                        # ContentKit と Persistence: パック管理・学習履歴の永続化
+│   ├── Data/                                        # ContentKit と Persistence: パック管理・学習履歴の永続化
+│   └── Presentation/                                # AppCore・HomeFeature: P4 の試験選択・画面遷移基盤
 ├── content/                                         # 学習コンテンツ、JSON Schema、検証ツール
 │   ├── schemas/                                     # JSON Schema(Draft 2020-12)
 │   ├── vendors.yaml  validation.yaml                # ベンダー定義、検証の閾値(全体)
@@ -34,6 +35,7 @@ google-cloud-professional-cloud-architect/
 | `packages/DomainModels/` | `content/schemas` に対応する Swift の値型(`Question`、`Choice`、`Flashcard`、`CaseStudy` など) |
 | `packages/Domain/` | 学習・採点ロジックとコンテンツ提供のインターフェース |
 | `packages/Data/` | `ContentKit`（署名付きパックの検証・読み込み・保存・起動処理）と `Persistence`（SwiftData による学習履歴・設定の永続化） |
+| `packages/Presentation/` | `AppCore`（依存注入、試験選択・切り替え、画面遷移）と `HomeFeature`（試験選択 ViewModel）。アプリ本体への接続は未実施 |
 | `content/` | 学習コンテンツ(YAML / Markdown)、JSON Schema、検証スクリプト。詳細は [content/README.md](content/README.md) |
 | `.github/workflows/` | CI。変更されたパスに応じて、必要なワークフローだけが動きます |
 
@@ -42,6 +44,8 @@ google-cloud-professional-cloud-architect/
 永続化層は [P3-S01〜S09](Documentation.docc/DDD/DDD-P3-Persistence.md) の実装・ローカル検証を完了しています。モデル・コンテナ生成、受験記録（`SwiftDataExamAttemptRepository`）・解答履歴（`SwiftDataAnswerHistoryRepository`）・カード・ブックマーク／既読・設定のリポジトリ、同期後の重複統合、JSON エクスポート・削除、V1 の移行計画を備えています。保存には1回の再試行と失敗時の取り消しを設けています。ディスク保存先にはアプリ側で解決した App Group の URL を渡します。リモート CI の確認は別途必要です。
 
 ## ローカルでの検証
+
+[P4 アプリ MVP](Documentation.docc/DDD/DDD-P4-AppMVP.md) は基盤実装に着手済みです。Presentation は Data に依存せず、リポジトリのプロトコルを受け取ります。アプリ側の Composition root、同梱パック、Xcode の依存追加、各画面と UI テストは後続作業です。
 
 ```sh
 cd /path/to/google-cloud-professional-cloud-architect
@@ -61,6 +65,7 @@ content/.venv/bin/python content/scripts/validate.py --check-links   # リンク
 swift test --package-path packages/DomainModels
 swift test --package-path packages/Domain
 swift test --package-path packages/Data
+swift test --package-path packages/Presentation
 ```
 
 `swift test` が `plugin for module 'TestingMacros' not found` で失敗する場合は、Xcode のツールチェーンを指定してください。
@@ -74,6 +79,7 @@ swift test --package-path packages/Data
 | `content-validate.yml` | PR、`main` への push(`content/**`、`packages/DomainModels/**` の変更時) | `pytest` と `validate.py --format github` |
 | `domainmodels-test.yml` | PR、`main` への push(`packages/DomainModels/**`、`content/schemas/**`、`content/tests/fixtures/**` の変更時) | `swift test --package-path packages/DomainModels`(macOS) |
 | `data-test.yml` | PR、`main` への push（Data・Domain・DomainModels・fixture の変更時） | `swift test --package-path packages/Data`。Python製パックをSwiftで検証 |
+| `presentation-test.yml` | PR、`main` への push（Presentation・Domain・DomainModels・JSON fixture の変更時） | `swift test --package-path packages/Presentation`。アプリ/UIテストは未接続 |
 | `content-link-check.yml` | 毎週月曜 00:00 UTC、手動実行 | 参照 URL のリンク切れ確認 |
 
 ## リリースタグの命名規則

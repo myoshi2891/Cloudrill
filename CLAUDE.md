@@ -9,6 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `ExamPrepApp/` + `ExamPrepApp.xcodeproj` — iOS アプリ(SwiftUI、表示名 Cloudrill)。`packages/DomainModels` をローカルパッケージ(相対パス)として参照
 - `packages/DomainModels/` — コンテンツの値型(SwiftPM、Swift 6、Swift Testing)
 - `packages/Domain/` — 学習・採点ロジックと `DomainInterfaces`（コンテンツ提供・永続化リポジトリのプロトコル、エラー、受験スナップショットなどの値型）
+- `packages/Presentation/` — P4 の基盤。`AppCore` は `AppDependencies`・`ActiveExamContext`・`AppRouter`、`HomeFeature` は `ExamPickerViewModel`。Data には依存しない。選択設定と中断スナップショットの保存が成功してから試験と経路を切り替え、await 中の重複操作を拒否する。アプリ側 Composition root・Xcode 接続・View は未実装。進捗は DDD-P4 第2節を参照
 - `packages/Data/` — `ContentKit` と `Persistence` を提供する。`ContentKit` は署名検証、索引と本文の読み込み、整合チェック、パック保存、同梱カタログと起動処理を担当し、テストは `content/tests/fixtures/packs/` を直接参照する。`Persistence` は SwiftData による学習履歴・設定の永続化を担当する
 - `packages/Data` の `Persistence` は P3-S01〜S09 の実装・ローカル検証完了（リモート CI は未確認）。10モデル、コンテナ、`SwiftDataExamAttemptRepository`・`SwiftDataAnswerHistoryRepository` を含む各 ModelActor リポジトリ、重複統合、エクスポート／削除、V1 の移行計画を実装済み。`Storage.write` が保存の1回再試行と rollback を共用する。App Group の URL は `storeDirectory` に渡し、インメモリでは CloudKit を無効にする。詳細と最終検証は `Documentation.docc/DDD/DDD-P3-Persistence.md` の各節・第5節を参照
 - `SyncDeduplicator.run()` は値型の計画を返し、`notifyUser` が true なら受験統合の通知が必要。`DataManagement.export(examID:)`・`deleteAll(examID:)` は nil なら全体、試験指定なら UserSettings を除く当該試験のみを扱う。エクスポートは版付き JSON（Date は Unix 秒、Data は Base64、リレーションは UUID）。内部の `PersistenceRows` が取得を共用する。`ModelContainerFactory` は `ExamPrepMigrationPlan` を指定し、移行計画導入前の V1 ストアを開き直すテストを備える
@@ -56,6 +57,7 @@ content/.venv/bin/python content/scripts/fsrs_vectors.py --out packages/Domain/T
 swift test --package-path packages/DomainModels
 swift test --package-path packages/Domain
 swift test --package-path packages/Data
+swift test --package-path packages/Presentation
 swift test --package-path packages/DomainModels --filter FixtureDecodingTests   # 単一テスト
 
 # 行カバレッジ(Sources の *TestSupport/ を除く。最低値を下回ると終了コード 1)
@@ -113,6 +115,7 @@ validate.py の終了コード: `0` = error なし / `1` = error あり(`--stric
 - `domain-test.yml` — `scripts/coverage.sh packages/Domain 80`(macOS。`swift test` と行カバレッジ 80% の確認。`packages/Domain/**`、`packages/DomainModels/**` の変更時。Domain は DomainModels に依存するので、DomainModels の変更でも実行する)
 - `content-link-check.yml` — 毎週、`--only CI-06 --check-links --strict`
 - `data-test.yml` — `swift test --package-path packages/Data`。Data・Domain・DomainModels・契約 fixture の変更時に、Python が生成した署名付きパックを CryptoKit で検証する。
+- `presentation-test.yml` — `swift test --package-path packages/Presentation`。Presentation・Domain・DomainModels・JSON fixture の変更時に試験選択・画面遷移を検証する。アプリ/UIテスト用の `app-test.yml` は未追加。
 
 ## 命名とリリース
 

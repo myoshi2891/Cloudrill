@@ -6,7 +6,7 @@
 | 作成日 | 2026-10-21 |
 | 上位文書 | [詳細設計書(索引・共通設計)](../DDD.md) |
 | 対象 | `ExamPrepApp`(アプリ本体)、`packages/Presentation`、`ExamPrepAppUITests` |
-| ステータス | レビュー待ち |
+| ステータス | 基盤実装着手（P4-S01 一部、S02 の状態管理、S03。アプリ接続は未実施） |
 
 ---
 
@@ -33,6 +33,37 @@ P1〜P3 の部品を組み合わせて、MVP(RDD 12 章)の画面を作る。画
 ---
 
 ## 2. 前提
+
+### 着手時点の確認（2026-10-28）
+
+- P2・P3 の実装とローカル検証は完了。今回も Data 116テスト、Domain 148テストが成功した。リモート CI は未確認。
+- 利用者の指定により `dev` ブランチのまま進め、コミットは利用者が行う。以下の機能ブランチ作成は今回には適用しない。
+- TBD-10 は本書の既定案（ホーム上部の試験名からシート表示）を採用する。今回実装したのは選択状態と ViewModel で、シートを含む View は未実装。
+- `swift-markdown` と `swift-snapshot-testing` は未追加。現在の基盤には不要であり、S12・S18 の着手時に採否を確認する。
+- `ExamPrepApp` は初期画面のまま。Xcode プロジェクトへの依存追加・設定変更は、リポジトリの規約に従い GUI で行う必要がある。
+- `content/catalog.yaml` の `gcp-pca` は `comingSoon`。開発用の同梱パック生成とアプリへのコピー、本番の公開判定は未実施。
+
+### 今回の成果物と検証範囲
+
+| ステップ | 実装済み | 残作業 |
+|---|---|---|
+| S01 | Presentation パッケージ、プロトコル型の `AppDependencies`、SwiftUI Environment の注入口、`presentation-test.yml` | アプリ側 `AppEnvironment`、起動引数、レンダラー登録表との整合、同梱パック、Xcode 設定・依存の接続、アプリ/UIテスト・`app-test.yml` |
+| S02 | `ActiveExamContext`、起動時選択の純粋関数、`ExamPickerViewModel` | `RootView`・選択シート・`MainTabView.id(examID)` への接続 |
+| S03 | `AppRouter`、全15種類の Route のタブ対応、タブ別 path、提出後の経路置換、試験切り替え時のリセット | 各画面の `NavigationStack` への接続 |
+
+Presentation の14テスト（パラメータ化されたケースを含む）が成功。前回選択の復元、1試験の自動選択、複数試験の選択要求、読み込み不可・全試験不可、設定保持、中断スナップショットの保存、保存失敗時の状態維持、切り替え連打、近日公開・公開終了・商標表示、画面遷移を検証した。最初のルーターテストでは未実装型によるコンパイル失敗を確認してから実装した（assertion Red ではない）。
+
+`ActiveExamContext` は `ContentBootstrapper` の `available` と `failures.keys`、カタログ、リポジトリ、時計、ルーターを受け取る。Presentation は Data に依存しない。切り替え先の設定取得・旧試験の中断保存・選択設定の保存が成功してから表示状態と経路を更新する。選択設定の保存だけが失敗した場合、旧試験は中断保存済みのまま選択され続ける。再開処理はアプリ接続時に行う。
+
+```sh
+env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --package-path packages/Presentation
+env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --package-path packages/Data
+env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --package-path packages/Domain
+```
+
+次は S01 のアプリ側 Composition root と開発用パックの同梱を実装し、Xcode でローカル依存を接続する。S01 の完了条件である iOS Simulator の `xcodebuild test` はまだ満たしていない。P4 全体の完了を示すものではない。
+
+### 設計上の前提
 
 - P2 と P3 が完了している。
 - 外部依存 `swift-snapshot-testing` と `swift-markdown` の採否を確認済みである([DDD 8 章](../DDD.md#8-外部依存の候補))。
