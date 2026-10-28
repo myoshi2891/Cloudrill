@@ -44,7 +44,10 @@ struct DesignSystemTests {
     @Test func timerUsesWholeMinutesForVoiceOver() {
         #expect(TimerLabel.accessibilityLabel(remainingSeconds: 5262) == "残り 87 分")
         #expect(TimerLabel.accessibilityLabel(remainingSeconds: 5220) == "残り 87 分")
-        #expect(TimerLabel.accessibilityLabel(remainingSeconds: 59) == "残り 0 分")
+        #expect(TimerLabel.accessibilityLabel(remainingSeconds: 60) == "残り 1 分")
+        #expect(TimerLabel.accessibilityLabel(remainingSeconds: 59) == "残り 1 分未満")
+        #expect(TimerLabel.accessibilityLabel(remainingSeconds: 1) == "残り 1 分未満")
+        #expect(TimerLabel.accessibilityLabel(remainingSeconds: 0) == "残り 0 分")
         #expect(TimerLabel.accessibilityLabel(remainingSeconds: -1) == "残り 0 分")
         #expect(TimerLabel.displayText(remainingSeconds: 5262) == "87:42")
         #expect(TimerLabel.displayText(remainingSeconds: -1) == "0:00")

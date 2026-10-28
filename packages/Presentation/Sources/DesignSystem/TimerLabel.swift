@@ -9,7 +9,10 @@ public struct TimerLabel: View {
         return String(format: "%d:%02d", seconds / 60, seconds % 60)
     }
     public nonisolated static func accessibilityLabel(remainingSeconds: Int) -> String {
-        String(format: String(localized: "timer.remaining", bundle: .module), max(0, remainingSeconds) / 60)
+        if (1..<60).contains(remainingSeconds) {
+            return String(localized: "timer.finalMinute", bundle: .module)
+        }
+        return String(format: String(localized: "timer.remaining", bundle: .module), max(0, remainingSeconds) / 60)
     }
     public var body: some View {
         Label(Self.displayText(remainingSeconds: remainingSeconds), systemImage: "timer")

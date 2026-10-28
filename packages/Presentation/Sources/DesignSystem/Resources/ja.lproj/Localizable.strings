@@ -1,0 +1,14 @@
+"choice.selected" = "選択肢%@、選択済み";
+"choice.unselected" = "選択肢%@、未選択";
+"result.correct" = "正解";
+"result.incorrect" = "不正解";
+"timer.remaining" = "残り %d 分";
+"mistake.cost" = "コスト";
+"mistake.opsOverhead" = "運用負荷";
+"mistake.compliance" = "コンプライアンス";
+"mistake.scalability" = "スケーラビリティ";
+"mistake.availability" = "可用性";
+"mistake.latency" = "レイテンシ";
+"mistake.requirementMismatch" = "要件不一致";
+"mistake.deprecated" = "非推奨";
+"timer.finalMinute" = "残り 1 分未満";
