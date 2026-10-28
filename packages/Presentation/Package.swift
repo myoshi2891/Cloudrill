@@ -7,6 +7,7 @@ let package = Package(
     products: [
         .library(name: "AppCore", targets: ["AppCore"]),
         .library(name: "HomeFeature", targets: ["HomeFeature"]),
+        .library(name: "ExamFeature", targets: ["ExamFeature"]),
     ],
     dependencies: [.package(path: "../DomainModels"), .package(path: "../Domain")],
     targets: [
@@ -15,6 +16,7 @@ let package = Package(
             .product(name: "StudyModels", package: "Domain"), .product(name: "ExamEngine", package: "Domain"),
         ]),
         .target(name: "HomeFeature", dependencies: ["AppCore", "DomainModels"]),
+        .target(name: "ExamFeature", dependencies: ["AppCore", "DomainModels"]),
         .testTarget(name: "AppCoreTests", dependencies: ["AppCore", "HomeFeature",
             .product(name: "DomainTestSupport", package: "Domain")]),
     ],
