@@ -16,6 +16,7 @@ private final class PausedSaver: Saver, Sendable {
     }
 }
 
+@Suite(.serialized)
 struct WriteCoordinationTests {
     private func wait(_ semaphore: DispatchSemaphore, seconds: Double) async -> DispatchTimeoutResult {
         await withCheckedContinuation { continuation in
