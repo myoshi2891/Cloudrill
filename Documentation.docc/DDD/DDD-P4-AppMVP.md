@@ -6,7 +6,7 @@
 | 作成日 | 2026-10-21 |
 | 上位文書 | [詳細設計書(索引・共通設計)](../DDD.md) |
 | 対象 | `ExamPrepApp`(アプリ本体)、`packages/Presentation`、`ExamPrepAppUITests` |
-| ステータス | 基盤実装着手（P4-S01 一部、S02 の状態管理、S03。アプリ接続は未実施） |
+| ステータス | 起動基盤をアプリへ接続済み（学習画面は未実装） |
 
 ---
 
@@ -43,7 +43,7 @@ P1〜P3 の部品を組み合わせて、MVP(RDD 12 章)の画面を作る。画
 - `ExamPrepApp` は初期画面のまま。Xcode プロジェクトへの依存追加・設定変更は、リポジトリの規約に従い GUI で行う必要がある。
 - `content/catalog.yaml` の `gcp-pca` は `comingSoon`。開発用の同梱パック生成とアプリへのコピー、本番の公開判定は未実施。
 
-### 今回の成果物と検証範囲
+### 初回の成果物と検証範囲
 
 | ステップ | 実装済み | 残作業 |
 |---|---|---|
@@ -61,9 +61,24 @@ env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --packag
 env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --package-path packages/Domain
 ```
 
-次は S01 のアプリ側 Composition root と開発用パックの同梱を実装し、Xcode でローカル依存を接続する。S01 の完了条件である iOS Simulator の `xcodebuild test` はまだ満たしていない。P4 全体の完了を示すものではない。
+初回時点ではアプリ側 Composition root・開発用パック・Xcode接続を後続作業としていた。以下に継続実装の結果を記録する。P4全体の完了を示すものではない。
 
-### 設計上の前提
+### 継続実装: 起動処理と同梱パック（2026-10-28）
+
+- `packages/AppComposition` にアプリ専用の `AppEnvironment` と `AppRootView` を追加した。アプリ本体から呼び出す Composition root をパッケージ化することで、Xcode の接続前にも実リポジトリとコンテンツを使って検証できる。Presentation → Data の依存は禁止したまま。
+- `AppEnvironment.live` は `SystemTimeSource` と実ストアを使い、呼び出し元が解決した App Group 保存先を受け取る。開発用の印が付いたパックは拒否する。CloudKit は未接続。
+- DEBUG専用の `development` はシステム時計と開発用ディスクストアを使う。`uiTesting` は固定・進行可能な時計、固定seed、インメモリまたは指定ディレクトリのストアを使用する。`-content-fixture` は1.0.0を選ぶ。`-store-path` はストアファイルではなく保存先ディレクトリ。矛盾した引数・不正な日時・パス・未知の引数は起動エラーになる。起動処理はローカル読み込みだけでネットワークアクセスはない。
+- `QuestionRendererRegistry` はsingle/multipleの選択肢を正誤なしで表示する。採点登録表と描画登録表が一致しない場合は起動を拒否する。選択数制約・セッション保存・デザインシステムとの統合はS07で追加する。
+- `scripts/bundle_packs.sh --development` は既存のビルド・署名処理を再利用し、`ExamPrepApp/Resources/Packs` にカタログ、署名付き2試験（Alphaの2版を含む）、テスト公開鍵、開発用の印を生成する。52ファイルの再生成一致と既存出力の保護を確認した。本番カタログの `comingSoon` は変更していない。
+- `AppRootView` は起動中・致命的エラー・試験選択・試験概要を表示し、ホーム上部の試験名から選択シートを開く。画面文言はString Catalog。模試開始などのMVP学習画面・5タブの接続は未実装。
+- AppCompositionの7テスト（引数検証9ケースを含む）とReleaseビルドを検証するCIを `app-test.yml` に追加した。実パックの署名、選択のディスク復元、固定時計とシステム時計、実保存、開発パックの本番起動拒否を検証する。これはSimulator上のUIテストではない。
+- ローカルでは上記7テスト、Presentationの14テスト、Releaseビルド、AppCompositionのiOS 18 Simulator向けクロスビルドが成功した。パッケージのクロスビルドは `swift build --build-system native --sdk <iPhoneSimulator.sdk> --triple arm64-apple-ios18.0-simulator` で確認した。アプリ本体の `xcodebuild` とSimulatorでの画面操作は接続後に検証する。
+
+利用者の明示承認を受けてXcode接続パッチを適用した。AppCompositionのローカル参照、iOS 18 / Swift 6 / iPhone・iPadへの設定、`Resources/Packs` のフォルダコピー、ContentViewからの起動画面呼び出しを接続済み。アプリ全体のSimulator向けビルドと、生成された.app内のカタログ・パック階層を確認した。App Group・本番識別子・本番パックは未完了。
+
+`ExamPrepAppUITests`を追加し、共有Schemeから試験選択と切り替え、単一試験の自動選択、不正な起動引数のエラー表示を検証する。UI検証で翻訳キーが表示される不具合を確認し、AppCompositionの`defaultLocalization`を`ja`に修正した。CIのアプリビルドはPRでも実行し、UIテストはmainへのpush・手動実行で実行する。
+
+### 設計時の前提（未完了項目を含む）
 
 - P2 と P3 が完了している。
 - 外部依存 `swift-snapshot-testing` と `swift-markdown` の採否を確認済みである([DDD 8 章](../DDD.md#8-外部依存の候補))。
