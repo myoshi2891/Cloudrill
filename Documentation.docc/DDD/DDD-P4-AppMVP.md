@@ -39,7 +39,7 @@ P1〜P3 の部品を組み合わせて、MVP(RDD 12 章)の画面を作る。画
 - P2・P3 の実装とローカル検証は完了。今回も Data 116テスト、Domain 148テストが成功した。リモート CI は未確認。
 - 利用者の指定により `dev` ブランチのまま進め、コミットは利用者が行う。以下の機能ブランチ作成は今回には適用しない。
 - TBD-10 は本書の既定案（ホーム上部の試験名からシート表示）を採用する。今回実装したのは選択状態と ViewModel で、シートを含む View は未実装。
-- `swift-markdown` と `swift-snapshot-testing` は未追加。現在の基盤には不要であり、S12・S18 の着手時に採否を確認する。
+- `swift-markdown` と `swift-snapshot-testing` は採用確認済みだが、依存には未追加。S12・S18 でそれぞれ導入する。
 - `ExamPrepApp` は初期画面のまま。Xcode プロジェクトへの依存追加・設定変更は、リポジトリの規約に従い GUI で行う必要がある。
 - `content/catalog.yaml` の `gcp-pca` は `comingSoon`。開発用の同梱パック生成とアプリへのコピー、本番の公開判定は未実施。
 
@@ -107,7 +107,7 @@ flowchart TB
 | 型 | 置き場所 | 役割 |
 |---|---|---|
 | `AppDependencies` | AppCore | プロトコル型の依存(リポジトリ、`TimeSource`、登録表、乱数の種の供給)をまとめた struct。`@Entry` で `EnvironmentValues` に置く |
-| `AppEnvironment` | アプリ本体 | `live()`(本番)と `uiTesting(arguments:)`(UI テスト)で `AppDependencies` を組み立てる。DEBUG 構成でだけ `uiTesting` をコンパイルする |
+| `AppEnvironment` | `packages/AppComposition/Sources/AppComposition/AppEnvironment.swift` | アプリ専用の Composition root。`live(packsRoot:storeDirectory:)`(本番)、`development(packsRoot:storeDirectory:)`(開発)、`uiTesting(arguments:packsRoot:workingDirectory:)`(UI テスト)で `AppDependencies` を組み立てる。`development` と `uiTesting` は DEBUG 構成でだけコンパイルする |
 | `ActiveExamContext` | AppCore | `@MainActor @Observable`。選択中の試験の `ExamContentProvider` と `ExamPreference` を持つ。`switchExam(to:)` で切り替える |
 | `AppRouter` | AppCore | タブの選択と、タブごとの `NavigationStack` の path を持つ。画面をまたぐ遷移は `Route` を受け取って処理する |
 | `QuestionRendererRegistry` | ExamFeature | 出題形式ごとの View を返す([DDD 4.9](../DDD.md#49-アプリ内の拡張点)) |
@@ -135,7 +135,7 @@ flowchart TB
 | `-fixed-now 2026-11-01T09:00:00Z` | `ManualTimeSource` をこの時刻で作る |
 | `-advance-on-launch 7200` | 起動時に時計を指定の秒数だけ進める(時間切れの再現) |
 | `-content-fixture test-alpha` | 同梱パックの代わりに、テスト用のパック(`packs/valid/test-alpha/1.0.0`)を使う |
-| `-store-in-memory` / `-store-path <path>` | インメモリのストア / 指定したファイルのストア(強制終了後の復元の確認用) |
+| `-store-in-memory` / `-store-path <path>` | インメモリのストア / 指定した保存先ディレクトリ内のストア(強制終了後の復元の確認用) |
 | `-network offline` | ネットワークを常に失敗させる |
 
 ---
@@ -157,7 +157,7 @@ flowchart TB
 |---|---|
 | 対応要件 | [DDD 3 章](../DDD.md#3-名称)、C-14、[DDD 5.4](../DDD.md#54-ci-のワークフロー) |
 | 前提 | P2、P3 |
-| 成果物 | `packages/Presentation/Package.swift`、`Sources/AppCore/AppDependencies.swift`、`ExamPrepApp/AppEnvironment.swift`、`ExamPrepApp/Resources/Packs/`、`.github/workflows/app-test.yml` |
+| 成果物 | `packages/Presentation/Package.swift`、`Sources/AppCore/AppDependencies.swift`、`packages/AppComposition/Sources/AppComposition/AppEnvironment.swift`、`ExamPrepApp/Resources/Packs/`、`.github/workflows/app-test.yml` |
 
 **Xcode の設定**(Build Settings で変更する。`project.pbxproj` は手で編集しない):
 
