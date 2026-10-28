@@ -718,7 +718,7 @@ content/.venv/bin/python content/scripts/validate.py
 | validate.py | error 0 件、既存の CI-02 warning 7 件（draft 模試の問題数不足） |
 | 秘密鍵 | 秘密鍵ヘッダーの検出 0 件、追跡対象の `.pem`・`.key`・`.p12`・`.pfx` も 0 件 |
 
-残作業は変更後のリモート CI の成功確認（DDD 7.8 の共通条件5）。ローカルで CI 相当の検証は通過したが、リモート CI は未実行なので P2 全体の完了とはまだ扱わない。README・CLAUDE.md に版選択の規則を反映済み。アプリのリソース組み込みと起動時の呼び出しは P4-S01 で行う。
+残作業は変更後のリモート CI の成功確認（DDD 7.8 の共通条件5）。ローカルで CI 相当の検証は通過したが、リモート CI は未実行なので P2 全体の完了とはまだ扱わない。README・CLAUDE.md に版選択の規則を反映済み。開発用パックのリソース組み込みと起動時の接続は実装済みで、`AppRootView` が環境を起動し、`AppEnvironment` が `ContentBootstrapper.bootstrap()` を呼び出す。App Group・本番識別子・本番パックなど、P4-S01 の残作業は引き続き未完了。
 
 SwiftPM はサンドボックス内でユーザーのキャッシュへの書き込みを拒否されたため、上記の Swift テストは権限を拡張して実行した。生成済みの契約 fixture は変更していない。異常系の変更はテストの一時コピーだけに行う。
 
