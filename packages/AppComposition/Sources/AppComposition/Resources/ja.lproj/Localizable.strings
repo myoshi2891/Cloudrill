@@ -1,0 +1,7 @@
+"loading" = "読み込み中";
+"chooseExam" = "試験を選択";
+"comingSoon" = "近日公開";
+"domains" = "学習ドメイン";
+"error.contentLoadFailed" = "データの読み込みに失敗しました。再インストールしてください";
+"error.examUnavailable" = "この試験のデータを読み込めませんでした";
+"error.persistenceFailed" = "保存に失敗しました";
