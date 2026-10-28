@@ -84,7 +84,7 @@ env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --packag
 - `packages/Presentation/Sources/DesignSystem` に `DomainPalette`、`ChoiceRow`、`DomainBadge`、`CaseBadge`、`ResultBadge`、`TimerLabel`、`MistakeTagChip`、`ReferenceLink` を追加した。`MarkdownView` は引き続き S12 で実装する。
 - ドメイン色は試験定義の並び順から割り当てる。6色を循環させ、周回ごとに記号を変更する。バッジの背景はライトで白・ダークで黒に固定し、全6色の文字コントラスト比が両モードで4.5以上であることを独立した相対輝度計算で検証した。正誤は色・アイコン・文言で表示する。
 - 選択肢は最小44ptのタップ領域、Dynamic Type、アクセシビリティサイズでの縦並び、選択状態と本文を含む VoiceOver ラベルを備える。既存の `QuestionRendererRegistry` を `ChoiceRow` に接続した。解答中の正誤表示は追加しない。
-- タイマーの表示は秒単位、アクセシビリティラベルは分単位。翻訳は DesignSystem の String Catalog に置く。全共通部品を含むライト・ダーク・最大文字サイズの Preview を追加した。Preview の目視・VoiceOver の実機確認は未実施。
+- タイマーの表示は秒単位、アクセシビリティラベルは分単位（残り1〜59秒は「残り 1 分未満」）。DesignSystem の翻訳は SwiftPM でも利用できる日本語 `.strings` リソースに置く。全共通部品を含むライト・ダーク・最大文字サイズの Preview を追加した。Preview の目視・VoiceOver の実機確認は未実施。
 - テストを先行追加し、型が未実装のコンパイル失敗を確認した。実装後に検出した誤答タグの翻訳キー表示を修正し、Presentation 全20テスト（DesignSystem 6、既存14）と AppComposition 全7テストが成功した。アプリ全体の Debug・iOS Simulator 向けビルド（署名なし）も成功した。次の実装ステップは S05 のホーム。
 
 ### 設計時の前提（未完了項目を含む）
@@ -143,7 +143,7 @@ flowchart TB
 | `-ui-testing` | `AppEnvironment.uiTesting` を使う |
 | `-fixed-now 2026-11-01T09:00:00Z` | `ManualTimeSource` をこの時刻で作る |
 | `-advance-on-launch 7200` | 起動時に時計を指定の秒数だけ進める(時間切れの再現) |
-| `-content-fixture test-alpha` | 同梱パックの代わりに、テスト用のパック(`packs/valid/test-alpha/1.0.0`)を使う |
+| `-content-fixture test-alpha` | 同梱カタログを利用可能な `test-alpha` に絞り込み、バージョン `1.0.0` を選択する |
 | `-store-in-memory` / `-store-path <path>` | インメモリのストア / 指定した保存先ディレクトリ内のストア(強制終了後の復元の確認用) |
 | `-network offline` | ネットワークを常に失敗させる |
 

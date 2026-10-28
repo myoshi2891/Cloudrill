@@ -84,9 +84,9 @@ swift test --package-path packages/AppComposition
 | `data-test.yml` | PR、`main` への push（Data・Domain・DomainModels・fixture の変更時） | `swift test --package-path packages/Data`。Python製パックをSwiftで検証 |
 | `presentation-test.yml` | PR、`main` への push（Presentation・Domain・DomainModels・JSON fixture の変更時） | `swift test --package-path packages/Presentation`。試験選択・画面遷移の状態管理を検証 |
 | `app-test.yml` | PR、`main` への push（アプリ・packages・パック同梱スクリプトの変更時） | AppComposition の起動・永続化・同梱署名テストとReleaseビルド。PRではSimulator向けビルド、mainへのpush・手動実行では起動UIテストも実行 |
+| `content-link-check.yml` | 毎週月曜 00:00 UTC、手動実行 | 参照 URL のリンク切れ確認 |
 
 開発用パックは `bash scripts/bundle_packs.sh --development --out <新規ディレクトリ>` で再生成できます。出力先の既定値は `ExamPrepApp/Resources/Packs` です。既存出力は上書きしません。生成結果はコミット対象で、公開鍵のみを含み、秘密鍵は保存しません。開発用の印が付いたパックは `AppEnvironment.live` が拒否します。本番パック・App Group設定は別途必要です。
-| `content-link-check.yml` | 毎週月曜 00:00 UTC、手動実行 | 参照 URL のリンク切れ確認 |
 
 ## リリースタグの命名規則
 
