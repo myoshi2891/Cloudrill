@@ -22,10 +22,8 @@ import QuestionSelector
         try Storage.read {
             let exam = examID.rawValue
             var history = PracticeHistory()
-            for row in try records(examID) {
-                let fact = try AnswerMapper.fact(row)
-                history.lastResult[fact.questionID] = fact.isCorrect
-            }
+            // 使わない選択内容は復号しない。
+            for row in try records(examID) { history.lastResult[row.questionID] = row.isCorrect }
             history.flagged = Set(try modelContext.fetch(FetchDescriptor<SchemaV1.Flag>(predicate: #Predicate { $0.examID == exam })).map(\.questionID))
             for row in try modelContext.fetch(FetchDescriptor<SchemaV1.PracticeServeLog>(predicate: #Predicate { $0.examID == exam })) {
                 history.lastServedAt[row.questionID] = max(history.lastServedAt[row.questionID] ?? .distantPast, row.servedAt)
@@ -41,12 +39,12 @@ import QuestionSelector
             }
         }
     }
-    public func setFlag(_ flagged: Bool, questionID: String, examID: ExamID) throws(PersistenceError) {
+    public func setFlag(_ flagged: Bool, questionID: String, examID: ExamID, at date: Date) throws(PersistenceError) {
         try Storage.write(modelContext, saver: ContextSaver()) {
             let exam = examID.rawValue
             let rows = try modelContext.fetch(FetchDescriptor<SchemaV1.Flag>(predicate: #Predicate { $0.examID == exam && $0.questionID == questionID }))
             if flagged && rows.isEmpty {
-                let row = SchemaV1.Flag(); row.examID = exam; row.questionID = questionID; row.createdAt = Date()
+                let row = SchemaV1.Flag(); row.examID = exam; row.questionID = questionID; row.createdAt = date
                 modelContext.insert(row)
             } else if !flagged { for row in rows { modelContext.delete(row) } }
         }
