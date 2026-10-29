@@ -10,13 +10,11 @@ public struct QuestionRendererRegistry: Sendable {
 
     @MainActor public func render(_ question: Question, selected: Set<String>,
                                  select: @escaping (String) -> Void) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text(question.stem.ja)
-            ForEach(question.choices) { choice in
-                ChoiceRow(id: choice.id, text: choice.text.ja, isSelected: selected.contains(choice.id)) {
-                    select(choice.id)
-                }
-            }
-        }
+        render(ChoiceQuestionPresentation(question: question, choiceIDs: question.choices.map(\.id)), selected: selected, select: select)
+    }
+
+    @MainActor public func render(_ question: ChoiceQuestionPresentation, selected: Set<String>,
+                                 select: @escaping (String) -> Void) -> some View {
+        ChoiceQuestionRenderer(question: question, selected: selected, select: select)
     }
 }
