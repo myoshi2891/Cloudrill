@@ -23,7 +23,10 @@ import QuestionSelector
             let exam = examID.rawValue
             var history = PracticeHistory()
             // 使わない選択内容は復号しない。
-            for row in try records(examID) { history.lastResult[row.questionID] = row.isCorrect }
+            for row in try records(examID) {
+                guard StudyMode(rawValue: row.modeRaw) != nil else { throw PersistenceError.corrupted("unknown study mode") }
+                history.lastResult[row.questionID] = row.isCorrect
+            }
             history.flagged = Set(try modelContext.fetch(FetchDescriptor<SchemaV1.Flag>(predicate: #Predicate { $0.examID == exam })).map(\.questionID))
             for row in try modelContext.fetch(FetchDescriptor<SchemaV1.PracticeServeLog>(predicate: #Predicate { $0.examID == exam })) {
                 history.lastServedAt[row.questionID] = max(history.lastServedAt[row.questionID] ?? .distantPast, row.servedAt)

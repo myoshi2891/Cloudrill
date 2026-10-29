@@ -47,5 +47,8 @@ import StudyModels
         context.insert(row); try context.save()
         let repo = SwiftDataAnswerHistoryRepository(modelContainer: container)
         await #expect(throws: PersistenceError.corrupted("unknown study mode")) { try await repo.answers(examID: "test-alpha") }
+        await #expect(throws: PersistenceError.corrupted("unknown study mode")) {
+            try await repo.practiceHistory(examID: "test-alpha", now: PersistenceFixtures.now)
+        }
     }
 }
