@@ -3,7 +3,7 @@ import DomainModels
 import DomainInterfaces
 
 /// 書き込みを直列化する。状態は毎回ディスクから読み、書き込み失敗時にメモリだけが進むのを防ぐ。
-public actor PackStore {
+public actor PackStore: PackPinning {
     private let root: URL
     private let fileManager: FileManager
     public init(root: URL, fileManager: FileManager = .default) {
