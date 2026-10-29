@@ -19,7 +19,7 @@ let package = Package(
             "DomainModels", .product(name: "DomainInterfaces", package: "Domain"),
             .product(name: "StudyModels", package: "Domain"), .product(name: "ExamEngine", package: "Domain"),
         ]),
-        .target(name: "HomeFeature", dependencies: ["AppCore", "DomainModels"]),
+        .target(name: "HomeFeature", dependencies: ["AppCore", "DomainModels", "DesignSystem"], resources: [.process("Resources")]),
         .target(name: "ExamFeature", dependencies: ["AppCore", "DomainModels", "DesignSystem"]),
         .testTarget(name: "AppCoreTests", dependencies: ["AppCore", "HomeFeature",
             .product(name: "DomainTestSupport", package: "Domain")]),

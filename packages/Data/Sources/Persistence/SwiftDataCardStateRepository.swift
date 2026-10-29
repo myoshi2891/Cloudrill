@@ -62,7 +62,7 @@ import FSRS
     public func addCardFromQuestion(questionID: String, examID: ExamID, at date: Date) throws(PersistenceError) {
         try Storage.write(modelContext, saver: ContextSaver()) {
             let id = "Q:" + questionID
-            guard try !states(examID).contains(where: { $0.cardID == id }) else { return }
+            guard try state(cardID: id, examID: examID) == nil else { return }
             let row = SchemaV1.CardState(); row.examID = examID.rawValue; row.cardID = id
             row.fsrsCardJSON = try Storage.encode(FSRSCard.new(at: date)); row.due = date
             modelContext.insert(row)

@@ -36,8 +36,8 @@ google-cloud-professional-cloud-architect/
 | `packages/DomainModels/` | `content/schemas` に対応する Swift の値型(`Question`、`Choice`、`Flashcard`、`CaseStudy` など) |
 | `packages/Domain/` | 学習・採点ロジックとコンテンツ提供のインターフェース |
 | `packages/Data/` | `ContentKit`（署名付きパックの検証・読み込み・保存・起動処理）と `Persistence`（SwiftData による学習履歴・設定の永続化） |
-| `packages/Presentation/` | `AppCore`（依存注入、試験選択・切り替え、画面遷移）、`HomeFeature`（試験選択 ViewModel）、`ExamFeature`（選択式問題のレンダラー） |
-| `packages/AppComposition/` | `AppEnvironment`（実リポジトリとコンテンツの組み立て）、DEBUG専用の起動引数、`AppRootView`（起動状態・試験選択・試験概要） |
+| `packages/Presentation/` | `AppCore`（依存注入、試験選択・切り替え、画面遷移）、`HomeFeature`（`ExamPickerViewModel`・`HomeViewModel`・`HomeView`）、`ExamFeature`（選択式問題のレンダラー） |
+| `packages/AppComposition/` | `AppEnvironment`（実リポジトリとコンテンツの組み立て）、DEBUG専用の起動引数、`AppRootView`（起動状態・試験選択・ホーム・5タブシェル） |
 | `content/` | 学習コンテンツ(YAML / Markdown)、JSON Schema、検証スクリプト。詳細は [content/README.md](content/README.md) |
 | `.github/workflows/` | CI。変更されたパスに応じて、必要なワークフローだけが動きます |
 
@@ -47,7 +47,7 @@ google-cloud-professional-cloud-architect/
 
 ## ローカルでの検証
 
-[P4 アプリ MVP](Documentation.docc/DDD/DDD-P4-AppMVP.md) は基盤と起動処理を実装中です。Presentation は Data に依存せず、アプリ専用の AppComposition で具体的なリポジトリを組み立てます。Xcodeへの依存追加と起動画面の接続は完了し、起動・試験選択のUIテストを追加しています。MVPの各学習画面は後続作業です。
+[P4 アプリ MVP](Documentation.docc/DDD/DDD-P4-AppMVP.md) は基盤と起動処理を実装中です。Presentation は Data に依存せず、アプリ専用の AppComposition で具体的なリポジトリを組み立てます。Xcodeへの依存追加と起動画面の接続は完了し、起動・試験選択のUIテストを追加しています。S05のホーム（今日の学習・弱点・復習期限のカード数・模試の再開）と5タブを接続済みです。遷移先の練習・模試・カード画面は後続作業です。
 
 ```sh
 cd /path/to/google-cloud-professional-cloud-architect

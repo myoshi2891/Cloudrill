@@ -173,7 +173,7 @@ public protocol AnswerHistoryRepository: Sendable {
     func answers(examID: ExamID) async throws(PersistenceError) -> [AnswerFact]
     func practiceHistory(examID: ExamID, now: Date) async throws(PersistenceError) -> PracticeHistory
     func markServed(questionIDs: [String], examID: ExamID, at date: Date) async throws(PersistenceError)
-    func setFlag(_ flagged: Bool, questionID: String, examID: ExamID) async throws(PersistenceError)
+    func setFlag(_ flagged: Bool, questionID: String, examID: ExamID, at date: Date) async throws(PersistenceError)
 }
 
 public protocol CardStateRepository: Sendable {

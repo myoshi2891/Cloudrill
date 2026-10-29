@@ -3,6 +3,7 @@ import OSLog
 import AppCore
 import HomeFeature
 import DomainModels
+import DomainInterfaces
 
 /// 起動失敗を空画面にせず表示する。依存の生成は View の task で一度だけ実行する。
 public struct AppRootView: View {
@@ -61,31 +62,72 @@ private struct ExamLandingView: View {
     let context: ActiveExamContext
     @State private var showsPicker = false
 
+    @Environment(\.appDependencies) private var dependencies
+
     var body: some View {
-        NavigationStack {
+        Group {
             if context.state.fatal != nil {
                 Text("error.contentLoadFailed", bundle: .module)
-            } else if context.state.needsSelection {
-                PickerContent(context: context)
-            } else if let content = context.content {
-                List {
-                    Section { Text(content.definition.name.ja).font(.headline) }
-                    Section {
-                        ForEach(content.definition.domains, id: \.id) { domain in Text(domain.name.ja) }
-                    } header: { Text("domains", bundle: .module) }
-                    Section { Text(content.vendor.trademarkNotice.ja).font(.footnote) }
-                }
-                .id(context.state.examID)
-                .toolbar {
-                    ToolbarItem(placement: .principal) {
-                        Button(content.definition.shortName) { showsPicker = true }
-                            .accessibilityIdentifier("examPickerButton")
-                    }
-                }
-                .sheet(isPresented: $showsPicker) {
-                    NavigationStack { PickerContent(context: context) { showsPicker = false } }
-                }
+            } else if let content = context.content, let dependencies {
+                MainTabView(context: context, content: content, dependencies: dependencies,
+                            selectExam: { showsPicker = true })
+                    .id(context.state.examID)
+            } else {
+                NavigationStack { PickerContent(context: context) }
             }
+        }
+        .sheet(isPresented: $showsPicker) {
+            NavigationStack { PickerContent(context: context) { showsPicker = false } }
+        }
+    }
+}
+
+/// 後続のFeature画面は、タブとRouteごとの接続点を置き換える。
+private struct MainTabView: View {
+    let context: ActiveExamContext
+    let content: any ExamContentProvider
+    let dependencies: AppDependencies
+    let selectExam: () -> Void
+
+    var body: some View {
+        @Bindable var router = context.router
+        TabView(selection: $router.selectedTab) {
+            ForEach(AppCore.Tab.allCases, id: \.self) { tab in
+                NavigationStack(path: Binding(get: { router.path(for: tab) },
+                                               set: { router.setPath($0, for: tab) })) {
+                    Group {
+                        if tab == .home {
+                            HomeView(model: HomeViewModel(definition: content.definition,
+                                answers: dependencies.answers, cards: dependencies.cards,
+                                attempts: dependencies.attempts, time: dependencies.time, router: router),
+                                selectExam: selectExam)
+                        } else {
+                            pending(tab)
+                        }
+                    }
+                    .navigationDestination(for: Route.self) { route in pending(route.tab) }
+                }
+                .tabItem { Label { Text(LocalizedStringKey("tab." + tab.rawValue), bundle: .module) }
+                    icon: { Image(systemName: symbol(tab)) } }
+                .tag(tab)
+            }
+        }
+    }
+
+    private func pending(_ tab: AppCore.Tab) -> some View {
+        ContentUnavailableView {
+            Label { Text(LocalizedStringKey("tab." + tab.rawValue), bundle: .module) }
+                icon: { Image(systemName: symbol(tab)) }
+        } description: { Text("featurePending", bundle: .module) }
+    }
+
+    private func symbol(_ tab: AppCore.Tab) -> String {
+        switch tab {
+        case .home: "house"
+        case .exam: "checklist"
+        case .cards: "rectangle.on.rectangle"
+        case .learn: "book"
+        case .analytics: "chart.bar"
         }
     }
 }

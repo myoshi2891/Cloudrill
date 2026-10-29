@@ -18,9 +18,12 @@ public enum AppEnvironmentError: Error, Equatable {
     public let packStore: PackStore
     public let isInMemory: Bool
 
-    public static var supportedKinds: Set<QuestionKind> {
+    private static var evaluatedKinds: Set<QuestionKind> {
         Set(QuestionKind.allCases.filter { AnswerEvaluatorRegistry.standard.supports($0) })
-            .intersection(QuestionRendererRegistry.standard.supportedKinds)
+    }
+
+    public static var supportedKinds: Set<QuestionKind> {
+        evaluatedKinds.intersection(QuestionRendererRegistry.standard.supportedKinds)
     }
 
     private init(dependencies: AppDependencies, activeExam: ActiveExamContext, packStore: PackStore, isInMemory: Bool) {
@@ -64,8 +67,7 @@ public enum AppEnvironmentError: Error, Equatable {
 
     private static func make(bundled: BundledPacks, storeDirectory: URL?, contentDirectory: URL,
                              time: any TimeSource, seed: @escaping @Sendable () -> UInt64 = { UInt64.random(in: .min ... .max) }) async throws -> AppEnvironment {
-        let evaluated = Set(QuestionKind.allCases.filter { AnswerEvaluatorRegistry.standard.supports($0) })
-        guard evaluated == QuestionRendererRegistry.standard.supportedKinds else { throw AppEnvironmentError.registryMismatch }
+        guard evaluatedKinds == QuestionRendererRegistry.standard.supportedKinds else { throw AppEnvironmentError.registryMismatch }
         let container = try ModelContainerFactory.make(inMemory: storeDirectory == nil, cloudKitContainer: nil, storeDirectory: storeDirectory)
         let dependencies = AppDependencies(attempts: SwiftDataExamAttemptRepository(modelContainer: container),
             answers: SwiftDataAnswerHistoryRepository(modelContainer: container), cards: SwiftDataCardStateRepository(modelContainer: container),

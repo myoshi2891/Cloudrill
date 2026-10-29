@@ -33,6 +33,34 @@ import XCTest
         attachScreenshot(app, name: "Single fixture Beta")
     }
 
+    func testHomeShowsEmptyStateAndLearningNavigation() {
+        let app = launch(["-content-fixture", "test-beta"])
+        XCTAssertTrue(app.staticTexts["homeNoData"].waitForExistence(timeout: 20))
+        XCTAssertEqual(app.staticTexts["homeDueCards"].label, "0 枚")
+        app.buttons["homeStartLearning"].tap()
+        XCTAssertTrue(app.tabBars.buttons["試験"].isSelected)
+        XCTAssertTrue(app.staticTexts["準備中"].waitForExistence(timeout: 5))
+        app.tabBars.buttons["ホーム"].tap()
+        XCTAssertTrue(app.staticTexts["homeNoData"].waitForExistence(timeout: 5))
+        attachScreenshot(app, name: "Home empty state")
+    }
+
+    func testExamSwitchResetsTabNavigation() {
+        let app = launch()
+        XCTAssertTrue(app.buttons["exam-test-beta"].waitForExistence(timeout: 20))
+        app.buttons["exam-test-beta"].tap()
+        XCTAssertTrue(app.buttons["homeStartLearning"].waitForExistence(timeout: 10))
+        app.buttons["homeStartLearning"].tap()
+        app.tabBars.buttons["ホーム"].tap()
+        app.buttons["examPickerButton"].tap()
+        app.buttons["exam-test-alpha"].tap()
+        XCTAssertTrue(app.staticTexts["homeNoData"].waitForExistence(timeout: 10))
+        XCTAssertEqual(app.buttons["examPickerButton"].label, "ALPHA")
+        XCTAssertTrue(app.tabBars.buttons["ホーム"].isSelected)
+        app.tabBars.buttons["試験"].tap()
+        XCTAssertEqual(app.navigationBars.buttons.count, 0)
+    }
+
     func testInvalidLaunchArgumentsShowFailure() {
         let app = launch(["-fixed-now", "invalid"])
         XCTAssertTrue(app.staticTexts["データの読み込みに失敗しました。再インストールしてください"].waitForExistence(timeout: 15))
