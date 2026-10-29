@@ -21,6 +21,13 @@
                ReferencedContainer = "container:ExamPrepApp.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+      <BuildActionEntry buildForTesting="YES" buildForRunning="NO"
+            buildForProfiling="NO" buildForArchiving="NO" buildForAnalyzing="YES">
+            <BuildableReference BuildableIdentifier="primary"
+               BlueprintIdentifier="0000000000000000000000C0"
+               BuildableName="ExamPrepAppUITests.xctest" BlueprintName="ExamPrepAppUITests"
+               ReferencedContainer="container:ExamPrepApp.xcodeproj"/>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -29,6 +36,14 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES"
       shouldAutocreateTestPlan = "YES">
+   <Testables>
+         <TestableReference skipped="NO">
+            <BuildableReference BuildableIdentifier="primary"
+               BlueprintIdentifier="0000000000000000000000C0"
+               BuildableName="ExamPrepAppUITests.xctest" BlueprintName="ExamPrepAppUITests"
+               ReferencedContainer="container:ExamPrepApp.xcodeproj"/>
+         </TestableReference>
+      </Testables>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"

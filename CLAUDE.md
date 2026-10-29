@@ -6,10 +6,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 クラウド認定試験対策 iOS アプリ「Cloudrill」と、その学習コンテンツのモノレポ。初期リリースの対象は Google Cloud Professional Cloud Architect(PCA、`examID: gcp-pca`)だが、コンテンツの構造と検証ツールは複数の試験(他ベンダーを含む)に対応している。試験の追加はコンテンツの追加だけで済む(コードを変えない)。
 
-- `ExamPrepApp/` + `ExamPrepApp.xcodeproj` — iOS アプリ(SwiftUI、表示名 Cloudrill)。`packages/DomainModels` をローカルパッケージ(相対パス)として参照
+- `ExamPrepApp/` + `ExamPrepApp.xcodeproj` — iOS アプリ(SwiftUI、表示名 Cloudrill)。`packages/DomainModels` と `packages/AppComposition` をローカルパッケージ(相対パス)として参照
 - `packages/DomainModels/` — コンテンツの値型(SwiftPM、Swift 6、Swift Testing)
-- `packages/Domain/` — 学習・採点ロジックと `DomainInterfaces`（`ExamContentProvider`、`ContentError`、`IntegrityViolation`）
-- `packages/Data/` — `ContentKit`。署名検証、索引と本文の読み込み、整合チェック、パック保存、同梱カタログと起動処理。テストは `content/tests/fixtures/packs/` を直接参照する
+- `packages/Domain/` — 学習・採点ロジックと `DomainInterfaces`（コンテンツ提供・永続化リポジトリのプロトコル、エラー、受験スナップショットなどの値型）
+- `packages/Presentation/` — P4 の基盤。`AppCore` は `AppDependencies`・`ActiveExamContext`・`AppRouter`、`HomeFeature` は `ExamPickerViewModel`、`ExamFeature` は `QuestionRendererRegistry`。Data には依存しない。選択設定と中断スナップショットの保存が成功してから試験と経路を切り替え、await 中の重複操作を拒否する。進捗は DDD-P4 第2節を参照
+- `Presentation` の `DesignSystem` は P4-S04 の共通部品と日本語 `.strings` リソースを提供する。ドメインの並び順から配色・記号を決め、ライト／ダークの専用背景でコントラストを保証する。`QuestionRendererRegistry` は共通 `ChoiceRow` を使う。次は S05 のホーム。本番 App Group ID は未定のため保留し、Debug の開発用ストアで作業を継続する。
+- `packages/AppComposition/` — アプリ専用の Composition root と起動View。Data と Presentation を接続する。`live` は呼び出し元で解決した保存先URLを受け取り、開発用パックを拒否する。`development`・`uiTesting` は DEBUG のみ。`AppRootView` は試験選択・概要までで、学習画面は未実装。Xcodeへ接続済み。今回は利用者の明示承認によりproject.pbxprojをパッチ更新した
+- `packages/Data/` — `ContentKit` と `Persistence` を提供する。`ContentKit` は署名検証、索引と本文の読み込み、整合チェック、パック保存、同梱カタログと起動処理を担当し、テストは `content/tests/fixtures/packs/` を直接参照する。`Persistence` は SwiftData による学習履歴・設定の永続化を担当する
+- `packages/Data` の `Persistence` は P3-S01〜S09 の実装・ローカル検証完了（リモート CI は未確認）。10モデル、コンテナ、`SwiftDataExamAttemptRepository`・`SwiftDataAnswerHistoryRepository` を含む各 ModelActor リポジトリ、重複統合、エクスポート／削除、V1 の移行計画を実装済み。`Storage.write` が保存の1回再試行と rollback を共用する。App Group の URL は `storeDirectory` に渡し、インメモリでは CloudKit を無効にする。詳細と最終検証は `Documentation.docc/DDD/DDD-P3-Persistence.md` の各節・第5節を参照
+- `SyncDeduplicator.run()` は値型の計画を返し、`notifyUser` が true なら受験統合の通知が必要。`DataManagement.export(examID:)`・`deleteAll(examID:)` は nil なら全体、試験指定なら UserSettings を除く当該試験のみを扱う。エクスポートは版付き JSON（Date は Unix 秒、Data は Base64、リレーションは UUID）。内部の `PersistenceRows` が取得を共用する。`ModelContainerFactory` は `ExamPrepMigrationPlan` を指定し、移行計画導入前の V1 ストアを開き直すテストを備える
 - `content/` — 学習コンテンツ(YAML / Markdown)、JSON Schema(Draft 2020-12)、Python の検証ツール。詳細仕様は `content/README.md`
   - `content/vendors.yaml`(全試験で共通のベンダー定義)と `content/validation.yaml`(検証の閾値、全体)
   - `content/exams/<examID>/` — 試験ごとのディレクトリ。`exam.yaml`(試験定義)、`validation.yaml`(試験ごとの検証設定)、`exam-sets.yaml`、問題などのコンテンツ
@@ -54,6 +59,8 @@ content/.venv/bin/python content/scripts/fsrs_vectors.py --out packages/Domain/T
 swift test --package-path packages/DomainModels
 swift test --package-path packages/Domain
 swift test --package-path packages/Data
+swift test --package-path packages/Presentation
+swift test --package-path packages/AppComposition
 swift test --package-path packages/DomainModels --filter FixtureDecodingTests   # 単一テスト
 
 # 行カバレッジ(Sources の *TestSupport/ を除く。最低値を下回ると終了コード 1)
@@ -93,6 +100,7 @@ validate.py の終了コード: `0` = error なし / `1` = error あり(`--stric
 - `fixtures/packs/` は `generate_packs.py` で再生成する。epoch は固定の `1793491200`。正常3パックと改ざん9種類を持ち、`tampered/expected.json` の `directory`・`error`・`expectedExamID` を Python / Swift の両方が使う。生成済みパックは手編集しない。
 - `PackStore(root:)` の root は Content 保存先。インストール元は `<root>/<examID>/staging/<UUID>/` に置き、検証・整合チェック後に `install` → `activate` を呼ぶ。受験中の版は `pin` で保持し、`garbageCollect` は current・previous・pins にないインストール版だけを削除する。`directory(...)` は `throws(ContentError)`。
 - `BundledPacks(root:)` はアプリの `Packs/` と `catalog.json` を読む。`ContentBootstrapper(catalogService:loader:integrityChecker:)` を起動時に呼び、`available` を利用する。`failures` は試験ごとの失敗、`fatalError` は全試験が利用不可の場合の E-01 用。起動時には本文や署名を全再検証せず、manifest・試験定義・ベンダーの一致と索引の整合を確認してから有効化する。`ExamCatalogService.activeLocation(for:)` は選択だけ、`load(for:loader:integrityChecker:)` は整合確認と有効化まで行う。
+- 版の選択は `ActiveLocation.swift` の内部純粋関数 `resolveActiveLocation(bundled:installed:)` に集約する。サービスが存在・パス・版を確認した候補を渡し、SemVer で新しい方を選ぶ。同順位（build metadata だけの差を含む）なら installed を維持する。`ActiveLocationTests` の表でサービスと純粋関数の両方を確認する。
 
 ## コンテンツの規約
 
@@ -110,6 +118,8 @@ validate.py の終了コード: `0` = error なし / `1` = error あり(`--stric
 - `domain-test.yml` — `scripts/coverage.sh packages/Domain 80`(macOS。`swift test` と行カバレッジ 80% の確認。`packages/Domain/**`、`packages/DomainModels/**` の変更時。Domain は DomainModels に依存するので、DomainModels の変更でも実行する)
 - `content-link-check.yml` — 毎週、`--only CI-06 --check-links --strict`
 - `data-test.yml` — `swift test --package-path packages/Data`。Data・Domain・DomainModels・契約 fixture の変更時に、Python が生成した署名付きパックを CryptoKit で検証する。
+- `presentation-test.yml` — `swift test --package-path packages/Presentation`。Presentation・Domain・DomainModels・JSON fixture の変更時に試験選択・画面遷移を検証する。
+- `app-test.yml` — AppComposition のテストとReleaseビルド。PRではSimulator向けビルド、mainへのpush・手動実行では起動UIテストを実行する。`scripts/bundle_packs.sh --development --out <新規ディレクトリ>` で同梱用の署名付きfixtureを再生成できる。既存出力は上書きしない
 
 ## 命名とリリース
 

@@ -6,7 +6,7 @@
 | 作成日 | 2026-10-21 |
 | 上位文書 | [詳細設計書(索引・共通設計)](../DDD.md) |
 | 対象 | `ExamPrepApp`(アプリ本体)、`packages/Presentation`、`ExamPrepAppUITests` |
-| ステータス | レビュー待ち |
+| ステータス | 起動基盤をアプリへ接続済み（学習画面は未実装） |
 
 ---
 
@@ -33,6 +33,61 @@ P1〜P3 の部品を組み合わせて、MVP(RDD 12 章)の画面を作る。画
 ---
 
 ## 2. 前提
+
+### 着手時点の確認（2026-10-28）
+
+- P2・P3 の実装とローカル検証は完了。今回も Data 116テスト、Domain 148テストが成功した。リモート CI は未確認。
+- 利用者の指定により `dev` ブランチのまま進め、コミットは利用者が行う。以下の機能ブランチ作成は今回には適用しない。
+- TBD-10 は本書の既定案（ホーム上部の試験名からシート表示）を採用する。今回実装したのは選択状態と ViewModel で、シートを含む View は未実装。
+- `swift-markdown` と `swift-snapshot-testing` は採用確認済みだが、依存には未追加。S12・S18 でそれぞれ導入する。
+- `ExamPrepApp` は初期画面のまま。Xcode プロジェクトへの依存追加・設定変更は、リポジトリの規約に従い GUI で行う必要がある。
+- `content/catalog.yaml` の `gcp-pca` は `comingSoon`。開発用の同梱パック生成とアプリへのコピー、本番の公開判定は未実施。
+
+### 初回の成果物と検証範囲
+
+| ステップ | 実装済み | 残作業 |
+|---|---|---|
+| S01 | Presentation パッケージ、プロトコル型の `AppDependencies`、SwiftUI Environment の注入口、`presentation-test.yml` | アプリ側 `AppEnvironment`、起動引数、レンダラー登録表との整合、同梱パック、Xcode 設定・依存の接続、アプリ/UIテスト・`app-test.yml` |
+| S02 | `ActiveExamContext`、起動時選択の純粋関数、`ExamPickerViewModel` | `RootView`・選択シート・`MainTabView.id(examID)` への接続 |
+| S03 | `AppRouter`、全15種類の Route のタブ対応、タブ別 path、提出後の経路置換、試験切り替え時のリセット | 各画面の `NavigationStack` への接続 |
+
+Presentation の14テスト（パラメータ化されたケースを含む）が成功。前回選択の復元、1試験の自動選択、複数試験の選択要求、読み込み不可・全試験不可、設定保持、中断スナップショットの保存、保存失敗時の状態維持、切り替え連打、近日公開・公開終了・商標表示、画面遷移を検証した。最初のルーターテストでは未実装型によるコンパイル失敗を確認してから実装した（assertion Red ではない）。
+
+`ActiveExamContext` は `ContentBootstrapper` の `available` と `failures.keys`、カタログ、リポジトリ、時計、ルーターを受け取る。Presentation は Data に依存しない。切り替え先の設定取得・旧試験の中断保存・選択設定の保存が成功してから表示状態と経路を更新する。選択設定の保存だけが失敗した場合、旧試験は中断保存済みのまま選択され続ける。再開処理はアプリ接続時に行う。
+
+```sh
+env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --package-path packages/Presentation
+env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --package-path packages/Data
+env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --package-path packages/Domain
+```
+
+初回時点ではアプリ側 Composition root・開発用パック・Xcode接続を後続作業としていた。以下に継続実装の結果を記録する。P4全体の完了を示すものではない。
+
+### 継続実装: 起動処理と同梱パック（2026-10-28）
+
+- `packages/AppComposition` にアプリ専用の `AppEnvironment` と `AppRootView` を追加した。アプリ本体から呼び出す Composition root をパッケージ化することで、Xcode の接続前にも実リポジトリとコンテンツを使って検証できる。Presentation → Data の依存は禁止したまま。
+- `AppEnvironment.live` は `SystemTimeSource` と実ストアを使い、呼び出し元が解決した App Group 保存先を受け取る。開発用の印が付いたパックは拒否する。CloudKit は未接続。
+- DEBUG専用の `development` はシステム時計と開発用ディスクストアを使う。`uiTesting` は固定・進行可能な時計、固定seed、インメモリまたは指定ディレクトリのストアを使用する。`-content-fixture` は1.0.0を選ぶ。`-store-path` はストアファイルではなく保存先ディレクトリ。矛盾した引数・不正な日時・パス・未知の引数は起動エラーになる。起動処理はローカル読み込みだけでネットワークアクセスはない。
+- `QuestionRendererRegistry` はsingle/multipleの選択肢を正誤なしで表示する。採点登録表と描画登録表が一致しない場合は起動を拒否する。選択数制約・セッション保存・デザインシステムとの統合はS07で追加する。
+- `scripts/bundle_packs.sh --development` は既存のビルド・署名処理を再利用し、`ExamPrepApp/Resources/Packs` にカタログ、署名付き2試験（Alphaの2版を含む）、テスト公開鍵、開発用の印を生成する。52ファイルの再生成一致と既存出力の保護を確認した。本番カタログの `comingSoon` は変更していない。
+- `AppRootView` は起動中・致命的エラー・試験選択・試験概要を表示し、ホーム上部の試験名から選択シートを開く。画面文言はString Catalog。模試開始などのMVP学習画面・5タブの接続は未実装。
+- AppCompositionの7テスト（引数検証9ケースを含む）とReleaseビルドを検証するCIを `app-test.yml` に追加した。実パックの署名、選択のディスク復元、固定時計とシステム時計、実保存、開発パックの本番起動拒否を検証する。これはSimulator上のUIテストではない。
+- ローカルでは上記7テスト、Presentationの14テスト、Releaseビルド、AppCompositionのiOS 18 Simulator向けクロスビルドが成功した。パッケージのクロスビルドは `swift build --build-system native --sdk <iPhoneSimulator.sdk> --triple arm64-apple-ios18.0-simulator` で確認した。アプリ本体の `xcodebuild` とSimulatorでの画面操作は接続後に検証する。
+
+利用者の明示承認を受けてXcode接続パッチを適用した。AppCompositionのローカル参照、iOS 18 / Swift 6 / iPhone・iPadへの設定、`Resources/Packs` のフォルダコピー、ContentViewからの起動画面呼び出しを接続済み。アプリ全体のSimulator向けビルドと、生成された.app内のカタログ・パック階層を確認した。App Group・本番識別子・本番パックは未完了。
+
+`ExamPrepAppUITests`を追加し、共有Schemeから試験選択と切り替え、単一試験の自動選択、不正な起動引数のエラー表示を検証する。UI検証で翻訳キーが表示される不具合を確認し、AppCompositionの`defaultLocalization`を`ja`に修正した。CIのアプリビルドはPRでも実行し、UIテストはmainへのpush・手動実行で実行する。
+
+### 継続実装: P4-S04 デザインシステム（2026-10-28）
+
+- 本番 App Group ID は利用者確認により未定のまま保留する。Debug の開発用保存先で P4 を継続できる。本番 plist・entitlement・コンテナの対応、本番識別子・本番パック、リモート CI の確認は残作業。
+- `packages/Presentation/Sources/DesignSystem` に `DomainPalette`、`ChoiceRow`、`DomainBadge`、`CaseBadge`、`ResultBadge`、`TimerLabel`、`MistakeTagChip`、`ReferenceLink` を追加した。`MarkdownView` は引き続き S12 で実装する。
+- ドメイン色は試験定義の並び順から割り当てる。6色を循環させ、周回ごとに記号を変更する。バッジの背景はライトで白・ダークで黒に固定し、全6色の文字コントラスト比が両モードで4.5以上であることを独立した相対輝度計算で検証した。正誤は色・アイコン・文言で表示する。
+- 選択肢は最小44ptのタップ領域、Dynamic Type、アクセシビリティサイズでの縦並び、選択状態と本文を含む VoiceOver ラベルを備える。既存の `QuestionRendererRegistry` を `ChoiceRow` に接続した。解答中の正誤表示は追加しない。
+- タイマーの表示は秒単位、アクセシビリティラベルは分単位（残り1〜59秒は「残り 1 分未満」）。DesignSystem の翻訳は SwiftPM でも利用できる日本語 `.strings` リソースに置く。全共通部品を含むライト・ダーク・最大文字サイズの Preview を追加した。Preview の目視・VoiceOver の実機確認は未実施。
+- テストを先行追加し、型が未実装のコンパイル失敗を確認した。実装後に検出した誤答タグの翻訳キー表示を修正し、Presentation 全20テスト（DesignSystem 6、既存14）と AppComposition 全7テストが成功した。アプリ全体の Debug・iOS Simulator 向けビルド（署名なし）も成功した。次の実装ステップは S05 のホーム。
+
+### 設計時の前提（未完了項目を含む）
 
 - P2 と P3 が完了している。
 - 外部依存 `swift-snapshot-testing` と `swift-markdown` の採否を確認済みである([DDD 8 章](../DDD.md#8-外部依存の候補))。
@@ -61,7 +116,7 @@ flowchart TB
 | 型 | 置き場所 | 役割 |
 |---|---|---|
 | `AppDependencies` | AppCore | プロトコル型の依存(リポジトリ、`TimeSource`、登録表、乱数の種の供給)をまとめた struct。`@Entry` で `EnvironmentValues` に置く |
-| `AppEnvironment` | アプリ本体 | `live()`(本番)と `uiTesting(arguments:)`(UI テスト)で `AppDependencies` を組み立てる。DEBUG 構成でだけ `uiTesting` をコンパイルする |
+| `AppEnvironment` | `packages/AppComposition/Sources/AppComposition/AppEnvironment.swift` | アプリ専用の Composition root。`live(packsRoot:storeDirectory:)`(本番)、`development(packsRoot:storeDirectory:)`(開発)、`uiTesting(arguments:packsRoot:workingDirectory:)`(UI テスト)で `AppDependencies` を組み立てる。`development` と `uiTesting` は DEBUG 構成でだけコンパイルする |
 | `ActiveExamContext` | AppCore | `@MainActor @Observable`。選択中の試験の `ExamContentProvider` と `ExamPreference` を持つ。`switchExam(to:)` で切り替える |
 | `AppRouter` | AppCore | タブの選択と、タブごとの `NavigationStack` の path を持つ。画面をまたぐ遷移は `Route` を受け取って処理する |
 | `QuestionRendererRegistry` | ExamFeature | 出題形式ごとの View を返す([DDD 4.9](../DDD.md#49-アプリ内の拡張点)) |
@@ -88,8 +143,8 @@ flowchart TB
 | `-ui-testing` | `AppEnvironment.uiTesting` を使う |
 | `-fixed-now 2026-11-01T09:00:00Z` | `ManualTimeSource` をこの時刻で作る |
 | `-advance-on-launch 7200` | 起動時に時計を指定の秒数だけ進める(時間切れの再現) |
-| `-content-fixture test-alpha` | 同梱パックの代わりに、テスト用のパック(`packs/valid/test-alpha/1.0.0`)を使う |
-| `-store-in-memory` / `-store-path <path>` | インメモリのストア / 指定したファイルのストア(強制終了後の復元の確認用) |
+| `-content-fixture test-alpha` | 同梱カタログを利用可能な `test-alpha` に絞り込み、バージョン `1.0.0` を選択する |
+| `-store-in-memory` / `-store-path <path>` | インメモリのストア / 指定した保存先ディレクトリ内のストア(強制終了後の復元の確認用) |
 | `-network offline` | ネットワークを常に失敗させる |
 
 ---
@@ -111,7 +166,7 @@ flowchart TB
 |---|---|
 | 対応要件 | [DDD 3 章](../DDD.md#3-名称)、C-14、[DDD 5.4](../DDD.md#54-ci-のワークフロー) |
 | 前提 | P2、P3 |
-| 成果物 | `packages/Presentation/Package.swift`、`Sources/AppCore/AppDependencies.swift`、`ExamPrepApp/AppEnvironment.swift`、`ExamPrepApp/Resources/Packs/`、`.github/workflows/app-test.yml` |
+| 成果物 | `packages/Presentation/Package.swift`、`Sources/AppCore/AppDependencies.swift`、`packages/AppComposition/Sources/AppComposition/AppEnvironment.swift`、`ExamPrepApp/Resources/Packs/`、`.github/workflows/app-test.yml` |
 
 **Xcode の設定**(Build Settings で変更する。`project.pbxproj` は手で編集しない):
 

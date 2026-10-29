@@ -19,7 +19,7 @@ let package = Package(
         .package(path: "../DomainModels"),
     ],
     targets: [
-        .target(name: "DomainInterfaces", dependencies: ["DomainModels"]),
+        .target(name: "DomainInterfaces", dependencies: ["DomainModels", "StudyModels", "ExamEngine", "FSRS", "QuestionSelector"]),
         .target(name: "StudyModels", dependencies: ["DomainModels"]),
         .target(name: "ExamEngine", dependencies: ["StudyModels", "DomainModels"]),
         // FSRS は学習内容に依存しないアルゴリズムなので、DomainModels にも依存させない

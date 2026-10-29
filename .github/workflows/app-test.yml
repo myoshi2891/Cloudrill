@@ -1,0 +1,72 @@
+name: app-test
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "ExamPrepApp/**"
+      - "ExamPrepAppUITests/**"
+      - "ExamPrepApp.xcodeproj/**"
+      - "packages/**"
+      - "scripts/bundle_packs.*"
+      - ".github/workflows/app-test.yml"
+  push:
+    branches: [main]
+    paths:
+      - "ExamPrepApp/**"
+      - "ExamPrepAppUITests/**"
+      - "ExamPrepApp.xcodeproj/**"
+      - "packages/**"
+      - "scripts/bundle_packs.*"
+      - ".github/workflows/app-test.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: app-test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  composition:
+    name: App composition tests and release build
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Test app startup with bundled packs
+        run: swift test --package-path packages/AppComposition
+      - name: Build production composition without test launch APIs
+        run: swift build --package-path packages/AppComposition -c release
+  simulator:
+    name: iOS build and startup smoke tests
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Build iOS Simulator app
+        run: >-
+          xcodebuild -project ExamPrepApp.xcodeproj -scheme ExamPrepApp
+          -configuration Debug -destination 'generic/platform=iOS Simulator'
+          -derivedDataPath /tmp/cloudrill-build CODE_SIGNING_ALLOWED=NO build
+      - name: Select available iPhone simulator
+        if: github.event_name != 'pull_request'
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess
+          devices = json.loads(subprocess.check_output(["xcrun", "simctl", "list", "devices", "available", "--json"]))["devices"]
+          device = next(device for runtime, entries in devices.items() if ".iOS-" in runtime
+                        and int(runtime.split(".iOS-")[1].split("-")[0]) >= 18
+                        for device in entries if device["name"].startswith("iPhone"))
+          with open(os.environ["GITHUB_ENV"], "a") as stream:
+              stream.write(f"SIMULATOR_ID={device['udid']}\n")
+          PY
+      - name: Run startup smoke tests
+        if: github.event_name != 'pull_request'
+        run: >-
+          xcodebuild -project ExamPrepApp.xcodeproj -scheme ExamPrepApp
+          -configuration Debug -destination "platform=iOS Simulator,id=$SIMULATOR_ID"
+          -derivedDataPath /tmp/cloudrill-build -resultBundlePath /tmp/cloudrill-startup.xcresult
+          CODE_SIGNING_ALLOWED=NO test

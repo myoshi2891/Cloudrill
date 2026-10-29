@@ -1,0 +1,36 @@
+name: presentation-test
+
+on:
+  pull_request:
+    paths:
+      - "packages/Presentation/**"
+      - "packages/Domain/**"
+      - "packages/DomainModels/**"
+      - "content/tests/fixtures/valid-json/**"
+      - ".github/workflows/presentation-test.yml"
+  push:
+    branches: [main]
+    paths:
+      - "packages/Presentation/**"
+      - "packages/Domain/**"
+      - "packages/DomainModels/**"
+      - "content/tests/fixtures/valid-json/**"
+      - ".github/workflows/presentation-test.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: presentation-test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  swift:
+    name: Presentation foundation tests
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Run Swift tests (Presentation)
+        run: swift test --package-path packages/Presentation
