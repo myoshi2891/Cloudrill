@@ -30,6 +30,7 @@ public protocol ExamAttemptRepository: Sendable {
     func start(examID: ExamID, examSet: Int, packVersion: String, snapshot: ExamSession.Snapshot) async throws(PersistenceError) -> UUID
     func save(snapshot: ExamSession.Snapshot, for attemptID: UUID) async throws(PersistenceError)
     /// Atomically saves answer history and its selection in the persisted session snapshot.
+    /// Replaces any earlier answer for the same question in the attempt, so only the latest fact is aggregated.
     /// Other snapshot fields are preserved; use save(snapshot:for:) for navigation or lifecycle changes.
     func record(_ answer: AnswerFact, in attemptID: UUID) async throws(PersistenceError)
     func finalize(attemptID: UUID, result: ExamResult, reason: SubmitReason, at date: Date) async throws(PersistenceError)

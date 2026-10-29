@@ -55,6 +55,8 @@ import ExamEngine
                 snapshot.answers[answer.questionID] = ids.isEmpty ? nil : answer.selection
             }
             attempt.sessionSnapshotJSON = try Storage.encode(snapshot)
+            // 選択の切り替えを別の解答として集計しないよう、受験×問題ごとに最新の1件だけを残す。
+            for old in attempt.answers ?? [] where old.questionID == answer.questionID { modelContext.delete(old) }
             modelContext.insert(row); row.attempt = attempt
         }
     }

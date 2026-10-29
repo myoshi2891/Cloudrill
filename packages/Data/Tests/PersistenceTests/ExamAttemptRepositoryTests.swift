@@ -72,10 +72,18 @@ final class FailingSaver: Saver, @unchecked Sendable {
         let container = try PersistenceFixtures.container()
         let repo = SwiftDataExamAttemptRepository(modelContainer: container)
         let id = try await repo.start(examID: "test-alpha", examSet: 1, packVersion: "1.0.0", snapshot: PersistenceFixtures.snapshot())
-        for _ in 0..<3 { try await repo.record(PersistenceFixtures.answer(), in: id) }
+        // 同じ問題の選択を切り替えても、受験×問題ごとに最新の解答だけが残る。
+        for correct in [true, false, true, false] { try await repo.record(PersistenceFixtures.answer(correct: correct), in: id) }
+        try await repo.record(PersistenceFixtures.answer(id: "Q2"), in: id)
+        let other = try await repo.start(examID: "test-alpha", examSet: 2, packVersion: "1.0.0", snapshot: PersistenceFixtures.snapshot())
+        try await repo.record(PersistenceFixtures.answer(), in: other)
         let records = try ModelContext(container).fetch(FetchDescriptor<SchemaV1.AnswerRecord>())
         #expect(records.count == 3)
-        #expect(records.allSatisfy { $0.modeRaw == "exam" && $0.attempt?.id == id })
+        #expect(records.allSatisfy { $0.modeRaw == "exam" })
+        let current = records.filter { $0.attempt?.id == id }
+        #expect(current.map(\.questionID).sorted() == ["Q1", "Q2"])
+        #expect(current.first { $0.questionID == "Q1" }?.isCorrect == false)
+        try await repo.abandon(attemptID: other)
         try await repo.finalize(attemptID: id, result: PersistenceFixtures.result, reason: .user, at: PersistenceFixtures.now)
         #expect(try await repo.inProgress(examID: "test-alpha") == nil)
         let history = try await repo.history(examID: "test-alpha")
