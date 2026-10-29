@@ -2,6 +2,7 @@ import SwiftUI
 import OSLog
 import AppCore
 import HomeFeature
+import ExamFeature
 import DomainModels
 import DomainInterfaces
 
@@ -88,6 +89,16 @@ private struct MainTabView: View {
     let content: any ExamContentProvider
     let dependencies: AppDependencies
     let selectExam: () -> Void
+    @State private var home: HomeViewModel
+
+    /// HomeViewModel は body の再評価(タブ切替・遷移)のたびに作り直さない。試験の切替は .id で作り直す。
+    init(context: ActiveExamContext, content: any ExamContentProvider, dependencies: AppDependencies,
+         selectExam: @escaping () -> Void) {
+        self.context = context; self.content = content; self.dependencies = dependencies; self.selectExam = selectExam
+        _home = State(initialValue: HomeViewModel(definition: content.definition,
+            answers: dependencies.answers, cards: dependencies.cards,
+            attempts: dependencies.attempts, time: dependencies.time, router: context.router))
+    }
 
     var body: some View {
         @Bindable var router = context.router
@@ -97,15 +108,21 @@ private struct MainTabView: View {
                                                set: { router.setPath($0, for: tab) })) {
                     Group {
                         if tab == .home {
-                            HomeView(model: HomeViewModel(definition: content.definition,
-                                answers: dependencies.answers, cards: dependencies.cards,
-                                attempts: dependencies.attempts, time: dependencies.time, router: router),
-                                selectExam: selectExam)
+                            HomeView(model: home, trademarkNotice: content.vendor.trademarkNotice,
+                                     selectExam: selectExam)
+                        } else if tab == .exam {
+                            ExamTopView(content: content, router: router)
                         } else {
                             pending(tab)
                         }
                     }
-                    .navigationDestination(for: Route.self) { route in pending(route.tab) }
+                    .navigationDestination(for: Route.self) { route in
+                        switch route {
+                        case .examStart(let set):
+                            ExamStartView(content: content, examSet: set, dependencies: dependencies, router: router)
+                        default: pending(route.tab)
+                        }
+                    }
                 }
                 .tabItem { Label { Text(LocalizedStringKey("tab." + tab.rawValue), bundle: .module) }
                     icon: { Image(systemName: symbol(tab)) } }

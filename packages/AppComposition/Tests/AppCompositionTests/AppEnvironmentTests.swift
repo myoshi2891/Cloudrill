@@ -4,6 +4,7 @@ import DomainModels
 import StudyModels
 import ContentKit
 import AppCore
+import ExamFeature
 @testable import AppComposition
 
 @MainActor struct AppEnvironmentTests {
@@ -35,6 +36,25 @@ import AppCore
         let reopened = try await AppEnvironment.uiTesting(arguments: args, packsRoot: Self.packs, workingDirectory: root)
         #expect(!reopened.isInMemory)
         #expect(reopened.activeExam.state.examID == "test-beta")
+    }
+
+    @Test func startsAndAbandonsWithRealRepositoriesAndPins() async throws {
+        let root = temporary()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let environment = try await AppEnvironment.uiTesting(arguments: ["-ui-testing", "-content-fixture", "test-beta", "-store-in-memory"],
+            packsRoot: Self.packs, workingDirectory: root)
+        let content = try #require(environment.activeExam.content)
+        let deps = environment.dependencies
+        let model = ExamStartViewModel(content: content, examSet: 1, attempts: deps.attempts,
+            pins: deps.pins, settings: deps.settings, time: deps.time, seedProvider: deps.seedProvider, router: environment.activeExam.router)
+        await model.start()
+        #expect(model.error == nil)
+        let attempt = try #require(try await deps.attempts.inProgress(examID: "test-beta"))
+        #expect(attempt.snapshot.order.items.count == 40)
+        #expect(try await environment.packStore.state(for: "test-beta").pins[attempt.id] == "1.0.0")
+        await model.abandon()
+        #expect(try await deps.attempts.inProgress(examID: "test-beta") == nil)
+        #expect(try await environment.packStore.state(for: "test-beta").pins.isEmpty)
     }
 
     @Test func supportedKindsMatchBothRegistries() {
