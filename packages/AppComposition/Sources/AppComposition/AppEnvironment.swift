@@ -70,7 +70,8 @@ public enum AppEnvironmentError: Error, Equatable {
         guard evaluatedKinds == QuestionRendererRegistry.standard.supportedKinds else { throw AppEnvironmentError.registryMismatch }
         let container = try ModelContainerFactory.make(inMemory: storeDirectory == nil, cloudKitContainer: nil, storeDirectory: storeDirectory)
         let store = PackStore(root: contentDirectory)
-        let dependencies = AppDependencies(pins: store, attempts: SwiftDataExamAttemptRepository(modelContainer: container),
+        let dependencies = AppDependencies(contentResolver: ExamContentResolver(bundled: bundled, store: store, supportedKinds: supportedKinds),
+            pins: store, attempts: SwiftDataExamAttemptRepository(modelContainer: container),
             answers: SwiftDataAnswerHistoryRepository(modelContainer: container), cards: SwiftDataCardStateRepository(modelContainer: container),
             bookmarks: SwiftDataBookmarkRepository(modelContainer: container), settings: SwiftDataSettingsRepository(modelContainer: container),
             dataManagement: DataManagement(modelContainer: container), time: time, seedProvider: seed)

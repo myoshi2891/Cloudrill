@@ -90,11 +90,13 @@ private struct MainTabView: View {
     let dependencies: AppDependencies
     let selectExam: () -> Void
     @State private var home: HomeViewModel
+    @State private var sessions: ExamSessionStore
 
     /// HomeViewModel は body の再評価(タブ切替・遷移)のたびに作り直さない。試験の切替は .id で作り直す。
     init(context: ActiveExamContext, content: any ExamContentProvider, dependencies: AppDependencies,
          selectExam: @escaping () -> Void) {
         self.context = context; self.content = content; self.dependencies = dependencies; self.selectExam = selectExam
+        _sessions = State(initialValue: ExamSessionStore(examID: content.definition.id, dependencies: dependencies, router: context.router))
         _home = State(initialValue: HomeViewModel(definition: content.definition,
             answers: dependencies.answers, cards: dependencies.cards,
             attempts: dependencies.attempts, time: dependencies.time, router: context.router))
@@ -120,6 +122,12 @@ private struct MainTabView: View {
                         switch route {
                         case .examStart(let set):
                             ExamStartView(content: content, examSet: set, dependencies: dependencies, router: router)
+                        case .examSession(let id):
+                            ExamSessionView(model: sessions.model(for: id))
+                        case .examReview(let id):
+                            ExamReviewView(session: sessions.model(for: id))
+                        case .examResult(let id):
+                            ExamSubmissionReceiptView(examID: content.definition.id, attemptID: id, attempts: dependencies.attempts)
                         default: pending(route.tab)
                         }
                     }
