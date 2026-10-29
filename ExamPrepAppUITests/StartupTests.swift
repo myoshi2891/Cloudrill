@@ -61,6 +61,21 @@ import XCTest
         XCTAssertEqual(app.navigationBars.buttons.count, 0)
     }
 
+    func testBetaExamStartAndResumeBanner() {
+        let app = launch(["-content-fixture", "test-beta"])
+        XCTAssertTrue(app.buttons["homeStartLearning"].waitForExistence(timeout: 20))
+        app.tabBars.buttons["試験"].tap()
+        app.buttons["exam-set-1"].tap()
+        XCTAssertTrue(app.staticTexts["exam-format"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["exam-format"].label, "40 問・90 分")
+        XCTAssertFalse(app.staticTexts["出題されるケース"].exists)
+        attachScreenshot(app, name: "Beta exam confirmation")
+        app.buttons["exam-start"].tap()
+        XCTAssertTrue(app.staticTexts["準備中"].waitForExistence(timeout: 5))
+        app.tabBars.buttons["ホーム"].tap()
+        XCTAssertTrue(app.buttons["homeResume"].waitForExistence(timeout: 10))
+    }
+
     func testInvalidLaunchArgumentsShowFailure() {
         let app = launch(["-fixed-now", "invalid"])
         XCTAssertTrue(app.staticTexts["データの読み込みに失敗しました。再インストールしてください"].waitForExistence(timeout: 15))
