@@ -19,9 +19,15 @@ let package = Package(
             "DomainModels", .product(name: "DomainInterfaces", package: "Domain"),
             .product(name: "StudyModels", package: "Domain"), .product(name: "ExamEngine", package: "Domain"),
         ]),
-        .target(name: "HomeFeature", dependencies: ["AppCore", "DomainModels", "DesignSystem"], resources: [.process("Resources")]),
-        .target(name: "ExamFeature", dependencies: ["AppCore", "DomainModels", "DesignSystem"]),
-        .testTarget(name: "AppCoreTests", dependencies: ["AppCore", "HomeFeature",
+        .target(name: "HomeFeature", dependencies: [
+            "AppCore", "DomainModels", "DesignSystem", .product(name: "DomainInterfaces", package: "Domain"),
+            .product(name: "StudyModels", package: "Domain"),
+        ], resources: [.process("Resources")]),
+        .target(name: "ExamFeature", dependencies: ["AppCore", "DomainModels", "DesignSystem",
+            .product(name: "DomainInterfaces", package: "Domain"),
+            .product(name: "StudyModels", package: "Domain"), .product(name: "ExamEngine", package: "Domain"),
+        ], resources: [.process("Resources")]),
+        .testTarget(name: "AppCoreTests", dependencies: ["AppCore", "HomeFeature", "ExamFeature",
             .product(name: "DomainTestSupport", package: "Domain")]),
     ],
     swiftLanguageModes: [.v6]
