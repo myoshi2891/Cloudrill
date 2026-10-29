@@ -5,3 +5,9 @@
 "error.contentLoadFailed" = "データの読み込みに失敗しました。再インストールしてください";
 "error.examUnavailable" = "この試験のデータを読み込めませんでした";
 "error.persistenceFailed" = "保存に失敗しました";
+"tab.home" = "ホーム";
+"tab.exam" = "試験";
+"tab.cards" = "カード";
+"tab.learn" = "学ぶ";
+"tab.analytics" = "分析";
+"featurePending" = "準備中";
