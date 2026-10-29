@@ -47,7 +47,7 @@ google-cloud-professional-cloud-architect/
 
 ## ローカルでの検証
 
-[P4 アプリ MVP](Documentation.docc/DDD/DDD-P4-AppMVP.md) は基盤と起動処理を実装中です。Presentation は Data に依存せず、アプリ専用の AppComposition で具体的なリポジトリを組み立てます。Xcodeへの依存追加と起動画面の接続は完了し、起動・試験選択のUIテストを追加しています。S05のホーム（今日の学習・弱点・復習期限のカード数・模試の再開）と5タブを接続済みです。遷移先の練習・模試・カード画面は後続作業です。
+[P4 アプリ MVP](Documentation.docc/DDD/DDD-P4-AppMVP.md) は基盤と起動処理を実装中です。Presentation は Data に依存せず、アプリ専用の AppComposition で具体的なリポジトリを組み立てます。Xcodeへの依存追加と起動画面の接続は完了し、起動・試験選択のUIテストを追加しています。S05のホーム（今日の学習・弱点・復習期限のカード数・模試の再開）と5タブを接続済みです。S06の模試一覧・開始確認・受験保存とパック固定・再開／破棄も接続済みです。次はS07の解答画面です。練習・カード画面も後続作業です。
 
 ```sh
 cd /path/to/google-cloud-professional-cloud-architect

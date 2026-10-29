@@ -96,6 +96,14 @@ env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --packag
 - 表示時・フォアグラウンド復帰・引っ張って更新で再取得する。取得失敗を未学習状態として表示せず、再試行を提供する。再取得失敗時は直前の成功データを保持する。
 - HomeViewModelTests を先行追加し、未実装型によるコンパイル失敗を確認してから実装した。Presentation 全28テスト（HomeViewModel 8、既存20）、AppComposition 全7テスト、iOS Simulator のアプリビルドとUIテスト5件が成功。ホーム空状態のスクリーンショットも目視確認し、試験名の重複を解消した。最終調整後にホーム表示・遷移および切り替え時の経路リセットのUIテストも個別に再実行して成功した。ダークモード・最大文字サイズ・実機 VoiceOver の確認は S18 に残る。リモートCIは未確認。
 
+### 継続実装: P4-S06 試験トップと模試開始（2026-10-29）
+
+- `ExamTopViewModel`・`ExamTopView` は complete の模試を ID 順に表示し、試験定義の `setCount` の範囲外を除外する。draft を含める指定は DEBUG のみ有効（通常の一覧では非表示）。`ExamStartViewModel`・`ExamStartView` は定義由来の問題数・時間と対象ケース名、時間経過の注意を表示する。ケース機能が無効ならケース本文を取得しない。
+- 開始時に同じ試験の進行中受験を確認し、存在すれば再開／確認付き破棄を提示する。設定のシャッフル指定・注入 seed から `ExamOrderBuilder` で順序を決定し、注入時計で開始したスナップショットを保存する。保存とパック固定が成功してから `.examSession` に遷移する。await 中の連打は拒否する。
+- `DomainInterfaces.PackPinning` を追加し、`PackStore` を適合させ、AppDependencies に注入した。Presentation は Data に依存しない。pin 失敗時は保存済み受験を保持し、再開時に同じ版の固定を再試行する。破棄は abandon 成功後に unpin する。解除だけ失敗した場合は画面内で解除を再試行でき、再読み込みでも操作を保持する。
+- 試験タブの一覧・開始確認を Composition root に接続した。解答先は S07 の接続点のままであり、開始しても解答はまだできない。次の実装対象は **P4-S07 解答画面**。本番 App Group・識別子・パックとリモート CI は引き続き未完了。
+- 先行テストで未実装型によるコンパイル失敗を確認した。解除失敗後の再読み込みで操作が失われるケースは assertion の失敗を確認して修正した。Presentation 全40テスト（S06 8件）、AppComposition 全8テスト（実ストアとパック固定・解除の統合検証を含む）、Data の関連15テストが成功。AppComposition の Release ビルドも成功。iOS Simulator のアプリビルドと UI テスト全6件が成功し、Beta の開始確認（40問・90分、ケース欄なし）から開始後のホーム再開表示まで検証した。開始確認画面のスクリーンショットも目視確認した。
+
 ### 設計時の前提（未完了項目を含む）
 
 - P2 と P3 が完了している。
