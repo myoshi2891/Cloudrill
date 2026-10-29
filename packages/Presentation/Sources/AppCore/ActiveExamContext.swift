@@ -88,19 +88,32 @@ public enum InitialExamSelection: Equatable, Sendable {
 
     private func activate(_ id: ExamID, user: UserSettings) async throws {
         let preference = try await settings.preference(examID: id)
+        var suspended: AttemptSnapshot?
         if let oldID = state.examID, let attempt = try await attempts.inProgress(examID: oldID),
            attempt.snapshot.state != .suspended {
             var session = ExamSession(snapshot: attempt.snapshot, timerPolicy: .init())
             try session.handle(.suspend, at: time.now())
             try await attempts.save(snapshot: session.snapshot, for: attempt.id)
+            suspended = attempt
         }
         if user.currentExamID != id {
             var updated = user
             updated.currentExamID = id
-            try await settings.save(settings: updated, at: time.now())
+            do {
+                try await settings.save(settings: updated, at: time.now())
+            } catch {
+                // 切り替えを中止するため、旧試験の受験を中断前の状態に戻す。
+                if let suspended { await revertSuspension(suspended) }
+                throw error
+            }
         }
         // 保存が成功するまでは、旧試験の画面と経路を保持する。
         state.examID = id; state.preference = preference; state.needsSelection = false; state.fatal = nil
         router.reset()
+    }
+
+    private func revertSuspension(_ attempt: AttemptSnapshot) async {
+        do { try await attempts.save(snapshot: attempt.snapshot, for: attempt.id) }
+        catch { logger.error("受験の中断の取り消しに失敗しました") }
     }
 }

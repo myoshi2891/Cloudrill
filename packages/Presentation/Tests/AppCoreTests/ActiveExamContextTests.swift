@@ -60,7 +60,8 @@ import HomeFeature
         #expect(context.router.path(for: .exam).isEmpty && context.router.selectedTab == .home)
     }
     @Test(arguments: [false, true]) func failureKeepsActiveExamAndNavigation(failAttemptSave: Bool) async throws {
-        let settings = SelectionSettings(current: "test-alpha"), attempts = SelectionAttempts(try SelectionFixtures.attempt())
+        let initial = try SelectionFixtures.attempt()
+        let settings = SelectionSettings(current: "test-alpha"), attempts = SelectionAttempts(initial)
         let context = try make(settings: settings, attempts: attempts)
         await context.restore()
         context.router.open(.examStart(examSet: 1))
@@ -69,6 +70,8 @@ import HomeFeature
         #expect(context.state.examID == "test-alpha")
         #expect(context.state.alert == .persistenceFailed)
         #expect(await settings.value.currentExamID == "test-alpha")
+        // 切り替えに失敗したら、旧試験の受験を中断したまま残さない。
+        #expect(await attempts.current?.snapshot == initial.snapshot)
         #expect(context.router.path(for: .exam) == [.examStart(examSet: 1)])
     }
     @Test func repeatedRestoreDoesNotDiscardNavigation() async throws {
