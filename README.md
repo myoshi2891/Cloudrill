@@ -36,8 +36,8 @@ google-cloud-professional-cloud-architect/
 | `packages/DomainModels/` | `content/schemas` に対応する Swift の値型(`Question`、`Choice`、`Flashcard`、`CaseStudy` など) |
 | `packages/Domain/` | 学習・採点ロジックとコンテンツ提供のインターフェース |
 | `packages/Data/` | `ContentKit`（署名付きパックの検証・読み込み・保存・起動処理）と `Persistence`（SwiftData による学習履歴・設定の永続化） |
-| `packages/Presentation/` | `AppCore`（依存注入、試験選択・切り替え、画面遷移）、`HomeFeature`（試験選択 ViewModel）、`ExamFeature`（選択式問題のレンダラー） |
-| `packages/AppComposition/` | `AppEnvironment`（実リポジトリとコンテンツの組み立て）、DEBUG専用の起動引数、`AppRootView`（起動状態・試験選択・試験概要） |
+| `packages/Presentation/` | `AppCore`（依存注入、試験選択・切り替え、画面遷移）、`HomeFeature`（`ExamPickerViewModel`・`HomeViewModel`・`HomeView`）、`ExamFeature`（選択式問題のレンダラー） |
+| `packages/AppComposition/` | `AppEnvironment`（実リポジトリとコンテンツの組み立て）、DEBUG専用の起動引数、`AppRootView`（起動状態・試験選択・ホーム・5タブシェル） |
 | `content/` | 学習コンテンツ(YAML / Markdown)、JSON Schema、検証スクリプト。詳細は [content/README.md](content/README.md) |
 | `.github/workflows/` | CI。変更されたパスに応じて、必要なワークフローだけが動きます |
 
