@@ -119,6 +119,7 @@ env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --packag
 - `ExamSessionStore` が受験IDごとに同じ解答ViewModelを共有し、解答と見直しを往復しても問題本文を再取得しない。画面間のpush/popでは中断せず、タブ移動・バックグラウンドでは中断する。見直し中に復帰すると `.reviewing` を復元し、見直し・提出確認中の期限超過は自動提出を優先する。
 - `ExamSubmission` に採点・`finalize`・カード追加・`unpin` を集約し、時間切れと手動提出で共用した。カード機能と `autoCardFromMistakes` が有効な場合、選択して誤答した問題だけをカード化する（未解答は含めない）。部分的な失敗後はインスタンス内の進捗を使って未完了処理を再試行し、提出・追加済みカードを重複処理しない。永続的な提出後処理キューは追加していない。
 - 先行テストで未実装APIによるコンパイル失敗を確認した。Presentation 全66テスト（S08の11件を含む）、AppComposition 全10テスト、Releaseビルドが成功。実ストアでの手動提出・カード保存・パック固定解除と、再起動後の結果・カードの存在も検証した。Simulatorの既存7件と、確認ボタンのテスト対象指定を修正後に再実行した見直し・手動提出1件が成功（計8件）。見直し一覧・手動提出後の画面をスクリーンショットでも目視確認した。
+- 追補（S09 後のレビュー対応）: 提出時の `unpin` は `retain` に置き換えた。結果・解説で受験時の版を開けるよう、試験ごとに直近 20 件の受験は固定を残す（DDD-P2 3.4）。
 - S07とS08の実装は利用者が `dev` へコミット済みで、PR #12 でレビュー中。追加された解答履歴の修正を含む HEAD `fc5ede0` でも、受験リポジトリ8件、AppComposition全10件、強制終了復元・期限超過提出と見直し・手動提出のUIテスト2件が成功した。次は **P4-S09 結果と解説**。エージェントによるコミットは行っていない。
 
 ### 継続実装: P4-S09 結果と解説（2026-10-30）
@@ -456,7 +457,7 @@ public enum Route: Hashable, Sendable {
 | `listsUnansweredAndFlagged` | 未解答 3 問、フラグ 2 問 | 一覧に件数と問題番号が出る |
 | `jumpToQuestion` | 一覧の問題 12 をタップ | `closeReview` の後に、問題 12 に移動する |
 | `submitAsksConfirmation` | 未解答がある状態で提出をタップ | 確認ダイアログに「未解答 3 問、見直し 2 問」 |
-| `confirmSubmitScores` | 確認する | `ScoringPolicy.score` → `finalize(reason: .user)` → `unpin` の順に呼ばれ、Route が `.examResult` |
+| `confirmSubmitScores` | 確認する | `ScoringPolicy.score` → `finalize(reason: .user)` → `retain` の順に呼ばれ、Route が `.examResult` |
 | `autoCardFromMistakes` | 設定 ON、誤答 4 問 | `addCardFromQuestion` が 4 回呼ばれる(FR-CARD-04) |
 | `autoCardDisabled` | 設定 OFF | 呼ばれない |
 | `expiryWhileReviewing` | 見直し中に期限を過ぎる | 自動で提出する(C-10) |
