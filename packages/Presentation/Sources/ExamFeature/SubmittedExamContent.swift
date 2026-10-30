@@ -29,3 +29,20 @@ struct SubmittedExamContent {
         return Self(summary: summary, content: content, questions: ids.compactMap { byID[$0] })
     }
 }
+
+/// 提出済みの受験は変わらないため、検証に成功した読み込み結果だけを受験ごとに再利用する。
+/// 試験の切替時に作り直す前提で、試験 ID もキーに含めて取り違えを防ぐ。
+@MainActor public final class SubmittedExamContentCache {
+    private struct Key: Hashable { let examID: ExamID; let attemptID: UUID }
+    private var entries: [Key: SubmittedExamContent] = [:]
+    public init() {}
+
+    func load(examID: ExamID, attemptID: UUID, attempts: any ExamAttemptRepository,
+              resolver: any ExamContentResolving) async throws -> SubmittedExamContent {
+        let key = Key(examID: examID, attemptID: attemptID)
+        if let cached = entries[key] { return cached }
+        let loaded = try await SubmittedExamContent.load(examID: examID, attemptID: attemptID, attempts: attempts, resolver: resolver)
+        entries[key] = loaded
+        return loaded
+    }
+}

@@ -51,6 +51,7 @@ import ExamEngine
             try await cards.addCardFromQuestion(questionID: id, examID: definition.id, at: plan.date)
             addedCards.insert(id)
         }
-        try await pins.unpin(attemptID: attemptID, for: definition.id)
+        // 提出後も結果・解説で受験時の版を開けるよう、固定を外さずに保持へ移す。
+        try await pins.retain(attemptID: attemptID, for: definition.id)
     }
 }

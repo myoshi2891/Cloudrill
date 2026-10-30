@@ -91,7 +91,8 @@ import FSRS
         #expect(await h.attempts.finalizations == 1)
         #expect(await h.attempts.result?.total == ScoreTally(correct: 1, total: 1))
         #expect(await h.attempts.reason == .timeExpired)
-        #expect(await h.pins.pinned == nil)
+        #expect(await h.pins.pinned == h.id)
+        #expect(await h.pins.retained == h.id)
         #expect(h.router.path(for: .exam) == [.examResult(attemptID: h.id)])
     }
     @Test func backgroundContinuesTimeAndExpiredResumeSubmits() async throws {
@@ -153,11 +154,11 @@ import FSRS
         await h.model.tick()
         #expect(h.router.path(for: .exam).isEmpty)
         await h.attempts.failFinalize(false)
-        await h.pins.failUnpin(true)
+        await h.pins.failRetain(true)
         await h.model.tick()
         #expect(await h.attempts.finalizations == 1)
         #expect(h.router.path(for: .exam).isEmpty)
-        await h.pins.failUnpin(false)
+        await h.pins.failRetain(false)
         await h.model.tick()
         #expect(await h.attempts.finalizations == 1)
         #expect(h.router.path(for: .exam) == [.examResult(attemptID: h.id)])

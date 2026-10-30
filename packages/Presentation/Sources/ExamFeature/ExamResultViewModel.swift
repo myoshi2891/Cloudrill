@@ -33,9 +33,12 @@ public struct ResultQuestion: Identifiable, Sendable {
     private let resolver: any ExamContentResolving
     private let attempts: any ExamAttemptRepository
     private let router: AppRouter
+    private let contentCache: SubmittedExamContentCache
 
     public init(examID: ExamID, attemptID: UUID, resolver: any ExamContentResolving,
-                attempts: any ExamAttemptRepository, router: AppRouter) {
+                attempts: any ExamAttemptRepository, router: AppRouter,
+                contentCache: SubmittedExamContentCache = .init()) {
+        self.contentCache = contentCache
         self.examID = examID; self.attemptID = attemptID; self.resolver = resolver
         self.attempts = attempts; self.router = router
     }
@@ -49,7 +52,7 @@ public struct ResultQuestion: Identifiable, Sendable {
         isLoading = true; error = nil
         defer { isLoading = false }
         do {
-            let loaded = try await SubmittedExamContent.load(examID: examID, attemptID: attemptID, attempts: attempts, resolver: resolver)
+            let loaded = try await contentCache.load(examID: examID, attemptID: attemptID, attempts: attempts, resolver: resolver)
             let definition = loaded.content.definition
             let snapshot = loaded.summary.attempt.snapshot
             let scored = try ScoringPolicies.policy(for: definition.scoring.policy).score(

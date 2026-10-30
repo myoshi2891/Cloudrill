@@ -134,11 +134,17 @@ struct ExamFixture: ExamContentProvider {
 actor TestPins: PackPinning {
     var pinned: UUID?
     var fails = false
+    var retained: UUID?
     var unpinFails = false
+    var retainFails = false
     func failUnpin(_ value: Bool) { unpinFails = value }
+    func failRetain(_ value: Bool) { retainFails = value }
     func fail(_ value: Bool) { fails = value }
     func pin(_ version: String, for examID: ExamID, attemptID: UUID) throws(ContentError) {
         if fails { throw .storage("test") }; pinned = attemptID
+    }
+    func retain(attemptID: UUID, for examID: ExamID) throws(ContentError) {
+        if retainFails { throw .storage("test") }; retained = attemptID
     }
     func unpin(attemptID: UUID, for examID: ExamID) throws(ContentError) { if unpinFails { throw .storage("test") }; pinned = nil }
 }

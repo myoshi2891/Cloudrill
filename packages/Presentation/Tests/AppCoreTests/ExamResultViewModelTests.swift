@@ -64,6 +64,36 @@ import DomainTestSupport
         #expect(model.result != nil)
         #expect(h.resolver.requests.withLock { $0 } == ["1.0.0", "1.0.0"])
     }
+    @Test func sharedCacheReusesValidatedContentAcrossRoutes() async throws {
+        // Arrange
+        let h = try ResultHarness()
+        let cache = SubmittedExamContentCache()
+        // Act
+        await h.resultModel(cache: cache).load()
+        let first = h.explanation("Q0", cache: cache), second = h.explanation("Q1", cache: cache)
+        await first.load(); await second.load()
+        // Assert
+        #expect(first.question?.id == "Q0" && second.question?.id == "Q1")
+        #expect(h.resolver.requests.withLock { $0 } == ["1.0.0"])
+    }
+    @Test func cacheDoesNotKeepFailedValidation() async throws {
+        // Arrange
+        let h = try ResultHarness()
+        let cache = SubmittedExamContentCache()
+        var bad = h.summary
+        bad.attempt.snapshot.order = QuestionOrder(items: [.init(questionID: "Q0", choiceIDs: ["missing"])])
+        await h.attempts.replace(bad)
+        let failed = h.explanation(cache: cache)
+        await failed.load()
+        await h.attempts.replace(h.summary)
+        // Act
+        let retried = h.explanation(cache: cache)
+        await retried.load()
+        // Assert
+        #expect(failed.error != nil)
+        #expect(retried.error == nil && retried.question?.id == "Q0")
+        #expect(h.resolver.requests.withLock { $0 } == ["1.0.0", "1.0.0"])
+    }
     @Test func invalidSavedOrderDoesNotShowPartialResult() async throws {
         let h = try ResultHarness()
         var bad = h.summary
@@ -150,13 +180,13 @@ import DomainTestSupport
             total: ScoreTally(correct: correct, total: count))
         attempts = ResultAttempts(summary)
     }
-    func resultModel() -> ExamResultViewModel {
+    func resultModel(cache: SubmittedExamContentCache = .init()) -> ExamResultViewModel {
         ExamResultViewModel(examID: summary.attempt.examID, attemptID: summary.id,
-            resolver: resolver, attempts: attempts, router: router)
+            resolver: resolver, attempts: attempts, router: router, contentCache: cache)
     }
-    func explanation(_ questionID: String = "Q0") -> ExplanationViewModel {
+    func explanation(_ questionID: String = "Q0", cache: SubmittedExamContentCache = .init()) -> ExplanationViewModel {
         ExplanationViewModel(examID: summary.attempt.examID, attemptID: summary.id, questionID: questionID,
-            resolver: resolver, attempts: attempts, cards: cards, time: time, router: router)
+            resolver: resolver, attempts: attempts, cards: cards, time: time, router: router, contentCache: cache)
     }
 }
 

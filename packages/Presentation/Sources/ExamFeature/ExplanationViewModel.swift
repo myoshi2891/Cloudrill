@@ -39,10 +39,13 @@ public struct QuestionReportContext: Identifiable, Equatable, Sendable {
     private let cards: any CardStateRepository
     private let time: any TimeSource
     private let router: AppRouter
+    private let contentCache: SubmittedExamContentCache
 
     public init(examID: ExamID, attemptID: UUID, questionID: String, resolver: any ExamContentResolving,
                 attempts: any ExamAttemptRepository, cards: any CardStateRepository,
-                time: any TimeSource, router: AppRouter) {
+                time: any TimeSource, router: AppRouter,
+                contentCache: SubmittedExamContentCache = .init()) {
+        self.contentCache = contentCache
         self.examID = examID; self.attemptID = attemptID; self.questionID = questionID
         self.resolver = resolver; self.attempts = attempts; self.cards = cards; self.time = time; self.router = router
     }
@@ -52,7 +55,7 @@ public struct QuestionReportContext: Identifiable, Equatable, Sendable {
         defer { isLoading = false }
         do {
             if question == nil {
-                let loaded = try await SubmittedExamContent.load(examID: examID, attemptID: attemptID, attempts: attempts, resolver: resolver)
+                let loaded = try await contentCache.load(examID: examID, attemptID: attemptID, attempts: attempts, resolver: resolver)
                 guard let question = loaded.questions.first(where: { $0.id == questionID }),
                       let order = loaded.summary.attempt.snapshot.order.items.first(where: { $0.questionID == questionID }) else {
                     throw ContentError.unknownQuestionIDs([questionID])

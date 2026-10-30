@@ -62,7 +62,8 @@ import ExamEngine
         #expect(await h.attempts.result?.total == ScoreTally(correct: 1, total: 6))
         #expect(await h.attempts.result?.unansweredCount == 1)
         #expect(await h.cards.added == ["Q1", "Q2", "Q3", "Q4"])
-        #expect(await h.pins.pinned == nil)
+        #expect(await h.pins.pinned == h.id)
+        #expect(await h.pins.retained == h.id)
         #expect(h.router.path(for: .exam) == [.examResult(attemptID: h.id)])
     }
     @Test func disabledAutoCards() async throws {
