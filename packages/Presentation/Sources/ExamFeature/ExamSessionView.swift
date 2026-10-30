@@ -89,36 +89,3 @@ public struct ExamSessionView: View {
         }
     }
 }
-
-/// S09 の詳細結果画面を追加するまでの提出確認。保存済み履歴から時間切れの理由を表示する。
-public struct ExamSubmissionReceiptView: View {
-    private let examID: ExamID
-    private let attemptID: UUID
-    private let attempts: any ExamAttemptRepository
-    @State private var summary: AttemptSummary?
-    @State private var failed = false
-    public init(examID: ExamID, attemptID: UUID, attempts: any ExamAttemptRepository) {
-        self.examID = examID; self.attemptID = attemptID; self.attempts = attempts
-    }
-    public var body: some View {
-        VStack(spacing: 20) {
-            if let summary {
-                Text(LocalizedStringKey(summary.reason == .timeExpired ? "session.expired" : "session.submitted"), bundle: .module)
-                    .accessibilityIdentifier("session-submitted")
-                Text(String(format: String(localized: "session.score", bundle: .module), summary.total.correct, summary.total.total))
-            } else if failed {
-                Text("session.loadFailed", bundle: .module)
-                Button { Task { await load() } } label: { Text("exam.retry", bundle: .module) }
-            } else { ProgressView() }
-        }
-        .padding()
-        .navigationTitle(Text("session.result", bundle: .module))
-        .task { await load() }
-    }
-    private func load() async {
-        do {
-            guard let item = try await attempts.history(examID: examID).first(where: { $0.id == attemptID }) else { throw PersistenceError.notFound }
-            summary = item; failed = false
-        } catch { failed = true }
-    }
-}

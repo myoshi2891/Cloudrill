@@ -233,7 +233,7 @@ final class SessionContent: ExamContentProvider, Sendable {
     var packVersion: String { "1.0.0" }
     var questionIndex: [QuestionIndexEntry] { [] }
     var examSets: [ExamSet] { base.examSets }
-    var docsIndex: [DocEntry] { [] }
+    var docsIndex: [DocEntry] { base.docsIndex }
     func questions(ids: [String]) async throws(ContentError) -> [Question] { reads.withLock { $0 += 1 }; return values }
     func caseStudies() async throws(ContentError) -> [CaseStudy] { try await base.caseStudies() }
     func flashcards() async throws(ContentError) -> [Flashcard] { [] }
