@@ -29,7 +29,7 @@ jobs:
     name: Presentation foundation tests
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
       - name: Run Swift tests (Presentation)
