@@ -152,13 +152,16 @@ Schema と Swift の型は、同じ PR で変更する(CLAUDE.md の運用ルー
 {
   "current": { "source": "installed", "version": "1.2.0" },
   "previous": { "source": "bundled", "version": "1.0.0" },
-  "pins": { "<受験の UUID>": "1.1.0" }
+  "pins": { "<受験の UUID>": "1.1.0" },
+  "retained": ["<提出済みの受験の UUID>"]
 }
 ```
 
-- `source` は `bundled`(アプリに同梱。読み取り専用)か `installed`(`versions/` の下)。同梱パックはコピーしない(初回起動を速くするため。NFR-01)。
+- `source` は `bundled`(アプリに同梱。読み取り専用)か `installed`(`versions/` の下)。起動時には同梱パックをコピーしない(初回起動を速くするため。NFR-01)。
+- `pin` は、固定した版を必ず `versions/` に置く。同梱にしかない版は `staging/<UUID>` へ複製し、manifest の `examID`・`packVersion` の一致を確認してから `install` する(アプリ更新で同梱版が差し替わっても、受験中・提出後の受験が版を読めるようにするため)。有効な版の選択は `state.current` だけを見るので、複製しても current・previous は変わらない。
+- 提出時は固定を外さず `retain` で `retained`(古い順)へ移す。試験ごとに直近 `retainedLimit`(既定 20)件を超えた受験の固定は外す。破棄した受験は `unpin` で外す。`retained` を持たない旧形式の `state.json` は空として読む。
 - `state.json` は `Data.write(to:options: .atomic)` で書く(同じボリューム内でのリネームになるので、書き込みの途中で失われない)。
-- 削除の対象は、`current`、`previous`、`pins` のどれにも含まれない版だけである(E-07、BDD 6.8 のロールバック)。
+- 削除の対象は、`current`、`previous`、`pins` のどれにも含まれない版だけである(E-07、BDD 6.8 のロールバック)。`retained` の受験は `pins` にも残るので保護される。
 - インストール時に全ファイルを検証したパックは、起動時には再検証しない(NFR-01)。
 
 ### 3.5 Swift の型

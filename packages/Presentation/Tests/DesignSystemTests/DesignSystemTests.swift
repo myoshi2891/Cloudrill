@@ -4,6 +4,11 @@ import DomainModels
 @testable import DesignSystem
 
 struct DesignSystemTests {
+    @Test func referencesShowAttributionLicenseButLinkOnlyHasNoLabel() {
+        #expect(ReferenceLink.licenseLabel(.ccBy40) == "CC BY 4.0")
+        #expect(ReferenceLink.licenseLabel(.apache20) == "Apache 2.0")
+        #expect(ReferenceLink.licenseLabel(.linkOnly) == nil)
+    }
     @Test func paletteAssignsByIndexAndDistinguishesRepeatedColors() {
         let first = (0..<6).map { DomainPalette.style(forDomainAt: $0) }
         #expect(Set(first.map(\.light)).count == 6)

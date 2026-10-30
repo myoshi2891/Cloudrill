@@ -8,9 +8,15 @@ public struct AccuracySummary: Sendable {
     public let weakestDomain: Int?
 
     public init(definition: ExamDefinition, answers: [AnswerFact]) {
+        self.init(definition: definition, outcomes: answers.filter { $0.examID == definition.id }
+            .map { AnswerOutcome(domain: $0.domain, subObjective: $0.subObjective, isCorrect: $0.isCorrect) })
+    }
+
+    /// outcomes は definition の試験に絞り込み済みであること。
+    public init(definition: ExamDefinition, outcomes: [AnswerOutcome]) {
         var domains = Dictionary(uniqueKeysWithValues: definition.domains.map { ($0.id, ScoreTally(correct: 0, total: 0)) })
         var subs: [String: ScoreTally] = [:]
-        for answer in answers where answer.examID == definition.id && domains[answer.domain] != nil {
+        for answer in outcomes where domains[answer.domain] != nil {
             domains[answer.domain]!.total += 1
             domains[answer.domain]!.correct += answer.isCorrect ? 1 : 0
             subs[answer.subObjective, default: .init(correct: 0, total: 0)].total += 1

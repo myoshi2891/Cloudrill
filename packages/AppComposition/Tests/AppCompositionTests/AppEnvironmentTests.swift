@@ -4,6 +4,7 @@ import DomainModels
 import StudyModels
 import ContentKit
 import AppCore
+import ExamFeature
 @testable import AppComposition
 
 @MainActor struct AppEnvironmentTests {
@@ -35,6 +36,134 @@ import AppCore
         let reopened = try await AppEnvironment.uiTesting(arguments: args, packsRoot: Self.packs, workingDirectory: root)
         #expect(!reopened.isInMemory)
         #expect(reopened.activeExam.state.examID == "test-beta")
+    }
+
+    @Test func startsAndAbandonsWithRealRepositoriesAndPins() async throws {
+        let root = temporary()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let environment = try await AppEnvironment.uiTesting(arguments: ["-ui-testing", "-content-fixture", "test-beta", "-store-in-memory"],
+            packsRoot: Self.packs, workingDirectory: root)
+        let content = try #require(environment.activeExam.content)
+        let deps = environment.dependencies
+        let model = ExamStartViewModel(content: content, examSet: 1, attempts: deps.attempts,
+            pins: deps.pins, settings: deps.settings, time: deps.time, seedProvider: deps.seedProvider, router: environment.activeExam.router)
+        await model.start()
+        #expect(model.error == nil)
+        let attempt = try #require(try await deps.attempts.inProgress(examID: "test-beta"))
+        #expect(attempt.snapshot.order.items.count == 40)
+        #expect(try await environment.packStore.state(for: "test-beta").pins[attempt.id] == "1.0.0")
+        await model.abandon()
+        #expect(try await deps.attempts.inProgress(examID: "test-beta") == nil)
+        #expect(try await environment.packStore.state(for: "test-beta").pins.isEmpty)
+    }
+
+    @Test func sessionRestoresDiskAnswersAndSubmitsAfterExpiry() async throws {
+        let root = temporary()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let args = ["-ui-testing", "-content-fixture", "test-beta", "-store-path", root.path,
+                    "-fixed-now", "2026-11-01T09:00:00Z"]
+        let first = try await AppEnvironment.uiTesting(arguments: args, packsRoot: Self.packs, workingDirectory: root)
+        let deps = first.dependencies
+        let start = ExamStartViewModel(content: try #require(first.activeExam.content), examSet: 1,
+            attempts: deps.attempts, pins: deps.pins, settings: deps.settings, time: deps.time,
+            seedProvider: deps.seedProvider, router: first.activeExam.router)
+        await start.start()
+        let attempt = try #require(try await deps.attempts.inProgress(examID: "test-beta"))
+        let session = ExamSessionViewModel(examID: "test-beta", attemptID: attempt.id, contentResolver: deps.contentResolver,
+            attempts: deps.attempts, pins: deps.pins, cards: deps.cards, settings: deps.settings, time: deps.time, router: first.activeExam.router)
+        await session.load()
+        let choice = try #require(session.state.question?.choices.first?.id)
+        await session.select(choiceID: choice)
+        await session.toggleFlag()
+        await session.move(to: 4)
+        await session.scenePhaseChanged(isActive: false)
+        #expect(session.state.alert == nil)
+        let reopened = try await AppEnvironment.uiTesting(arguments: args + ["-advance-on-launch", "61"], packsRoot: Self.packs, workingDirectory: root)
+        let restored = ExamSessionViewModel(examID: "test-beta", attemptID: attempt.id, contentResolver: reopened.dependencies.contentResolver,
+            attempts: reopened.dependencies.attempts, pins: reopened.dependencies.pins, cards: reopened.dependencies.cards, settings: reopened.dependencies.settings, time: reopened.dependencies.time, router: reopened.activeExam.router)
+        await restored.load()
+        #expect(restored.state.currentIndex == 4)
+        #expect(restored.state.remainingSeconds == 5339)
+        await restored.move(to: 0)
+        #expect(restored.state.selected == [choice])
+        #expect(restored.state.isFlagged)
+        await restored.scenePhaseChanged(isActive: false)
+        let expired = try await AppEnvironment.uiTesting(arguments: args + ["-advance-on-launch", "5401"], packsRoot: Self.packs, workingDirectory: root)
+        let expiredSession = ExamSessionViewModel(examID: "test-beta", attemptID: attempt.id, contentResolver: expired.dependencies.contentResolver,
+            attempts: expired.dependencies.attempts, pins: expired.dependencies.pins, cards: expired.dependencies.cards, settings: expired.dependencies.settings, time: expired.dependencies.time, router: expired.activeExam.router)
+        await expiredSession.load()
+        #expect(expiredSession.state.alert == nil)
+        #expect(try await expired.dependencies.attempts.inProgress(examID: "test-beta") == nil)
+        #expect(try await expired.dependencies.attempts.history(examID: "test-beta").first?.reason == .timeExpired)
+        // 提出後も結果・解説で受験時の版を開けるよう、固定は保持へ移る。
+        #expect(try await expired.packStore.state(for: "test-beta").retained == [attempt.id])
+        #expect(expired.activeExam.router.path(for: .exam) == [.examResult(attemptID: attempt.id)])
+    }
+
+    @Test func reviewAndManualSubmissionUseSharedSessionAndPersistCards() async throws {
+        let root = temporary()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let args = ["-ui-testing", "-content-fixture", "test-beta", "-store-path", root.path]
+        let environment = try await AppEnvironment.uiTesting(arguments: args, packsRoot: Self.packs, workingDirectory: root)
+        let deps = environment.dependencies
+        let content = try #require(environment.activeExam.content)
+        let start = ExamStartViewModel(content: content, examSet: 1, attempts: deps.attempts,
+            pins: deps.pins, settings: deps.settings, time: deps.time, seedProvider: deps.seedProvider,
+            router: environment.activeExam.router)
+        await start.start()
+        let attempt = try #require(try await deps.attempts.inProgress(examID: "test-beta"))
+        let store = ExamSessionStore(examID: "test-beta", dependencies: deps, router: environment.activeExam.router)
+        let session = store.model(for: attempt.id)
+        #expect(store.model(for: attempt.id) === session)
+        await session.load()
+        let questionID = try #require(session.state.question?.id)
+        let question = try #require(try await content.questions(ids: [questionID]).first)
+        let wrong = try #require(question.choices.first { !$0.isCorrect })
+        await session.select(choiceID: wrong.id)
+        await session.toggleFlag()
+        await session.openReview()
+        await session.viewDisappeared() // 見直しへのpushで中断しない。
+        #expect(session.state.sessionState == .reviewing)
+        let review = ExamReviewViewModel(session: store.model(for: attempt.id))
+        await review.load()
+        #expect(review.state.unansweredCount == 39)
+        #expect(review.state.flaggedCount == 1)
+        await review.jumpToQuestion(index: 10)
+        await session.showQuestions()
+        #expect(session.state.currentIndex == 10)
+        await session.openReview()
+        review.submitTapped()
+        await review.confirmSubmit()
+        #expect(session.state.alert == nil)
+        #expect(environment.activeExam.router.path(for: .exam) == [.examResult(attemptID: attempt.id)])
+        let reopened = try await AppEnvironment.uiTesting(arguments: args, packsRoot: Self.packs, workingDirectory: root)
+        let history = try await reopened.dependencies.attempts.history(examID: "test-beta")
+        #expect(history.count == 1)
+        #expect(history.first?.reason == .user)
+        #expect(history.first?.total.total == 40)
+        #expect(try await reopened.dependencies.cards.card(id: "Q:" + questionID, examID: "test-beta") != nil)
+        #expect(try await reopened.dependencies.cards.scheduledCards(examID: "test-beta").count == 1)
+        #expect(try await reopened.packStore.state(for: "test-beta").retained == [attempt.id])
+        let result = ExamResultViewModel(examID: "test-beta", attemptID: attempt.id,
+            resolver: reopened.dependencies.contentResolver, attempts: reopened.dependencies.attempts, router: reopened.activeExam.router)
+        await result.load()
+        #expect(result.error == nil)
+        #expect(result.result?.total == history.first?.total)
+        #expect(result.result?.unansweredCount == 39)
+        #expect(result.domains.count == 4)
+        #expect(result.cases.isEmpty)
+        #expect(result.questions.map(\.id) == attempt.snapshot.order.items.map(\.questionID))
+        let explanation = ExplanationViewModel(examID: "test-beta", attemptID: attempt.id, questionID: questionID,
+            resolver: reopened.dependencies.contentResolver, attempts: reopened.dependencies.attempts,
+            cards: reopened.dependencies.cards, time: reopened.dependencies.time, router: reopened.activeExam.router)
+        await explanation.load()
+        #expect(explanation.error == nil)
+        #expect(explanation.question == question)
+        #expect(explanation.selectedIDs == [wrong.id])
+        #expect(!explanation.isCorrect)
+        #expect(explanation.isAddedToCards) // S08 の自動追加を再起動後にも認識する。
+        await explanation.addToCards()
+        #expect(try await reopened.dependencies.cards.scheduledCards(examID: "test-beta").count == 1)
     }
 
     @Test func supportedKindsMatchBothRegistries() {

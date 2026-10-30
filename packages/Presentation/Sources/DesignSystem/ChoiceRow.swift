@@ -34,6 +34,6 @@ public struct ChoiceRow: View {
                                                                lineWidth: isSelected ? 2 : 1))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Self.accessibilityLabel(for: id, isSelected: isSelected) + "、" + text)
-        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
+        .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : [.isButton])
     }
 }

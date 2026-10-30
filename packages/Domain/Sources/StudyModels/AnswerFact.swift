@@ -41,3 +41,16 @@ public struct AnswerFact: Hashable, Sendable {
         self.elapsedSeconds = elapsedSeconds
     }
 }
+
+/// 正答率の集計に使う最小限の事実。選択内容を復号せずに読めるよう分離する。
+public struct AnswerOutcome: Hashable, Sendable {
+    public var domain: Int
+    public var subObjective: String
+    public var isCorrect: Bool
+
+    public init(domain: Int, subObjective: String, isCorrect: Bool) {
+        self.domain = domain
+        self.subObjective = subObjective
+        self.isCorrect = isCorrect
+    }
+}

@@ -11,10 +11,10 @@ import FSRS
 
 @MainActor struct HomeViewModelTests {
     private func model(answers: [AnswerFact] = [], cards: [FSRSCard] = [], attempt: AttemptSnapshot? = nil,
-                       failing: Bool = false) throws -> HomeViewModel {
+                       failing: Bool = false, router: AppRouter = AppRouter()) throws -> HomeViewModel {
         HomeViewModel(definition: try SelectionFixtures.content("test-beta").definition,
                       answers: HomeAnswers(answers, failing: failing), cards: HomeCards(cards),
-                      attempts: SelectionAttempts(attempt), time: FixedTimeSource(SelectionFixtures.now), router: AppRouter())
+                      attempts: SelectionAttempts(attempt), time: FixedTimeSource(SelectionFixtures.now), router: router)
     }
     @Test func showsExamNameAndNoDataYet() async throws {
         let vm = try model()
@@ -61,8 +61,69 @@ import FSRS
         let vm = try model(failing: true)
         await vm.refresh()
         #expect(vm.state.alert == .persistenceFailed)
-        #expect(!vm.state.isLoaded)
+        #expect(!vm.state.isHistoryLoaded)
         #expect(!vm.state.isLoading)
+    }
+    @Test func historyFailureKeepsOtherEntryPoints() async throws {
+        // Arrange
+        var attempt = try SelectionFixtures.attempt(); attempt.examID = "test-beta"
+        var due = FSRSCard.new(at: SelectionFixtures.now); due.phase = .review
+        let vm = try model(cards: [due], attempt: attempt, failing: true)
+        // Act
+        await vm.refresh()
+        // Assert
+        #expect(vm.state.isLoaded)
+        #expect(vm.state.resumeAttemptID == attempt.id)
+        #expect(vm.state.isCardsLoaded)
+        #expect(vm.state.dueCards == 1)
+        #expect(vm.state.alert == .persistenceFailed)
+    }
+    @Test func homeEntryPointsReplaceExamPath() async throws {
+        // Arrange
+        var attempt = try SelectionFixtures.attempt(); attempt.examID = "test-beta"
+        let router = AppRouter()
+        let vm = try model(answers: [fact(domain: 4, correct: false)], attempt: attempt, router: router)
+        await vm.refresh()
+        // Act
+        vm.startLearning(); router.selectedTab = .home
+        vm.startLearning(); router.selectedTab = .home
+        vm.practiceWeakDomain()
+        #expect(router.path(for: .exam) == [.practiceSetup(.domain(4))])
+        router.selectedTab = .home
+        vm.resumeExam()
+        // Assert
+        #expect(router.path(for: .exam) == [.examSession(attemptID: attempt.id)])
+        #expect(router.selectedTab == .exam)
+    }
+    @Test func cancelledRefreshStillAppliesResults() async throws {
+        // Arrange
+        let vm = try model(answers: [fact(domain: 4, correct: false)])
+        // Act
+        let task = Task { await vm.refresh() }
+        task.cancel()
+        await task.value
+        // Assert
+        #expect(vm.state.isLoaded)
+        #expect(vm.state.weakDomain == 4)
+        #expect(!vm.state.isLoading)
+    }
+    @Test func refreshDuringLoadRunsAgain() async throws {
+        // Arrange
+        let answers = HomeAnswers([], failing: false)
+        let vm = HomeViewModel(definition: try SelectionFixtures.content("test-beta").definition,
+            answers: answers, cards: HomeCards([]), attempts: SelectionAttempts(),
+            time: FixedTimeSource(SelectionFixtures.now), router: AppRouter())
+        await answers.hold()
+        let first = Task { await vm.refresh() }
+        await answers.waitUntilHeld()
+        // Act: 読み込み中にデータが変わり、2回目の refresh が来る
+        await answers.update([fact(domain: 4, correct: false)], failing: false)
+        await vm.refresh()
+        await answers.release()
+        await first.value
+        // Assert
+        #expect(vm.state.weakDomain == 4)
+        #expect(await answers.readCount == 2)
     }
     @Test func tiedDomainsFollowDefinitionOrder() throws {
         let summary = AccuracySummary(definition: try SelectionFixtures.content("test-beta").definition,
@@ -108,8 +169,27 @@ private actor HomeAnswers: AnswerHistoryRepository {
     var failing: Bool
     init(_ facts: [AnswerFact], failing: Bool) { self.facts = facts; self.failing = failing }
     func update(_ facts: [AnswerFact], failing: Bool) { self.facts = facts; self.failing = failing }
-    func answers(examID: ExamID) throws(PersistenceError) -> [AnswerFact] {
+    var readCount = 0
+    private var gate: CheckedContinuation<Void, Never>?
+    private var held = false
+    private var heldWaiter: CheckedContinuation<Void, Never>?
+    func hold() { held = true }
+    func waitUntilHeld() async {
+        if gate != nil { return }
+        await withCheckedContinuation { heldWaiter = $0 }
+    }
+    func release() { gate?.resume(); gate = nil }
+    func answers(examID: ExamID) async throws(PersistenceError) -> [AnswerFact] {
+        readCount += 1
+        if held {
+            held = false
+            await withCheckedContinuation { gate = $0; heldWaiter?.resume(); heldWaiter = nil }
+        }
         if failing { throw .saveFailed("test") }; return facts
+    }
+    func outcomes(examID: ExamID) async throws(PersistenceError) -> [AnswerOutcome] {
+        try await answers(examID: examID).filter { $0.examID == examID }
+            .map { AnswerOutcome(domain: $0.domain, subObjective: $0.subObjective, isCorrect: $0.isCorrect) }
     }
     func record(_ answer: AnswerFact) throws(PersistenceError) {}
     func practiceHistory(examID: ExamID, now: Date) throws(PersistenceError) -> PracticeHistory { .init() }

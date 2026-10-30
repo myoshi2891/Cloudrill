@@ -51,4 +51,21 @@ import StudyModels
             try await repo.practiceHistory(examID: "test-alpha", now: PersistenceFixtures.now)
         }
     }
+    @Test func outcomesSkipUndecodableSelection() async throws {
+        // Arrange: 新しい版が書いた未知の選択形式の行
+        let container = try PersistenceFixtures.container()
+        let repo = SwiftDataAnswerHistoryRepository(modelContainer: container)
+        try await repo.record(PersistenceFixtures.answer(correct: true))
+        let context = ModelContext(container)
+        let row = SchemaV1.AnswerRecord(); row.examID = "test-alpha"; row.modeRaw = StudyMode.practice.rawValue
+        row.domain = 2; row.subObjective = "2.1"; row.isCorrect = false; row.selectionJSON = Data(#"{"kind":"future"}"#.utf8)
+        context.insert(row); try context.save()
+        // Act
+        let outcomes = try await repo.outcomes(examID: "test-alpha")
+        // Assert
+        #expect(outcomes.count == 2)
+        #expect(outcomes.contains(AnswerOutcome(domain: 2, subObjective: "2.1", isCorrect: false)))
+        #expect(try await repo.outcomes(examID: "test-beta").isEmpty)
+        await #expect(throws: PersistenceError.self) { try await repo.answers(examID: "test-alpha") }
+    }
 }

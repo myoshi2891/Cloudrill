@@ -18,6 +18,15 @@ import QuestionSelector
     public func answers(examID: ExamID) throws(PersistenceError) -> [AnswerFact] {
         try Storage.read { try records(examID).map(AnswerMapper.fact) }
     }
+    public func outcomes(examID: ExamID) throws(PersistenceError) -> [AnswerOutcome] {
+        // 使わない選択内容は復号しない。
+        try Storage.read {
+            try records(examID).map {
+                guard StudyMode(rawValue: $0.modeRaw) != nil else { throw PersistenceError.corrupted("unknown study mode") }
+                return AnswerOutcome(domain: $0.domain, subObjective: $0.subObjective, isCorrect: $0.isCorrect)
+            }
+        }
+    }
     public func practiceHistory(examID: ExamID, now: Date) throws(PersistenceError) -> PracticeHistory {
         try Storage.read {
             let exam = examID.rawValue
