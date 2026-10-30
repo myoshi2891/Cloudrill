@@ -3,7 +3,7 @@ import Observation
 import DomainModels
 
 public enum Tab: String, CaseIterable, Hashable, Sendable { case home, exam, cards, learn, analytics }
-public enum PracticePreset: Hashable, Sendable { case domain(Int) }
+public enum PracticePreset: Hashable, Sendable { case domain(Int); case caseStudy(CaseStudyID) }
 public struct DeckID: StringIdentifier {
     public let rawValue: String
     public init(rawValue: String) { self.rawValue = rawValue }

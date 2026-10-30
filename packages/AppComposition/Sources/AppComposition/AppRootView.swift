@@ -3,6 +3,7 @@ import OSLog
 import AppCore
 import HomeFeature
 import ExamFeature
+import PracticeFeature
 import DomainModels
 import DomainInterfaces
 
@@ -122,6 +123,10 @@ private struct MainTabView: View {
                     }
                     .navigationDestination(for: Route.self) { route in
                         switch route {
+                        case .practiceSetup(let preset):
+                            PracticeView(model: PracticeViewModel(content: content, preset: preset,
+                                answers: dependencies.answers, cards: dependencies.cards, time: dependencies.time,
+                                router: router, seedProvider: dependencies.seedProvider))
                         case .examStart(let set):
                             ExamStartView(content: content, examSet: set, dependencies: dependencies, router: router)
                         case .examSession(let id):

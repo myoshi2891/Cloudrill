@@ -10,6 +10,8 @@ public struct ExamTopView: View {
     }
     public var body: some View {
         List {
+            Button { router.open(.practiceSetup(nil)) } label: { Text("exam.practice", bundle: .module) }
+                .accessibilityIdentifier("exam-practice")
             Section {
                 ForEach(model.sets) { set in
                     Button { router.open(.examStart(examSet: set.id)) } label: {

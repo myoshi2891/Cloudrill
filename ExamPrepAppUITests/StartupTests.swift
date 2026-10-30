@@ -39,7 +39,7 @@ import XCTest
         XCTAssertEqual(app.staticTexts["homeDueCards"].label, "0 枚")
         app.buttons["homeStartLearning"].tap()
         XCTAssertTrue(app.tabBars.buttons["試験"].isSelected)
-        XCTAssertTrue(app.staticTexts["準備中"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.navigationBars["練習"].waitForExistence(timeout: 5))
         app.tabBars.buttons["ホーム"].tap()
         XCTAssertTrue(app.staticTexts["homeNoData"].waitForExistence(timeout: 5))
         attachScreenshot(app, name: "Home empty state")
@@ -221,6 +221,31 @@ import XCTest
         reveal(relatedDoc, in: app)
         relatedDoc.tap()
         XCTAssertTrue(app.tabBars.buttons["学ぶ"].isSelected)
+    }
+
+    func testPracticeFeedbackAndResultOffline() {
+        let app = launch(["-content-fixture", "test-beta"])
+        XCTAssertTrue(app.buttons["homeStartLearning"].waitForExistence(timeout: 20))
+        app.buttons["homeStartLearning"].tap()
+        XCTAssertTrue(app.navigationBars["練習"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["ケース（未選択ならすべて）"].exists)
+        let start = app.buttons["practice-start"]
+        reveal(start, in: app)
+        start.tap()
+        for _ in 0..<10 {
+            let choice = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "session-choice-")).firstMatch
+            XCTAssertTrue(choice.waitForExistence(timeout: 5))
+            choice.tap()
+            let submit = app.buttons["practice-submit"]
+            reveal(submit, in: app)
+            submit.tap()
+            XCTAssertTrue(app.staticTexts["explanation-stem"].waitForExistence(timeout: 5))
+            XCTAssertTrue(app.staticTexts["explanation-rationale-a"].exists)
+            app.buttons["practice-next"].tap()
+        }
+        XCTAssertTrue(app.staticTexts["practice-score"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["practice-score"].label.contains("/ 10 問正解"))
+        attachScreenshot(app, name: "Practice result")
     }
 
     private func reveal(_ element: XCUIElement, in app: XCUIApplication) {
