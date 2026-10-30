@@ -143,6 +143,26 @@ import ExamFeature
         #expect(try await reopened.dependencies.cards.card(id: "Q:" + questionID, examID: "test-beta") != nil)
         #expect(try await reopened.dependencies.cards.scheduledCards(examID: "test-beta").count == 1)
         #expect(try await reopened.packStore.state(for: "test-beta").pins.isEmpty)
+        let result = ExamResultViewModel(examID: "test-beta", attemptID: attempt.id,
+            resolver: reopened.dependencies.contentResolver, attempts: reopened.dependencies.attempts, router: reopened.activeExam.router)
+        await result.load()
+        #expect(result.error == nil)
+        #expect(result.result?.total == history.first?.total)
+        #expect(result.result?.unansweredCount == 39)
+        #expect(result.domains.count == 4)
+        #expect(result.cases.isEmpty)
+        #expect(result.questions.map(\.id) == attempt.snapshot.order.items.map(\.questionID))
+        let explanation = ExplanationViewModel(examID: "test-beta", attemptID: attempt.id, questionID: questionID,
+            resolver: reopened.dependencies.contentResolver, attempts: reopened.dependencies.attempts,
+            cards: reopened.dependencies.cards, time: reopened.dependencies.time, router: reopened.activeExam.router)
+        await explanation.load()
+        #expect(explanation.error == nil)
+        #expect(explanation.question == question)
+        #expect(explanation.selectedIDs == [wrong.id])
+        #expect(!explanation.isCorrect)
+        #expect(explanation.isAddedToCards) // S08 の自動追加を再起動後にも認識する。
+        await explanation.addToCards()
+        #expect(try await reopened.dependencies.cards.scheduledCards(examID: "test-beta").count == 1)
     }
 
     @Test func supportedKindsMatchBothRegistries() {

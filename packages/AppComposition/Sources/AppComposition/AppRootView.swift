@@ -127,7 +127,14 @@ private struct MainTabView: View {
                         case .examReview(let id):
                             ExamReviewView(session: sessions.model(for: id))
                         case .examResult(let id):
-                            ExamSubmissionReceiptView(examID: content.definition.id, attemptID: id, attempts: dependencies.attempts)
+                            ExamResultView(model: ExamResultViewModel(examID: content.definition.id, attemptID: id,
+                                resolver: dependencies.contentResolver, attempts: dependencies.attempts, router: router))
+                        case .explanation(let attemptID, let questionID):
+                            if let attemptID {
+                                ExplanationView(model: ExplanationViewModel(examID: content.definition.id, attemptID: attemptID,
+                                    questionID: questionID, resolver: dependencies.contentResolver, attempts: dependencies.attempts,
+                                    cards: dependencies.cards, time: dependencies.time, router: router))
+                            } else { pending(.exam) }
                         default: pending(route.tab)
                         }
                     }
