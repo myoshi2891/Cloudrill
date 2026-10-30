@@ -38,13 +38,15 @@
 
 ## 再実行
 
+UIテストの `<SIMULATOR_ID>` は、各自の環境で `xcrun simctl list devices available` を実行し、出力から選んだ Simulator の ID に置き換える。
+
 ```sh
 env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --package-path packages/Presentation
 env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --package-path packages/AppComposition
 env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift build --package-path packages/AppComposition -c release
 env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild \
   -project ExamPrepApp.xcodeproj -scheme ExamPrepApp -configuration Debug \
-  -destination 'platform=iOS Simulator,id=3C8F027B-C4E0-479F-A6B3-7F4654DB6031' \
+  -destination 'platform=iOS Simulator,id=<SIMULATOR_ID>' \
   -derivedDataPath /tmp/cloudrill-s09-build CODE_SIGNING_ALLOWED=NO \
   -only-testing:ExamPrepAppUITests/StartupTests/testResultExplanationAndCardActionsOffline \
   -only-testing:ExamPrepAppUITests/StartupTests/testAnswerRestoresAfterTerminationAndExpiresOnRelaunch \
