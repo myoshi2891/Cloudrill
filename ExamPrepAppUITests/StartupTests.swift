@@ -171,6 +171,65 @@ import XCTest
         XCTAssertTrue(app.staticTexts["データの読み込みに失敗しました。再インストールしてください"].waitForExistence(timeout: 15))
     }
 
+    func testResultExplanationAndCardActionsOffline() {
+        let app = launch(["-content-fixture", "test-beta"])
+        XCTAssertTrue(app.buttons["homeStartLearning"].waitForExistence(timeout: 20))
+        app.tabBars.buttons["試験"].tap()
+        app.buttons["exam-set-1"].tap()
+        app.buttons["exam-start"].tap()
+        XCTAssertTrue(app.staticTexts["session-progress"].waitForExistence(timeout: 10))
+        let review = app.buttons["session-review"]
+        reveal(review, in: app)
+        review.tap()
+        app.buttons["review-submit"].tap()
+        app.alerts.buttons["review-confirm"].firstMatch.tap()
+        XCTAssertTrue(app.staticTexts["result-score"].waitForExistence(timeout: 10))
+        XCTAssertEqual(app.staticTexts["result-score"].label, "0 / 40 (0%)")
+        XCTAssertTrue(app.staticTexts["ドメイン別正答率"].exists)
+        XCTAssertFalse(app.staticTexts["ケース別正答率"].exists)
+        attachScreenshot(app, name: "Detailed exam result")
+        let first = app.buttons["result-question-1"]
+        reveal(first, in: app)
+        first.tap()
+        XCTAssertTrue(app.staticTexts["explanation-stem"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["未解答"].exists)
+        app.buttons["explanation-language"].tap()
+        XCTAssertEqual(app.buttons["explanation-language"].label, "日本語で読む")
+        app.buttons["explanation-language"].tap()
+        for id in ["a", "b", "c", "d"] {
+            let rationale = app.staticTexts["explanation-rationale-\(id)"]
+            reveal(rationale, in: app)
+            XCTAssertTrue(rationale.exists)
+        }
+        let addCard = app.buttons["explanation-add-card"]
+        reveal(addCard, in: app)
+        addCard.tap()
+        XCTAssertTrue(app.buttons["追加済み"].waitForExistence(timeout: 5))
+        XCTAssertFalse(addCard.isEnabled)
+        attachScreenshot(app, name: "Explanation references and card added")
+        app.buttons["explanation-report"].tap()
+        XCTAssertTrue(app.staticTexts["誤り報告の受付は準備中です。"].waitForExistence(timeout: 5))
+        app.buttons["閉じる"].tap()
+        // fixture の問題1には資料がなく、問題13 (NET.1) にだけ関連資料がある。
+        XCTAssertFalse(app.buttons["explanation-related-doc"].exists)
+        app.buttons["BackButton"].tap()
+        let withDoc = app.buttons["result-question-13"]
+        reveal(withDoc, in: app)
+        withDoc.tap()
+        XCTAssertTrue(app.staticTexts["explanation-stem"].waitForExistence(timeout: 5))
+        let relatedDoc = app.buttons["explanation-related-doc"]
+        reveal(relatedDoc, in: app)
+        relatedDoc.tap()
+        XCTAssertTrue(app.tabBars.buttons["学ぶ"].isSelected)
+    }
+
+    private func reveal(_ element: XCUIElement, in app: XCUIApplication) {
+        for _ in 0..<12 {
+            if element.exists && element.isHittable { return }
+            app.swipeUp()
+        }
+    }
+
     private func attachScreenshot(_ app: XCUIApplication, name: String) {
         let attachment = XCTAttachment(screenshot: app.screenshot())
         attachment.name = name
