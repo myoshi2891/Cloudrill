@@ -140,6 +140,17 @@ env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --packag
 
 ---
 
+### 継続実装: P4-S10 練習モード（2026-10-30）
+
+- `PracticeFeature` の `PracticeViewModel`・`PracticeView` を追加し、ホームの今日の学習・弱点と試験トップから接続した。ドメイン・サブ項目・ケースは試験定義由来、ケース機能無効なら非表示。難易度・誤答／未解答／フラグ・5／10／20／すべてを指定できる。
+- `QuestionSelector` に履歴と条件を渡し、選択した本文の全件取得・出題記録の保存後に開始する。該当なしと取得・保存失敗を区別する。本文は開始時に保持し、後から別の版に差し替えない。
+- 解答は共有の `QuestionRendererRegistry`、解説は練習用の入口を追加した `ExplanationViewModel`・`ExplanationView` を使う。必要な選択数を満たして「解答する」を押すと、`.practice` の解答履歴保存成功後に正誤・全選択肢の解説を表示する。カード手動追加・日英切り替え・関連資料・版付き報告も共有する。
+- フラグの保存、保存失敗の再試行、保存中の二重操作防止、全問終了時の総合・ドメイン別集計を実装した。練習の段階は一つの ViewModel の値型 `state` で管理し、`.practiceSetup` の画面内で切り替える。予約済みの `.practiceSession` / `.practiceResult` ルートは使っていない。アプリ終了からの練習位置の復元は対象外だが、確定した履歴は永続化する。
+- Presentation 91テスト、AppComposition 11テスト、Releaseビルド、Simulator UIテスト3件が成功した。
+- 次は **P4-S11 フラッシュカード**。検証結果と既存境界は `docs/handoffs/2026-10-30-p4-s10-practice.md` を参照。
+
+---
+
 ## 3. 設計
 
 ### 3.1 アプリの骨格
