@@ -101,7 +101,6 @@ import ExamEngine
             try await self.attempts.record(fact, in: self.attemptID)
             self.session = next
             try await self.attempts.save(snapshot: next.snapshot, for: self.attemptID)
-            self.questionEnteredAt = now
         }
     }
 
