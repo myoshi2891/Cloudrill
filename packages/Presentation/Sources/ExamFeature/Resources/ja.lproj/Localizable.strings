@@ -77,3 +77,5 @@
 "explanation.loadFailed" = "受験時の解説を読み込めませんでした。再読み込みしてください。";
 "explanation.english" = "英語で読む";
 "explanation.japanese" = "日本語で読む";
+
+"exam.practice" = "練習問題を解く";

@@ -32,10 +32,10 @@ public struct QuestionReportContext: Identifiable, Equatable, Sendable {
     public var preferEnglish = false
     private var reportContext: QuestionReportContext?
     private let examID: ExamID
-    private let attemptID: UUID
+    private let attemptID: UUID?
     private let questionID: String
-    private let resolver: any ExamContentResolving
-    private let attempts: any ExamAttemptRepository
+    private let resolver: (any ExamContentResolving)?
+    private let attempts: (any ExamAttemptRepository)?
     private let cards: any CardStateRepository
     private let time: any TimeSource
     private let router: AppRouter
@@ -49,12 +49,27 @@ public struct QuestionReportContext: Identifiable, Equatable, Sendable {
         self.examID = examID; self.attemptID = attemptID; self.questionID = questionID
         self.resolver = resolver; self.attempts = attempts; self.cards = cards; self.time = time; self.router = router
     }
+    /// 練習では保存成功後の解答と、そのセッションが読み込んだ本文を使う。
+    public init(content: any ExamContentProvider, question: Question, selectedIDs: Set<String>, isCorrect: Bool,
+                cards: any CardStateRepository, time: any TimeSource, router: AppRouter) {
+        examID = content.definition.id; attemptID = nil; questionID = question.id
+        resolver = nil; attempts = nil; contentCache = .init()
+        self.cards = cards; self.time = time; self.router = router
+        self.question = question; choices = question.choices; self.selectedIDs = selectedIDs
+        self.isCorrect = isCorrect; isUnanswered = false
+        canAddToCards = content.definition.features.flashcards
+        relatedDoc = content.definition.features.docs && content.docsIndex.contains { $0.subObjective == question.subObjective }
+            ? question.subObjective : nil
+        reportContext = .init(examID: examID, questionID: question.id,
+                              questionRevision: question.revision, packVersion: content.packVersion)
+    }
     public func load() async {
         guard !isLoading, !isAdding else { return }
         isLoading = true; error = nil
         defer { isLoading = false }
         do {
             if question == nil {
+                guard let attemptID, let attempts, let resolver else { throw ContentError.unknownQuestionIDs([questionID]) }
                 let loaded = try await contentCache.load(examID: examID, attemptID: attemptID, attempts: attempts, resolver: resolver)
                 guard let question = loaded.questions.first(where: { $0.id == questionID }),
                       let order = loaded.summary.attempt.snapshot.order.items.first(where: { $0.questionID == questionID }) else {
