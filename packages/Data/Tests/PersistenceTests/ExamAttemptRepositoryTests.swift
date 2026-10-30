@@ -113,8 +113,10 @@ final class FailingSaver: Saver, @unchecked Sendable {
         var answer = PersistenceFixtures.answer()
         answer.selection = selection
         var expected = snapshot
+        var expectedRecords = 1
         if case let .choices(ids) = selection {
             expected.answers[answer.questionID] = ids.isEmpty ? nil : selection
+            expectedRecords = ids.isEmpty ? 0 : 1
         }
         do {
             let container = try ModelContainerFactory.make(inMemory: false, cloudKitContainer: nil, storeDirectory: root)
@@ -125,7 +127,7 @@ final class FailingSaver: Saver, @unchecked Sendable {
         let reopened = try ModelContainerFactory.make(inMemory: false, cloudKitContainer: nil, storeDirectory: root)
         let repo = SwiftDataExamAttemptRepository(modelContainer: reopened)
         #expect(try await repo.inProgress(examID: "test-alpha")?.snapshot == expected)
-        #expect(try ModelContext(reopened).fetchCount(FetchDescriptor<SchemaV1.AnswerRecord>()) == 1)
+        #expect(try ModelContext(reopened).fetchCount(FetchDescriptor<SchemaV1.AnswerRecord>()) == expectedRecords)
     }
     @Test(arguments: [0, 1, 2]) func recordSavesSnapshotAtomically(failures: Int) async throws {
         let container = try PersistenceFixtures.container()

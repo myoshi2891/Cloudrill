@@ -50,13 +50,16 @@ import ExamEngine
             let row = try AnswerMapper.record(answer)
             // Keep restoration in the same transaction as the answer history.
             // Empty selections follow ExamSession.select's unanswered representation.
+            let isEmpty: Bool
             switch answer.selection {
-            case let .choices(ids):
-                snapshot.answers[answer.questionID] = ids.isEmpty ? nil : answer.selection
+            case let .choices(ids): isEmpty = ids.isEmpty
             }
+            snapshot.answers[answer.questionID] = isEmpty ? nil : answer.selection
             attempt.sessionSnapshotJSON = try Storage.encode(snapshot)
             // 選択の切り替えを別の解答として集計しないよう、受験×問題ごとに最新の1件だけを残す。
             for old in attempt.answers ?? [] where old.questionID == answer.questionID { modelContext.delete(old) }
+            // 選択を全解除した問題は未解答なので、履歴にも残さない。
+            guard !isEmpty else { return }
             modelContext.insert(row); row.attempt = attempt
         }
     }
