@@ -5,9 +5,15 @@ import DomainInterfaces
 /// 書き込みを直列化する。状態は毎回ディスクから読み、書き込み失敗時にメモリだけが進むのを防ぐ。
 public actor PackStore: PackPinning {
     private let root: URL
+    private let bundledRoot: URL?
+    private let retainedLimit: Int
     private let fileManager: FileManager
-    public init(root: URL, fileManager: FileManager = .default) {
+    /// bundledRoot はアプリ同梱の Packs/。同梱版を固定するとき、アプリ更新で消えないよう保存先へ複製する。
+    /// retainedLimit は提出後も結果・解説を開けるよう版を保持する受験の件数（試験ごと、新しい順）。
+    public init(root: URL, bundledRoot: URL? = nil, retainedLimit: Int = 20, fileManager: FileManager = .default) {
         self.root = root.standardizedFileURL
+        self.bundledRoot = bundledRoot?.standardizedFileURL
+        self.retainedLimit = max(0, retainedLimit)
         self.fileManager = fileManager
     }
     private func examPath(_ exam: ExamID, _ suffix: String = "") throws(ContentError) -> URL {
@@ -65,22 +71,57 @@ public actor PackStore: PackPinning {
         state.previous = nil
         try file.write(state)
     }
+    /// 固定した版は必ず保存先に置く。同梱にしかない版は複製してから記録する。
     public func pin(_ version: String, for examID: ExamID, attemptID: UUID) throws(ContentError) {
         try checkVersion(version)
         let file = try stateFile(examID)
         var state = try file.read()
-        let installed = try isDirectory(examPath(examID, "versions/\(version)"))
-        guard state.current?.version == version || state.previous?.version == version || installed else {
-            throw .storage("version is not available")
+        if try !isDirectory(examPath(examID, "versions/\(version)")) {
+            try installBundled(version, for: examID)
         }
         state.pins[attemptID] = version
+        try file.write(state)
+    }
+    /// 提出済みの受験の固定を保持枠へ移し、保持枠を超えた古い受験の固定を外す。固定がなければ何もしない。
+    public func retain(attemptID: UUID, for examID: ExamID) throws(ContentError) {
+        let file = try stateFile(examID)
+        var state = try file.read()
+        guard state.pins[attemptID] != nil else { return }
+        if !state.retained.contains(attemptID) { state.retained.append(attemptID) }
+        while state.retained.count > retainedLimit {
+            state.pins.removeValue(forKey: state.retained.removeFirst())
+        }
         try file.write(state)
     }
     public func unpin(attemptID: UUID, for examID: ExamID) throws(ContentError) {
         let file = try stateFile(examID)
         var state = try file.read()
         state.pins.removeValue(forKey: attemptID)
+        state.retained.removeAll { $0 == attemptID }
         try file.write(state)
+    }
+    /// 同梱版を staging に複製し、manifest の一致を確認してから install する。失敗時は staging を残さない。
+    private func installBundled(_ version: String, for examID: ExamID) throws(ContentError) {
+        guard let bundledRoot else { throw .storage("version is not available") }
+        let source = bundledRoot.appending(path: "\(examID.rawValue)/\(version)")
+        guard (try? source.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink) == false, isDirectory(source) else {
+            throw .storage("version is not available")
+        }
+        let staged = try examPath(examID, "staging/\(UUID().uuidString)")
+        do throws(ContentError) {
+            do {
+                try fileManager.createDirectory(at: staged.deletingLastPathComponent(), withIntermediateDirectories: true)
+                try fileManager.copyItem(at: source, to: staged)
+            } catch { throw ContentError.storage("bundled copy failed: \(error)") }
+            let manifest = try PackLoader().manifest(packAt: staged)
+            guard manifest.examID == examID, manifest.packVersion == version else {
+                throw ContentError.storage("pack manifest identity mismatch")
+            }
+            try install(staged: staged, version: version, for: examID)
+        } catch {
+            try? fileManager.removeItem(at: staged)
+            throw error
+        }
     }
     public func garbageCollect(for examID: ExamID) throws(ContentError) {
         let state = try state(for: examID)

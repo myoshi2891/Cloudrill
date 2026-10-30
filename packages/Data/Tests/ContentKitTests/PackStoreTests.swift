@@ -85,6 +85,69 @@ struct PackStoreTests {
         try await reopened.garbageCollect(for: "test-alpha")
         #expect(try FileManager.default.contentsOfDirectory(atPath: versions.path).sorted() == ["1.1.0", "1.2.0"])
     }
+    @Test func pinCopiesBundledVersionIntoStore() async throws {
+        // Arrange
+        let root = PackFixtures.temporary()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let store = PackStore(root: root, bundledRoot: PackFixtures.root.appending(path: "valid"))
+        try await store.activate(.init(source: .bundled, version: "1.0.0"), for: "test-alpha")
+        // Act
+        try await store.pin("1.0.0", for: "test-alpha", attemptID: UUID())
+        // Assert
+        #expect(FileManager.default.fileExists(atPath: root.appending(path: "test-alpha/versions/1.0.0/manifest.json").path))
+        #expect(try FileManager.default.contentsOfDirectory(atPath: root.appending(path: "test-alpha/staging").path).isEmpty)
+        #expect(try await store.state(for: "test-alpha").current == .init(source: .bundled, version: "1.0.0"))
+    }
+    @Test func pinRejectsUnavailableOrMismatchedVersion() async throws {
+        // Arrange
+        let root = PackFixtures.temporary()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let bundle = root.appending(path: "bundle")
+        try FileManager.default.createDirectory(at: bundle.appending(path: "test-alpha"), withIntermediateDirectories: true)
+        try FileManager.default.copyItem(at: PackFixtures.valid("test-beta"), to: bundle.appending(path: "test-alpha/2.0.0"))
+        let unbundled = PackStore(root: root.appending(path: "a"))
+        let mismatched = PackStore(root: root.appending(path: "b"), bundledRoot: bundle)
+        try await unbundled.activate(.init(source: .bundled, version: "1.0.0"), for: "test-alpha")
+        // Act / Assert
+        await #expect(throws: ContentError.self) { try await unbundled.pin("1.0.0", for: "test-alpha", attemptID: UUID()) }
+        await #expect(throws: ContentError.self) { try await mismatched.pin("9.9.9", for: "test-alpha", attemptID: UUID()) }
+        await #expect(throws: ContentError.storage("pack manifest identity mismatch")) {
+            try await mismatched.pin("2.0.0", for: "test-alpha", attemptID: UUID())
+        }
+        #expect(try await unbundled.state(for: "test-alpha").pins.isEmpty)
+        #expect(try await mismatched.state(for: "test-alpha").pins.isEmpty)
+        #expect(try FileManager.default.contentsOfDirectory(atPath: root.appending(path: "b/test-alpha/staging").path).isEmpty)
+        #expect(!FileManager.default.fileExists(atPath: root.appending(path: "b/test-alpha/versions/2.0.0").path))
+    }
+    @Test func retainKeepsLatestSubmittedAttempts() async throws {
+        // Arrange
+        let root = PackFixtures.temporary()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let store = PackStore(root: root, retainedLimit: 2)
+        let attempts = [UUID(), UUID(), UUID()]
+        for (attempt, version) in zip(attempts, ["1.0.0", "1.1.0", "1.2.0"]) {
+            try await install(store, root: root, version: version)
+            try await store.pin(version, for: "test-alpha", attemptID: attempt)
+        }
+        // Act
+        for attempt in attempts { try await store.retain(attemptID: attempt, for: "test-alpha") }
+        try await store.retain(attemptID: attempts[2], for: "test-alpha") // 提出の再試行は保持順を変えない。
+        try await store.retain(attemptID: UUID(), for: "test-alpha")       // 固定のない受験は何もしない。
+        try await store.garbageCollect(for: "test-alpha")
+        // Assert
+        let state = try await PackStore(root: root).state(for: "test-alpha")
+        #expect(state.retained == [attempts[1], attempts[2]])
+        #expect(state.pins == [attempts[1]: "1.1.0", attempts[2]: "1.2.0"])
+        let versions = root.appending(path: "test-alpha/versions")
+        #expect(try FileManager.default.contentsOfDirectory(atPath: versions.path).sorted() == ["1.1.0", "1.2.0"])
+        try await store.unpin(attemptID: attempts[1], for: "test-alpha")
+        #expect(try await store.state(for: "test-alpha").retained == [attempts[2]])
+    }
+    @Test func stateWithoutRetainedDecodes() throws {
+        let id = UUID()
+        let state = try JSONDecoder().decode(PackState.self, from: Data("{\"pins\":{\"\(id.uuidString)\":\"1.0.0\"}}".utf8))
+        #expect(state.pins == [id: "1.0.0"] && state.retained.isEmpty)
+    }
     @Test func bundledIsNeverDeletedAndRollback() async throws {
         let root = PackFixtures.temporary()
         defer { try? FileManager.default.removeItem(at: root) }
