@@ -69,7 +69,7 @@ public enum AppEnvironmentError: Error, Equatable {
                              time: any TimeSource, seed: @escaping @Sendable () -> UInt64 = { UInt64.random(in: .min ... .max) }) async throws -> AppEnvironment {
         guard evaluatedKinds == QuestionRendererRegistry.standard.supportedKinds else { throw AppEnvironmentError.registryMismatch }
         let container = try ModelContainerFactory.make(inMemory: storeDirectory == nil, cloudKitContainer: nil, storeDirectory: storeDirectory)
-        let store = PackStore(root: contentDirectory)
+        let store = PackStore(root: contentDirectory, bundledRoot: bundled.root)
         let dependencies = AppDependencies(contentResolver: ExamContentResolver(bundled: bundled, store: store, supportedKinds: supportedKinds),
             pins: store, attempts: SwiftDataExamAttemptRepository(modelContainer: container),
             answers: SwiftDataAnswerHistoryRepository(modelContainer: container), cards: SwiftDataCardStateRepository(modelContainer: container),

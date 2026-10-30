@@ -95,7 +95,8 @@ import ExamFeature
         #expect(expiredSession.state.alert == nil)
         #expect(try await expired.dependencies.attempts.inProgress(examID: "test-beta") == nil)
         #expect(try await expired.dependencies.attempts.history(examID: "test-beta").first?.reason == .timeExpired)
-        #expect(try await expired.packStore.state(for: "test-beta").pins.isEmpty)
+        // 提出後も結果・解説で受験時の版を開けるよう、固定は保持へ移る。
+        #expect(try await expired.packStore.state(for: "test-beta").retained == [attempt.id])
         #expect(expired.activeExam.router.path(for: .exam) == [.examResult(attemptID: attempt.id)])
     }
 
@@ -142,7 +143,7 @@ import ExamFeature
         #expect(history.first?.total.total == 40)
         #expect(try await reopened.dependencies.cards.card(id: "Q:" + questionID, examID: "test-beta") != nil)
         #expect(try await reopened.dependencies.cards.scheduledCards(examID: "test-beta").count == 1)
-        #expect(try await reopened.packStore.state(for: "test-beta").pins.isEmpty)
+        #expect(try await reopened.packStore.state(for: "test-beta").retained == [attempt.id])
         let result = ExamResultViewModel(examID: "test-beta", attemptID: attempt.id,
             resolver: reopened.dependencies.contentResolver, attempts: reopened.dependencies.attempts, router: reopened.activeExam.router)
         await result.load()

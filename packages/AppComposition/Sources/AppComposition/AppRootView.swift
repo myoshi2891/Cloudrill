@@ -91,12 +91,14 @@ private struct MainTabView: View {
     let selectExam: () -> Void
     @State private var home: HomeViewModel
     @State private var sessions: ExamSessionStore
+    @State private var submittedContent: SubmittedExamContentCache
 
     /// HomeViewModel は body の再評価(タブ切替・遷移)のたびに作り直さない。試験の切替は .id で作り直す。
     init(context: ActiveExamContext, content: any ExamContentProvider, dependencies: AppDependencies,
          selectExam: @escaping () -> Void) {
         self.context = context; self.content = content; self.dependencies = dependencies; self.selectExam = selectExam
         _sessions = State(initialValue: ExamSessionStore(examID: content.definition.id, dependencies: dependencies, router: context.router))
+        _submittedContent = State(initialValue: SubmittedExamContentCache())
         _home = State(initialValue: HomeViewModel(definition: content.definition,
             answers: dependencies.answers, cards: dependencies.cards,
             attempts: dependencies.attempts, time: dependencies.time, router: context.router))
@@ -128,12 +130,14 @@ private struct MainTabView: View {
                             ExamReviewView(session: sessions.model(for: id))
                         case .examResult(let id):
                             ExamResultView(model: ExamResultViewModel(examID: content.definition.id, attemptID: id,
-                                resolver: dependencies.contentResolver, attempts: dependencies.attempts, router: router))
+                                resolver: dependencies.contentResolver, attempts: dependencies.attempts, router: router,
+                                contentCache: submittedContent))
                         case .explanation(let attemptID, let questionID):
                             if let attemptID {
                                 ExplanationView(model: ExplanationViewModel(examID: content.definition.id, attemptID: attemptID,
                                     questionID: questionID, resolver: dependencies.contentResolver, attempts: dependencies.attempts,
-                                    cards: dependencies.cards, time: dependencies.time, router: router))
+                                    cards: dependencies.cards, time: dependencies.time, router: router,
+                                    contentCache: submittedContent))
                             } else { pending(.exam) }
                         default: pending(route.tab)
                         }
