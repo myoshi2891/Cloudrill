@@ -5,6 +5,7 @@ import StudyModels
 import ContentKit
 import AppCore
 import ExamFeature
+import PracticeFeature
 @testable import AppComposition
 
 @MainActor struct AppEnvironmentTests {
@@ -24,6 +25,33 @@ import ExamFeature
         #expect(environment.activeExam.content?.packVersion == "1.0.0")
         #expect(environment.activeExam.state.fatal == nil)
         #expect(!FileManager.default.fileExists(atPath: root.appending(path: "StudyHistory.store").path))
+    }
+
+    @Test func practiceAnswersAndFlagsSurviveReopeningDiskStore() async throws {
+        let root = temporary()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let args = ["-ui-testing", "-content-fixture", "test-beta", "-store-path", root.appending(path: "history").path]
+        let first = try await AppEnvironment.uiTesting(arguments: args, packsRoot: Self.packs, workingDirectory: root)
+        let content = try #require(first.activeExam.content)
+        let deps = first.dependencies
+        let model = PracticeViewModel(content: content, answers: deps.answers, cards: deps.cards,
+            time: deps.time, router: first.activeExam.router, seedProvider: { 42 })
+        await model.start()
+        let question = try #require(model.current)
+        await model.toggleFlag()
+        for choice in question.choices where choice.isCorrect { model.select(choice.id) }
+        await model.submit()
+        #expect(model.state.phase == .feedback)
+        let second = try await AppEnvironment.uiTesting(arguments: args, packsRoot: Self.packs, workingDirectory: root)
+        let facts = try await second.dependencies.answers.answers(examID: content.definition.id)
+        #expect(facts.count == 1)
+        #expect(facts.first?.questionID == question.id)
+        #expect(facts.first?.mode == .practice)
+        #expect(facts.first?.isCorrect == true)
+        let history = try await second.dependencies.answers.practiceHistory(examID: content.definition.id, now: deps.time.now())
+        #expect(history.flagged.contains(question.id))
+        #expect(history.lastServedAt.count == 10)
+        #expect(try await second.dependencies.attempts.history(examID: content.definition.id).isEmpty)
     }
 
     @Test func diskConfigurationRestoresLastSelection() async throws {
