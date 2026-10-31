@@ -71,7 +71,9 @@ public struct AnalyticsState: Equatable, Sendable {
                 id: domain.id, domainIndex: index,
                 domain: AnalyticsRow(id: "\(domain.id)", name: domain.name, tally: summary.byDomain[domain.id] ?? empty),
                 subObjectives: domain.subObjectives.compactMap { sub in
-                    guard let tally = summary.bySubObjective[sub.id], tally.total > 0 else { return nil }
+                    // 記録時のドメインが一致する解答だけを数える
+                    let key = SubObjectiveKey(domain: domain.id, subObjective: sub.id)
+                    guard let tally = summary.bySubObjective[key], tally.total > 0 else { return nil }
                     return AnalyticsRow(id: sub.id, name: sub.name, tally: tally)
                 })
         }

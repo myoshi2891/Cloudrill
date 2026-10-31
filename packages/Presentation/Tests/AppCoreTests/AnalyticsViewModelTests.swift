@@ -33,6 +33,17 @@ import QuestionSelector
         #expect(model.state.sections.first { $0.id == 2 }?.subObjectives.isEmpty == true)
     }
 
+    @Test func subObjectiveTallyStaysWithRecordedDomain() async throws {
+        // Arrange: 改版前にドメイン 2 で記録された "1.1" の解答
+        let moved = [AnswerOutcome(domain: 2, subObjective: "1.1", isCorrect: true)]
+        let model = AnalyticsViewModel(definition: try definition("test-alpha"), answers: AnalyticsAnswers(["test-alpha": moved]))
+        // Act
+        await model.refresh()
+        // Assert: ドメイン 1 の "1.1" には出さず、ドメインの集計は記録時のドメインに残す
+        #expect(model.state.sections.first { $0.id == 1 }?.subObjectives.isEmpty == true)
+        #expect(model.state.sections.first { $0.id == 2 }?.domain.tally.total == 1)
+    }
+
     @Test func noAnswersDomain() async throws {
         // ドメイン 1 は全問不正解(0%)、ドメイン 2 は解答なし(—)
         let answers = AnalyticsAnswers(["test-alpha": outcomes("1.1", correct: 0, wrong: 2)])
