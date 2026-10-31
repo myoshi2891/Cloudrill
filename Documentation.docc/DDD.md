@@ -732,7 +732,7 @@ struct AnswerEvaluatorTests {
 | `fsrs`(py-fsrs) | FSRS のテストベクタの生成(開発時のみ。CI では使わない) | P1-S08a | 公開されているテストケースを手で書き写す |
 | `pytest-cov` | Python のカバレッジ計測 | 任意 | 計測しない |
 | `swift-snapshot-testing` | スナップショットテスト | P4-S18 | Xcode Previews の目視確認だけにする |
-| `swift-markdown`(Apple) | Markdown のパース(推奨は、パースした結果を自前で SwiftUI に描画する方式) | P4-S12 | `AttributedString(markdown:)`(表とコードブロックの表現力が足りない)、サードパーティの描画ライブラリ |
+| `swift-markdown`(Apple) | Markdown のパース(推奨は、パースした結果を自前で SwiftUI に描画する方式)。**採用済み**(2026-10-31、0.9.0) | P4-S12 | `AttributedString(markdown:)`(表とコードブロックの表現力が足りない)、サードパーティの描画ライブラリ |
 | Terraform | Cloud Storage、Cloud CDN、Cloud Run、Firestore の構築 | P5-S07 | 手順書による手動構築 |
 | report-api の実装言語(Go / Node.js) | report-api | P5-S05 | TBD-07 |
 

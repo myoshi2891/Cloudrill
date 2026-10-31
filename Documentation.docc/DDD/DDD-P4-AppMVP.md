@@ -159,6 +159,16 @@ env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --packag
 - Presentation 104テスト（DesignSystem 7、AppCoreTests 97、S11 13件）、AppComposition 12テスト（実ストアの評価・再起動後の状態と今日の枚数）、Releaseビルド、Simulator UIテスト（S11 1件・既存2件）が成功した。
 - 次は **P4-S12 関連ドキュメント**。引き継ぎは `docs/handoffs/2026-10-31-p4-s11-flashcards.md`。
 
+### 継続実装: P4-S12 ドキュメント（2026-10-31）
+
+- 利用者の承認により `swift-markdown` 0.9.0（swift-cmark 0.9.0 を含む）を Presentation に追加した（DDD 8 章）。パースだけに使い、描画は自前の SwiftUI。
+- `DesignSystem` に `MarkdownDocument`（中間表現）と `MarkdownView` を追加。見出し・段落・箇条書き・引用・表・コード・画像・区切り線に変換し、インラインは Markdown 文字列のまま `AttributedString` で描画する。HTML と未対応ブロックは段落の文字列にする。`format()` は祖先の記号（引用の `> `）も出力するため、親から切り離して整形する。
+- 画像はパックのルートからの相対パスに解決する（`packAssetPath`）。スキーム付き・絶対パス・`..`（パーセントエンコードを含む）・空の区切りは表示しない。パック形式に assets がないため、利用者の決定により画像は代替テキストの表示までとし、同梱は後続で扱う。
+- `LearnFeature` を追加。`LearnModuleRegistry.standard` は docs → `.docsIndex`、caseStudies → `.caseList`（本文は S13）だけを登録する（ツリーとドリルは P6）。`DocsIndexViewModel` は試験定義の順にサブ項目を並べ、ドキュメントのないものは「準備中」で選べない。`DocViewModel` は本文を読み込み、出典を `ReferenceLink`（CC BY 4.0／Apache 2.0 の表示）で出す。索引にないサブ項目は notFound、読込失敗は再試行できる。
+- 学ぶタブと `.docsIndex`・`.doc` を Composition root に接続し、解説画面の「関連ドキュメント」から本文まで遷移できるようになった。
+- Presentation 117テスト（DesignSystem 13、AppCoreTests 104。S12 は 13件）、AppComposition 13テスト（同梱パックの本文変換）、Releaseビルド、Simulator UIテスト（S12 1件、関連ドキュメントの遷移先を確認する既存1件を強化）が成功した。目次・本文のスクリーンショットを目視確認した。
+- 次は **P4-S13 ケーススタディの要約**。引き継ぎは `docs/handoffs/2026-10-31-p4-s12-docs.md`。
+
 ---
 
 ## 3. 設計
