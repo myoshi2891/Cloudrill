@@ -6,6 +6,7 @@ import ContentKit
 import AppCore
 import ExamFeature
 import PracticeFeature
+import FlashcardFeature
 @testable import AppComposition
 
 @MainActor struct AppEnvironmentTests {
@@ -52,6 +53,36 @@ import PracticeFeature
         #expect(history.flagged.contains(question.id))
         #expect(history.lastServedAt.count == 10)
         #expect(try await second.dependencies.attempts.history(examID: content.definition.id).isEmpty)
+    }
+
+    @Test func cardReviewSurvivesReopeningDiskStore() async throws {
+        let root = temporary()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let args = ["-ui-testing", "-content-fixture", "test-beta", "-store-path", root.appending(path: "history").path]
+        let first = try await AppEnvironment.uiTesting(arguments: args, packsRoot: Self.packs, workingDirectory: root)
+        let content = try #require(first.activeExam.content)
+        let deps = first.dependencies
+        func deckList(_ environment: AppEnvironment) -> DeckListViewModel {
+            DeckListViewModel(content: content, cards: environment.dependencies.cards, settings: environment.dependencies.settings,
+                              time: environment.dependencies.time, calendar: .current, router: environment.activeExam.router)
+        }
+        let before = deckList(first)
+        await before.refresh()
+        let total = try #require(before.state.decks.first?.dueToday)
+        let session = CardSessionViewModel(content: content, deck: DeckKind.all.id, cards: deps.cards, settings: deps.settings,
+                                           time: deps.time, calendar: .current, router: first.activeExam.router)
+        await session.start()
+        let cardID = try #require(session.current?.id)
+        session.flip()
+        // Easy は review 段階に進み期限が明日以降になるので、今日の枚数から外れる
+        await session.rate(.easy)
+        #expect(session.state.alert == nil)
+        let second = try await AppEnvironment.uiTesting(arguments: args, packsRoot: Self.packs, workingDirectory: root)
+        let stored = try await second.dependencies.cards.card(id: cardID, examID: content.definition.id)
+        #expect(stored?.phase == .review)
+        let after = deckList(second)
+        await after.refresh()
+        #expect(after.state.decks.first?.dueToday == total - 1)
     }
 
     @Test func diskConfigurationRestoresLastSelection() async throws {
