@@ -1,9 +1,12 @@
 import SwiftUI
 import DesignSystem
 import DomainModels
+import AppCore
+import SettingsFeature
 
 public struct ExplanationView: View {
     @State private var model: ExplanationViewModel
+    @Environment(\.appDependencies) private var dependencies
     public init(model: ExplanationViewModel) { _model = State(initialValue: model) }
 
     public var body: some View {
@@ -66,7 +69,8 @@ public struct ExplanationView: View {
         }
         .task { await model.load() }
         .sheet(item: Binding(get: { model.report }, set: { if $0 == nil { model.closeReport() } })) { context in
-            QuestionReportEntryView(context: context)
+            if let dependencies { ReportSheetView(context: context, dependencies: dependencies) }
+            else { QuestionReportEntryView(context: context) }
         }
     }
     private func choiceRow(_ choice: Choice) -> some View {
@@ -88,7 +92,7 @@ public struct ExplanationView: View {
     }
 }
 
-/// S15 で入力フォームと永続キューへ差し替える接続点。未送信のものを送信済みとは表示しない。
+/// 依存が未注入(Preview)のときだけ使う読み取り専用の表示。未送信のものを送信済みとは表示しない。
 private struct QuestionReportEntryView: View {
     let context: QuestionReportContext
     @Environment(\.dismiss) private var dismiss
