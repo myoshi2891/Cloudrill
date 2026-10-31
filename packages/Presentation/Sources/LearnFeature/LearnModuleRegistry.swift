@@ -35,7 +35,6 @@ public struct LearnModuleRegistry: Sendable {
     public static let standard = LearnModuleRegistry(entries: [
         Entry(module: LearnModule(id: "docs", titleKey: "learn.module.docs", symbol: "doc.text", route: .docsIndex(domain: nil)),
               isEnabled: { $0.docs }),
-        // ケースの本文は S13 で接続する
         Entry(module: LearnModule(id: "cases", titleKey: "learn.module.cases", symbol: "building.2", route: .caseList),
               isEnabled: { $0.caseStudies }),
     ])

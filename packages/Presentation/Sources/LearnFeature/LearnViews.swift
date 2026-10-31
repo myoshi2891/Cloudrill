@@ -98,6 +98,70 @@ public struct DocView: View {
     }
 }
 
+/// ケーススタディの一覧(SCR-043)
+public struct CaseListView: View {
+    @State private var model: CaseListViewModel
+    public init(model: CaseListViewModel) { _model = State(initialValue: model) }
+    public var body: some View {
+        Group {
+            if !model.isAvailable {
+                ContentUnavailableView { Text("cases.unavailable", bundle: .module) }
+            } else {
+                switch model.phase {
+                case .idle: ProgressView()
+                case .failed:
+                    ContentUnavailableView { Text("cases.loadFailed", bundle: .module) } actions: {
+                        Button { Task { await model.load() } } label: { Text("doc.retry", bundle: .module) }
+                    }
+                case .loaded(let cases):
+                    List(cases) { item in
+                        Button { model.open(item.id) } label: {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(item.name.ja)
+                                Text(item.summary.ja).font(.caption).foregroundStyle(.secondary).lineLimit(2)
+                            }
+                        }
+                        .accessibilityIdentifier("case-row-\(item.id.rawValue)")
+                    }
+                }
+            }
+        }
+        .navigationTitle(Text("cases.title", bundle: .module))
+        .task { await model.load() }
+    }
+}
+
+/// ケーススタディの詳細(SCR-044)
+public struct CaseDetailView: View {
+    @State private var model: CaseDetailViewModel
+    public init(model: CaseDetailViewModel) { _model = State(initialValue: model) }
+    public var body: some View {
+        Group {
+            switch model.phase {
+            case .idle: ProgressView()
+            case .notFound:
+                ContentUnavailableView { Text("case.notFound", bundle: .module) }
+                    .accessibilityIdentifier("case-not-found")
+            case .failed:
+                ContentUnavailableView { Text("case.loadFailed", bundle: .module) } actions: {
+                    Button { Task { await model.load() } } label: { Text("doc.retry", bundle: .module) }
+                }
+            case .loaded(let caseStudy):
+                List {
+                    CaseStudySections(caseStudy)
+                    Section {
+                        Button { model.practice() } label: { Text("case.practice", bundle: .module) }
+                            .accessibilityIdentifier("case-practice")
+                    }
+                }
+                .navigationTitle(caseStudy.name.ja)
+            }
+        }
+        .navigationBarTitleDisplayModeInline()
+        .task { await model.load() }
+    }
+}
+
 private extension View {
     /// macOS でもテストのためにビルドできるよう、iOS だけで指定する
     @ViewBuilder func navigationBarTitleDisplayModeInline() -> some View {

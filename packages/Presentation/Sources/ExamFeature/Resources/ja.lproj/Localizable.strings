@@ -34,11 +34,6 @@
 "session.score" = "正答数 %d / %d";
 "session.loadFailed" = "模試を復元できませんでした。再読み込みしてください。";
 "session.saveFailed" = "保存に失敗しました。もう一度お試しください。";
-"case.summary" = "要約";
-"case.business" = "ビジネス要件";
-"case.technical" = "技術要件";
-"case.environment" = "既存環境";
-"case.official" = "公式ページを見る";
 "review.open" = "見直し一覧へ";
 "review.title" = "見直し一覧";
 "review.counts" = "未解答 %d 問、見直し %d 問";
