@@ -149,6 +149,16 @@ env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --packag
 - Presentation 91テスト、AppComposition 11テスト、Releaseビルド、Simulator UIテスト3件が成功した。
 - 次は **P4-S11 フラッシュカード**。検証結果と既存境界は `docs/handoffs/2026-10-30-p4-s10-practice.md` を参照。
 
+### 継続実装: P4-S11 フラッシュカード（2026-10-31）
+
+- `FlashcardFeature` を追加し、カードタブに `DeckListViewModel`・`DeckListView`（SCR-030）、`.cardSession(DeckID)` に `CardSessionViewModel`・`CardSessionView`（SCR-031/032）を接続した。`features.flashcards` が無効なら読み込まず「この試験にはカードがありません」を表示する。
+- デッキは すべて → 試験定義順のドメイン・サブ項目 → 間違えた問題（`Q:` カード）。カードのないデッキは出さない。`Q:` カードの分類は問題索引から引き、索引にない問題のカードは除外する。`DeckID` は `all`・`domain:<n>`・`sub:<id>`・`mistakes` で符号化する。予約済みの `.deck` ルートは使っていない。
+- 内部の `CardLibrary` がデッキ一覧と学習で同じキューを作る。復習は状態あり・`.new` 以外、新規は状態なしのコンテンツカード → `.new` の `Q:` カードの順で `DailyQueueBuilder` に渡す。上限は `ExamPreference` の値から、注入 Calendar での今日の試験全体の実績（`reviewCount`）を差し引く。
+- 学習は表 → 「答えを見る」→ 4評価。各ボタンに `FSRSScheduler.review` から求めた次の間隔（分・時間・日・か月・年）を出す。`apply` の保存成功後にだけ次へ進め、失敗時は位置を保ち同じ結果（時刻を含む）で再試行する。保存中の連打は拒否する。`Q:` カードは表に問題文、裏に正解の選択肢と理由を出す。日英は英語があれば併記する（FR-CARD-06）。完了画面に学習枚数と評価別の枚数を出す。
+- 同じセッション内では、Again などで今日中に期限が来るカードを再出題しない（デッキ一覧の今日の枚数に残り、次のセッションで出る）。
+- Presentation 104テスト（DesignSystem 7、AppCoreTests 97、S11 13件）、AppComposition 12テスト（実ストアの評価・再起動後の状態と今日の枚数）、Releaseビルド、Simulator UIテスト（S11 1件・既存2件）が成功した。
+- 次は **P4-S12 関連ドキュメント**。引き継ぎは `docs/handoffs/2026-10-31-p4-s11-flashcards.md`。
+
 ---
 
 ## 3. 設計
