@@ -270,6 +270,22 @@ import XCTest
         XCTAssertTrue(app.navigationBars["練習"].waitForExistence(timeout: 5))
     }
 
+    func testAnalyticsShowsDomainsWithoutAnswersOffline() {
+        let app = launch(["-content-fixture", "test-beta"])
+        XCTAssertTrue(app.tabBars.buttons["分析"].waitForExistence(timeout: 20))
+        app.tabBars.buttons["分析"].tap()
+        XCTAssertTrue(app.staticTexts["analytics-empty"].waitForExistence(timeout: 5))
+        // test-beta の4ドメインを、解答なし(0% ではなく「—」)で出す
+        for id in 1...4 {
+            let row = app.descendants(matching: .any)["analytics-domain-\(id)"]
+            reveal(row, in: app)
+            XCTAssertTrue(row.exists, "domain \(id)")
+            XCTAssertTrue(row.label.contains("—"), row.label)
+        }
+        XCTAssertFalse(app.descendants(matching: .any)["analytics-domain-5"].exists)
+        attachScreenshot(app, name: "Analytics")
+    }
+
     func testPracticeFeedbackAndResultOffline() {
         let app = launch(["-content-fixture", "test-beta"])
         XCTAssertTrue(app.buttons["homeStartLearning"].waitForExistence(timeout: 20))
