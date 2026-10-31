@@ -248,6 +248,32 @@ import XCTest
         attachScreenshot(app, name: "Practice result")
     }
 
+    func testFlashcardDeckStudyAndFinishOffline() {
+        let app = launch(["-content-fixture", "test-beta"])
+        XCTAssertTrue(app.tabBars.buttons["カード"].waitForExistence(timeout: 20))
+        app.tabBars.buttons["カード"].tap()
+        let deck = app.buttons["deck-all"]
+        XCTAssertTrue(deck.waitForExistence(timeout: 5))
+        XCTAssertTrue(deck.label.contains("今日 2 枚"))
+        deck.tap()
+        for _ in 0..<2 {
+            XCTAssertTrue(app.staticTexts["card-front"].waitForExistence(timeout: 5))
+            app.buttons["card-flip"].tap()
+            let easy = app.buttons["card-rate-easy"]
+            XCTAssertTrue(easy.waitForExistence(timeout: 5))
+            XCTAssertTrue(easy.label.contains("簡単") && easy.label.contains("日"), easy.label)
+            easy.tap()
+        }
+        XCTAssertTrue(app.staticTexts["card-finished-count"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["card-finished-count"].label.contains("2 枚を学習しました"))
+        attachScreenshot(app, name: "Flashcard finished")
+        app.buttons["card-back-to-decks"].tap()
+        XCTAssertTrue(app.buttons["deck-all"].waitForExistence(timeout: 5))
+        let refreshed = NSPredicate(format: "label CONTAINS %@", "今日 0 枚")
+        expectation(for: refreshed, evaluatedWith: app.buttons["deck-all"])
+        waitForExpectations(timeout: 5)
+    }
+
     private func reveal(_ element: XCUIElement, in app: XCUIApplication) {
         for _ in 0..<12 {
             if element.exists && element.isHittable { return }
