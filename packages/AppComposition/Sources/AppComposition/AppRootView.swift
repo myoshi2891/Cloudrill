@@ -106,7 +106,7 @@ private struct MainTabView: View {
         _sessions = State(initialValue: ExamSessionStore(examID: content.definition.id, dependencies: dependencies, router: context.router))
         _submittedContent = State(initialValue: SubmittedExamContentCache())
         _decks = State(initialValue: DeckListViewModel(content: content, cards: dependencies.cards,
-            settings: dependencies.settings, time: dependencies.time, calendar: .current, router: context.router))
+            settings: dependencies.settings, time: dependencies.time, calendar: .autoupdatingCurrent, router: context.router))
         _home = State(initialValue: HomeViewModel(definition: content.definition,
             answers: dependencies.answers, cards: dependencies.cards,
             attempts: dependencies.attempts, time: dependencies.time, router: context.router))
@@ -151,7 +151,7 @@ private struct MainTabView: View {
                             CaseDetailView(model: CaseDetailViewModel(content: content, id: id, router: router))
                         case .cardSession(let deck):
                             CardSessionView(model: CardSessionViewModel(content: content, deck: deck, cards: dependencies.cards,
-                                settings: dependencies.settings, time: dependencies.time, calendar: .current, router: router))
+                                settings: dependencies.settings, time: dependencies.time, calendar: .autoupdatingCurrent, router: router))
                         case .examStart(let set):
                             ExamStartView(content: content, examSet: set, dependencies: dependencies, router: router)
                         case .examSession(let id):
