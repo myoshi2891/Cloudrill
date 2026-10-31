@@ -5,6 +5,7 @@ import HomeFeature
 import ExamFeature
 import PracticeFeature
 import FlashcardFeature
+import LearnFeature
 import DomainModels
 import DomainInterfaces
 
@@ -123,6 +124,8 @@ private struct MainTabView: View {
                             ExamTopView(content: content, router: router)
                         } else if tab == .cards {
                             DeckListView(model: decks)
+                        } else if tab == .learn {
+                            LearnTopView(content: content, router: router)
                         } else {
                             pending(tab)
                         }
@@ -133,6 +136,10 @@ private struct MainTabView: View {
                             PracticeView(model: PracticeViewModel(content: content, preset: preset,
                                 answers: dependencies.answers, cards: dependencies.cards, time: dependencies.time,
                                 router: router, seedProvider: dependencies.seedProvider))
+                        case .docsIndex(let domain):
+                            DocsIndexView(model: DocsIndexViewModel(content: content, domain: domain, router: router))
+                        case .doc(let subObjective):
+                            DocView(model: DocViewModel(content: content, subObjective: subObjective))
                         case .cardSession(let deck):
                             CardSessionView(model: CardSessionViewModel(content: content, deck: deck, cards: dependencies.cards,
                                 settings: dependencies.settings, time: dependencies.time, calendar: .current, router: router))

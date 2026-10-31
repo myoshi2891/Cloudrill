@@ -16,6 +16,7 @@ let package = Package(
             .product(name: "ExamFeature", package: "Presentation"),
             .product(name: "PracticeFeature", package: "Presentation"),
             .product(name: "FlashcardFeature", package: "Presentation"),
+            .product(name: "LearnFeature", package: "Presentation"),
             .product(name: "ContentKit", package: "Data"), .product(name: "Persistence", package: "Data"),
             .product(name: "DomainInterfaces", package: "Domain"), .product(name: "StudyModels", package: "Domain"),
             .product(name: "ExamEngine", package: "Domain")], resources: [.process("Resources")]),

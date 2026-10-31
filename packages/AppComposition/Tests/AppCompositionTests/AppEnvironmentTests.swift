@@ -7,6 +7,8 @@ import AppCore
 import ExamFeature
 import PracticeFeature
 import FlashcardFeature
+import LearnFeature
+import DesignSystem
 @testable import AppComposition
 
 @MainActor struct AppEnvironmentTests {
@@ -83,6 +85,21 @@ import FlashcardFeature
         let after = deckList(second)
         await after.refresh()
         #expect(after.state.decks.first?.dueToday == total - 1)
+    }
+
+    @Test func bundledDocOpensAsMarkdown() async throws {
+        let root = temporary()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let environment = try await AppEnvironment.uiTesting(arguments: ["-ui-testing", "-content-fixture", "test-alpha",
+            "-store-in-memory"], packsRoot: Self.packs, workingDirectory: root)
+        let content = try #require(environment.activeExam.content)
+        let index = DocsIndexViewModel(content: content, router: environment.activeExam.router)
+        let row = try #require(index.sections.flatMap(\.rows).first { $0.isAvailable })
+        let model = DocViewModel(content: content, subObjective: row.id)
+        await model.load()
+        guard case .loaded(let document) = model.phase else { Issue.record("本文を読み込める"); return }
+        #expect(document.blocks.first.map { if case .heading = $0 { true } else { false } } == true)
+        #expect(document.blocks.contains { if case .paragraph = $0 { true } else { false } })
     }
 
     @Test func diskConfigurationRestoresLastSelection() async throws {
