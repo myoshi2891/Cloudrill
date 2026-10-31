@@ -26,11 +26,13 @@ public struct MarkdownDocument: Hashable, Sendable {
 
     /// 画像の参照先を、パックのルートからの相対パスに解決する。
     /// スキーム付き・絶対パス・`..` や空の区切りを含むパスは nil。パーセントエンコードは解いてから確かめる。
+    /// スキームは解いた後の先頭の区切りに `:` があるかで判定する(`javascript%3A...` も弾く)。
     public static func packAssetPath(_ source: String?) -> String? {
         guard let source, let decoded = source.removingPercentEncoding, !decoded.isEmpty,
-              !decoded.hasPrefix("/"), !decoded.contains("\\"), URL(string: source)?.scheme == nil else { return nil }
+              !decoded.hasPrefix("/"), !decoded.contains("\\") else { return nil }
         let parts = decoded.split(separator: "/", omittingEmptySubsequences: false)
-        guard !parts.contains(where: { $0 == ".." || $0.isEmpty }) else { return nil }
+        guard let first = parts.first, !first.contains(":"),
+              !parts.contains(where: { $0 == ".." || $0.isEmpty }) else { return nil }
         let normalized = parts.filter { $0 != "." }
         return normalized.isEmpty ? nil : normalized.joined(separator: "/")
     }

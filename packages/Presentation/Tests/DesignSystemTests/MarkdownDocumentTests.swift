@@ -46,7 +46,8 @@ struct MarkdownDocumentTests {
     }
 
     @Test(arguments: ["../x.svg", "assets/../../x.svg", "%2e%2e/x.svg", "/etc/x.svg", "https://example.com/x.svg",
-                      "file:///etc/x.svg", "", "assets//x.svg", "assets\\x.svg", "."])
+                      "file:///etc/x.svg", "", "assets//x.svg", "assets\\x.svg", ".",
+                      "javascript%3Aalert(1)", "https%3A//example.com/x.svg", "%68ttps%3A%2F%2Fexample.com/x.svg"])
     func pathsOutsidePackAreHidden(source: String) {
         #expect(MarkdownDocument.packAssetPath(source) == nil)
         #expect(MarkdownDocument(parsing: "![x](\(source))").blocks.allSatisfy {
