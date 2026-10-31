@@ -221,6 +221,27 @@ import XCTest
         reveal(relatedDoc, in: app)
         relatedDoc.tap()
         XCTAssertTrue(app.tabBars.buttons["学ぶ"].isSelected)
+        XCTAssertTrue(app.staticTexts["ダミーの本文です。"].waitForExistence(timeout: 5))
+    }
+
+    func testLearnDocsIndexAndDocumentOffline() {
+        let app = launch(["-content-fixture", "test-alpha"])
+        XCTAssertTrue(app.tabBars.buttons["学ぶ"].waitForExistence(timeout: 20))
+        app.tabBars.buttons["学ぶ"].tap()
+        XCTAssertTrue(app.buttons["learn-module-docs"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["learn-module-cases"].exists)
+        XCTAssertFalse(app.buttons["learn-module-trees"].exists)
+        app.buttons["learn-module-docs"].tap()
+        let available = app.buttons["doc-row-1.1"]
+        XCTAssertTrue(available.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["doc-row-1.2"].label.contains("準備中"))
+        XCTAssertFalse(app.buttons["doc-row-1.2"].isEnabled)
+        attachScreenshot(app, name: "Docs index")
+        available.tap()
+        XCTAssertTrue(app.staticTexts["ダミーの本文です。"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["出典"].exists)
+        XCTAssertTrue(app.buttons["doc-reference-0"].exists || app.links["doc-reference-0"].exists)
+        attachScreenshot(app, name: "Document")
     }
 
     func testPracticeFeedbackAndResultOffline() {
