@@ -11,6 +11,7 @@ let package = Package(
         .library(name: "HomeFeature", targets: ["HomeFeature"]),
         .library(name: "ExamFeature", targets: ["ExamFeature"]),
         .library(name: "PracticeFeature", targets: ["PracticeFeature"]),
+        .library(name: "FlashcardFeature", targets: ["FlashcardFeature"]),
     ],
     dependencies: [.package(path: "../DomainModels"), .package(path: "../Domain")],
     targets: [
@@ -32,7 +33,11 @@ let package = Package(
             .product(name: "DomainInterfaces", package: "Domain"), .product(name: "StudyModels", package: "Domain"),
             .product(name: "QuestionSelector", package: "Domain"), .product(name: "ExamEngine", package: "Domain")
         ], resources: [.process("Resources")]),
-        .testTarget(name: "AppCoreTests", dependencies: ["AppCore", "HomeFeature", "ExamFeature", "PracticeFeature",
+        .target(name: "FlashcardFeature", dependencies: ["AppCore", "DesignSystem", "DomainModels",
+            .product(name: "DomainInterfaces", package: "Domain"), .product(name: "StudyModels", package: "Domain"),
+            .product(name: "FSRS", package: "Domain")
+        ], resources: [.process("Resources")]),
+        .testTarget(name: "AppCoreTests", dependencies: ["AppCore", "HomeFeature", "ExamFeature", "PracticeFeature", "FlashcardFeature",
             .product(name: "DomainTestSupport", package: "Domain")]),
     ],
     swiftLanguageModes: [.v6]
