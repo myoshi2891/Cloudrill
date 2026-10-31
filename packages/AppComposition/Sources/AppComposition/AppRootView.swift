@@ -140,6 +140,10 @@ private struct MainTabView: View {
                             DocsIndexView(model: DocsIndexViewModel(content: content, domain: domain, router: router))
                         case .doc(let subObjective):
                             DocView(model: DocViewModel(content: content, subObjective: subObjective))
+                        case .caseList:
+                            CaseListView(model: CaseListViewModel(content: content, router: router))
+                        case .caseDetail(let id):
+                            CaseDetailView(model: CaseDetailViewModel(content: content, id: id, router: router))
                         case .cardSession(let deck):
                             CardSessionView(model: CardSessionViewModel(content: content, deck: deck, cards: dependencies.cards,
                                 settings: dependencies.settings, time: dependencies.time, calendar: .current, router: router))
