@@ -4,6 +4,9 @@ import AppCore
 import HomeFeature
 import ExamFeature
 import PracticeFeature
+import FlashcardFeature
+import LearnFeature
+import AnalyticsFeature
 import DomainModels
 import DomainInterfaces
 
@@ -93,6 +96,9 @@ private struct MainTabView: View {
     @State private var home: HomeViewModel
     @State private var sessions: ExamSessionStore
     @State private var submittedContent: SubmittedExamContentCache
+    @State private var decks: DeckListViewModel
+    @State private var analytics: AnalyticsViewModel
+    @Environment(\.scenePhase) private var scenePhase
 
     /// HomeViewModel は body の再評価(タブ切替・遷移)のたびに作り直さない。試験の切替は .id で作り直す。
     init(context: ActiveExamContext, content: any ExamContentProvider, dependencies: AppDependencies,
@@ -100,9 +106,12 @@ private struct MainTabView: View {
         self.context = context; self.content = content; self.dependencies = dependencies; self.selectExam = selectExam
         _sessions = State(initialValue: ExamSessionStore(examID: content.definition.id, dependencies: dependencies, router: context.router))
         _submittedContent = State(initialValue: SubmittedExamContentCache())
+        _decks = State(initialValue: DeckListViewModel(content: content, cards: dependencies.cards,
+            settings: dependencies.settings, time: dependencies.time, calendar: .autoupdatingCurrent, router: context.router))
         _home = State(initialValue: HomeViewModel(definition: content.definition,
             answers: dependencies.answers, cards: dependencies.cards,
             attempts: dependencies.attempts, time: dependencies.time, router: context.router))
+        _analytics = State(initialValue: AnalyticsViewModel(definition: content.definition, answers: dependencies.answers))
     }
 
     var body: some View {
@@ -117,6 +126,22 @@ private struct MainTabView: View {
                                      selectExam: selectExam)
                         } else if tab == .exam {
                             ExamTopView(content: content, router: router)
+                        } else if tab == .cards {
+                            DeckListView(model: decks)
+                                // 学習から一覧(ルート)へ戻ったら今日の枚数を読み直す
+                                .onChange(of: router.path(for: .cards).isEmpty) { _, isEmpty in
+                                    guard isEmpty else { return }
+                                    Task { await decks.refresh() }
+                                }
+                                // フォアグラウンド復帰時も読み直す(日付をまたいだ「今日」の枚数)
+                                .onChange(of: scenePhase) { _, phase in
+                                    guard phase == .active else { return }
+                                    Task { await decks.refresh() }
+                                }
+                        } else if tab == .learn {
+                            LearnTopView(content: content, router: router)
+                        } else if tab == .analytics {
+                            AnalyticsView(model: analytics)
                         } else {
                             pending(tab)
                         }
@@ -127,6 +152,17 @@ private struct MainTabView: View {
                             PracticeView(model: PracticeViewModel(content: content, preset: preset,
                                 answers: dependencies.answers, cards: dependencies.cards, time: dependencies.time,
                                 router: router, seedProvider: dependencies.seedProvider))
+                        case .docsIndex(let domain):
+                            DocsIndexView(model: DocsIndexViewModel(content: content, domain: domain, router: router))
+                        case .doc(let subObjective):
+                            DocView(model: DocViewModel(content: content, subObjective: subObjective))
+                        case .caseList:
+                            CaseListView(model: CaseListViewModel(content: content, router: router))
+                        case .caseDetail(let id):
+                            CaseDetailView(model: CaseDetailViewModel(content: content, id: id, router: router))
+                        case .cardSession(let deck):
+                            CardSessionView(model: CardSessionViewModel(content: content, deck: deck, cards: dependencies.cards,
+                                settings: dependencies.settings, time: dependencies.time, calendar: .autoupdatingCurrent, router: router))
                         case .examStart(let set):
                             ExamStartView(content: content, examSet: set, dependencies: dependencies, router: router)
                         case .examSession(let id):

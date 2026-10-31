@@ -1,0 +1,7 @@
+"analytics.title" = "分析";
+"analytics.byDomain" = "ドメイン別の正答率";
+"analytics.empty" = "まだ解答がありません。練習や模試を解くと正答率が表示されます";
+"analytics.count" = "%d / %d 問正解";
+"analytics.loadFailed" = "学習履歴を読み込めませんでした";
+"analytics.retry" = "再試行";
+"analytics.overall" = "ドメイン全体";

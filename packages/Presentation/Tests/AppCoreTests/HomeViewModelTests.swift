@@ -47,7 +47,7 @@ import FSRS
         let summary = AccuracySummary(definition: try SelectionFixtures.content("test-beta").definition, answers: facts)
         #expect(summary.byDomain[4]?.ratio == 0.5)
         #expect(summary.byDomain[2]?.ratio == nil)
-        #expect(summary.bySubObjective["4.1"]?.total == 2)
+        #expect(summary.bySubObjective[SubObjectiveKey(domain: 4, subObjective: "4.1")]?.total == 2)
     }
     @Test func resumeBanner() async throws {
         var attempt = try SelectionFixtures.attempt(); attempt.examID = "test-beta"

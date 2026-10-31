@@ -12,3 +12,9 @@
 "mistake.requirementMismatch" = "要件不一致";
 "mistake.deprecated" = "非推奨";
 "timer.finalMinute" = "残り 1 分未満";
+"markdown.image" = "図";
+"case.summary" = "要約";
+"case.business" = "ビジネス要件";
+"case.technical" = "技術要件";
+"case.environment" = "既存環境";
+"case.official" = "公式ページを見る";

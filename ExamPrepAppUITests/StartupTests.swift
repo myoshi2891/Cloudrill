@@ -221,6 +221,69 @@ import XCTest
         reveal(relatedDoc, in: app)
         relatedDoc.tap()
         XCTAssertTrue(app.tabBars.buttons["学ぶ"].isSelected)
+        XCTAssertTrue(app.staticTexts["ダミーの本文です。"].waitForExistence(timeout: 5))
+    }
+
+    func testLearnDocsIndexAndDocumentOffline() {
+        let app = launch(["-content-fixture", "test-alpha"])
+        XCTAssertTrue(app.tabBars.buttons["学ぶ"].waitForExistence(timeout: 20))
+        app.tabBars.buttons["学ぶ"].tap()
+        XCTAssertTrue(app.buttons["learn-module-docs"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["learn-module-cases"].exists)
+        XCTAssertFalse(app.buttons["learn-module-trees"].exists)
+        app.buttons["learn-module-docs"].tap()
+        let available = app.buttons["doc-row-1.1"]
+        XCTAssertTrue(available.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["doc-row-1.2"].label.contains("準備中"))
+        XCTAssertFalse(app.buttons["doc-row-1.2"].isEnabled)
+        attachScreenshot(app, name: "Docs index")
+        available.tap()
+        XCTAssertTrue(app.staticTexts["ダミーの本文です。"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["出典"].exists)
+        XCTAssertTrue(app.buttons["doc-reference-0"].exists || app.links["doc-reference-0"].exists)
+        attachScreenshot(app, name: "Document")
+    }
+
+    func testLearnCaseListDetailAndPracticeOffline() {
+        let app = launch(["-content-fixture", "test-alpha"])
+        XCTAssertTrue(app.tabBars.buttons["学ぶ"].waitForExistence(timeout: 20))
+        app.tabBars.buttons["学ぶ"].tap()
+        XCTAssertTrue(app.buttons["learn-module-cases"].waitForExistence(timeout: 5))
+        app.buttons["learn-module-cases"].tap()
+        // 試験定義の caseStudies(ehr, altostrat)の順
+        let first = app.buttons["case-row-ehr"]
+        let second = app.buttons["case-row-altostrat"]
+        XCTAssertTrue(first.waitForExistence(timeout: 5))
+        XCTAssertTrue(second.exists)
+        XCTAssertLessThan(first.frame.minY, second.frame.minY)
+        attachScreenshot(app, name: "Case list")
+        first.tap()
+        for header in ["要約", "ビジネス要件", "技術要件", "既存環境"] {
+            XCTAssertTrue(app.staticTexts[header].waitForExistence(timeout: 5), header)
+        }
+        let official = app.buttons["case-official"].exists ? app.buttons["case-official"] : app.links["case-official"]
+        XCTAssertTrue(official.exists)
+        attachScreenshot(app, name: "Case detail")
+        let practice = app.buttons["case-practice"]
+        reveal(practice, in: app)
+        practice.tap()
+        XCTAssertTrue(app.navigationBars["練習"].waitForExistence(timeout: 5))
+    }
+
+    func testAnalyticsShowsDomainsWithoutAnswersOffline() {
+        let app = launch(["-content-fixture", "test-beta"])
+        XCTAssertTrue(app.tabBars.buttons["分析"].waitForExistence(timeout: 20))
+        app.tabBars.buttons["分析"].tap()
+        XCTAssertTrue(app.staticTexts["analytics-empty"].waitForExistence(timeout: 5))
+        // test-beta の4ドメインを、解答なし(0% ではなく「—」)で出す
+        for id in 1...4 {
+            let row = app.descendants(matching: .any)["analytics-domain-\(id)"]
+            reveal(row, in: app)
+            XCTAssertTrue(row.exists, "domain \(id)")
+            XCTAssertTrue(row.label.contains("—"), row.label)
+        }
+        XCTAssertFalse(app.descendants(matching: .any)["analytics-domain-5"].exists)
+        attachScreenshot(app, name: "Analytics")
     }
 
     func testPracticeFeedbackAndResultOffline() {
@@ -246,6 +309,32 @@ import XCTest
         XCTAssertTrue(app.staticTexts["practice-score"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["practice-score"].label.contains("/ 10 問正解"))
         attachScreenshot(app, name: "Practice result")
+    }
+
+    func testFlashcardDeckStudyAndFinishOffline() {
+        let app = launch(["-content-fixture", "test-beta"])
+        XCTAssertTrue(app.tabBars.buttons["カード"].waitForExistence(timeout: 20))
+        app.tabBars.buttons["カード"].tap()
+        let deck = app.buttons["deck-all"]
+        XCTAssertTrue(deck.waitForExistence(timeout: 5))
+        XCTAssertTrue(deck.label.contains("今日 2 枚"))
+        deck.tap()
+        for _ in 0..<2 {
+            XCTAssertTrue(app.staticTexts["card-front"].waitForExistence(timeout: 5))
+            app.buttons["card-flip"].tap()
+            let easy = app.buttons["card-rate-easy"]
+            XCTAssertTrue(easy.waitForExistence(timeout: 5))
+            XCTAssertTrue(easy.label.contains("簡単") && easy.label.contains("日"), easy.label)
+            easy.tap()
+        }
+        XCTAssertTrue(app.staticTexts["card-finished-count"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["card-finished-count"].label.contains("2 枚を学習しました"))
+        attachScreenshot(app, name: "Flashcard finished")
+        app.buttons["card-back-to-decks"].tap()
+        XCTAssertTrue(app.buttons["deck-all"].waitForExistence(timeout: 5))
+        let refreshed = NSPredicate(format: "label CONTAINS %@", "今日 0 枚")
+        expectation(for: refreshed, evaluatedWith: app.buttons["deck-all"])
+        waitForExpectations(timeout: 5)
     }
 
     private func reveal(_ element: XCUIElement, in app: XCUIApplication) {

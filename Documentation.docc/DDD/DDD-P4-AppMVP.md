@@ -149,6 +149,43 @@ env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --packag
 - Presentation 91テスト、AppComposition 11テスト、Releaseビルド、Simulator UIテスト3件が成功した。
 - 次は **P4-S11 フラッシュカード**。検証結果と既存境界は `docs/handoffs/2026-10-30-p4-s10-practice.md` を参照。
 
+### 継続実装: P4-S11 フラッシュカード（2026-10-31）
+
+- `FlashcardFeature` を追加し、カードタブに `DeckListViewModel`・`DeckListView`（SCR-030）、`.cardSession(DeckID)` に `CardSessionViewModel`・`CardSessionView`（SCR-031/032）を接続した。`features.flashcards` が無効なら読み込まず「この試験にはカードがありません」を表示する。
+- デッキは すべて → 試験定義順のドメイン・サブ項目 → 間違えた問題（`Q:` カード）。カードのないデッキは出さない。`Q:` カードの分類は問題索引から引き、索引にない問題のカードは除外する。`DeckID` は `all`・`domain:<n>`・`sub:<id>`・`mistakes` で符号化する。予約済みの `.deck` ルートは使っていない。
+- 内部の `CardLibrary` がデッキ一覧と学習で同じキューを作る。復習は状態あり・`.new` 以外、新規は状態なしのコンテンツカード → `.new` の `Q:` カードの順で `DailyQueueBuilder` に渡す。上限は `ExamPreference` の値から、注入 Calendar での今日の試験全体の実績（`reviewCount`）を差し引く。
+- 学習は表 → 「答えを見る」→ 4評価。各ボタンに `FSRSScheduler.review` から求めた次の間隔（分・時間・日・か月・年）を出す。`apply` の保存成功後にだけ次へ進め、失敗時は位置を保ち同じ結果（時刻を含む）で再試行する。保存中の連打は拒否する。`Q:` カードは表に問題文、裏に正解の選択肢と理由を出す。日英は英語があれば併記する（FR-CARD-06）。完了画面に学習枚数と評価別の枚数を出す。
+- 同じセッション内では、Again などで今日中に期限が来るカードを再出題しない（デッキ一覧の今日の枚数に残り、次のセッションで出る）。
+- Presentation 104テスト（DesignSystem 7、AppCoreTests 97、S11 13件）、AppComposition 12テスト（実ストアの評価・再起動後の状態と今日の枚数）、Releaseビルド、Simulator UIテスト（S11 1件・既存2件）が成功した。
+- 次は **P4-S12 関連ドキュメント**。引き継ぎは `docs/handoffs/2026-10-31-p4-s11-flashcards.md`。
+
+### 継続実装: P4-S12 ドキュメント（2026-10-31）
+
+- 利用者の承認により `swift-markdown` 0.9.0（swift-cmark 0.9.0 を含む）を Presentation に追加した（DDD 8 章）。パースだけに使い、描画は自前の SwiftUI。
+- `DesignSystem` に `MarkdownDocument`（中間表現）と `MarkdownView` を追加。見出し・段落・箇条書き・引用・表・コード・画像・区切り線に変換し、インラインは Markdown 文字列のまま `AttributedString` で描画する。HTML と未対応ブロックは段落の文字列にする。`format()` は祖先の記号（引用の `> `）も出力するため、親から切り離して整形する。
+- 画像はパックのルートからの相対パスに解決する（`packAssetPath`）。スキーム付き・絶対パス・`..`（パーセントエンコードを含む）・空の区切りは表示しない。パック形式に assets がないため、利用者の決定により画像は代替テキストの表示までとし、同梱は後続で扱う。
+- `LearnFeature` を追加。`LearnModuleRegistry.standard` は docs → `.docsIndex`、caseStudies → `.caseList`（本文は S13）だけを登録する（ツリーとドリルは P6）。`DocsIndexViewModel` は試験定義の順にサブ項目を並べ、ドキュメントのないものは「準備中」で選べない。`DocViewModel` は本文を読み込み、出典を `ReferenceLink`（CC BY 4.0／Apache 2.0 の表示）で出す。索引にないサブ項目は notFound、読込失敗は再試行できる。
+- 学ぶタブと `.docsIndex`・`.doc` を Composition root に接続し、解説画面の「関連ドキュメント」から本文まで遷移できるようになった。
+- Presentation 117テスト（DesignSystem 13、AppCoreTests 104。S12 は 13件）、AppComposition 13テスト（同梱パックの本文変換）、Releaseビルド、Simulator UIテスト（S12 1件、関連ドキュメントの遷移先を確認する既存1件を強化）が成功した。目次・本文のスクリーンショットを目視確認した。
+- 次は **P4-S13 ケーススタディの要約**。引き継ぎは `docs/handoffs/2026-10-31-p4-s12-docs.md`。
+
+### 継続実装: P4-S13 ケーススタディの要約（2026-10-31）
+
+- `LearnFeature` に `CaseListViewModel`（SCR-043）と `CaseDetailViewModel`（SCR-044）、`CaseListView`・`CaseDetailView` を追加。一覧は試験定義の `caseStudies` の順に並べ、定義にないケースは出さない。詳細は定義にない ID と無効な試験では読み込まずに notFound、読込失敗は一覧・詳細とも再試行できる。
+- 「このケースの問題を解く」は `.practiceSetup(.caseStudy(id))` を開き、試験タブの練習条件設定（S10 のプリセット処理）へ移る。
+- 要約・ビジネス要件・技術要件・既存環境・公式リンク（LG-03）の表示を `DesignSystem` の `CaseStudySections` に移し、解答中の `CaseSheetView` と共有した。対応する文字列も DesignSystem へ移した。
+- Composition root の `.caseList`・`.caseDetail` を接続した。要件マッピング（FR-CASE-02）は P6-S06。
+- Presentation 123テスト（DesignSystem 13、AppCoreTests 110。S13 は 6件）、AppComposition 13テスト、Releaseビルド、Simulator UIテスト（S13 1件と S12 のドキュメント1件）が成功した。一覧・詳細のスクリーンショットを目視確認した。
+- 次は **P4-S14 基本の分析**。引き継ぎは `docs/handoffs/2026-10-31-p4-s13-cases.md`。
+
+### 継続実装: P4-S14 基本の分析（2026-10-31）
+
+- Presentation に `AnalyticsFeature` を追加（Swift Charts は OS 同梱で外部依存は増えない）。`AnalyticsViewModel` は選択中の試験の `outcomes(examID:)` だけを読み、`AccuracySummary` で集計する。ドメインは試験定義の順で全件、サブ項目は定義の順で解答のあるものだけを出す。
+- 正答率は四捨五入の整数 %。解答0件は `ScoreTally.ratio` が nil なので「—」とし、全問不正解の「0%」と区別する。読み込み中の再要求は完了後に再実行し（`HomeViewModel` と同じ）、失敗時は前回の集計を保って再試行できる。
+- `AnalyticsView`（SCR-050）は解答のあるドメインの横棒グラフ（ドメイン配色）と、ドメインごとの「ドメイン全体」・サブ項目の行を出す。タブ表示・引き下げ・フォアグラウンド復帰で再集計する。Composition root の分析タブに接続した。SCR-051（`.analyticsDomain`）と合格準備度（FR-ANLY-02）は範囲外。
+- Presentation 130テスト（DesignSystem 13、AppCoreTests 117。S14 は 7件）、AppComposition 13テスト、Releaseビルド、Simulator UIテスト（S14 1件）が成功した。解答なしの画面のスクリーンショットを目視確認した。
+- 次は **P4-S15 誤り報告のシートと送信キュー**。引き継ぎは `docs/handoffs/2026-10-31-p4-s14-analytics.md`。
+
 ---
 
 ## 3. 設計

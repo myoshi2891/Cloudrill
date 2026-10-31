@@ -1,0 +1,17 @@
+"learn.title" = "学ぶ";
+"learn.empty" = "この試験には学習コンテンツがありません";
+"learn.module.docs" = "ドキュメント";
+"learn.module.cases" = "ケーススタディ";
+"docs.title" = "ドキュメント";
+"docs.unavailable" = "この試験にはドキュメントがありません";
+"docs.preparing" = "準備中";
+"doc.references" = "出典";
+"doc.notFound" = "このサブ項目のドキュメントはまだありません";
+"doc.loadFailed" = "ドキュメントを読み込めませんでした";
+"doc.retry" = "再試行";
+"cases.title" = "ケーススタディ";
+"cases.unavailable" = "この試験にはケーススタディがありません";
+"cases.loadFailed" = "ケーススタディを読み込めませんでした";
+"case.notFound" = "このケーススタディは見つかりません";
+"case.loadFailed" = "ケーススタディを読み込めませんでした";
+"case.practice" = "このケースの問題を解く";
