@@ -244,6 +244,32 @@ import XCTest
         attachScreenshot(app, name: "Document")
     }
 
+    func testLearnCaseListDetailAndPracticeOffline() {
+        let app = launch(["-content-fixture", "test-alpha"])
+        XCTAssertTrue(app.tabBars.buttons["学ぶ"].waitForExistence(timeout: 20))
+        app.tabBars.buttons["学ぶ"].tap()
+        XCTAssertTrue(app.buttons["learn-module-cases"].waitForExistence(timeout: 5))
+        app.buttons["learn-module-cases"].tap()
+        // 試験定義の caseStudies(ehr, altostrat)の順
+        let first = app.buttons["case-row-ehr"]
+        let second = app.buttons["case-row-altostrat"]
+        XCTAssertTrue(first.waitForExistence(timeout: 5))
+        XCTAssertTrue(second.exists)
+        XCTAssertLessThan(first.frame.minY, second.frame.minY)
+        attachScreenshot(app, name: "Case list")
+        first.tap()
+        for header in ["要約", "ビジネス要件", "技術要件", "既存環境"] {
+            XCTAssertTrue(app.staticTexts[header].waitForExistence(timeout: 5), header)
+        }
+        let official = app.buttons["case-official"].exists ? app.buttons["case-official"] : app.links["case-official"]
+        XCTAssertTrue(official.exists)
+        attachScreenshot(app, name: "Case detail")
+        let practice = app.buttons["case-practice"]
+        reveal(practice, in: app)
+        practice.tap()
+        XCTAssertTrue(app.navigationBars["練習"].waitForExistence(timeout: 5))
+    }
+
     func testPracticeFeedbackAndResultOffline() {
         let app = launch(["-content-fixture", "test-beta"])
         XCTAssertTrue(app.buttons["homeStartLearning"].waitForExistence(timeout: 20))
