@@ -127,6 +127,11 @@ private struct MainTabView: View {
                             ExamTopView(content: content, router: router)
                         } else if tab == .cards {
                             DeckListView(model: decks)
+                                // 学習から一覧(ルート)へ戻ったら今日の枚数を読み直す
+                                .onChange(of: router.path(for: .cards).isEmpty) { _, isEmpty in
+                                    guard isEmpty else { return }
+                                    Task { await decks.refresh() }
+                                }
                         } else if tab == .learn {
                             LearnTopView(content: content, router: router)
                         } else if tab == .analytics {
