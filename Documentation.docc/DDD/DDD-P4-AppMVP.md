@@ -178,6 +178,14 @@ env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --packag
 - Presentation 123テスト（DesignSystem 13、AppCoreTests 110。S13 は 6件）、AppComposition 13テスト、Releaseビルド、Simulator UIテスト（S13 1件と S12 のドキュメント1件）が成功した。一覧・詳細のスクリーンショットを目視確認した。
 - 次は **P4-S14 基本の分析**。引き継ぎは `docs/handoffs/2026-10-31-p4-s13-cases.md`。
 
+### 継続実装: P4-S14 基本の分析（2026-10-31）
+
+- Presentation に `AnalyticsFeature` を追加（Swift Charts は OS 同梱で外部依存は増えない）。`AnalyticsViewModel` は選択中の試験の `outcomes(examID:)` だけを読み、`AccuracySummary` で集計する。ドメインは試験定義の順で全件、サブ項目は定義の順で解答のあるものだけを出す。
+- 正答率は四捨五入の整数 %。解答0件は `ScoreTally.ratio` が nil なので「—」とし、全問不正解の「0%」と区別する。読み込み中の再要求は完了後に再実行し（`HomeViewModel` と同じ）、失敗時は前回の集計を保って再試行できる。
+- `AnalyticsView`（SCR-050）は解答のあるドメインの横棒グラフ（ドメイン配色）と、ドメインごとの「ドメイン全体」・サブ項目の行を出す。タブ表示・引き下げ・フォアグラウンド復帰で再集計する。Composition root の分析タブに接続した。SCR-051（`.analyticsDomain`）と合格準備度（FR-ANLY-02）は範囲外。
+- Presentation 130テスト（DesignSystem 13、AppCoreTests 117。S14 は 7件）、AppComposition 13テスト、Releaseビルド、Simulator UIテスト（S14 1件）が成功した。解答なしの画面のスクリーンショットを目視確認した。
+- 次は **P4-S15 誤り報告のシートと送信キュー**。引き継ぎは `docs/handoffs/2026-10-31-p4-s14-analytics.md`。
+
 ---
 
 ## 3. 設計
