@@ -186,6 +186,15 @@ env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --packag
 - Presentation 130テスト（DesignSystem 13、AppCoreTests 117。S14 は 7件）、AppComposition 13テスト、Releaseビルド、Simulator UIテスト（S14 1件）が成功した。解答なしの画面のスクリーンショットを目視確認した。
 - 次は **P4-S15 誤り報告のシートと送信キュー**。引き継ぎは `docs/handoffs/2026-10-31-p4-s14-analytics.md`。
 
+### 継続実装: P4-S15 誤り報告のシートと送信キュー（2026-11-01）
+
+- `DomainInterfaces/ReportQueue.swift` に `ReportReason`（BDD 7.2 の6種・同順）、`PendingReportEntry`（C-11 の文脈）、`ReportQueue`（enqueue／pending／remove／removeAll）、`ReportSending`（P5 の `ReportClient` が実装）を追加。
+- キューは学習履歴と**別ストア**（`ReportQueue.store`、`ReportQueueSchemaV1`・`ReportQueueMigrationPlan`、CloudKit なし）。学習履歴を同期すると端末ごとに同じ報告を送り、自由記述も iCloud に複製されるため。これにより本節 Green の「SchemaV1/V2 に追加」案は採らず、学習履歴のスキーマは変更していない。`SwiftDataReportQueue` は `Storage` を共用する。
+- Presentation に `SettingsFeature`（`ReportSheetViewModel`・`ReportSheetView`）を追加。`QuestionReportContext` は AppCore へ移し、`ReportMetadata`（アプリの版・BCP-47 ロケール）を追加。`AppDependencies` に `reports`・`reportSender`（P4 は nil）・`reportMetadata` を追加した。報告は先に保存し、送信の仕組みがなければ「受け付けました」、送信できなければ E-08、送信できればキューから外す。コメントは書記素単位で500文字、保存失敗は再試行でき、送信中の重複を拒否する。結果とエラーは画面下端に出す。
+- 解説画面（模試の結果・練習の即時解説）の報告シートを差し替えた。
+- テスト: Data 6件（`queuePersists` ほか）、Presentation 8件（DDD の Red 表5件＋送信済みの削除・保存失敗の再試行・重複拒否）。Domain・Data・Presentation（139）・AppComposition（13）、Releaseビルド、Simulator UIテスト（結果→解説→報告の送信）が成功した。
+- 次は **P4-S16 設定**。全データ削除では `ReportQueue.removeAll(examID:)` も呼ぶ。引き継ぎは `docs/handoffs/2026-11-01-p4-s15-report.md`。
+
 ---
 
 ## 3. 設計
