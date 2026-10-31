@@ -13,6 +13,7 @@ let package = Package(
         .library(name: "PracticeFeature", targets: ["PracticeFeature"]),
         .library(name: "FlashcardFeature", targets: ["FlashcardFeature"]),
         .library(name: "LearnFeature", targets: ["LearnFeature"]),
+        .library(name: "AnalyticsFeature", targets: ["AnalyticsFeature"]),
     ],
     dependencies: [.package(path: "../DomainModels"), .package(path: "../Domain"),
                    // Markdown のパースだけに使う。描画は DesignSystem.MarkdownView(DDD 8 章)
@@ -44,8 +45,12 @@ let package = Package(
         .target(name: "LearnFeature", dependencies: ["AppCore", "DesignSystem", "DomainModels",
             .product(name: "DomainInterfaces", package: "Domain")
         ], resources: [.process("Resources")]),
+        // グラフは OS 同梱の Swift Charts を使う
+        .target(name: "AnalyticsFeature", dependencies: ["AppCore", "DesignSystem", "DomainModels",
+            .product(name: "DomainInterfaces", package: "Domain"), .product(name: "StudyModels", package: "Domain")
+        ], resources: [.process("Resources")]),
         .testTarget(name: "AppCoreTests", dependencies: ["AppCore", "HomeFeature", "ExamFeature", "PracticeFeature", "FlashcardFeature",
-            "LearnFeature",
+            "LearnFeature", "AnalyticsFeature",
             .product(name: "DomainTestSupport", package: "Domain")]),
     ],
     swiftLanguageModes: [.v6]
