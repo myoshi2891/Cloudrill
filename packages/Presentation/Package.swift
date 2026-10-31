@@ -50,8 +50,8 @@ let package = Package(
         .target(name: "AnalyticsFeature", dependencies: ["AppCore", "DesignSystem", "DomainModels",
             .product(name: "DomainInterfaces", package: "Domain"), .product(name: "StudyModels", package: "Domain")
         ], resources: [.process("Resources")]),
-        // 誤り報告のシート(SCR-090)。S16 で設定画面を追加する
-        .target(name: "SettingsFeature", dependencies: ["AppCore", "DesignSystem",
+        // 設定(SCR-002)と誤り報告のシート(SCR-090)
+        .target(name: "SettingsFeature", dependencies: ["AppCore", "DesignSystem", "DomainModels",
             .product(name: "DomainInterfaces", package: "Domain"), .product(name: "StudyModels", package: "Domain")
         ], resources: [.process("Resources")]),
         .testTarget(name: "AppCoreTests", dependencies: ["AppCore", "HomeFeature", "ExamFeature", "PracticeFeature", "FlashcardFeature",

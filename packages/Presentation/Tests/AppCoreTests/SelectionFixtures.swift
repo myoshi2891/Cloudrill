@@ -54,6 +54,7 @@ actor SelectionSettings: SettingsRepository {
     private var readObserver: CheckedContinuation<Void, Never>?
     init(current: ExamID? = nil) { value = UserSettings(currentExamID: current, displayLanguage: .en, shuffleChoices: true) }
     func rejectSaves() { failSave = true }
+    func reset() { value = UserSettings() }
     func pauseNextRead() { pauseRead = true }
     func waitForPausedRead() async {
         if pendingRead != nil { return }
