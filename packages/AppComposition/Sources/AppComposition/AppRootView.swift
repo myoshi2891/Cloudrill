@@ -98,6 +98,7 @@ private struct MainTabView: View {
     @State private var submittedContent: SubmittedExamContentCache
     @State private var decks: DeckListViewModel
     @State private var analytics: AnalyticsViewModel
+    @Environment(\.scenePhase) private var scenePhase
 
     /// HomeViewModel は body の再評価(タブ切替・遷移)のたびに作り直さない。試験の切替は .id で作り直す。
     init(context: ActiveExamContext, content: any ExamContentProvider, dependencies: AppDependencies,
@@ -130,6 +131,11 @@ private struct MainTabView: View {
                                 // 学習から一覧(ルート)へ戻ったら今日の枚数を読み直す
                                 .onChange(of: router.path(for: .cards).isEmpty) { _, isEmpty in
                                     guard isEmpty else { return }
+                                    Task { await decks.refresh() }
+                                }
+                                // フォアグラウンド復帰時も読み直す(日付をまたいだ「今日」の枚数)
+                                .onChange(of: scenePhase) { _, phase in
+                                    guard phase == .active else { return }
                                     Task { await decks.refresh() }
                                 }
                         } else if tab == .learn {
