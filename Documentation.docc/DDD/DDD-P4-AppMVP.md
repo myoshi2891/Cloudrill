@@ -169,6 +169,15 @@ env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --packag
 - Presentation 117テスト（DesignSystem 13、AppCoreTests 104。S12 は 13件）、AppComposition 13テスト（同梱パックの本文変換）、Releaseビルド、Simulator UIテスト（S12 1件、関連ドキュメントの遷移先を確認する既存1件を強化）が成功した。目次・本文のスクリーンショットを目視確認した。
 - 次は **P4-S13 ケーススタディの要約**。引き継ぎは `docs/handoffs/2026-10-31-p4-s12-docs.md`。
 
+### 継続実装: P4-S13 ケーススタディの要約（2026-10-31）
+
+- `LearnFeature` に `CaseListViewModel`（SCR-043）と `CaseDetailViewModel`（SCR-044）、`CaseListView`・`CaseDetailView` を追加。一覧は試験定義の `caseStudies` の順に並べ、定義にないケースは出さない。詳細は定義にない ID と無効な試験では読み込まずに notFound、読込失敗は一覧・詳細とも再試行できる。
+- 「このケースの問題を解く」は `.practiceSetup(.caseStudy(id))` を開き、試験タブの練習条件設定（S10 のプリセット処理）へ移る。
+- 要約・ビジネス要件・技術要件・既存環境・公式リンク（LG-03）の表示を `DesignSystem` の `CaseStudySections` に移し、解答中の `CaseSheetView` と共有した。対応する文字列も DesignSystem へ移した。
+- Composition root の `.caseList`・`.caseDetail` を接続した。要件マッピング（FR-CASE-02）は P6-S06。
+- Presentation 123テスト（DesignSystem 13、AppCoreTests 110。S13 は 6件）、AppComposition 13テスト、Releaseビルド、Simulator UIテスト（S13 1件と S12 のドキュメント1件）が成功した。一覧・詳細のスクリーンショットを目視確認した。
+- 次は **P4-S14 基本の分析**。引き継ぎは `docs/handoffs/2026-10-31-p4-s13-cases.md`。
+
 ---
 
 ## 3. 設計
