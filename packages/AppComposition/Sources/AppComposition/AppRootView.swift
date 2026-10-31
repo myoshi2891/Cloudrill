@@ -6,6 +6,7 @@ import ExamFeature
 import PracticeFeature
 import FlashcardFeature
 import LearnFeature
+import AnalyticsFeature
 import DomainModels
 import DomainInterfaces
 
@@ -96,6 +97,7 @@ private struct MainTabView: View {
     @State private var sessions: ExamSessionStore
     @State private var submittedContent: SubmittedExamContentCache
     @State private var decks: DeckListViewModel
+    @State private var analytics: AnalyticsViewModel
 
     /// HomeViewModel は body の再評価(タブ切替・遷移)のたびに作り直さない。試験の切替は .id で作り直す。
     init(context: ActiveExamContext, content: any ExamContentProvider, dependencies: AppDependencies,
@@ -108,6 +110,7 @@ private struct MainTabView: View {
         _home = State(initialValue: HomeViewModel(definition: content.definition,
             answers: dependencies.answers, cards: dependencies.cards,
             attempts: dependencies.attempts, time: dependencies.time, router: context.router))
+        _analytics = State(initialValue: AnalyticsViewModel(definition: content.definition, answers: dependencies.answers))
     }
 
     var body: some View {
@@ -126,6 +129,8 @@ private struct MainTabView: View {
                             DeckListView(model: decks)
                         } else if tab == .learn {
                             LearnTopView(content: content, router: router)
+                        } else if tab == .analytics {
+                            AnalyticsView(model: analytics)
                         } else {
                             pending(tab)
                         }
