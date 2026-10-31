@@ -1,0 +1,11 @@
+"learn.title" = "学ぶ";
+"learn.empty" = "この試験には学習コンテンツがありません";
+"learn.module.docs" = "ドキュメント";
+"learn.module.cases" = "ケーススタディ";
+"docs.title" = "ドキュメント";
+"docs.unavailable" = "この試験にはドキュメントがありません";
+"docs.preparing" = "準備中";
+"doc.references" = "出典";
+"doc.notFound" = "このサブ項目のドキュメントはまだありません";
+"doc.loadFailed" = "ドキュメントを読み込めませんでした";
+"doc.retry" = "再試行";

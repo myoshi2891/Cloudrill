@@ -12,10 +12,14 @@ let package = Package(
         .library(name: "ExamFeature", targets: ["ExamFeature"]),
         .library(name: "PracticeFeature", targets: ["PracticeFeature"]),
         .library(name: "FlashcardFeature", targets: ["FlashcardFeature"]),
+        .library(name: "LearnFeature", targets: ["LearnFeature"]),
     ],
-    dependencies: [.package(path: "../DomainModels"), .package(path: "../Domain")],
+    dependencies: [.package(path: "../DomainModels"), .package(path: "../Domain"),
+                   // Markdown のパースだけに使う。描画は DesignSystem.MarkdownView(DDD 8 章)
+                   .package(url: "https://github.com/swiftlang/swift-markdown.git", .upToNextMinor(from: "0.9.0"))],
     targets: [
-        .target(name: "DesignSystem", dependencies: ["DomainModels"], resources: [.process("Resources")]),
+        .target(name: "DesignSystem", dependencies: ["DomainModels", .product(name: "Markdown", package: "swift-markdown")],
+                resources: [.process("Resources")]),
         .testTarget(name: "DesignSystemTests", dependencies: ["DesignSystem", "DomainModels"]),
         .target(name: "AppCore", dependencies: [
             "DomainModels", .product(name: "DomainInterfaces", package: "Domain"),
@@ -37,7 +41,11 @@ let package = Package(
             .product(name: "DomainInterfaces", package: "Domain"), .product(name: "StudyModels", package: "Domain"),
             .product(name: "FSRS", package: "Domain")
         ], resources: [.process("Resources")]),
+        .target(name: "LearnFeature", dependencies: ["AppCore", "DesignSystem", "DomainModels",
+            .product(name: "DomainInterfaces", package: "Domain")
+        ], resources: [.process("Resources")]),
         .testTarget(name: "AppCoreTests", dependencies: ["AppCore", "HomeFeature", "ExamFeature", "PracticeFeature", "FlashcardFeature",
+            "LearnFeature",
             .product(name: "DomainTestSupport", package: "Domain")]),
     ],
     swiftLanguageModes: [.v6]

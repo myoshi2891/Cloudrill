@@ -12,3 +12,4 @@
 "mistake.requirementMismatch" = "要件不一致";
 "mistake.deprecated" = "非推奨";
 "timer.finalMinute" = "残り 1 分未満";
+"markdown.image" = "図";

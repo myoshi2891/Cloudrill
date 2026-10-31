@@ -97,10 +97,7 @@ import FSRS
         #expect(days >= 1)
     }
 
-    @Test(arguments: [
-        (59.0, CardInterval.minutes(1)), (600, .minutes(10)), (3_600, .hours(1)), (3 * 86_400, .days(3)),
-        (60 * 86_400, .months(2)), (400 * 86_400, .years(1)),
-    ])
+    @Test(arguments: intervalBucketCases)
     func intervalBuckets(seconds: Double, expected: CardInterval) {
         #expect(CardInterval(seconds: seconds) == expected)
     }
@@ -190,6 +187,12 @@ import FSRS
 }
 
 // MARK: - Support
+
+/// 秒数と期待する区分。@Test マクロ内の型推論を軽くするため、型を明示し算術を使わない(3日・60日・400日)
+private let intervalBucketCases: [(Double, CardInterval)] = [
+    (59, .minutes(1)), (600, .minutes(10)), (3_600, .hours(1)), (259_200, .days(3)),
+    (5_184_000, .months(2)), (34_560_000, .years(1)),
+]
 
 private func card(_ id: String, _ domain: Int, _ sub: String) -> Flashcard {
     let json = """
