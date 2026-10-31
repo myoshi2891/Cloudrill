@@ -14,6 +14,7 @@ let package = Package(
         .library(name: "FlashcardFeature", targets: ["FlashcardFeature"]),
         .library(name: "LearnFeature", targets: ["LearnFeature"]),
         .library(name: "AnalyticsFeature", targets: ["AnalyticsFeature"]),
+        .library(name: "SettingsFeature", targets: ["SettingsFeature"]),
     ],
     dependencies: [.package(path: "../DomainModels"), .package(path: "../Domain"),
                    // Markdown のパースだけに使う。描画は DesignSystem.MarkdownView(DDD 8 章)
@@ -30,7 +31,7 @@ let package = Package(
             "AppCore", "DomainModels", "DesignSystem", .product(name: "DomainInterfaces", package: "Domain"),
             .product(name: "StudyModels", package: "Domain"),
         ], resources: [.process("Resources")]),
-        .target(name: "ExamFeature", dependencies: ["AppCore", "DomainModels", "DesignSystem",
+        .target(name: "ExamFeature", dependencies: ["AppCore", "DomainModels", "DesignSystem", "SettingsFeature",
             .product(name: "DomainInterfaces", package: "Domain"),
             .product(name: "StudyModels", package: "Domain"), .product(name: "ExamEngine", package: "Domain"),
         ], resources: [.process("Resources")]),
@@ -49,8 +50,12 @@ let package = Package(
         .target(name: "AnalyticsFeature", dependencies: ["AppCore", "DesignSystem", "DomainModels",
             .product(name: "DomainInterfaces", package: "Domain"), .product(name: "StudyModels", package: "Domain")
         ], resources: [.process("Resources")]),
+        // 設定(SCR-002)と誤り報告のシート(SCR-090)
+        .target(name: "SettingsFeature", dependencies: ["AppCore", "DesignSystem", "DomainModels",
+            .product(name: "DomainInterfaces", package: "Domain"), .product(name: "StudyModels", package: "Domain")
+        ], resources: [.process("Resources")]),
         .testTarget(name: "AppCoreTests", dependencies: ["AppCore", "HomeFeature", "ExamFeature", "PracticeFeature", "FlashcardFeature",
-            "LearnFeature", "AnalyticsFeature",
+            "LearnFeature", "AnalyticsFeature", "SettingsFeature",
             .product(name: "DomainTestSupport", package: "Domain")]),
     ],
     swiftLanguageModes: [.v6]

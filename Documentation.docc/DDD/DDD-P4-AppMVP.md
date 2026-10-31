@@ -186,6 +186,24 @@ env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --packag
 - Presentation 130テスト（DesignSystem 13、AppCoreTests 117。S14 は 7件）、AppComposition 13テスト、Releaseビルド、Simulator UIテスト（S14 1件）が成功した。解答なしの画面のスクリーンショットを目視確認した。
 - 次は **P4-S15 誤り報告のシートと送信キュー**。引き継ぎは `docs/handoffs/2026-10-31-p4-s14-analytics.md`。
 
+### 継続実装: P4-S15 誤り報告のシートと送信キュー（2026-11-01）
+
+- `DomainInterfaces/ReportQueue.swift` に `ReportReason`（BDD 7.2 の6種・同順）、`PendingReportEntry`（C-11 の文脈）、`ReportQueue`（enqueue／pending／remove／removeAll）、`ReportSending`（P5 の `ReportClient` が実装）を追加。
+- キューは学習履歴と**別ストア**（`ReportQueue.store`、`ReportQueueSchemaV1`・`ReportQueueMigrationPlan`、CloudKit なし）。学習履歴を同期すると端末ごとに同じ報告を送り、自由記述も iCloud に複製されるため。これにより本節 Green の「SchemaV1/V2 に追加」案は採らず、学習履歴のスキーマは変更していない。`SwiftDataReportQueue` は `Storage` を共用する。
+- Presentation に `SettingsFeature`（`ReportSheetViewModel`・`ReportSheetView`）を追加。`QuestionReportContext` は AppCore へ移し、`ReportMetadata`（アプリの版・BCP-47 ロケール）を追加。`AppDependencies` に `reports`・`reportSender`（P4 は nil）・`reportMetadata` を追加した。報告は先に保存し、送信の仕組みがなければ「受け付けました」、送信できなければ E-08、送信できればキューから外す。コメントは書記素単位で500文字、保存失敗は再試行でき、送信中の重複を拒否する。結果とエラーは画面下端に出す。
+- 解説画面（模試の結果・練習の即時解説）の報告シートを差し替えた。
+- テスト: Data 6件（`queuePersists` ほか）、Presentation 8件（DDD の Red 表5件＋送信済みの削除・保存失敗の再試行・重複拒否）。Domain・Data・Presentation（139）・AppComposition（13）、Releaseビルド、Simulator UIテスト（結果→解説→報告の送信）が成功した。
+- 次は **P4-S16 設定**。全データ削除では `ReportQueue.removeAll(examID:)` も呼ぶ。引き継ぎは `docs/handoffs/2026-11-01-p4-s15-report.md`。
+
+### 継続実装: P4-S16 設定（2026-11-01）
+
+- `SettingsFeature` に `SettingsViewModel`・`SettingsView`（SCR-002）を追加。ホーム右上の歯車からシートで開く。
+- 試験ごとの設定（1日の新規カード数・復習上限・誤答のカード化）は `ExamPreference` の検証付き初期化で作って保存し、失敗したら元の値に戻す。選択肢のシャッフルは保存の直前に `UserSettings` を読み直して `shuffleChoices` だけを変える。出題順は受験記録に固定されるので、反映されるのは次に開始する模試から。
+- データの書き出しは全試験の `export(nil)` を `cloudrill-export-<yyyyMMdd>.json` に書き、`ShareLink` に渡す。削除は「<試験> の学習データを削除」と「すべて削除」の2つで（利用者の決定）、確認ダイアログで確定したときだけ `deleteAll` と `ReportQueue.removeAll` を同じ範囲で実行する。確定ボタンより先にダイアログを閉じる処理が走るため、削除の範囲は確定ボタンから明示的に渡す。
+- `ActiveExamContext.didDeleteData(examID:)` は経路をリセットし、`ActiveExamState.dataRevision` を増やす。`MainTabView` の `.id` を試験 ID と `dataRevision` の組にして、保持中の ViewModel を作り直す。すべて削除した場合は起動時と同じ規則で試験を選び直す（試験が1つなら自動で選び、複数なら選択画面）。about には `ActiveExamContext.vendors` の商標表示、非公式であること、合格を保証しないこと（LG-04・LG-05）、アプリの版を出す。
+- Presentation 137テスト（S16 は SettingsViewModel 8件と ActiveExamContext 3件）、AppComposition 13テスト、Releaseビルド、Simulator UIテスト（設定1件の追加と既存の報告1件）が成功した。スクリーンショットを目視確認した。
+- 次は **P4-S17 UI テスト（受け入れ基準）**。引き継ぎは `docs/handoffs/2026-11-01-p4-s16-settings.md`。
+
 ---
 
 ## 3. 設計

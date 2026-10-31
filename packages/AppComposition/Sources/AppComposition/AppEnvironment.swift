@@ -65,16 +65,26 @@ public enum AppEnvironmentError: Error, Equatable {
     }
     #endif
 
+    /// 送信する報告に添えるアプリの版とロケール(C-11)。個人を識別する情報は含めない。
+    private static func reportMetadata(bundle: Bundle = .main, locale: Locale = .current) -> ReportMetadata {
+        let version = bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+        return ReportMetadata(appVersion: version ?? "0.0.0", locale: locale.identifier(.bcp47))
+    }
+
     private static func make(bundled: BundledPacks, storeDirectory: URL?, contentDirectory: URL,
                              time: any TimeSource, seed: @escaping @Sendable () -> UInt64 = { UInt64.random(in: .min ... .max) }) async throws -> AppEnvironment {
         guard evaluatedKinds == QuestionRendererRegistry.standard.supportedKinds else { throw AppEnvironmentError.registryMismatch }
         let container = try ModelContainerFactory.make(inMemory: storeDirectory == nil, cloudKitContainer: nil, storeDirectory: storeDirectory)
+        // 誤り報告のキューは学習履歴と別ストア。CloudKit で同期しない(BDD 7.2 の端末内キュー)
+        let reportContainer = try ReportQueueContainerFactory.make(inMemory: storeDirectory == nil, storeDirectory: storeDirectory)
         let store = PackStore(root: contentDirectory, bundledRoot: bundled.root)
         let dependencies = AppDependencies(contentResolver: ExamContentResolver(bundled: bundled, store: store, supportedKinds: supportedKinds),
             pins: store, attempts: SwiftDataExamAttemptRepository(modelContainer: container),
             answers: SwiftDataAnswerHistoryRepository(modelContainer: container), cards: SwiftDataCardStateRepository(modelContainer: container),
             bookmarks: SwiftDataBookmarkRepository(modelContainer: container), settings: SwiftDataSettingsRepository(modelContainer: container),
-            dataManagement: DataManagement(modelContainer: container), time: time, seedProvider: seed)
+            dataManagement: DataManagement(modelContainer: container),
+            reports: SwiftDataReportQueue(modelContainer: reportContainer), reportMetadata: reportMetadata(),
+            time: time, seedProvider: seed)
         let catalogService = ExamCatalogService(bundled: bundled, store: store, cachedCatalog: nil)
         let loaded = await ContentBootstrapper(catalogService: catalogService,
             integrityChecker: ContentIntegrityChecker(supportedKinds: supportedKinds)).bootstrap()

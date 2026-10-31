@@ -208,8 +208,23 @@ import XCTest
         XCTAssertFalse(addCard.isEnabled)
         attachScreenshot(app, name: "Explanation references and card added")
         app.buttons["explanation-report"].tap()
-        XCTAssertTrue(app.staticTexts["誤り報告の受付は準備中です。"].waitForExistence(timeout: 5))
-        app.buttons["閉じる"].tap()
+        // SCR-090: 理由を選ぶまで送信できず、送信するとキューに保存される(送信は P5)
+        let submit = app.buttons["report-submit"]
+        XCTAssertTrue(submit.waitForExistence(timeout: 5))
+        XCTAssertFalse(submit.isEnabled)
+        app.buttons["正解が誤っている"].tap()
+        XCTAssertTrue(submit.isEnabled)
+        attachScreenshot(app, name: "Report sheet")
+        // 注意文はコメント欄の下にあり、画面外では生成されないためスクロールして確認する
+        let privacy = app.staticTexts["report-privacy"]
+        reveal(privacy, in: app)
+        XCTAssertEqual(privacy.label, "氏名・メールアドレスなどの個人情報は書かないでください")
+        submit.tap()
+        let message = app.staticTexts["report-message"]
+        XCTAssertTrue(message.waitForExistence(timeout: 5))
+        XCTAssertEqual(message.label, "報告を受け付けました。あとで送信します")
+        attachScreenshot(app, name: "Report queued")
+        app.buttons["report-close"].tap()
         // fixture の問題1には資料がなく、問題13 (NET.1) にだけ関連資料がある。
         XCTAssertFalse(app.buttons["explanation-related-doc"].exists)
         app.buttons["BackButton"].tap()
@@ -268,6 +283,38 @@ import XCTest
         reveal(practice, in: app)
         practice.tap()
         XCTAssertTrue(app.navigationBars["練習"].waitForExistence(timeout: 5))
+    }
+
+    func testSettingsShuffleAndDeleteExamDataOffline() {
+        let app = launch(["-content-fixture", "test-beta"])
+        let open = app.buttons["settings-open"]
+        XCTAssertTrue(open.waitForExistence(timeout: 20))
+        open.tap()
+        // SCR-002: シャッフルを ON にする
+        let shuffle = app.switches["settings-shuffle"]
+        XCTAssertTrue(shuffle.waitForExistence(timeout: 5))
+        XCTAssertEqual(shuffle.value as? String, "0")
+        shuffle.switches.firstMatch.tap()
+        XCTAssertEqual(shuffle.value as? String, "1")
+        let notice = app.staticTexts["settings-no-guarantee"]
+        reveal(notice, in: app)
+        XCTAssertTrue(notice.exists)
+        attachScreenshot(app, name: "Settings")
+        // この試験のデータを削除: 確認ダイアログで確定したときだけ削除し、ホームを作り直す
+        let deleteExam = app.buttons["settings-delete-exam"]
+        reveal(deleteExam, in: app)
+        deleteExam.tap()
+        let confirm = app.buttons["settings-delete-confirm"].firstMatch
+        XCTAssertTrue(confirm.waitForExistence(timeout: 5))
+        attachScreenshot(app, name: "Settings delete confirmation")
+        confirm.tap()
+        // シートが閉じるのを待つ(閉じる途中では背後のホームのボタンも見えている)
+        XCTAssertTrue(app.buttons["settings-close"].waitForNonExistence(timeout: 10))
+        XCTAssertTrue(open.isHittable)
+        // 試験のデータ削除では設定(シャッフル)は残る
+        open.tap()
+        XCTAssertTrue(shuffle.waitForExistence(timeout: 5))
+        XCTAssertEqual(shuffle.value as? String, "1")
     }
 
     func testAnalyticsShowsDomainsWithoutAnswersOffline() {
