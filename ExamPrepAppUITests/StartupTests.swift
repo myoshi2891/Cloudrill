@@ -208,8 +208,23 @@ import XCTest
         XCTAssertFalse(addCard.isEnabled)
         attachScreenshot(app, name: "Explanation references and card added")
         app.buttons["explanation-report"].tap()
-        XCTAssertTrue(app.staticTexts["誤り報告の受付は準備中です。"].waitForExistence(timeout: 5))
-        app.buttons["閉じる"].tap()
+        // SCR-090: 理由を選ぶまで送信できず、送信するとキューに保存される(送信は P5)
+        let submit = app.buttons["report-submit"]
+        XCTAssertTrue(submit.waitForExistence(timeout: 5))
+        XCTAssertFalse(submit.isEnabled)
+        app.buttons["正解が誤っている"].tap()
+        XCTAssertTrue(submit.isEnabled)
+        attachScreenshot(app, name: "Report sheet")
+        // 注意文はコメント欄の下にあり、画面外では生成されないためスクロールして確認する
+        let privacy = app.staticTexts["report-privacy"]
+        reveal(privacy, in: app)
+        XCTAssertEqual(privacy.label, "氏名・メールアドレスなどの個人情報は書かないでください")
+        submit.tap()
+        let message = app.staticTexts["report-message"]
+        XCTAssertTrue(message.waitForExistence(timeout: 5))
+        XCTAssertEqual(message.label, "報告を受け付けました。あとで送信します")
+        attachScreenshot(app, name: "Report queued")
+        app.buttons["report-close"].tap()
         // fixture の問題1には資料がなく、問題13 (NET.1) にだけ関連資料がある。
         XCTAssertFalse(app.buttons["explanation-related-doc"].exists)
         app.buttons["BackButton"].tap()
