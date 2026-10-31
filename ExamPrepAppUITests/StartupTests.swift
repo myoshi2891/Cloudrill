@@ -285,6 +285,38 @@ import XCTest
         XCTAssertTrue(app.navigationBars["練習"].waitForExistence(timeout: 5))
     }
 
+    func testSettingsShuffleAndDeleteExamDataOffline() {
+        let app = launch(["-content-fixture", "test-beta"])
+        let open = app.buttons["settings-open"]
+        XCTAssertTrue(open.waitForExistence(timeout: 20))
+        open.tap()
+        // SCR-002: シャッフルを ON にする
+        let shuffle = app.switches["settings-shuffle"]
+        XCTAssertTrue(shuffle.waitForExistence(timeout: 5))
+        XCTAssertEqual(shuffle.value as? String, "0")
+        shuffle.switches.firstMatch.tap()
+        XCTAssertEqual(shuffle.value as? String, "1")
+        let notice = app.staticTexts["settings-no-guarantee"]
+        reveal(notice, in: app)
+        XCTAssertTrue(notice.exists)
+        attachScreenshot(app, name: "Settings")
+        // この試験のデータを削除: 確認ダイアログで確定したときだけ削除し、ホームを作り直す
+        let deleteExam = app.buttons["settings-delete-exam"]
+        reveal(deleteExam, in: app)
+        deleteExam.tap()
+        let confirm = app.buttons["settings-delete-confirm"].firstMatch
+        XCTAssertTrue(confirm.waitForExistence(timeout: 5))
+        attachScreenshot(app, name: "Settings delete confirmation")
+        confirm.tap()
+        // シートが閉じるのを待つ(閉じる途中では背後のホームのボタンも見えている)
+        XCTAssertTrue(app.buttons["settings-close"].waitForNonExistence(timeout: 10))
+        XCTAssertTrue(open.isHittable)
+        // 試験のデータ削除では設定(シャッフル)は残る
+        open.tap()
+        XCTAssertTrue(shuffle.waitForExistence(timeout: 5))
+        XCTAssertEqual(shuffle.value as? String, "1")
+    }
+
     func testAnalyticsShowsDomainsWithoutAnswersOffline() {
         let app = launch(["-content-fixture", "test-beta"])
         XCTAssertTrue(app.tabBars.buttons["分析"].waitForExistence(timeout: 20))
