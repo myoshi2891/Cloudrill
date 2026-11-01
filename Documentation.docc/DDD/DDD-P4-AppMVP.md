@@ -213,6 +213,7 @@ env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --packag
 - StartupTests の、上記と重なる3件を新しいファイルへ移し、共通部品を使うようにした。
 - 完了条件の `xcodebuild test -scheme ExamPrepApp -only-testing:ExamPrepAppUITests` は 19件すべて成功した（iPhone 18 Pro Simulator、約11分）。Presentation 137テストと Release ビルドも成功した。
 - 起動時間は Simulator（Debug・UI テスト用の設定）で平均 5.28 秒だった。NFR-01 の 2 秒を大きく上回るため、Release の実機で計測して要因を調べる必要がある（P4 の残課題）。
+- 2026-11-01: 起動時間の調査用に AppComposition の OSLog 区間計測（ストア生成・パック起動・選択復元）と、試験選択が操作可能になるまでの UI 計測を追加。実機は接続不可で、Release 起動には本番 App Group・パックも必要なため NFR-01 は未判定。P4-S18 は未着手で、P4 は未完了。手順と残課題は `docs/handoffs/2026-11-01-p4-startup-profiling.md`。
 - 引き継ぎは `docs/handoffs/2026-11-01-p4-s17-ui-tests.md`。
 
 ---
