@@ -214,9 +214,10 @@ private struct MainTabView: View {
                 .tag(tab)
             }
         }
-        // NFR-01 の終点: ホームの読み込みが完了し、操作できる状態になった時点
-        .onChange(of: home.state.isLoaded, initial: true) { _, isLoaded in
-            if isLoaded { StartupMetrics.markReady() }
+        // NFR-01 の終点: ホームの読み込みが完了し、その内容を反映したフレームが描画された時点
+        .task(id: home.state.isLoaded) {
+            guard home.state.isLoaded else { return }
+            await StartupMetrics.markReadyAfterNextFrame()
         }
     }
 
@@ -260,8 +261,11 @@ private struct PickerContent: View {
             if let notice = picker.state.trademarkNotice { Text(notice.ja).font(.footnote) }
         }
         .navigationTitle(Text("chooseExam", bundle: .module))
-        // NFR-01 の終点: 初回起動で試験選択が表示された時点（2回目以降は markReady が無視する）
-        .onAppear { StartupMetrics.markReady() }
+        // NFR-01 の終点: 初回起動で試験を選べる状態の一覧が描画された時点（2回目以降は記録しない）
+        .task(id: !picker.state.isLoading && picker.state.items.contains(where: \.isSelectable)) {
+            guard !picker.state.isLoading, picker.state.items.contains(where: \.isSelectable) else { return }
+            await StartupMetrics.markReadyAfterNextFrame()
+        }
         .task(id: requested) {
             guard let id = requested else { return }
             await picker.select(id)
