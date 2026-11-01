@@ -4,15 +4,16 @@
 
 S17 の次の作業である NFR-01（コールドスタートから操作可能になるまで2秒）の調査を開始した。
 
-- `AppComposition` に OSLog の区間計測を追加。Instruments の Points of Interest で subsystem `Cloudrill`、category `startup` を確認できる。Release でも有効で、ユーザーデータは記録しない。
+- `AppComposition` に OSLog の区間計測を追加。subsystem `Cloudrill`、category は `OSLog.Category.pointsOfInterest`（Instruments の Points of Interest に表示される）。Release でも有効で、ユーザーデータは記録しない。
+- 操作可能状態の終点として、イベント `StartupReady` を1プロセスにつき1回だけ記録する。初回起動では試験選択の一覧が表示された時点（`PickerContent.onAppear`）、試験選択済みの再起動ではホームの読み込みが完了した時点（`HomeViewModel.state.isLoaded` が true）。
 - `StartupPreparation`: `AppRootView.task` 開始から依存の設定完了または起動失敗まで。プロセスの起動・初回描画を含まないため、この区間だけで NFR-01 を判定しない。
-- 内訳は `StudyStore`（学習ストア生成）、`ReportStore`（報告キュー生成）、`ContentBootstrap`（パック読み込み・整合確認）、`RestoreSelection`（設定・選択・中断状態の復元）。ストアとパックの区間は失敗しても終了する。
+- 内訳は `StudyStore`（学習ストア生成）、`ReportStore`（報告キュー生成）、`ContentBootstrap`（パック読み込み・整合確認）、`RestoreSelection`（`ActiveExamContext.restore()` による設定の読み込みと試験選択の復元のみ）。中断中の受験の検出はその後の `HomeViewModel.load()` で行い、この区間には含まれない（その時間は `StartupReady` までに含まれる）。ストアとパックの区間は失敗しても終了する。
 - 既存の `testLaunchPerformance` に加えて、`testLaunchToExamPickerPerformance` を追加。全同梱試験・空のインメモリストアで起動し、試験選択ボタンが存在して操作可能になるまでを5回測る。終了処理は計測の外に置く。XCTest の起動・問い合わせ時間も含むので実機の合否判定には使わない。
 
 ## 実機での計測手順
 
 1. 本番 App Group、署名と entitlement、`CloudrillAppGroup` の Info.plist 設定、本番署名済み同梱パックを準備する。現在の Release は開発用パックを拒否するため、現状のままでは正常起動を計測できない。
-2. 接続した実機を選び、Release を Profile する。UI テスト用の引数は使わない。Instruments の App Launch と Points of Interest を使い、プロセス起動から操作可能な画面まで、および上記の区間を確認する。
+2. 接続した実機を選び、Release を Profile する。UI テスト用の引数は使わない。Instruments の App Launch と Points of Interest を使い、プロセス起動から `StartupReady` イベントまでを NFR-01 の値として記録し、上記の区間で内訳を確認する。`StartupPreparation` や `testLaunchToExamPickerPerformance` の値を NFR-01 の代わりにしない。
 3. 初回起動（ストア作成・試験選択）と、試験選択後にプロセスを終了した再起動（ストア再利用・ホーム復元）を分けて記録する。各条件で複数回測り、端末・OS・コミット・パック版・保存状態・各回の値を記録する。
 4. NFR-01 の2秒判定と内訳を PR に添付し、時間を要している区間が分かってから改善する。Simulator、Debug、UI テストの数値と直接比較しない。
 
