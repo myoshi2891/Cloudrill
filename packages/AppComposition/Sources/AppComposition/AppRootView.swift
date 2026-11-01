@@ -36,6 +36,8 @@ public struct AppRootView: View {
         }
         .task {
             guard environment == nil, !failed else { return }
+            let preparation = StartupMetrics.signposter.beginInterval("StartupPreparation", id: StartupMetrics.signposter.makeSignpostID())
+            defer { StartupMetrics.signposter.endInterval("StartupPreparation", preparation) }
             do {
                 guard let packsRoot else { throw CocoaError(.fileNoSuchFile) }
                 #if DEBUG
@@ -212,6 +214,11 @@ private struct MainTabView: View {
                 .tag(tab)
             }
         }
+        // NFR-01 の終点: ホームの読み込みが完了し、その内容を反映したフレームが描画された時点
+        .task(id: home.state.isLoaded) {
+            guard home.state.isLoaded else { return }
+            await StartupMetrics.markReadyAfterNextFrame()
+        }
     }
 
     private func pending(_ tab: AppCore.Tab) -> some View {
@@ -254,12 +261,33 @@ private struct PickerContent: View {
             if let notice = picker.state.trademarkNotice { Text(notice.ja).font(.footnote) }
         }
         .navigationTitle(Text("chooseExam", bundle: .module))
+        // NFR-01 の終点: 初回起動で試験を選べる状態の一覧が描画された時点（2回目以降は記録しない）
+        // 復元の保存エラーは操作可能とみなさず、別の事象として記録する
+        .task(id: StartupReadiness(state: picker.state)) {
+            switch StartupReadiness(state: picker.state) {
+            case .pending: return
+            case .persistenceFailed: StartupMetrics.markPersistenceFailure()
+            case .ready: await StartupMetrics.markReadyAfterNextFrame()
+            }
+        }
         .task(id: requested) {
             guard let id = requested else { return }
             await picker.select(id)
             if context.state.examID == id { onSelected() }
             requested = nil
         }
+    }
+}
+
+/// 試験選択画面が NFR-01 の終点に達したか。
+private enum StartupReadiness: Hashable {
+    case pending, ready, persistenceFailed
+
+    init(state: ExamPickerState) {
+        if state.isLoading { self = .pending }
+        else if state.alert == .persistenceFailed { self = .persistenceFailed }
+        else if state.items.contains(where: \.isSelectable) { self = .ready }
+        else { self = .pending }
     }
 }
 
