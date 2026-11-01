@@ -21,8 +21,9 @@ import XCTest
         measure(metrics: [XCTClockMetric()], options: options) {
             app.launch()
             let exam = app.buttons["exam-test-alpha"]
-            XCTAssertTrue(exam.waitForExistence(timeout: 20))
-            XCTAssertTrue(exam.isHittable)
+            // 存在した直後は描画・有効化の途中のことがあるため、操作可能になるまで待つ
+            let hittable = XCTNSPredicateExpectation(predicate: NSPredicate(format: "isHittable == true"), object: exam)
+            XCTAssertEqual(XCTWaiter().wait(for: [hittable], timeout: 20), .completed)
             stopMeasuring()
             app.terminate()
         }
