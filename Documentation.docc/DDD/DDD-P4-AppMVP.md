@@ -204,6 +204,17 @@ env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --packag
 - Presentation 137テスト（S16 は SettingsViewModel 8件と ActiveExamContext 3件）、AppComposition 13テスト、Releaseビルド、Simulator UIテスト（設定1件の追加と既存の報告1件）が成功した。スクリーンショットを目視確認した。
 - 次は **P4-S17 UI テスト（受け入れ基準）**。引き継ぎは `docs/handoffs/2026-11-01-p4-s16-settings.md`。
 
+### 継続実装: P4-S17 UI テスト（受け入れ基準）（2026-11-01）
+
+- `ExamPrepAppUITests/UITestSupport.swift` に共通の起動引数・`reveal`・スクリーンショットと、Page Object の `ExamScreen`・`ReviewScreen` を置いた。`answerCurrent()` は「Nつ選択」を読んで、複数選択にも必要な数だけ解答する。
+- `ExamFlowUITests`: `testCompleteExamAndSubmit`（test-alpha の55問に解答し、見直しから提出して結果画面へ）、`testAutoSubmitOnTimeout`（7201秒後に起動すると「制限時間を過ぎたため提出しました」と結果画面）、`testBetaExamHasNoCaseUI`、見直しからの手動提出（StartupTests から移動）。
+- `ResumeUITests.testResumeAfterTermination`: 5問に解答して強制終了し、10分後に起動すると「問題 6 / 40」、「残り 80 分」、未解答35問・見直し1問、1問目の解答とフラグが復元される。製品側は解答画面のタイマーに `session-timer` を付けただけ。
+- `OfflineUITests.testAllFeaturesOffline`（模試→練習→カード→ドキュメント）と `LaunchPerformanceTests.testLaunchPerformance`（`XCTApplicationLaunchMetric`。Simulator では記録のみ）。
+- StartupTests の、上記と重なる3件を新しいファイルへ移し、共通部品を使うようにした。
+- 完了条件の `xcodebuild test -scheme ExamPrepApp -only-testing:ExamPrepAppUITests` は 19件すべて成功した（iPhone 18 Pro Simulator、約11分）。Presentation 137テストと Release ビルドも成功した。
+- 起動時間は Simulator（Debug・UI テスト用の設定）で平均 5.28 秒だった。NFR-01 の 2 秒を大きく上回るため、Release の実機で計測して要因を調べる必要がある（P4 の残課題）。
+- 引き継ぎは `docs/handoffs/2026-11-01-p4-s17-ui-tests.md`。
+
 ---
 
 ## 3. 設計
