@@ -19,6 +19,8 @@ public struct ActiveExamState: Equatable, Sendable {
     public var isLoading = false
     public var alert: AppAlert?
     public var fatal: AppAlert?
+    /// 学習データの削除ごとに増やす。画面側はこの値で ViewModel を作り直し、削除済みの記録を参照し続けない。
+    public var dataRevision = 0
 }
 
 /// 起動時の選択規則。前回の試験が読めない場合は、別試験へ自動的に切り替えない。
@@ -53,6 +55,23 @@ public enum InitialExamSelection: Equatable, Sendable {
 
     public var content: (any ExamContentProvider)? { state.examID.flatMap { available[$0] } }
     public func isAvailable(_ id: ExamID) -> Bool { available[id] != nil }
+    /// 利用できる試験のベンダー(ID で重複を除き ID 順)。商標の表示に使う(LG-04)。
+    public var vendors: [Vendor] {
+        Dictionary(available.values.map { ($0.vendor.id, $0.vendor) }, uniquingKeysWith: { first, _ in first })
+            .values.sorted { $0.id.rawValue < $1.id.rawValue }
+    }
+
+    /// 設定画面でデータを削除した後に呼ぶ。試験指定なら同じ試験のまま画面を作り直す。
+    /// すべての削除では選択中の試験の設定も消えるため、起動時と同じ規則で選び直す。
+    public func didDeleteData(examID: ExamID?) async {
+        router.reset()
+        let revision = state.dataRevision + 1
+        guard examID == nil else { state.dataRevision = revision; return }
+        state = ActiveExamState()
+        state.dataRevision = revision
+        restored = false
+        await restore()
+    }
 
     public func restore() async {
         guard !restored, !state.isLoading else { return }

@@ -6,15 +6,6 @@ import DomainInterfaces
 import StudyModels
 import ExamEngine
 
-/// S15 の報告フォームへ渡す、表示中のコンテンツを特定する値。
-public struct QuestionReportContext: Identifiable, Equatable, Sendable {
-    public let examID: ExamID
-    public let questionID: String
-    public let questionRevision: Int
-    public let packVersion: String
-    public var id: String { "\(examID)/\(packVersion)/\(questionID)/\(questionRevision)" }
-}
-
 @MainActor @Observable public final class ExplanationViewModel {
     public private(set) var question: Question?
     public private(set) var choices: [Choice] = []

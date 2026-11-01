@@ -13,6 +13,10 @@ public struct AppDependencies: Sendable {
     public let bookmarks: any BookmarkRepository
     public let settings: any SettingsRepository
     public let dataManagement: any DataManagementRepository
+    public let reports: any ReportQueue
+    /// P5 の `ReportClient`。未設定ならキューに保存するだけで送信しない。
+    public let reportSender: (any ReportSending)?
+    public let reportMetadata: ReportMetadata
     public let time: any TimeSource
     public let evaluators: AnswerEvaluatorRegistry
     public let seedProvider: @Sendable () -> UInt64
@@ -20,11 +24,13 @@ public struct AppDependencies: Sendable {
     public init(contentResolver: any ExamContentResolving, pins: any PackPinning, attempts: any ExamAttemptRepository, answers: any AnswerHistoryRepository,
                 cards: any CardStateRepository, bookmarks: any BookmarkRepository,
                 settings: any SettingsRepository, dataManagement: any DataManagementRepository,
+                reports: any ReportQueue, reportSender: (any ReportSending)? = nil, reportMetadata: ReportMetadata,
                 time: any TimeSource, evaluators: AnswerEvaluatorRegistry = .standard,
                 seedProvider: @escaping @Sendable () -> UInt64) {
         self.contentResolver = contentResolver
         self.pins = pins; self.attempts = attempts; self.answers = answers; self.cards = cards; self.bookmarks = bookmarks
         self.settings = settings; self.dataManagement = dataManagement; self.time = time
+        self.reports = reports; self.reportSender = reportSender; self.reportMetadata = reportMetadata
         self.evaluators = evaluators; self.seedProvider = seedProvider
     }
 }

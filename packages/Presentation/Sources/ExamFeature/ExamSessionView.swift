@@ -24,6 +24,7 @@ public struct ExamSessionView: View {
                         Spacer()
                         TimelineView(.periodic(from: timelineStart, by: 1)) { context in
                             TimerLabel(remainingSeconds: state.remainingSeconds)
+                                .accessibilityIdentifier("session-timer")
                                 .task(id: Int(context.date.timeIntervalSince1970)) { await model.tick() }
                         }
                     }

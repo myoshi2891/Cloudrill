@@ -7,6 +7,7 @@ import PracticeFeature
 import FlashcardFeature
 import LearnFeature
 import AnalyticsFeature
+import SettingsFeature
 import DomainModels
 import DomainInterfaces
 
@@ -76,7 +77,8 @@ private struct ExamLandingView: View {
             } else if let content = context.content, let dependencies {
                 MainTabView(context: context, content: content, dependencies: dependencies,
                             selectExam: { showsPicker = true })
-                    .id(context.state.examID)
+                    // 試験の切替とデータの削除で、保持中の ViewModel を作り直す
+                    .id(MainTabIdentity(examID: context.state.examID, dataRevision: context.state.dataRevision))
             } else {
                 NavigationStack { PickerContent(context: context) }
             }
@@ -98,6 +100,7 @@ private struct MainTabView: View {
     @State private var submittedContent: SubmittedExamContentCache
     @State private var decks: DeckListViewModel
     @State private var analytics: AnalyticsViewModel
+    @State private var showsSettings = false
     @Environment(\.scenePhase) private var scenePhase
 
     /// HomeViewModel は body の再評価(タブ切替・遷移)のたびに作り直さない。試験の切替は .id で作り直す。
@@ -114,6 +117,16 @@ private struct MainTabView: View {
         _analytics = State(initialValue: AnalyticsViewModel(definition: content.definition, answers: dependencies.answers))
     }
 
+    private var settingsView: some View {
+        SettingsView(model: SettingsViewModel(examID: content.definition.id, examName: content.definition.shortName,
+            vendors: context.vendors, appVersion: dependencies.reportMetadata.appVersion,
+            settings: dependencies.settings, dataManagement: dependencies.dataManagement, reports: dependencies.reports,
+            time: dependencies.time, onDeleted: { [context] examID in
+                // 削除後は MainTabView ごと作り直すので、このシートも閉じる
+                await context.didDeleteData(examID: examID)
+            }))
+    }
+
     var body: some View {
         @Bindable var router = context.router
         TabView(selection: $router.selectedTab) {
@@ -124,6 +137,16 @@ private struct MainTabView: View {
                         if tab == .home {
                             HomeView(model: home, trademarkNotice: content.vendor.trademarkNotice,
                                      selectExam: selectExam)
+                                // 設定はホームの右上から開く(BDD 3章)
+                                .toolbar {
+                                    ToolbarItem(placement: .primaryAction) {
+                                        Button { showsSettings = true } label: {
+                                            Label { Text("settings.open", bundle: .module) } icon: { Image(systemName: "gearshape") }
+                                        }
+                                        .accessibilityIdentifier("settings-open")
+                                    }
+                                }
+                                .sheet(isPresented: $showsSettings) { settingsView }
                         } else if tab == .exam {
                             ExamTopView(content: content, router: router)
                         } else if tab == .cards {
@@ -238,4 +261,9 @@ private struct PickerContent: View {
             requested = nil
         }
     }
+}
+
+private struct MainTabIdentity: Hashable {
+    let examID: ExamID?
+    let dataRevision: Int
 }

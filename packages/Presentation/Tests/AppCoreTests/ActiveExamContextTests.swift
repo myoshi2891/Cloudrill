@@ -130,4 +130,37 @@ import HomeFeature
         await context.switchExam(to: "test-beta")
         #expect(context.state.examID == "test-alpha" && context.state.alert == .examUnavailable)
     }
+
+    @Test func deletingExamDataKeepsExamAndRebuildsScreens() async throws {
+        // Arrange
+        let context = try make(settings: SelectionSettings(current: "test-beta"))
+        await context.restore()
+        context.router.open(.examStart(examSet: 1))
+        // Act
+        await context.didDeleteData(examID: "test-beta")
+        // Assert: 同じ試験のまま、経路をリセットして画面を作り直す
+        #expect(context.state.examID == "test-beta" && context.state.dataRevision == 1)
+        #expect(context.router.path(for: .exam).isEmpty && context.router.selectedTab == .home)
+    }
+    @Test func deletingAllDataReselectsLikeLaunch() async throws {
+        // Arrange: 設定も削除され、前回の試験はわからなくなる
+        let settings = SelectionSettings(current: "test-beta")
+        let context = try make(settings: settings)
+        await context.restore()
+        await settings.reset()
+        // Act
+        await context.didDeleteData(examID: nil)
+        // Assert: 複数の試験があるので選択画面へ
+        #expect(context.state.needsSelection && context.state.examID == nil)
+        #expect(context.state.dataRevision == 1)
+        // 試験が1つなら起動時と同じく自動で選ぶ
+        let single = try make(ids: ["test-alpha"])
+        await single.restore()
+        await single.didDeleteData(examID: nil)
+        #expect(single.state.examID == "test-alpha" && single.state.dataRevision == 1)
+    }
+    @Test func vendorsAreUniqueAndSorted() throws {
+        let context = try make()
+        #expect(context.vendors.map(\.id.rawValue) == ["example-cloud", "google-cloud"])
+    }
 }
