@@ -20,6 +20,14 @@ enum StartupMetrics {
         didMarkReady = true
         signposter.emitEvent("StartupReady")
     }
+
+    /// 起動時の選択復元が保存エラーで失敗した時点。StartupReady とは別に記録し、以降の StartupReady は記録しない
+    /// （再選択などの操作時間が起動時間に混ざるため）。
+    @MainActor static func markPersistenceFailure() {
+        guard !didMarkReady else { return }
+        didMarkReady = true
+        signposter.emitEvent("StartupPersistenceFailed")
+    }
 }
 
 /// 次の画面更新(vsync)まで待つ。その時点で、直前の実行ループで確定した View の更新は描画対象になっている。

@@ -262,9 +262,13 @@ private struct PickerContent: View {
         }
         .navigationTitle(Text("chooseExam", bundle: .module))
         // NFR-01 の終点: 初回起動で試験を選べる状態の一覧が描画された時点（2回目以降は記録しない）
-        .task(id: !picker.state.isLoading && picker.state.items.contains(where: \.isSelectable)) {
-            guard !picker.state.isLoading, picker.state.items.contains(where: \.isSelectable) else { return }
-            await StartupMetrics.markReadyAfterNextFrame()
+        // 復元の保存エラーは操作可能とみなさず、別の事象として記録する
+        .task(id: StartupReadiness(state: picker.state)) {
+            switch StartupReadiness(state: picker.state) {
+            case .pending: return
+            case .persistenceFailed: StartupMetrics.markPersistenceFailure()
+            case .ready: await StartupMetrics.markReadyAfterNextFrame()
+            }
         }
         .task(id: requested) {
             guard let id = requested else { return }
@@ -272,6 +276,18 @@ private struct PickerContent: View {
             if context.state.examID == id { onSelected() }
             requested = nil
         }
+    }
+}
+
+/// 試験選択画面が NFR-01 の終点に達したか。
+private enum StartupReadiness: Hashable {
+    case pending, ready, persistenceFailed
+
+    init(state: ExamPickerState) {
+        if state.isLoading { self = .pending }
+        else if state.alert == .persistenceFailed { self = .persistenceFailed }
+        else if state.items.contains(where: \.isSelectable) { self = .ready }
+        else { self = .pending }
     }
 }
 
