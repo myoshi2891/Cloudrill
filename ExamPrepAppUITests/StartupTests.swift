@@ -1,15 +1,9 @@
 import XCTest
 
+/// 起動・試験選択と、各機能の画面ごとの確認。模試の通しと復元は ExamFlowUITests・ResumeUITests に置く。
 @MainActor final class StartupTests: XCTestCase {
-    private func launch(_ extra: [String] = []) -> XCUIApplication {
-        let app = XCUIApplication()
-        app.launchArguments = ["-ui-testing", "-store-in-memory", "-network", "offline"] + extra
-        app.launch()
-        return app
-    }
-
     func testSelectAndSwitchExamOffline() {
-        let app = launch()
+        let app = launchApp()
         let beta = app.buttons["exam-test-beta"]
         XCTAssertTrue(beta.waitForExistence(timeout: 20))
         beta.tap()
@@ -26,7 +20,7 @@ import XCTest
     }
 
     func testSingleFixtureSkipsPicker() {
-        let app = launch(["-content-fixture", "test-beta", "-fixed-now", "2026-11-01T09:00:00Z"])
+        let app = launchApp(["-content-fixture", "test-beta", "-fixed-now", "2026-11-01T09:00:00Z"])
         let picker = app.buttons["examPickerButton"]
         XCTAssertTrue(picker.waitForExistence(timeout: 20))
         XCTAssertEqual(picker.label, "BETA")
@@ -34,7 +28,7 @@ import XCTest
     }
 
     func testHomeShowsEmptyStateAndLearningNavigation() {
-        let app = launch(["-content-fixture", "test-beta"])
+        let app = launchApp(["-content-fixture", "test-beta"])
         XCTAssertTrue(app.staticTexts["homeNoData"].waitForExistence(timeout: 20))
         XCTAssertEqual(app.staticTexts["homeDueCards"].label, "0 枚")
         app.buttons["homeStartLearning"].tap()
@@ -46,7 +40,7 @@ import XCTest
     }
 
     func testExamSwitchResetsTabNavigation() {
-        let app = launch()
+        let app = launchApp()
         XCTAssertTrue(app.buttons["exam-test-beta"].waitForExistence(timeout: 20))
         app.buttons["exam-test-beta"].tap()
         XCTAssertTrue(app.buttons["homeStartLearning"].waitForExistence(timeout: 10))
@@ -61,118 +55,13 @@ import XCTest
         XCTAssertEqual(app.navigationBars.buttons.count, 0)
     }
 
-    func testBetaExamStartAndResumeBanner() {
-        let app = launch(["-content-fixture", "test-beta"])
-        XCTAssertTrue(app.buttons["homeStartLearning"].waitForExistence(timeout: 20))
-        app.tabBars.buttons["試験"].tap()
-        app.buttons["exam-set-1"].tap()
-        XCTAssertTrue(app.staticTexts["exam-format"].waitForExistence(timeout: 5))
-        XCTAssertEqual(app.staticTexts["exam-format"].label, "40 問・90 分")
-        XCTAssertFalse(app.staticTexts["出題されるケース"].exists)
-        attachScreenshot(app, name: "Beta exam confirmation")
-        app.buttons["exam-start"].tap()
-        XCTAssertTrue(app.staticTexts["session-progress"].waitForExistence(timeout: 10))
-        XCTAssertEqual(app.staticTexts["session-progress"].label, "問題 1 / 40")
-        XCTAssertFalse(app.buttons["session-case"].exists)
-        let choice = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "session-choice-")).firstMatch
-        XCTAssertTrue(choice.waitForExistence(timeout: 5))
-        choice.tap()
-        XCTAssertTrue(choice.label.contains("選択済み"))
-        attachScreenshot(app, name: "Beta answer selected")
-        app.tabBars.buttons["ホーム"].tap()
-        XCTAssertTrue(app.buttons["homeResume"].waitForExistence(timeout: 10))
-    }
-
-    func testAnswerRestoresAfterTerminationAndExpiresOnRelaunch() {
-        let app = XCUIApplication()
-        let store = "/tmp/cloudrill-session-ui-\(UUID().uuidString)"
-        defer { try? FileManager.default.removeItem(atPath: store) }
-        let args = ["-ui-testing", "-content-fixture", "test-beta", "-store-path", store,
-                    "-fixed-now", "2026-11-01T09:00:00Z", "-network", "offline"]
-        app.launchArguments = args
-        app.launch()
-        XCTAssertTrue(app.buttons["homeStartLearning"].waitForExistence(timeout: 20))
-        app.tabBars.buttons["試験"].tap()
-        app.buttons["exam-set-1"].tap()
-        XCTAssertTrue(app.buttons["exam-start"].waitForExistence(timeout: 5))
-        app.buttons["exam-start"].tap()
-        XCTAssertTrue(app.staticTexts["session-progress"].waitForExistence(timeout: 10))
-        let choice = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "session-choice-")).firstMatch
-        let choiceID = choice.identifier
-        choice.tap()
-        XCTAssertTrue(choice.label.contains("選択済み"))
-        let flag = app.buttons["session-flag"]
-        if !flag.isHittable { app.swipeUp() }
-        flag.tap()
-        app.buttons["session-next"].tap()
-        XCTAssertEqual(app.staticTexts["session-progress"].label, "問題 2 / 40")
-        app.terminate()
-        app.launchArguments = args + ["-advance-on-launch", "61"]
-        app.launch()
-        XCTAssertTrue(app.buttons["homeResume"].waitForExistence(timeout: 20))
-        app.buttons["homeResume"].tap()
-        XCTAssertTrue(app.staticTexts["session-progress"].waitForExistence(timeout: 10))
-        XCTAssertEqual(app.staticTexts["session-progress"].label, "問題 2 / 40")
-        let previous = app.buttons["session-previous"]
-        if !previous.isHittable { app.swipeUp() }
-        previous.tap()
-        XCTAssertTrue(app.buttons[choiceID].label.contains("選択済み"))
-        XCTAssertEqual(app.buttons["session-flag"].label, "見直しフラグを外す")
-        app.terminate()
-        app.launchArguments = args + ["-advance-on-launch", "5401"]
-        app.launch()
-        XCTAssertTrue(app.buttons["homeResume"].waitForExistence(timeout: 20))
-        app.buttons["homeResume"].tap()
-        XCTAssertTrue(app.staticTexts["session-submitted"].waitForExistence(timeout: 10))
-        XCTAssertEqual(app.staticTexts["session-submitted"].label, "制限時間を過ぎたため提出しました")
-        attachScreenshot(app, name: "Expired exam submission")
-    }
-
-    func testReviewJumpCancelAndManualSubmission() {
-        let app = launch(["-content-fixture", "test-beta"])
-        XCTAssertTrue(app.buttons["homeStartLearning"].waitForExistence(timeout: 20))
-        app.tabBars.buttons["試験"].tap()
-        app.buttons["exam-set-1"].tap()
-        app.buttons["exam-start"].tap()
-        XCTAssertTrue(app.buttons["session-choice-a"].waitForExistence(timeout: 10))
-        app.buttons["session-choice-a"].tap()
-        app.buttons["session-flag"].tap()
-        let reviewButton = app.buttons["session-review"]
-        if !reviewButton.isHittable { app.swipeUp() }
-        reviewButton.tap()
-        XCTAssertTrue(app.staticTexts["review-counts"].waitForExistence(timeout: 5))
-        XCTAssertEqual(app.staticTexts["review-counts"].label, "未解答 39 問、見直し 1 問")
-        attachScreenshot(app, name: "Exam review unanswered and flagged")
-        app.buttons["review-question-2"].tap()
-        XCTAssertTrue(app.staticTexts["session-progress"].waitForExistence(timeout: 5))
-        XCTAssertEqual(app.staticTexts["session-progress"].label, "問題 2 / 40")
-        if !reviewButton.isHittable { app.swipeUp() }
-        reviewButton.tap()
-        XCTAssertTrue(app.buttons["review-submit"].waitForExistence(timeout: 5))
-        app.buttons["review-submit"].tap()
-        let dialog = app.alerts.firstMatch
-        XCTAssertTrue(dialog.waitForExistence(timeout: 5))
-        XCTAssertTrue(dialog.staticTexts["未解答 39 問、見直し 1 問"].exists)
-        dialog.buttons["キャンセル"].tap()
-        XCTAssertTrue(app.staticTexts["review-counts"].exists)
-        app.buttons["review-submit"].tap()
-        XCTAssertTrue(dialog.waitForExistence(timeout: 5))
-        dialog.buttons["review-confirm"].firstMatch.tap()
-        XCTAssertTrue(app.staticTexts["session-submitted"].waitForExistence(timeout: 10))
-        XCTAssertEqual(app.staticTexts["session-submitted"].label, "模試を提出しました")
-        attachScreenshot(app, name: "Manually submitted exam")
-        app.tabBars.buttons["ホーム"].tap()
-        XCTAssertTrue(app.buttons["homeStartLearning"].waitForExistence(timeout: 5))
-        XCTAssertFalse(app.buttons["homeResume"].exists)
-    }
-
     func testInvalidLaunchArgumentsShowFailure() {
-        let app = launch(["-fixed-now", "invalid"])
+        let app = launchApp(["-fixed-now", "invalid"])
         XCTAssertTrue(app.staticTexts["データの読み込みに失敗しました。再インストールしてください"].waitForExistence(timeout: 15))
     }
 
     func testResultExplanationAndCardActionsOffline() {
-        let app = launch(["-content-fixture", "test-beta"])
+        let app = launchApp(["-content-fixture", "test-beta"])
         XCTAssertTrue(app.buttons["homeStartLearning"].waitForExistence(timeout: 20))
         app.tabBars.buttons["試験"].tap()
         app.buttons["exam-set-1"].tap()
@@ -240,7 +129,7 @@ import XCTest
     }
 
     func testLearnDocsIndexAndDocumentOffline() {
-        let app = launch(["-content-fixture", "test-alpha"])
+        let app = launchApp(["-content-fixture", "test-alpha"])
         XCTAssertTrue(app.tabBars.buttons["学ぶ"].waitForExistence(timeout: 20))
         app.tabBars.buttons["学ぶ"].tap()
         XCTAssertTrue(app.buttons["learn-module-docs"].waitForExistence(timeout: 5))
@@ -260,7 +149,7 @@ import XCTest
     }
 
     func testLearnCaseListDetailAndPracticeOffline() {
-        let app = launch(["-content-fixture", "test-alpha"])
+        let app = launchApp(["-content-fixture", "test-alpha"])
         XCTAssertTrue(app.tabBars.buttons["学ぶ"].waitForExistence(timeout: 20))
         app.tabBars.buttons["学ぶ"].tap()
         XCTAssertTrue(app.buttons["learn-module-cases"].waitForExistence(timeout: 5))
@@ -286,7 +175,7 @@ import XCTest
     }
 
     func testSettingsShuffleAndDeleteExamDataOffline() {
-        let app = launch(["-content-fixture", "test-beta"])
+        let app = launchApp(["-content-fixture", "test-beta"])
         let open = app.buttons["settings-open"]
         XCTAssertTrue(open.waitForExistence(timeout: 20))
         open.tap()
@@ -318,7 +207,7 @@ import XCTest
     }
 
     func testAnalyticsShowsDomainsWithoutAnswersOffline() {
-        let app = launch(["-content-fixture", "test-beta"])
+        let app = launchApp(["-content-fixture", "test-beta"])
         XCTAssertTrue(app.tabBars.buttons["分析"].waitForExistence(timeout: 20))
         app.tabBars.buttons["分析"].tap()
         XCTAssertTrue(app.staticTexts["analytics-empty"].waitForExistence(timeout: 5))
@@ -334,7 +223,7 @@ import XCTest
     }
 
     func testPracticeFeedbackAndResultOffline() {
-        let app = launch(["-content-fixture", "test-beta"])
+        let app = launchApp(["-content-fixture", "test-beta"])
         XCTAssertTrue(app.buttons["homeStartLearning"].waitForExistence(timeout: 20))
         app.buttons["homeStartLearning"].tap()
         XCTAssertTrue(app.navigationBars["練習"].waitForExistence(timeout: 5))
@@ -359,7 +248,7 @@ import XCTest
     }
 
     func testFlashcardDeckStudyAndFinishOffline() {
-        let app = launch(["-content-fixture", "test-beta"])
+        let app = launchApp(["-content-fixture", "test-beta"])
         XCTAssertTrue(app.tabBars.buttons["カード"].waitForExistence(timeout: 20))
         app.tabBars.buttons["カード"].tap()
         let deck = app.buttons["deck-all"]
@@ -382,19 +271,5 @@ import XCTest
         let refreshed = NSPredicate(format: "label CONTAINS %@", "今日 0 枚")
         expectation(for: refreshed, evaluatedWith: app.buttons["deck-all"])
         waitForExpectations(timeout: 5)
-    }
-
-    private func reveal(_ element: XCUIElement, in app: XCUIApplication) {
-        for _ in 0..<12 {
-            if element.exists && element.isHittable { return }
-            app.swipeUp()
-        }
-    }
-
-    private func attachScreenshot(_ app: XCUIApplication, name: String) {
-        let attachment = XCTAttachment(screenshot: app.screenshot())
-        attachment.name = name
-        attachment.lifetime = .keepAlways
-        add(attachment)
     }
 }
