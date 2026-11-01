@@ -74,9 +74,17 @@ public enum AppEnvironmentError: Error, Equatable {
     private static func make(bundled: BundledPacks, storeDirectory: URL?, contentDirectory: URL,
                              time: any TimeSource, seed: @escaping @Sendable () -> UInt64 = { UInt64.random(in: .min ... .max) }) async throws -> AppEnvironment {
         guard evaluatedKinds == QuestionRendererRegistry.standard.supportedKinds else { throw AppEnvironmentError.registryMismatch }
-        let container = try ModelContainerFactory.make(inMemory: storeDirectory == nil, cloudKitContainer: nil, storeDirectory: storeDirectory)
+        let container = try {
+            let interval = StartupMetrics.signposter.beginInterval("StudyStore", id: StartupMetrics.signposter.makeSignpostID())
+            defer { StartupMetrics.signposter.endInterval("StudyStore", interval) }
+            return try ModelContainerFactory.make(inMemory: storeDirectory == nil, cloudKitContainer: nil, storeDirectory: storeDirectory)
+        }()
         // 誤り報告のキューは学習履歴と別ストア。CloudKit で同期しない(BDD 7.2 の端末内キュー)
-        let reportContainer = try ReportQueueContainerFactory.make(inMemory: storeDirectory == nil, storeDirectory: storeDirectory)
+        let reportContainer = try {
+            let interval = StartupMetrics.signposter.beginInterval("ReportStore", id: StartupMetrics.signposter.makeSignpostID())
+            defer { StartupMetrics.signposter.endInterval("ReportStore", interval) }
+            return try ReportQueueContainerFactory.make(inMemory: storeDirectory == nil, storeDirectory: storeDirectory)
+        }()
         let store = PackStore(root: contentDirectory, bundledRoot: bundled.root)
         let dependencies = AppDependencies(contentResolver: ExamContentResolver(bundled: bundled, store: store, supportedKinds: supportedKinds),
             pins: store, attempts: SwiftDataExamAttemptRepository(modelContainer: container),
@@ -86,12 +94,18 @@ public enum AppEnvironmentError: Error, Equatable {
             reports: SwiftDataReportQueue(modelContainer: reportContainer), reportMetadata: reportMetadata(),
             time: time, seedProvider: seed)
         let catalogService = ExamCatalogService(bundled: bundled, store: store, cachedCatalog: nil)
-        let loaded = await ContentBootstrapper(catalogService: catalogService,
-            integrityChecker: ContentIntegrityChecker(supportedKinds: supportedKinds)).bootstrap()
+        let loaded = await {
+            let interval = StartupMetrics.signposter.beginInterval("ContentBootstrap", id: StartupMetrics.signposter.makeSignpostID())
+            defer { StartupMetrics.signposter.endInterval("ContentBootstrap", interval) }
+            return await ContentBootstrapper(catalogService: catalogService,
+                integrityChecker: ContentIntegrityChecker(supportedKinds: supportedKinds)).bootstrap()
+        }()
         let entries = try await catalogService.entries().map(\.entry)
         let active = ActiveExamContext(available: loaded.available, catalog: entries, failures: Set(loaded.failures.keys),
             settings: dependencies.settings, attempts: dependencies.attempts, time: time, router: AppRouter())
+        let restoration = StartupMetrics.signposter.beginInterval("RestoreSelection", id: StartupMetrics.signposter.makeSignpostID())
         await active.restore()
+        StartupMetrics.signposter.endInterval("RestoreSelection", restoration)
         return AppEnvironment(dependencies: dependencies, activeExam: active, packStore: store, isInMemory: storeDirectory == nil)
     }
 }

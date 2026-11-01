@@ -36,6 +36,8 @@ public struct AppRootView: View {
         }
         .task {
             guard environment == nil, !failed else { return }
+            let preparation = StartupMetrics.signposter.beginInterval("StartupPreparation", id: StartupMetrics.signposter.makeSignpostID())
+            defer { StartupMetrics.signposter.endInterval("StartupPreparation", preparation) }
             do {
                 guard let packsRoot else { throw CocoaError(.fileNoSuchFile) }
                 #if DEBUG
