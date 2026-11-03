@@ -12,7 +12,7 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["pytest==9.1.1"]
+dev = ["pytest==9.2.0"]
 # FSRS のテストベクタの生成用(開発時のみ。CI では使わない)。uv sync --project content --group fsrs で入れる
 fsrs = ["fsrs==6.3.2"]
 
