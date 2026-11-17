@@ -5,7 +5,14 @@ import DomainInterfaces
 public protocol FileReading: Sendable { func read(_ url: URL) throws -> Data }
 public struct FileManagerReader: FileReading {
     public init() {}
-    public func read(_ url: URL) throws -> Data { try Data(contentsOf: url) }
+    /// 最後の要素を O_NOFOLLOW で開き、その記述子から読む。PackFiles の確認と読み込みのあいだに
+    /// ファイルをシンボリックリンクへ差し替えられても、リンク先を読まない(途中のディレクトリの差し替えは対象外)。
+    public func read(_ url: URL) throws -> Data {
+        let descriptor = open(url.path, O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
+        guard descriptor >= 0 else { throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO) }
+        let handle = FileHandle(fileDescriptor: descriptor, closeOnDealloc: true)
+        return try handle.readToEnd() ?? Data()
+    }
 }
 
 /// I/O の失敗とデコードの失敗を区別する。インスタンスを本文キャッシュと共有する。
