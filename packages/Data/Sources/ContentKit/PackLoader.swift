@@ -16,7 +16,8 @@ public struct PackLoader: Sendable {
     static let loadedFiles = ["exam.json", "vendor.json", "questions/index.json", "exam-sets.json", "docs/index.json"]
 
     public func load(packAt directory: URL, manifest: Manifest) throws(ContentError) -> PackContent {
-        let files = PackFiles(root: directory, reader: reader)
+        // 遅延読み込み(問題本文・ドキュメント・機能別のファイル)も、manifest に載ったパスだけに限る。
+        let files = PackFiles(root: directory, reader: reader, listed: Set(manifest.files.map(\.path)))
         return try PackContent(
             definition: files.decode(ExamDefinition.self, "exam.json"),
             vendor: files.decode(Vendor.self, "vendor.json"), packVersion: manifest.packVersion,

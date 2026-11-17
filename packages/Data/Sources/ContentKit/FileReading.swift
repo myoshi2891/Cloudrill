@@ -12,10 +12,14 @@ public struct FileManagerReader: FileReading {
 struct PackFiles: Sendable {
     let root: URL
     let reader: any FileReading
+    /// manifest に載っているパス。nil は manifest を読む前(manifest.json・カタログ)で、制限しない。
+    /// 載っていないファイルはハッシュの検証を受けていないので、遅延読み込みでも読まない。
+    var listed: Set<String>? = nil
     func data(_ path: String) throws(ContentError) -> Data {
         let url = root.appending(path: path).standardizedFileURL
         guard !path.hasPrefix("/"), !path.split(separator: "/").contains(".."),
               url.path.hasPrefix(root.standardizedFileURL.path + "/") else { throw .storage("unsafe path: \(path)") }
+        if let listed, !listed.contains(path) { throw .fileMissing(path) }
         // 同梱パックは起動時に署名を再検証しないので、読み込みのたびにパック内のシンボリックリンクを拒否する。
         var component = root
         for part in path.split(separator: "/") {

@@ -107,6 +107,36 @@ struct PackLoaderTests {
         // Act / Assert: 同梱パックは起動時に再検証しないので、読み込みの時点で拒否する
         await #expect(throws: ContentError.storage("unsafe path: \(entry.path)")) { try await content.docBody(for: entry) }
     }
+    @Test func unlistedLazyFilesAreRejected() async throws {
+        // Arrange: 検証済みの manifest から、遅延読み込みのファイルを外して読み込む
+        let directory = PackFixtures.valid()
+        var manifest = try PackFixtures.verifier().verify(packAt: directory, expectedExamID: "test-alpha", currentVersion: nil)
+        let probe = try PackLoader().load(packAt: directory, manifest: manifest)
+        let doc = try #require(probe.docsIndex.first)
+        let question = try #require(probe.questionIndex.first)
+        let domainFile = "questions/domain\(question.domain).json"
+        let removed: Set = ["flashcards.json", doc.path, domainFile]
+        manifest.files.removeAll { removed.contains($0.path) }
+        // Act
+        let content = try PackLoader().load(packAt: directory, manifest: manifest)
+        // Assert: ファイルはディスクにあるが、manifest に無いので読まない
+        await #expect(throws: ContentError.fileMissing("flashcards.json")) { try await content.flashcards() }
+        await #expect(throws: ContentError.fileMissing(doc.path)) { try await content.docBody(for: doc) }
+        await #expect(throws: ContentError.fileMissing(domainFile)) { try await content.questions(ids: [question.id]) }
+        #expect(try await !content.caseStudies().isEmpty)
+    }
+    @Test func loadReadsExactlyLoadedFiles() throws {
+        // Arrange
+        let directory = PackFixtures.valid()
+        let manifest = try PackFixtures.verifier().verify(packAt: directory, expectedExamID: "test-alpha", currentVersion: nil)
+        let spy = SpyFileReader()
+        // Act
+        _ = try PackLoader(fileReader: spy).load(packAt: directory, manifest: manifest)
+        // Assert: load の読むファイルが変わったら、PackVerifier が要求する loadedFiles も合わせる
+        let prefix = directory.standardizedFileURL.path + "/"
+        let relative = spy.paths.map { $0.hasPrefix(prefix) ? String($0.dropFirst(prefix.count)) : $0 }
+        #expect(relative.sorted() == PackLoader.loadedFiles.sorted())
+    }
     @Test func loadAllQuestionsForExamSetUnderBudget() async throws {
         let content = try PackFixtures.content()
         let ids = try #require(content.examSets.first).questionIDs
