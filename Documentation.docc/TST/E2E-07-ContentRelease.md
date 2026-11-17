@@ -1,0 +1,56 @@
+# E2E-07 コンテンツの制作からアプリでの表示まで
+
+| 項目 | 内容 |
+|---|---|
+| 文書バージョン | 0.1(初版ドラフト) |
+| 作成日 | 2026-11-17 |
+| 上位文書 | [テスト項目書(索引)](../TST.md) |
+| レベル | E2E |
+| 対応要件 | AC-06、NFR-05、FR-CONT-01、FR-CONT-04、RDD 10 章、BDD 10 章、[DDD-P2](../DDD/DDD-P2-ContentPack.md)、[DDD-P5](../DDD/DDD-P5-Delivery.md) P5-S01 |
+| 対象 | 原稿(YAML・Markdown)→ `validate.py` → `build_pack.py` → `sign_manifest.py` → `build_catalog.py` → 同梱(`bundle_packs.sh`)→ アプリでの表示。CI のワークフロー |
+| 既存のテスト | [content/tests/](../../content/tests/)、[AppEnvironmentTests](../../packages/AppComposition/Tests/AppCompositionTests/AppEnvironmentTests.swift)、`.github/workflows/` の 7 件 |
+
+---
+
+## 1. シナリオと観点
+
+コンテンツの担当者が原稿を書いてから、利用者の画面に出るまでの経路を、端から端まで通す。アプリの E2E(E2E-01〜06)が「利用者の操作」を通すのに対し、ここでは「コンテンツの流れ」を通す。
+
+- **正常の経路**: 原稿 → 検証 → ビルド → 署名 → カタログ → 同梱 → 表示。
+- **修正の経路**: 問題を 1 問直す → 版を上げる → 変わるのがその問題だけである。
+- **止まるべき場所**: 検証の error、Schema の変更の漏れ、fixture の再生成の漏れ。
+- **CI**: 変更したパスに応じて、必要なワークフローが動く。
+
+## 2. テスト項目
+
+| ID | テスト項目 | 条件・手順 | 期待結果 | 実施方法 | 時期 | 結果 |
+|---|---|---|---|---|---|---|
+| E2E-07-01 | リポジトリのコンテンツの検証(AC-06) | `content/.venv/bin/python content/scripts/validate.py` を実行する | error が 0 件で、終了コードが 0 である | 自動: `test_cli.test_repository_content_has_no_errors`、CI の `content-validate.yml` | 現在 | 未実施 |
+| E2E-07-02 | 原稿から署名付きパックまで | fixture の原稿から、パックをビルドし、署名し、検証する | 検証に通るパックができる。同じ入力なら、同じバイト列になる | 自動: `test_build_pack.test_build_is_deterministic`、`test_sign.test_sign_and_verify`、`test_generated.test_packs_match_generator` | 現在 | 未実施 |
+| E2E-07-03 | パックからアプリの起動まで | 開発用の同梱パックで、アプリの構成を作る | 同梱パックがそろっていて署名の検証に通り、試験を読み込める | 自動: `AppEnvironmentTests.bundledPacksArePresentAndSignaturesVerify`、`uiTestingParsesArgumentsAndBootstrapsFixture` | 現在 | 未実施 |
+| E2E-07-04 | 同梱パックの再生成 | `scripts/bundle_packs.sh --development --out <新しいディレクトリ>` を実行し、コミット済みの `ExamPrepApp/Resources/Packs` と比べる | 内容が一致する。既存の出力先を指定すると、上書きせずに失敗する | 手動 | 現在 | 未実施 |
+| E2E-07-05 | 問題の修正の流れ | 問題を 1 問直し、改訂番号と版を上げてビルドする | 変わるファイルが、その問題を含むものと、索引・manifest だけである | 自動: `test_generated.test_revised_pack_changes_one_question` | 現在 | 未実施 |
+| E2E-07-06 | 検証の error での停止 | error のあるコンテンツで、パックをビルドする | ビルドが止まり、出力先に何も残らない | 自動: `test_build_pack.test_build_aborts_on_validation_error` | 現在 | 未実施 |
+| E2E-07-07 | Schema の変更の流れ | Schema を変え、CLAUDE.md の手順(Swift の型 → fixture の再生成 → JSON の再生成 → 両方のテスト)を通す | 手順のどこかを抜かすと、`pytest` または `swift test` が失敗する | 手動。fixture の鮮度は IT-01-01 | 現在 | 未実施 |
+| E2E-07-08 | CI のワークフローの起動 | コンテンツだけ、Schema、Swift のパッケージ、アプリを、それぞれ変えたプルリクエストを作る | 変更したパスに対応するワークフローだけが動く。Schema と fixture の変更では、Python と Swift の両方が動く | 手動 | 現在 | 未実施 |
+| E2E-07-09 | 修正した原稿の、アプリでの表示 | fixture の問題文を直し、パックと同梱を作り直して、アプリで該当の問題を開く | 直した文面が表示される | 手動 | 現在 | 未実施 |
+| E2E-07-10 | 本番のパックの作成 | 本番のコンテンツ(`gcp-pca`)を、本番の鍵でビルド・署名し、Release のアプリに同梱して起動する | 検証に error がない。アプリが起動し、全機能で PCA の内容が出る。開発用のパックとテスト用の鍵が入っていない | 手動 | リリース前 | 未実施 |
+| E2E-07-11 | 本番の規模での所要時間 | 本番の量のコンテンツ(RDD 6.1 の総量)で、検証とビルドを実行する | CI で待てる時間内に終わる | 手動 | リリース前 | 未実施 |
+| E2E-07-12 | リリースのタグからの配信 | リリースのタグを作る | ワークフローがパックを公開する(E2E-05-01 と同じ) | 手動 | P5 | 未実施 |
+| E2E-07-13 | リンク切れの定期の確認 | `content-link-check.yml` を手動で実行する | 出典の URL にアクセスし、切れているリンクがあればジョブが失敗する | 手動 | 現在 | 未実施 |
+| E2E-07-14 | 試験ガイドの改訂への対応(FR-CONT-04) | 試験定義の試験ガイドの版を上げて、検証を実行する | 版の合わない問題が、CI-12 の warning として一覧できる | 手動。ルールの検出は FT-09-15 | 現在 | 未実施 |
+
+## 3. 既存のテストで覆われていない点
+
+- **経路の各区間**は、自動テストで確認している(E2E-07-01〜03、05、06)。**区間をつないだ全体**(原稿を直してから、アプリの画面に出るまで。E2E-07-09)を通す自動テストは見当たらない。
+- **E2E-07-04**: DDD-P4 に、52 ファイルの再生成が一致したという記録がある。コミット済みの同梱パックと、生成器の出力の一致を、CI で確認しているかは特定できなかった。
+- **E2E-07-08**: ワークフローの `paths` の設定は目視できるが、実際のプルリクエストでの動作と、リモートの CI の結果は未確認である(CLAUDE.md の記載)。
+- **E2E-07-10、11**: 本番のコンテンツがまだない(`content/catalog.yaml` の `gcp-pca` は `comingSoon`)。
+- コンテンツの内容の正しさ(問題と解説が正確か)は、この文書群の対象外である。作問とレビューの体制(TBD-06)で扱う。
+
+## 4. 未決事項
+
+| No. | 内容 | 決める時期 |
+|---|---|---|
+| 1 | コミット済みの同梱パックと、生成器の出力の一致を、CI で確認するか | P4-S18 |
+| 2 | 本番のパックを同梱する手順([SEC-03](../SEC/SEC-03-DebugIsolation.md) の未決事項 2 と同じ) | P5-S01 |
