@@ -13,7 +13,7 @@ from conftest import VALID
 from contentpack.build import build_pack
 from contentpack.sign import SigningError, sign_manifest
 from contentpack.testing import test_signing_key as signing_key
-from contentpack.verify import VerificationError, verify_pack
+from contentpack.verify import LOADED_FILES, VerificationError, verify_pack
 from sign_manifest import main
 
 
@@ -255,3 +255,23 @@ def test_sign_rejects_invalid_semver(pack, field):
     with pytest.raises(SigningError):
         sign_manifest(path, "test-2026", signing_key("test-2026"))
     assert (pack / "manifest.sig").read_bytes() == before
+
+
+def _unlist(pack, path):
+    manifest = json.loads((pack / "manifest.json").read_bytes())
+    manifest["files"] = [entry for entry in manifest["files"] if entry["path"] != path]
+    raw = json.dumps(manifest).encode()
+    (pack / "manifest.json").write_bytes(raw)
+    (pack / "manifest.sig").write_bytes(base64.b64encode(signing_key("test-2026").sign(raw)))
+
+
+@pytest.mark.parametrize("path", LOADED_FILES)
+def test_unlisted_loaded_file_is_rejected(pack, path):
+    _unlist(pack, path)
+    with pytest.raises(VerificationError, match=f"file_missing: {path}"):
+        verify(pack)
+
+
+def test_extra_unlisted_file_is_accepted(pack):
+    (pack / "extra.json").write_text("{}", encoding="utf-8")
+    assert verify(pack)
