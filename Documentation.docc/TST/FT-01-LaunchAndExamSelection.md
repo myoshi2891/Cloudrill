@@ -24,7 +24,7 @@
 
 | ID | テスト項目 | 条件・手順 | 期待結果 | 実施方法 | 時期 | 結果 |
 |---|---|---|---|---|---|---|
-| FT-01-01 | 前回の試験の復元 | 前回の選択が保存されていて、その試験が利用できる状態で起動する | 選択画面を出さず、前回の試験のホームを表示する | 自動: `ActiveExamContextTests.restoresLastExam` | 現在 | 未実施 |
+| FT-01-01 | 前回の試験の復元 | 前回の選択が保存されていて、その試験が利用できる状態で起動する | 選択画面を出さず、前回の試験のホームを表示する | 自動: `ActiveExamContextTests.restoresLastExam`(状態の復元: 試験 ID・コンテンツ・`needsSelection` が false)。ホームの画面が表示されることは自動(追加)(E2E-04-06) | 現在 | 未実施 |
 | FT-01-02 | 試験が 1 つだけ | 利用できる試験が 1 つで、前回の選択がない | その試験を自動で選び、選択を保存する | 自動: `ActiveExamContextTests.singleExamAutoSelectedAndSaved` | 現在 | 未実施 |
 | FT-01-03 | 試験が複数 | 利用できる試験が複数で、前回の選択がない | 試験の選択画面を表示する | 自動: `ActiveExamContextTests.multipleExamsShowPicker` | 現在 | 未実施 |
 | FT-01-04 | 前回の試験が使えない | 前回の試験が読み込みに失敗、または公開終了になっている | 別の試験を黙って選ばず、選択画面を表示する | 自動: `ActiveExamContextTests.unavailableLastExamDoesNotSilentlySelectAnother` | 現在 | 未実施 |
@@ -45,6 +45,7 @@
 
 ## 3. 既存のテストで覆われていない点
 
+- **FT-01-01**: `restoresLastExam` は `ActiveExamContext` の状態だけを確認している。前回の試験のホームが画面に出ることは確認していない。
 - **FT-01-18**: 起動中・起動失敗の表示は `AppRootView`(View)の中にあり、ViewModel のテストでは確認できない。UI テストの `StartupTests.testInvalidLaunchArgumentsShowFailure` が失敗の表示を確認している(E2E-04-05)。読み込み中の表示は自動テストが見当たらない。
 - 起動時に選択の保存が失敗した場合の表示(`StartupPersistenceFailed` の記録)は、対応するテストをテスト名からは特定できなかった。
 

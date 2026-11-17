@@ -31,8 +31,8 @@
 | FT-02-04 | 進行中の模試がある | 中断中の模試がある状態で、試験トップを開く | 新しい模試を開始できず、再開と破棄を選べる。破棄すると固定を外す | 自動: `ExamStartViewModelTests.startBlockedResumeAndAbandon` | 現在 | 未実施 |
 | FT-02-05 | 開始・破棄の失敗 | 版の固定、破棄の保存、固定の解除をそれぞれ失敗させる | 新しい開始で版の固定に失敗したら、画面を進めず、作成済みの受験の記録を残し、再開で固定をやり直せる。破棄の保存の失敗では、画面を進めず、記録と固定を元のまま保ち、再試行できる。固定の解除の失敗では、受験の記録は削除済みで固定だけが残る。画面は進行中の受験として扱い、同じ `ExamStartViewModel` のインスタンスで `load()` で読み込み直したあとの再試行で固定を解除できる。画面を作り直す(ViewModel を新しく作る)と、解除を待っている固定は引き継がれず、この再試行の対象にならない | 自動: `ExamStartViewModelTests.pinFailureDoesNotNavigateAndCanRetry`、`abandonFailureKeepsAttemptAndPin`、`unpinFailureCanRetryAfterReload`(同じインスタンスでの `load()` と再試行) | 現在 | 未実施 |
 | FT-02-06 | 開始の連続操作 | 設定の読み込み中に、開始をもう一度タップする | 2 回目を無視し、受験の記録を 1 つだけ作る | 自動: `ExamStartViewModelTests.duplicateStartWhileAwaitingSettingsIsIgnored` | 現在 | 未実施 |
-| FT-02-07 | 問題の読み込みと出題順 | 解答画面を開く | 全問を 1 回で読み込み、保存した出題順と選択肢の順で表示する | 自動: `ExamSessionViewModelTests.loadsAllQuestionsOnceAndRestoresOrder` | 現在 | 未実施 |
-| FT-02-08 | 解答の保存と正誤の非表示(FR-EXAM-03、NFR-04) | 選択肢を選ぶ | 選ぶたびに保存する。正誤・解説・正解数を画面に出さない | 自動: `ExamSessionViewModelTests.selectionPersistsAndDoesNotExposeCorrectness` | 現在 | 未実施 |
+| FT-02-07 | 問題の読み込みと出題順 | 解答画面を開く | 全問を 1 回で読み込み、保存した出題順と選択肢の順で表示する | 自動: `ExamSessionViewModelTests.loadsAllQuestionsOnceAndRestoresOrder`(読み込みが 1 回、問題数、最初の問題の選択肢の順)。移動したあとの問題 ID が保存した出題順と一致することは自動(追加) | 現在 | 未実施 |
+| FT-02-08 | 解答の保存と正誤の非表示(FR-EXAM-03、NFR-04) | 選択肢を選ぶ | 選ぶたびに保存する。正誤・解説・正解数を画面に出さない | 自動: `ExamSessionViewModelTests.selectionPersistsAndDoesNotExposeCorrectness`(保存の回数と内容、画面の状態の問題・選択肢に `correctChoiceIDs`・`isCorrect` が無いこと)。画面に解説・正解数が出ないことは自動(追加)(E2E-01-07) | 現在 | 未実施 |
 | FT-02-09 | 単一選択と複数選択(FR-EXAM-06) | 単一選択で選び直す。複数選択で指定数まで選び、超えて選ぶ、解除する | 単一選択は 1 つだけ選ばれる。複数選択は指定数を超えて選べず、解除できる | 自動: `ExamSessionViewModelTests.multipleLimitAndDeselection`、`ExamSessionAnswerTests.selectRecordsAnswer`、`selectNilClearsAnswer` | 現在 | 未実施 |
 | FT-02-10 | フラグと移動(FR-EXAM-04) | フラグを付け外しし、前後へ移動する。最初と最後の問題で、さらに移動する | フラグと現在位置を保存する。範囲の外へは移動しない | 自動: `ExamSessionViewModelTests.flagMoveAndSnapshotRestoration`、`ExamSessionAnswerTests.toggleFlag`、`moveClampsIndex` | 現在 | 未実施 |
 | FT-02-11 | 中断からの復元(FR-EXAM-07) | 解答・フラグ・現在位置を保存した状態から、ViewModel を作り直す | 解答・フラグ・現在位置・残り時間を復元する | 自動: `ExamSessionViewModelTests.flagMoveAndSnapshotRestoration`、`ExamSessionAnswerTests.restoreFromSnapshot`、`restoreClampsIndex` | 現在 | 未実施 |
@@ -51,7 +51,9 @@
 
 ## 3. 既存のテストで覆われていない点
 
-- この観点の項目は、すべて既存の自動テストに対応づけられた。
+- この観点の項目は、すべて既存の自動テストに対応づけられた。ただし、次の点は一部だけである。
+- **FT-02-07**: 移動したあとに表示する問題の ID が、保存した出題順と一致することは確認していない。
+- **FT-02-08**: ViewModel の状態に正解の情報が無いことは確認しているが、画面に解説・正解数が出ないことは確認していない。
 - **FT-02-05**: 固定の解除に失敗したあと、画面を作り直した場合に残った固定を解除する経路は、どのテストも確認していない。
 - 画面の表示そのもの(タイマーの見た目、警告の色、触覚)は ViewModel のテストでは確認できない。E2E-01・E2E-06 で確認する。
 - iPad の Split View(FR-EXAM-10)は P6-S02 の対象で、まだ項目にしていない。
