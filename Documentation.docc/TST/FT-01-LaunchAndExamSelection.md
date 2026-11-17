@@ -30,7 +30,7 @@
 | FT-01-04 | 前回の試験が使えない | 前回の試験が読み込みに失敗、または公開終了になっている | 別の試験を黙って選ばず、選択画面を表示する | 自動: `ActiveExamContextTests.unavailableLastExamDoesNotSilentlySelectAnother` | 現在 | 未実施 |
 | FT-01-05 | 利用できる試験がない(E-01) | 全試験の読み込みに失敗する | 致命的エラーの画面を表示する | 自動: `ActiveExamContextTests.noExamAvailableIsFatal` | 現在 | 未実施 |
 | FT-01-06 | 選択画面の表示 | 近日公開・公開終了・読み込み失敗の試験を含むカタログ | 近日公開は選べない状態で表示する。未インストールの公開終了と読み込み失敗は選べない。商標の表示がある。ベンダーは重複なく並ぶ | 自動: `ActiveExamContextTests.pickerDisablesComingSoonAndShowsTrademark`、`failedAndUninstalledRetiredExamsCannotBeSelected`、`vendorsAreUniqueAndSorted` | 現在 | 未実施 |
-| FT-01-07 | 試験の切り替え | 模試の進行中に、別の試験を選ぶ | 進行中の模試を中断として保存し、試験ごとの設定を保ち、全タブの経路を初期化する | 自動: `ActiveExamContextTests.switchSuspendsAttemptPreservesSettingsAndResetsNavigation` | 現在 | 未実施 |
+| FT-01-07 | 試験の切り替え | 模試の進行中に、別の試験を選ぶ | 進行中の模試を中断として保存し、試験ごとの設定を保ち、全タブの経路を初期化する | 自動: `ActiveExamContextTests.switchSuspendsAttemptPreservesSettingsAndResetsNavigation`(経路のあるカード・学ぶ・分析・試験の各タブに経路を積んでから切り替え、全タブが空になることを確認する) | 現在 | 未実施 |
 | FT-01-08 | 切り替えの保存失敗 | 切り替え時の保存を失敗させる | 元の試験と経路のままで、保存に失敗したことを表示する | 自動: `ActiveExamContextTests.failureKeepsActiveExamAndNavigation` | 現在 | 未実施 |
 | FT-01-09 | 切り替えの連続操作 | 保存の完了を待たずに、別の試験を続けて選ぶ | 後の操作を受け付けず、最初の選択が上書きされない | 自動: `ActiveExamContextTests.concurrentSwitchDoesNotOverwritePendingSelection` | 現在 | 未実施 |
 | FT-01-10 | 復元の繰り返し | 起動時の復元処理を 2 回呼ぶ | 開いていた画面の経路を捨てない | 自動: `ActiveExamContextTests.repeatedRestoreDoesNotDiscardNavigation` | 現在 | 未実施 |

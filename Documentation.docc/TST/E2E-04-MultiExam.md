@@ -27,7 +27,7 @@
 |---|---|---|---|---|---|---|
 | E2E-04-01 | 試験の選択と切り替え | 2 つの試験がある状態で起動し、試験を選ぶ。ホームの試験名から、もう一方に切り替える | 選択画面が出る。選ぶとホームが出る。切り替えると、ホームの試験名と内容が変わる | 自動(UI): `StartupTests.testSelectAndSwitchExamOffline` | 現在 | 未実施 |
 | E2E-04-02 | 試験が 1 つだけ | `-content-fixture` で試験を 1 つにして起動する | 選択画面を出さず、ホームが出る | 自動(UI): `StartupTests.testSingleFixtureSkipsPicker` | 現在 | 未実施 |
-| E2E-04-03 | 切り替え時の画面の位置 | 各タブで画面を進めてから、試験を切り替える | 全タブが最初の画面に戻る | 自動(UI): `StartupTests.testExamSwitchResetsTabNavigation` | 現在 | 未実施 |
+| E2E-04-03 | 切り替え時の画面の位置 | 各タブで画面を進めてから、試験を切り替える | 全タブが最初の画面に戻る | 自動(UI): `StartupTests.testExamSwitchResetsTabNavigation`(試験タブの経路が初期化されることだけ)。ほかのタブで画面を進めてから切り替え、全タブが戻ることは自動(追加)。ViewModel の単位では FT-01-07 が全タブを確認する | 現在 | 未実施 |
 | E2E-04-04 | ケースのない試験 | `-content-fixture test-beta` で起動する | 模試の開始確認が「40 問・90 分」になる。学ぶタブにケースがない。解答の画面にケース文のボタンがない | 自動(UI): `ExamFlowUITests.testBetaExamHasNoCaseUI` | 現在 | 未実施 |
 | E2E-04-05 | 不正な起動の条件 | 不正な起動引数で起動する | 起動の失敗を示す画面が出る。アプリは止まらない | 自動(UI): `StartupTests.testInvalidLaunchArgumentsShowFailure` | 現在 | 未実施 |
 | E2E-04-06 | 前回の試験の復元 | 試験を選んでアプリを終了し、同じ保存先で起動する | 選択画面を出さず、前回の試験のホームが出る | 自動(追加)。保存先の作り直しは IT-04-07 | 現在 | 未実施 |

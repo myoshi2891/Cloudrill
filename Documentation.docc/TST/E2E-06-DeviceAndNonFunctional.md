@@ -26,7 +26,7 @@
 
 | ID | テスト項目 | 条件・手順 | 期待結果 | 実施方法 | 時期 | 結果 |
 |---|---|---|---|---|---|---|
-| E2E-06-01 | 起動時間(NFR-01) | 実機の Release ビルドを、完全に終了した状態から起動する。5 回測る | 起動から操作できるまでが 2 秒以内である | 手動(Instruments、`StartupMetrics` の区間)。シミュレータでの記録は 自動(UI): `LaunchPerformanceTests.testLaunchPerformance`、`testLaunchToExamPickerPerformance` | リリース前 | 未実施 |
+| E2E-06-01 | 起動時間(NFR-01) | 実機の Release ビルドを、完全に終了した状態から起動する。5 回測る | 起動から操作できるまでが 2 秒以内である | 手動(Instruments の App Launch で、プロセスの起動から `StartupReady` イベントまでを測る。`StartupMetrics` の区間(`StartupPreparation` など)はプロセスの起動や描画を含まないので、その内訳として見るだけにする)。シミュレータでの記録は 自動(UI): `LaunchPerformanceTests.testLaunchPerformance`、`testLaunchToExamPickerPerformance` | リリース前 | 未実施 |
 | E2E-06-02 | 問題の切り替え(NFR-02) | 本番のパックの模試で、「次へ」を続けて押す | 切り替えが 100ms 以内で、引っかかりがない | 手動(Instruments) | リリース前 | 未実施 |
 | E2E-06-03 | VoiceOver での模試(AC-07) | VoiceOver を ON にして、模試を開始から提出まで操作する | すべての操作ができる。選択肢は「選択肢 B、選択済み」のように状態を読む。タイマーは 1 分ごとに読み上げる | 手動 | P4-S18 | 未実施 |
 | E2E-06-04 | VoiceOver でのほかの機能 | VoiceOver で、練習・カード・ドキュメント・分析・設定を操作する | すべての操作ができる。グラフの値、カードの表と裏、表の内容を読める | 手動 | P4-S18 | 未実施 |

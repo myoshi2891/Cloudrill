@@ -29,7 +29,7 @@
 | FT-02-02 | 開始確認の表示 | 模試を選ぶ | 問題数・制限時間・含まれるケースを、試験定義のとおりに表示する | 自動: `ExamStartViewModelTests.startShowsFormatAndCases` | 現在 | 未実施 |
 | FT-02-03 | 模試の開始 | 開始を確定する | 受験の記録を作り、出題順を保存し、コンテンツの版を固定して、解答画面へ進む | 自動: `ExamStartViewModelTests.startCreatesAttemptAndPins` | 現在 | 未実施 |
 | FT-02-04 | 進行中の模試がある | 中断中の模試がある状態で、試験トップを開く | 新しい模試を開始できず、再開と破棄を選べる。破棄すると固定を外す | 自動: `ExamStartViewModelTests.startBlockedResumeAndAbandon` | 現在 | 未実施 |
-| FT-02-05 | 開始・破棄の失敗 | 版の固定、破棄の保存、固定の解除をそれぞれ失敗させる | 画面を進めず、記録と固定を元のまま保ち、再試行できる | 自動: `ExamStartViewModelTests.pinFailureDoesNotNavigateAndCanRetry`、`abandonFailureKeepsAttemptAndPin`、`unpinFailureCanRetryAfterReload` | 現在 | 未実施 |
+| FT-02-05 | 開始・破棄の失敗 | 版の固定、破棄の保存、固定の解除をそれぞれ失敗させる | 版の固定・破棄の保存の失敗では、画面を進めず、記録と固定を元のまま保ち、再試行できる。固定の解除の失敗では、受験の記録は削除済みで固定だけが残る。画面は進行中の受験として扱い、読み込み直したあとの再試行で固定を解除できる | 自動: `ExamStartViewModelTests.pinFailureDoesNotNavigateAndCanRetry`、`abandonFailureKeepsAttemptAndPin`、`unpinFailureCanRetryAfterReload` | 現在 | 未実施 |
 | FT-02-06 | 開始の連続操作 | 設定の読み込み中に、開始をもう一度タップする | 2 回目を無視し、受験の記録を 1 つだけ作る | 自動: `ExamStartViewModelTests.duplicateStartWhileAwaitingSettingsIsIgnored` | 現在 | 未実施 |
 | FT-02-07 | 問題の読み込みと出題順 | 解答画面を開く | 全問を 1 回で読み込み、保存した出題順と選択肢の順で表示する | 自動: `ExamSessionViewModelTests.loadsAllQuestionsOnceAndRestoresOrder` | 現在 | 未実施 |
 | FT-02-08 | 解答の保存と正誤の非表示(FR-EXAM-03、NFR-04) | 選択肢を選ぶ | 選ぶたびに保存する。正誤・解説・正解数を画面に出さない | 自動: `ExamSessionViewModelTests.selectionPersistsAndDoesNotExposeCorrectness` | 現在 | 未実施 |
