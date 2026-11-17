@@ -16,6 +16,14 @@ struct PackFiles: Sendable {
         let url = root.appending(path: path).standardizedFileURL
         guard !path.hasPrefix("/"), !path.split(separator: "/").contains(".."),
               url.path.hasPrefix(root.standardizedFileURL.path + "/") else { throw .storage("unsafe path: \(path)") }
+        // 同梱パックは起動時に署名を再検証しないので、読み込みのたびにパック内のシンボリックリンクを拒否する。
+        var component = root
+        for part in path.split(separator: "/") {
+            component.append(path: String(part))
+            if (try? component.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink) == true {
+                throw .storage("unsafe path: \(path)")
+            }
+        }
         do { return try reader.read(url) }
         catch { throw .fileMissing(path) }
     }

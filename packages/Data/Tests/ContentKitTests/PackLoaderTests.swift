@@ -92,6 +92,21 @@ struct PackLoaderTests {
         entry.path = "../outside.md"
         await #expect(throws: ContentError.fileMissing(entry.path)) { try await content.docBody(for: entry) }
     }
+    @Test func symlinkIsRejectedAtRead() async throws {
+        // Arrange: 検証済みのパックを読み込んだあと、本文をパックの外へのシンボリックリンクに置き換える
+        let root = PackFixtures.temporary()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let pack = try PackFixtures.copy(to: root)
+        let manifest = try PackFixtures.verifier().verify(packAt: pack, expectedExamID: "test-alpha", currentVersion: nil)
+        let content = try PackLoader().load(packAt: pack, manifest: manifest)
+        let entry = try #require(content.docsIndex.first)
+        let outside = root.appending(path: "outside.md")
+        try Data("# outside".utf8).write(to: outside)
+        try FileManager.default.removeItem(at: pack.appending(path: entry.path))
+        try FileManager.default.createSymbolicLink(at: pack.appending(path: entry.path), withDestinationURL: outside)
+        // Act / Assert: 同梱パックは起動時に再検証しないので、読み込みの時点で拒否する
+        await #expect(throws: ContentError.storage("unsafe path: \(entry.path)")) { try await content.docBody(for: entry) }
+    }
     @Test func loadAllQuestionsForExamSetUnderBudget() async throws {
         let content = try PackFixtures.content()
         let ids = try #require(content.examSets.first).questionIDs

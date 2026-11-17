@@ -11,6 +11,10 @@ public struct PackLoader: Sendable {
         try PackFiles(root: directory, reader: reader).decode(Manifest.self, "manifest.json")
     }
 
+    /// `load` が読むファイル。`PackVerifier` は、これらが manifest に載っていて、ハッシュを検証済みであることを要求する。
+    /// `load` で読むファイルを変えたら、ここも合わせる。
+    static let loadedFiles = ["exam.json", "vendor.json", "questions/index.json", "exam-sets.json", "docs/index.json"]
+
     public func load(packAt directory: URL, manifest: Manifest) throws(ContentError) -> PackContent {
         let files = PackFiles(root: directory, reader: reader)
         return try PackContent(
