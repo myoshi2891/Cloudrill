@@ -39,7 +39,8 @@
 ## 3. 事前調査で把握した現状
 
 - `PackVerifier.verify` は「署名 → デコード → 版・試験 → ファイル」の順で確認する。`verify.py` も同じ順序である。
-- `PackVerifier.verify` は、ファイルの確認の最初に、`PackLoader.loadedFiles` がすべて manifest に載っていることを確認する(2026-11-17 に追加)。`verify.py` も `_check_files` の最初に、同じ 5 ファイル(`LOADED_FILES`)を同じ順で確認し、`file_missing` で拒否する(2026-11-18 に追加)。Python と Swift は同じ manifest を拒否する。
+- `PackVerifier.verify` は、ファイルの確認の最初に、`PackLoader.loadedFiles` がすべて manifest に載っていることを確認する(2026-11-17 に追加)。`verify.py` も `_check_files` の最初に、同じ 5 ファイル(`LOADED_FILES`)を同じ順で確認し、`file_missing` で拒否する(2026-11-18 に追加)。Python と Swift の結果がそろうと言えるのは、`LOADED_FILES` のどれかが載っていない manifest を拒否する点だけである。
+- manifest の最上位の未知のキーの扱いは、Python と Swift で違う。`verify.py` は Schema(`additionalProperties: false`)で `manifest_undecodable` として拒否する。Swift の `Manifest` は既定の `Codable` でデコードするので、未知のキーを無視して受け入れる。どちらの場合も署名は `manifest.json` のバイト列全体が対象なので、この違いで署名の確認を回避することはできない(未決事項 5)。なお、`unknown-key` の fixture は署名の鍵が鍵リングに無い場合の確認であり、このケースの確認にはならない。
 - 改ざんの fixture は 9 種類ある(`app-too-old`、`bad-signature`、`exam-mismatch`、`hash-mismatch`、`missing-file`、`path-traversal`、`size-mismatch`、`unknown-key`、`unsupported-format`)。版戻しとシンボリックリンクは fixture ではなく、`PackVerifierTests` の個別のテストで扱っている。
 - 起動時の `ContentBootstrapper` は、署名と本文のハッシュを再検証しない。manifest・試験定義・ベンダーの一致と、索引の整合だけを確認する(起動時間 NFR-01 のため)。
 - `PackStore.installBundled` は、同梱版を複製するときに manifest の試験 ID と版の一致だけを確認し、署名は確認しない。
@@ -55,3 +56,4 @@
 | 2 | 同梱パックの署名を、ビルド時・起動時・`pin` の複製時のどこで確認するか。アプリ本体のコード署名で守られるため不要とするなら、その判断を記録する | P5 の着手前 |
 | 3 | (決定済み)manifest に載っていないファイルの扱い。`PackLoader` が読むファイルは拒否し、読まれない余分なファイルは許容する。`verify.py` にも同じ確認を足し、Python と Swift の範囲をそろえた(SEC-01-06) | — |
 | 4 | パックとファイルのサイズの上限(SEC-05-08 と同じ) | P5-S03 |
+| 5 | manifest の最上位の未知のキーを、Swift でも拒否して Python とそろえるか(Python は拒否、Swift は無視)。そろえるなら、契約 fixture に未知のキーを持つ署名済み manifest を加える | P5 の着手前 |

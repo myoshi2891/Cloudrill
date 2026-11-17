@@ -22,7 +22,7 @@
 
 | ID | 確認項目 | 確認方法 | 対象 | 時期 | 結果 |
 |---|---|---|---|---|---|
-| SEC-02-01 | 本番の秘密鍵は Secret Manager にだけ置き、リリース用のサービスアカウントだけが読める | 署名鍵のシークレットに対して、`secretmanager.versions.access` の権限を実際に持つ主体を確認する。シークレット自体の IAM ポリシーに加え、プロジェクト・フォルダ・組織から継承するポリシーと、この権限を含むカスタムロール・基本ロール(`roles/owner`、`roles/editor`)も対象にする(例: Policy Analyzer の `gcloud asset analyze-iam-policy --full-resource-name=<シークレット> --permissions=secretmanager.versions.access`)。権限を持つのがリリース用のサービスアカウントだけであること | DDD-P5 P5-S07 | リリース前 | 未確認 |
+| SEC-02-01 | 本番の秘密鍵は Secret Manager にだけ置き、リリース用のサービスアカウントだけが読める | 署名鍵のシークレットに対して、`secretmanager.versions.access` の権限を実際に持つ主体を確認する。シークレット自体の IAM ポリシーに加え、プロジェクト・フォルダ・組織から継承するポリシーと、この権限を含むカスタムロール・基本ロール(`roles/owner`、`roles/editor`)も対象にする(例: Policy Analyzer の `gcloud asset analyze-iam-policy --full-resource-name=<シークレット> --permissions=secretmanager.versions.access`)。権限を持つのがリリース用のサービスアカウントだけであること。あわせて、リリース用のサービスアカウントになりすませる主体(そのサービスアカウントに対して `iam.serviceAccounts.getAccessToken` を持つ主体。例: `gcloud asset analyze-iam-policy --full-resource-name=<サービスアカウント> --permissions=iam.serviceAccounts.getAccessToken`。継承するポリシーとロールも対象)を確認し、承認された主体(リリースのワークフローなど)だけに限られていること | DDD-P5 P5-S07 | リリース前 | 未確認 |
 | SEC-02-02 | ステージングと本番で別の鍵を使う。鍵 ID も別にする | 両環境のシークレットと、それぞれの `manifest.json` の `keyID` を比べる | DDD-P5 P5-S01 | P5 | 未確認 |
 | SEC-02-03 | 署名ツールは、秘密鍵を環境変数から受け取り、ファイル・標準出力・例外のメッセージに出さない | `sign_manifest.py` の `--key-env` の処理と、`SigningError` のメッセージを目視する。わざと不正な鍵を渡し、出力に鍵の内容が含まれないことを確認する | sign_manifest.py、sign.py | 現在 | 未確認 |
 | SEC-02-04 | テスト用の鍵(`--test-key`)は、テストと fixture の生成でだけ使える。リリースのワークフローから呼べない | `content-release.yml` に `--test-key` が無いこと。`build_pack.py` と `sign_manifest.py` が、本番の鍵 ID とテスト用の鍵の組み合わせを拒否するかを確認する | sign_manifest.py、P5-S01 | P5 | 未確認 |
