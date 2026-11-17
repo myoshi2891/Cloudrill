@@ -22,7 +22,7 @@
 
 | ID | 確認項目 | 確認方法 | 対象 | 時期 | 結果 |
 |---|---|---|---|---|---|
-| SEC-10-01 | アプリのログに、解答・自由記述・設定の値・ファイルの絶対パスを出さない | `grep -rn -E 'Logger\(\|logger\.' packages/*/Sources` で全箇所を確認する。値を埋め込む場合は `privacy: .private`(または既定の非公開)であること | アプリ全体 | 現在 | 未確認 |
+| SEC-10-01 | アプリのログに、解答・自由記述・設定の値・ファイルの絶対パスを出さない | `grep -rn -E 'Logger\(\|logger\.' packages/*/Sources ExamPrepApp` で、パッケージとアプリのターゲットの全箇所を確認する。値を埋め込む場合は `privacy: .private`(または既定の非公開)であること | アプリ全体 | 現在 | 未確認 |
 | SEC-10-02 | `print`・`NSLog`・`debugPrint`・`dump` を、製品のコードで使わない | `grep -rn -E '\b(print\|NSLog\|debugPrint\|dump)\(' packages/*/Sources ExamPrepApp` が、テスト支援以外で何も出さない | アプリ全体 | 現在 | 未確認 |
 | SEC-10-03 | 計測用のサインポスト(`OSSignposter`)の名前と付加情報に、利用者のデータを含めない | `StartupMetrics` と `AppEnvironment` のサインポストの名前が固定の文字列であることを目視する | StartupMetrics.swift、AppEnvironment.swift | 現在 | 未確認 |
 | SEC-10-04 | 画面に出すエラーは決まった文言だけで、`error.localizedDescription` や内部のエラーの文字列をそのまま出さない | `String(describing: error)` と `localizedDescription` の使用箇所を洗い出し、画面に届かないことを確認する(`ContentError.undecodable` の `reason`、`storage` の文字列を含む) | Presentation、FileReading.swift、PackStore.swift | 現在 | 未確認 |
