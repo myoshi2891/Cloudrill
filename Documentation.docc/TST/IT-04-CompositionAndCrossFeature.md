@@ -32,7 +32,7 @@
 | IT-04-02 | 不正な起動引数 | 未知の引数、重複した引数、矛盾した引数、不正な日時やパスを渡す | 構成を作らず、エラーにする | 自動: `AppEnvironmentTests.invalidArgumentsAreRejected`(重複した引数 `-network offline -network offline`、`-store-in-memory` の重複を含む) | 現在 | 未実施 |
 | IT-04-03 | 開発用の構成 | 開発用の構成を作る | システムの時計と、実際のリポジトリを使う | 自動: `AppEnvironmentTests.developmentUsesSystemTimeAndRealRepositories` | 現在 | 未実施 |
 | IT-04-04 | 本番の構成 | 開発用の印(`development.json`)のあるパックで、本番の構成を作る | 起動を拒否する | 自動: `AppEnvironmentTests.liveRejectsDevelopmentBundle` | 現在 | 未実施 |
-| IT-04-05 | 同梱パックの確認 | アプリに同梱したパックを読む | 必要な試験がそろっていて、署名の検証に通る | 自動: `AppEnvironmentTests.bundledPacksArePresentAndSignaturesVerify` | 現在 | 未実施 |
+| IT-04-05 | 同梱パックの確認 | アプリに同梱したパックを読む | カタログで `available` の試験のパックがそろっていて、署名の検証に通る | 自動: `AppEnvironmentTests.bundledPacksArePresentAndSignaturesVerify` | 現在 | 未実施 |
 | IT-04-06 | 採点と描画の対応 | 採点の登録表と、問題の描画の登録表を比べる | 対応する問題の種類が一致する。一致しなければ起動を拒否する | 自動: `AppEnvironmentTests.supportedKindsMatchBothRegistries`(対応する種類が `QuestionKind.allCases` と一致することだけ)。不一致のときに起動を拒否すること(`AppEnvironment` の `registryMismatch`)は自動(追加)。登録表が static なので、不一致を作るには差し替えの手段が要る | 現在 | 未実施 |
 | IT-04-07 | 選択の復元 | ディスクの保存先で試験を選び、構成を作り直す | 前回の試験が選ばれている | 自動: `AppEnvironmentTests.diskConfigurationRestoresLastSelection` | 現在 | 未実施 |
 | IT-04-08 | 模試の開始と破棄 | 実際のリポジトリとパックの保存で、模試を開始し、破棄する | 受験の記録と版の固定ができ、破棄で両方が消える | 自動: `AppEnvironmentTests.startsAndAbandonsWithRealRepositoriesAndPins` | 現在 | 未実施 |
