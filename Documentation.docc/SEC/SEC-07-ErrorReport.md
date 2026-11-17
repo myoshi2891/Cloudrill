@@ -25,7 +25,7 @@
 |---|---|---|---|---|---|
 | SEC-07-01 | 入力欄に「個人情報は書かないでください」と表示する | 報告シートを開き、`report.privacyNotice` の文言が表示されることを確認する | ReportSheetView、`Localizable.strings` | 現在 | 未確認 |
 | SEC-07-02 | 自由記述が 500 文字を超えると送信できない | `ReportSheetViewModel` のテスト(`isCommentTooLong`、`canSubmit`)が通る | ReportSheetViewModel.swift 18・41〜43 行目 | 現在 | 未確認 |
-| SEC-07-03 | 報告に含める項目が、試験 ID・問題 ID・改訂番号・パックの版・理由・自由記述・アプリの版・ロケールだけである | `PendingReport` のプロパティと、`reportMetadata` が返す値を目視する。端末名・識別子・学習履歴を含まないこと | ReportQueueStore.swift、AppEnvironment.swift 69〜73 行目 | 現在 | 未確認 |
+| SEC-07-03 | 報告に含める項目が、試験 ID・問題 ID・改訂番号・パックの版・理由・自由記述・アプリの版・ロケールだけである | `PendingReport` のプロパティ(上記の項目と、端末内のキューの管理に使う `id`・`createdAt`)と、`reportMetadata` が返す値を目視する。`id` は報告ごとにランダムに作るキューのレコードの ID で、端末の識別子ではないこと(端末や利用者をまたいで追跡できないこと)。端末名・端末の識別子・学習履歴を含まないこと | ReportQueueStore.swift、AppEnvironment.swift 69〜73 行目 | 現在 | 未確認 |
 | SEC-07-04 | 未送信の報告を iCloud に同期しない | `ReportQueueContainerFactory` が `cloudKitDatabase: .none` を指定していること。`ReportQueueTests` が通る | ReportQueueStore.swift 38〜45 行目 | 現在 | 未確認 |
 | SEC-07-05 | 送信に成功した報告と、利用者が削除を選んだ報告を、端末から消す | `ReportSender` のテスト(P5-S06)と、SEC-04-08・SEC-04-09 | P5-S06 | P5 | 未確認 |
 | SEC-07-06 | report-api が、App Attest の assertion を検証する。assertion は、リクエスト本文の SHA-256 と challenge に対するものである | 契約テスト(本文を書き換えたリクエスト、別の鍵の assertion が 401 になる) | DDD-P5 3.3、P5-S04 | P5 | 未確認 |

@@ -28,7 +28,7 @@
 | SEC-01-03 | 署名が鍵リングのどれかで検証でき、かつ manifest の `keyID` がその鍵の ID と一致する場合だけ受け入れる | `unknown-key` の fixture が拒否されること、`verifiedIDs.contains(manifest.keyID)` の分岐を目視する | PackVerifier.swift 30 行目、verify.py `_decode` | 現在 | 未確認 |
 | SEC-01-04 | 署名・公開鍵の Base64 は正規形だけを受け入れる(長さ 64 バイト・32 バイト、再エンコードして一致) | `rejectsInvalidKey` と `bad-signature` の fixture が通る。改行つきの `manifest.sig` を手で作り、拒否されることを確認する | PackVerifier.swift、PublicKeyRing.swift | 現在 | 未確認 |
 | SEC-01-05 | manifest の全ファイルについて、存在・サイズ・SHA-256 を確認する | `hash-mismatch`、`size-mismatch`、`missing-file` の fixture が拒否される | `checkFiles` | 現在 | 未確認 |
-| SEC-01-06 | manifest に載っていないファイルがパックにあっても読まれない、または拒否される | パックに余分なファイルを 1 つ足して `verify` と `PackLoader` を実行し、挙動を記録する。許容するなら理由を「未決事項」から設計書へ移す | PackVerifier.swift、PackLoader.swift | 現在 | 未確認 |
+| SEC-01-06 | `PackLoader.load` が読むファイル(`PackLoader.loadedFiles`)は、すべて manifest に載っていてハッシュを検証される。載っていない manifest は、署名が正しくても `fileMissing` で拒否する。manifest に載っていない余分なファイルは、読まれないので許容する | `PackVerifierTests` の `unlistedLoadedFileIsRejected`(5 ファイルそれぞれを外して署名し直す)、`modifiedUnlistedLoadedFileIsRejected`(外した `exam.json` を書き換える)、`extraUnlistedFileIsAccepted`(余分なファイルを `verify` が通し、`PackLoader` が読まない)が成功すること | PackVerifier.swift、PackLoader.swift | 現在 | 未確認 |
 | SEC-01-07 | 現在の版以下のパックを拒否する(build metadata だけが違う版も含む) | `notNewerIsRejected`(`1.0.0`、`1.1.0`、`1.0.0+build`)が通る | `checkVersions` | 現在 | 未確認 |
 | SEC-01-08 | パスの規則(絶対パス・`..`・許可外の文字の拒否)が、Schema・Python・Swift で一致している | `manifest.schema.json` の `FileEntry.path` の正規表現と、`checkPath` の正規表現を比べる。`path-traversal` の fixture が拒否される | manifest.schema.json、`checkPath` | 現在 | 未確認 |
 | SEC-01-09 | パックの中のシンボリックリンクを拒否する(ファイルと途中のディレクトリの両方) | `symlinkIsRejected`(`exam.json`、`questions`)が通る | `checkPath` | 現在 | 未確認 |
@@ -39,6 +39,7 @@
 ## 3. 事前調査で把握した現状
 
 - `PackVerifier.verify` は「署名 → デコード → 版・試験 → ファイル」の順で確認する。`verify.py` も同じ順序である。
+- `PackVerifier.verify` は、ファイルの確認の最初に、`PackLoader.loadedFiles` がすべて manifest に載っていることを確認する(2026-11-17 に追加)。`verify.py` にはこの確認がない。`build_pack.py` が常にこれらのファイルを載せるため実害はないが、Python と Swift の検証の範囲が異なる。
 - 改ざんの fixture は 9 種類ある(`app-too-old`、`bad-signature`、`exam-mismatch`、`hash-mismatch`、`missing-file`、`path-traversal`、`size-mismatch`、`unknown-key`、`unsupported-format`)。版戻しとシンボリックリンクは fixture ではなく、`PackVerifierTests` の個別のテストで扱っている。
 - 起動時の `ContentBootstrapper` は、署名と本文のハッシュを再検証しない。manifest・試験定義・ベンダーの一致と、索引の整合だけを確認する(起動時間 NFR-01 のため)。
 - `PackStore.installBundled` は、同梱版を複製するときに manifest の試験 ID と版の一致だけを確認し、署名は確認しない。
@@ -51,5 +52,5 @@
 |---|---|---|
 | 1 | インストール後の保存先(App Group)での改ざんを脅威に含めるか。含めるなら、起動時または一定間隔での再検証の方法を決める。含めないなら、理由(アプリのサンドボックスと Data Protection で守られる)を BDD 8.2 に書く | P5 の着手前 |
 | 2 | 同梱パックの署名を、ビルド時・起動時・`pin` の複製時のどこで確認するか。アプリ本体のコード署名で守られるため不要とするなら、その判断を記録する | P5 の着手前 |
-| 3 | manifest に載っていないファイルの扱い(無視するか、拒否するか) | P5-S03 |
+| 3 | manifest に載っていないファイルの扱い。`PackLoader` が読むファイルは拒否し、読まれない余分なファイルは許容することにした(SEC-01-06)。残る論点は、`verify.py` に同じ確認を足して Python と Swift の範囲をそろえるか | P5-S03 |
 | 4 | パックとファイルのサイズの上限(SEC-05-08 と同じ) | P5-S03 |
