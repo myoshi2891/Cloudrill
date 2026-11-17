@@ -23,7 +23,7 @@
 | ID | 確認項目 | 確認方法 | 対象 | 時期 | 結果 |
 |---|---|---|---|---|---|
 | SEC-11-01 | アプリの外に送るデータの一覧を作り、ストアのプライバシー表示と 1 項目ずつ一致させる(誤り報告の項目、App Attest の鍵 ID のハッシュ、利用統計) | 送信する項目の一覧(SEC-07-03、SEC-06-08)と、App Store Connect の「App のプライバシー」の回答を比べる | App Store Connect | リリース前 | 未確認 |
-| SEC-11-02 | プライバシーポリシーを公開し、ストアの表示・設定画面からリンクしている。内容に、集めるデータ・目的・保存期間(報告は 180 日)・削除の方法・問い合わせ先がある | ポリシーの URL と内容を確認する。設定画面のリンク先を確認する | ポリシー、SettingsView | リリース前 | 未確認 |
+| SEC-11-02 | プライバシーポリシーを公開し、ストアの表示・設定画面からリンクしている。内容に、集めるデータ・目的・保存期間・削除の方法・問い合わせ先がある。報告の保存期間は、180 日と、そのあと削除されるまでの遅れ(SEC-07-12 で許す範囲)の両方を書く | ポリシーの URL と内容を確認する。報告の保存期間が「180 日」だけで、削除の遅れに触れていないものは不適合とする。設定画面のリンク先を確認する | ポリシー、SettingsView | リリース前 | 未確認 |
 | SEC-11-03 | プライバシーマニフェスト(`PrivacyInfo.xcprivacy`)をアプリに入れる。トラッキングは「なし」、集めるデータの種類は SEC-11-01 と一致させる | Release ビルドの `.app` に `PrivacyInfo.xcprivacy` があること。Xcode のプライバシーレポート(アーカイブから生成)を確認する | アプリのバンドル | リリース前 | 未確認 |
 | SEC-11-04 | 理由の申告が必要な API(ファイルのタイムスタンプ、起動からの時間、空き容量、`UserDefaults` など)の使用を洗い出し、マニフェストに理由を書く。依存ライブラリ(`swift-markdown`)の分も確認する | `grep -rn -E 'UserDefaults\|AppStorage\|systemUptime\|volumeAvailableCapacity\|creationDate\|contentModificationDate' packages/*/Sources ExamPrepApp` と、Xcode のプライバシーレポートを確認する | アプリ全体、依存 | リリース前 | 未確認 |
 | SEC-11-05 | トラッキングをしない。ATT のダイアログを出さず、広告 ID・`identifierForVendor`・端末のフィンガープリントになる値を使わない | `grep -rn -E 'AppTrackingTransparency\|ASIdentifierManager\|identifierForVendor' packages/*/Sources ExamPrepApp` が何も出さない。依存に広告・解析の SDK が無いこと | アプリ全体 | 現在 | 未確認 |

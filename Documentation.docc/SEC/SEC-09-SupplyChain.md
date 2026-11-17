@@ -23,7 +23,7 @@
 | ID | 確認項目 | 確認方法 | 対象 | 時期 | 結果 |
 |---|---|---|---|---|---|
 | SEC-09-01 | 全ワークフローの `permissions` が最小である(今は `contents: read` だけ)。ジョブ単位の指定でも広げていない | `grep -A2 '^permissions:' .github/workflows/*.yml` で、ワークフローの既定が 7 件すべてにあることを確認する。ジョブ単位の指定はワークフローの既定を上書きするので、`grep -n -A3 -E '^\s+permissions:' .github/workflows/*.yml` で、字下げされたジョブの `permissions` もすべて確認する(`write` や `write-all` が無いこと)。リポジトリの既定の権限(Settings > Actions)が読み取り専用であること | `.github/workflows/` | 現在 | 未確認 |
-| SEC-09-02 | `pull_request_target` と `workflow_run` を使わない。フォークからのプルリクエストでシークレットを使わない | `grep -n -E 'pull_request_target\|workflow_run\|secrets\.' .github/workflows/*.yml` が何も出さない | `.github/workflows/` | 現在 | 未確認 |
+| SEC-09-02 | `pull_request_target` と `workflow_run` を使わない。フォークからのプルリクエストでシークレットを使わない | `grep -n -E 'pull_request_target\|workflow_run\|\bsecrets\b' .github/workflows/*.yml` が何も出さない(`secrets` を単語として探し、`secrets.TOKEN` のプロパティの形と `secrets['TOKEN']` の添字の形、`secrets: inherit` の両方を拾う) | `.github/workflows/` | 現在 | 未確認 |
 | SEC-09-03 | チェックアウトで認証情報を残さない(`persist-credentials: false`) | `actions/checkout` の全 8 か所に指定があることを確認する | `.github/workflows/` | 現在 | 未確認 |
 | SEC-09-04 | GitHub Actions をコミット SHA で固定する。少なくとも、シークレットや `id-token` を使うリリースのワークフローでは必ず固定する | `grep -h -o 'uses: .*' .github/workflows/*.yml` で、`@<40 桁の SHA>` になっていることを確認する | `.github/workflows/` | 現在 | 未確認 |
 | SEC-09-05 | `run:` の中に、プルリクエストの題名・ブランチ名・タグ名などの外部から決められる値(`${{ github.event.* }}`、`${{ github.head_ref }}`、`${{ github.ref_name }}`、`${{ github.ref }}`、`${{ inputs.* }}` など)を直接埋め込まない。値は `env:` で渡し、シェルの変数として引用符つきで使う | `grep -n -F '${{' .github/workflows/*.yml` で全ての式を洗い出し、`run:` のブロックの中にある式を 1 つずつ確認する。`run:` の中に残してよいのは、外部から決められない値(`runner.*`、ワークフローの中で定義した `matrix.*` など)だけである | `.github/workflows/` | 現在 | 未確認 |

@@ -34,7 +34,7 @@
 ## 3. 事前調査で把握した現状
 
 - `AppEnvironment.uiTesting`・`development` と、`UITestingConfiguration.swift` の全体は `#if DEBUG` の中にある。`AppRootView` も、起動引数を見る処理は `#if DEBUG` の中だけである。
-- `ExamPrepApp/Resources/Packs/` には、開発用のパック(`test-alpha`、`test-beta`)、`development.json`、`test-keys.json`、`catalog.json` がコミットされている。今の状態で Release ビルドを起動すると、`live` が `developmentContentNotAllowed` で失敗する(意図どおり)。
+- `ExamPrepApp/Resources/Packs/` には、開発用のパック(`test-alpha`、`test-beta`)、`development.json`、`test-keys.json`、`catalog.json` がコミットされている。今の状態で Release ビルドを起動すると、Info.plist に `CloudrillAppGroup` が無いため、`AppRootView` が `CocoaError(.fileNoSuchFile)` で失敗し、`AppEnvironment.live` の `developmentContentNotAllowed` の確認までは到達しない。この確認に到達するのは、App Group を設定したあとである(SEC-03-03 は AppComposition のテストで確認し、Release の起動では SEC-03-07 の設定後に確認する)。
 - `CloudrillAppGroup` を設定している Info.plist・xcconfig・`project.pbxproj` は見当たらない。本番の App Group ID は未定である(TBD-04)。
 - アプリのターゲットのバンドル ID は `devplaceholder.$(PROJECT_UNIQUE_VALUE:identifier).…` の仮の値である。
 - `UITestingConfiguration` は、未知の引数・重複した引数・相対パスの `-store-path`・形式の違う `-content-fixture` を拒否する。
