@@ -25,7 +25,7 @@
 |---|---|---|---|---|---|---|
 | FT-04-01 | 条件設定の選択肢 | 形の違う 2 つの試験で、条件設定を開く | ドメイン・サブ項目・ケース・難易度の選択肢が、試験定義のとおりに出る。ケースのない試験ではケースを出さない | 自動: `PracticeViewModelTests.optionsAndPresetsFollowDefinition` | 現在 | 未実施 |
 | FT-04-02 | 絞り込み(FR-PRAC-01) | ドメイン、サブ項目、ケース、難易度をそれぞれ、および組み合わせて指定する | 条件に合う問題だけを出す | 自動: `QuestionSelectorTests.filtersByDomain`、`filtersBySubObjectiveAndCase`、`filtersByDifficulty` | 現在 | 未実施 |
-| FT-04-03 | 状態での絞り込み(FR-PRAC-03) | 「間違えた問題のみ」「未解答のみ」「フラグ付きのみ」を指定する | 直近の解答が不正解の問題、一度も解答していない問題、フラグを付けた問題だけを出す | 自動: `QuestionSelectorTests.wrongOnly`、`unansweredOnly`、`flaggedOnly` | 現在 | 未実施 |
+| FT-04-03 | 状態での絞り込み(FR-PRAC-03) | 「間違えた問題のみ」「未解答のみ」「フラグ付きのみ」を指定する | 直近の解答が不正解の問題、一度も解答していない問題、フラグを付けた問題だけを出す | 自動: `QuestionSelectorTests.wrongOnly`、`unansweredOnly`、`flaggedOnly`(直近の結果をまとめた `lastResult` を直接渡す。複数の解答のどれが直近かは見ない)。不正解のあとに正解した解答から `lastResult` が正解になることは `AnswerHistoryRepositoryTests.lastResultAndReadinessIncludeEveryMode`。保存した解答の履歴から「間違えた問題のみ」の絞り込みの結果までを通すことは自動(追加) | 現在 | 未実施 |
 | FT-04-04 | 出題数(FR-PRAC-04) | 5・10・20 問・すべてを指定する。候補が指定より少ない | 指定した数を出す。候補が少なければ、ある分だけ出す | 自動: `QuestionSelectorTests.countLimits`、`countExceedsCandidates` | 現在 | 未実施 |
 | FT-04-05 | 該当する問題がない | 条件に合う問題が 0 問。または、出題の記録の保存に失敗する | 練習を開始せず、その旨を表示する | 自動: `QuestionSelectorTests.emptyResult`、`PracticeViewModelTests.emptyAndFailedMarkServedDoNotStart` | 現在 | 未実施 |
 | FT-04-06 | 重複と直近の除外 | 直近 24 時間に出題した問題を含む候補から選ぶ。候補が足りる場合と足りない場合。ちょうど 24 時間前 | 同じ問題を 2 回出さない。足りる限り直近の問題を除き、足りなければ古い順に補う。ちょうど 24 時間前は除外しない | 自動: `QuestionSelectorTests.noDuplicates`、`excludesRecentWhenEnough`、`fillsFromOldestRecent`、`servedExactlyAtBoundaryIsFresh` | 現在 | 未実施 |
