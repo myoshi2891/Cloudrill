@@ -31,7 +31,7 @@
 | E2E-07-04 | 同梱パックの再生成 | `scripts/bundle_packs.sh --development --out <新しいディレクトリ>` を実行し、コミット済みの `ExamPrepApp/Resources/Packs` と比べる | 内容が一致する。既存の出力先を指定すると、上書きせずに失敗する | 手動 | 現在 | 未実施 |
 | E2E-07-05 | 問題の修正の流れ | 問題を 1 問直し、改訂番号と版を上げてビルドする | 問題のオブジェクトのうち、変わるのが直した 1 問だけで、その改訂番号が 1 つ上がる。ビルドの出力で、変わるファイルが、その問題を含むものと、索引・manifest だけである | 問題のオブジェクトの比較は 自動: `test_generated.test_revised_pack_changes_one_question`(生成済みの fixture のパックの問題を比べる。ビルドの出力のファイルは比べない)。2 つの版をビルドしてファイルを比べることは自動(追加) | 現在 | 未実施 |
 | E2E-07-06 | 検証の error での停止 | error のあるコンテンツで、パックをビルドする | ビルドが止まり、出力先に何も残らない | 自動: `test_build_pack.test_build_aborts_on_validation_error` | 現在 | 未実施 |
-| E2E-07-07 | Schema の変更の流れ | Schema を変え、CLAUDE.md の手順(Swift の型 → fixture の再生成 → JSON の再生成 → 両方のテスト)を通す | 手順のどこかを抜かすと、`pytest` または `swift test` が失敗する | 手動。fixture の鮮度は IT-01-01 | 現在 | 未実施 |
+| E2E-07-07 | Schema の変更の流れ | Schema を変え、CLAUDE.md の手順(Swift の型 → fixture の再生成 → JSON の再生成 → 両方のテスト)を通す | fixture の再生成を抜かすと `test_generated.test_fixtures_are_up_to_date`、JSON の再生成を抜かすと `test_generated.test_swift_fixtures_are_up_to_date` が失敗する。Swift の型の更新を抜かした場合に失敗するかは、Swift のデコードが未知のキーをどう扱うかに依存するので、IT-01-14 の実施結果を記録してから期待結果を確定する | 手動。fixture の鮮度は IT-01-01 | 現在 | 未実施 |
 | E2E-07-08 | CI のワークフローの起動 | コンテンツだけ、Schema、Swift のパッケージ、アプリを、それぞれ変えたプルリクエストを作る | 変更したパスに対応するワークフローだけが動く。Schema と fixture の変更では、Python と Swift の両方が動く | 手動 | 現在 | 未実施 |
 | E2E-07-09 | 修正した原稿の、アプリでの表示 | fixture の問題文を直し、パックと同梱を作り直して、アプリで該当の問題を開く | 直した文面が表示される | 手動 | 現在 | 未実施 |
 | E2E-07-10 | 本番のパックの作成 | 本番のコンテンツ(`gcp-pca`)を、本番の鍵でビルド・署名し、Release のアプリに同梱して起動する | 検証に error がない。アプリが起動し、全機能で PCA の内容が出る。開発用のパックとテスト用の鍵が入っていない | 手動 | リリース前 | 未実施 |

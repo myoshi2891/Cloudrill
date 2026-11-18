@@ -25,7 +25,7 @@
 |---|---|---|---|---|---|---|
 | FT-07-01 | ドメイン別の正答率(FR-ANLY-01) | ドメインごとに正答数の違う解答履歴で、分析タブを開く | ドメインごとの正答率と解答数を表示する | 自動: `AnalyticsViewModelTests.accuracyByDomain` | 現在 | 未実施 |
 | FT-07-02 | サブ項目別の正答率(FR-ANLY-01) | ドメインの詳細を開く | サブ項目ごとの正答率と解答数を表示する | 自動: `AnalyticsViewModelTests.accuracyBySubObjective` | 現在 | 未実施 |
-| FT-07-03 | 解答した時点の区分 | 解答のあとで、問題のサブ項目が別のドメインへ移った状態を作る | 解答を記録したときのドメインとサブ項目で集計する | 自動: `AnalyticsViewModelTests.subObjectiveTallyStaysWithRecordedDomain` | 現在 | 未実施 |
+| FT-07-03 | 解答した時点の区分 | 解答のあとで、問題のサブ項目が別のドメインへ移った状態を作る(移動元と移動先の両方向) | 解答を記録したときのドメインとサブ項目で集計する。移った先のドメインに、そのサブ項目の行を出さない | 自動: `AnalyticsViewModelTests.subObjectiveTallyStaysWithRecordedDomain`(ドメイン 2 で記録した "1.1")、`answerStaysInDomainAfterSubObjectiveMovesAway`(ドメイン 1 で記録した "1.1" が、ドメイン 2 へ移った) | 現在 | 未実施 |
 | FT-07-04 | 解答のないドメイン | 一部のドメインにだけ解答がある。まったく解答がない | 解答のないドメインは「—」と表示する。まったく解答がなくても、全ドメインを表示する | 自動: `AnalyticsViewModelTests.noAnswersDomain`、`emptyHistoryShowsAllDomainsAsDash` | 現在 | 未実施 |
 | FT-07-05 | ドメインの名前と順 | 形の違う 2 つの試験で開く | ドメインの名前と順が、試験定義のとおりである | 自動: `AnalyticsViewModelTests.domainNamesFromDefinition` | 現在 | 未実施 |
 | FT-07-06 | 試験ごとの集計 | 2 つの試験に解答履歴がある | 選んでいる試験の履歴だけを集計する | 自動: `AnalyticsViewModelTests.perExamOnly` | 現在 | 未実施 |
