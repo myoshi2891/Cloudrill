@@ -22,7 +22,7 @@
 
 | ID | 確認項目 | 確認方法 | 対象 | 時期 | 結果 |
 |---|---|---|---|---|---|
-| SEC-06-01 | P4 までのアプリが、ネットワークに接続しない(外部リンクを利用者が開く場合を除く) | `grep -rn -E 'URLSession\|URLRequest\|NWConnection' packages/*/Sources ExamPrepApp` が何も出さない。`OfflineUITests` が通る | アプリ全体 | 現在 | 未確認 |
+| SEC-06-01 | P4 までのアプリが、ネットワークに接続しない(外部リンクを利用者が開く場合を除く) | `grep -rn -e URLSession -e URLRequest -e NWConnection packages/*/Sources ExamPrepApp` が何も出さない。`OfflineUITests` が通る | アプリ全体 | 現在 | 未確認 |
 | SEC-06-02 | Info.plist に ATS の例外(`NSAppTransportSecurity`、`NSAllowsArbitraryLoads`、ドメインごとの例外)が無い | `grep -n NSAppTransportSecurity ExamPrepApp.xcodeproj/project.pbxproj` が何も出さない。Release ビルドの Info.plist を確認する | project.pbxproj | 現在 | 未確認 |
 | SEC-06-03 | 配信と報告の接続先が https で、ホストが固定されている。カタログや manifest の値でホストを変えられない | `PackUpdater` と `ReportClient` が、基底 URL をビルド時の設定から取り、パスだけを組み立てることを確認する。パスの値(試験 ID・版・ファイルのパス)を形式で確認すること | P5-S03、P5-S06 | P5 | 未確認 |
 | SEC-06-04 | リダイレクトで https 以外や別のホストへ移らない | 接続先を 302 で `http://` と別ホストへ向ける Fake でテストし、たどらないことを確認する | P5-S03 | P5 | 未確認 |

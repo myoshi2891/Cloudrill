@@ -30,7 +30,7 @@
 | SEC-04-06 | エクスポートのファイルを、共有の完了後・設定画面を閉じたとき・次回の起動時のいずれかで削除する | エクスポート → 共有 → アプリの再起動のあと、`tmp/` に `cloudrill-export-*.json` が残っていないことを確認する | SettingsViewModel.swift `exportData()` | 現在 | 未確認 |
 | SEC-04-07 | エクスポートのファイルが平文の JSON であることを、利用者に伝えている(共有先の選択は利用者の責任になる) | 設定画面の文言を確認する | SettingsView.swift | 現在 | 未確認 |
 | SEC-04-08 | 全体の削除で、学習履歴・設定・未送信の誤り報告・削除の時点で残っているエクスポートのファイル(SEC-04-06 の削除を待っているもの)がすべて消える | `SettingsViewModel` の削除処理が `dataManagement.deleteAll` と `reports.removeAll` を呼び、未削除のエクスポートのファイルも消すことを目視する。削除後に両方のストアが空であることをテストで確認する。エクスポートしてから、SEC-04-06 の削除が動く前(共有の完了前・画面を閉じる前・再起動の前)に全体の削除を実行し、`tmp/` に `cloudrill-export-*.json` が残らないことをテストで確認する | SettingsViewModel.swift 162〜163 行目、`exportData()` | 現在 | 未確認 |
-| SEC-04-09 | 試験を指定した削除で、ほかの試験のデータと `UserSettings` が残り、指定した試験のデータ(未送信の報告を含む)だけが消える | `DataManagementTests`、`ReportQueueTests` の該当するテストが通る | DataManagement、SwiftDataReportQueue | 現在 | 未確認 |
+| SEC-04-09 | 試験を指定した削除で、ほかの試験のデータと `UserSettings` が残り、指定した試験のデータ(未送信の報告を含む)だけが消える。残っている書き出しファイルは全試験のデータを含むので、試験を指定した削除でも消す | `DataManagementTests`、`ReportQueueTests` の該当するテストが通る。`SettingsViewModelTests.deleteRemovesOutstandingExport` が通る(書き出し後、片付けの前に試験を指定して削除すると、書き出しファイルが残らず、学習データの削除は指定した試験だけに限られる) | DataManagement、SwiftDataReportQueue | 現在 | 未確認 |
 | SEC-04-10 | 削除の途中で失敗したとき、利用者に失敗を伝え、「削除済み」と表示しない | 片方のリポジトリを失敗させる Fake でテストし、エラー表示になることを確認する | SettingsViewModel.swift | 現在 | 未確認 |
 
 ## 3. 事前調査で把握した現状
@@ -38,7 +38,7 @@
 - 保存先は 3 か所ある。学習履歴(`StudyHistory.store`)、誤り報告のキュー(`ReportQueue.store`)、パック(`Content/`)。Release では App Group の URL の下に置く。
 - Data Protection クラスを明示的に指定しているコードは見当たらない。entitlements ファイルもまだ無い。指定しなければ iOS の既定値(初回のロック解除まで保護)になるが、BDD 8.2 の指定どおりかは実機で確認する必要がある。
 - `isExcludedFromBackup` を設定しているコードは見当たらない。
-- エクスポートは、全試験のデータを平文の JSON にして `FileManager.default.temporaryDirectory` に書き、`ShareLink` に渡す。書き出したファイルを削除する処理は見当たらない(SEC-04-06)。全体の削除も、エクスポートのファイルを消さない(SEC-04-08)。
+- エクスポートは、全試験のデータを平文の JSON にして `FileManager.default.temporaryDirectory` に書き、`ShareLink` に渡す。共有の完了後・画面を閉じたとき・次回の起動時に、書き出したファイルを削除する処理は見当たらない(SEC-04-06)。削除(全体・試験の指定の両方)は、学習データを消す前に、同じ画面で書き出したファイル(`exportFile`)を消す(2026-11-18 に追加)。消せなければ削除の失敗として扱う。前回の起動までに書き出し、残っているファイルは対象外である(SEC-04-08)。
 - 削除は、学習履歴(`deleteAll`)と誤り報告のキュー(`removeAll`)の両方を呼んでいる。
 - 現在は `cloudKitContainer: nil` で、CloudKit との同期は無効である(SEC-12)。
 
