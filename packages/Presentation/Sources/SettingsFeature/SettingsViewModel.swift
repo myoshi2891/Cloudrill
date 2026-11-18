@@ -177,8 +177,12 @@ public enum DataDeletionScope: Equatable, Sendable {
 
     private func removeExportFile() throws {
         guard let file = exportFile else { return }
-        if FileManager.default.fileExists(atPath: file.path(percentEncoded: false)) {
+        // 存在の確認と削除の間に状態が変わりうるので、削除を直接試す。
+        // 無視するのは「ファイルが無い」ことが確かな場合だけで、ほかの失敗は参照を残したまま投げる
+        do {
             try FileManager.default.removeItem(at: file)
+        } catch let error as CocoaError where error.code == .fileNoSuchFile {
+            // すでに消えているので、削除できた場合と同じに扱う
         }
         exportFile = nil
     }
