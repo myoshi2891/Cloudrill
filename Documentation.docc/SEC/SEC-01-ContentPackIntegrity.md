@@ -23,7 +23,7 @@
 
 | ID | 確認項目 | 確認方法 | 対象 | 時期 | 結果 |
 |---|---|---|---|---|---|
-| SEC-01-01 | 署名の確認が済むまで、manifest の JSON を解析しない | `swift test --package-path packages/Data --filter PackVerifierTests` の `signatureCheckedBeforeDecode` が通る。`verify()` の先頭が `checkSignature` であることを目視する | PackVerifier.swift、verify.py | 現在 | 未確認 |
+| SEC-01-01 | 署名の確認が済むまで、manifest の JSON を解析しない | Swift: `swift test --package-path packages/Data --filter PackVerifierTests` の `signatureCheckedBeforeDecode` が通る。`verify()` の先頭が `checkSignature` であることを目視する。Python: `(cd content && .venv/bin/pytest tests/test_sign.py::test_tampered_manifest_fails_before_decode)` が通り、デコードの前に `signature_invalid` で拒否されることを確認する。`verify_pack` が `_decode` より前に `_check_signature` を呼んでいることを目視する | PackVerifier.swift、verify.py | 現在 | 未確認 |
 | SEC-01-02 | 改ざんした 9 種類のパックを、Python と Swift が同じエラーで拒否する | `tamperedPacks`(Swift)と `(cd content && .venv/bin/pytest tests/test_sign.py tests/test_generated.py)` が通る。`tampered/expected.json` の `error` が両方で使われていることを確認する | 契約 fixture | 現在 | 未確認 |
 | SEC-01-03 | 署名が鍵リングのどれかで検証でき、かつ manifest の `keyID` がその鍵の ID と一致する場合だけ受け入れる | `unknown-key` の fixture が拒否されること、`verifiedIDs.contains(manifest.keyID)` の分岐を目視する | PackVerifier.swift 30 行目、verify.py `_decode` | 現在 | 未確認 |
 | SEC-01-04 | 署名・公開鍵の Base64 は正規形だけを受け入れる(長さ 64 バイト・32 バイト、再エンコードして一致) | `rejectsInvalidKey` と `bad-signature` の fixture が通る。改行つきの `manifest.sig` を手で作り、拒否されることを確認する | PackVerifier.swift、PublicKeyRing.swift | 現在 | 未確認 |
