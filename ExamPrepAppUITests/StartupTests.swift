@@ -244,6 +244,14 @@ import XCTest
         }
         XCTAssertTrue(app.staticTexts["practice-score"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["practice-score"].label.contains("/ 10 問正解"))
+        // 解答した全問に、正誤の行がある(FT-04-14)
+        let firstRow = app.descendants(matching: .any)["practice-answer-1"]
+        reveal(firstRow, in: app)
+        XCTAssertTrue(firstRow.waitForExistence(timeout: 5))
+        XCTAssertTrue(firstRow.label.contains("正解"))
+        let lastRow = app.descendants(matching: .any)["practice-answer-10"]
+        reveal(lastRow, in: app)
+        XCTAssertTrue(lastRow.waitForExistence(timeout: 5))
         attachScreenshot(app, name: "Practice result")
     }
 
