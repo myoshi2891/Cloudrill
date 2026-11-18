@@ -7,9 +7,20 @@ public struct FileManagerReader: FileReading {
     public init() {}
     /// 最後の要素を O_NOFOLLOW で開き、その記述子から読む。PackFiles の確認と読み込みのあいだに
     /// ファイルをシンボリックリンクへ差し替えられても、リンク先を読まない(途中のディレクトリの差し替えは対象外)。
+    /// FIFO やデバイスを開いて待ち続けないよう O_NONBLOCK で開き、同じ記述子の fstat で通常のファイルだけを読む。
     public func read(_ url: URL) throws -> Data {
-        let descriptor = open(url.path, O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
+        let descriptor = open(url.path, O_RDONLY | O_NOFOLLOW | O_NONBLOCK | O_CLOEXEC)
         guard descriptor >= 0 else { throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO) }
+        var status = stat()
+        guard fstat(descriptor, &status) == 0 else {
+            let code = POSIXErrorCode(rawValue: errno) ?? .EIO
+            close(descriptor)
+            throw POSIXError(code)
+        }
+        guard status.st_mode & S_IFMT == S_IFREG else {
+            close(descriptor)
+            throw POSIXError(.EFTYPE)
+        }
         let handle = FileHandle(fileDescriptor: descriptor, closeOnDealloc: true)
         return try handle.readToEnd() ?? Data()
     }

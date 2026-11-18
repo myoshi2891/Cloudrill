@@ -75,7 +75,8 @@ struct PackVerifierTests {
         // Act / Assert
         #expect(try PackFixtures.verifier().verify(packAt: pack, expectedExamID: "test-alpha", currentVersion: nil).packVersion == "1.0.0")
     }
-    @Test(arguments: PackLoader.loadedFiles)
+    // PackLoader.loadedFiles から外しても確認が消えないよう、期待するパスを明示する
+    @Test(arguments: ["exam.json", "vendor.json", "questions/index.json", "exam-sets.json", "docs/index.json"])
     func unlistedLoadedFileIsRejected(path: String) throws {
         // Arrange: PackLoader が読むファイルを manifest から外し、正しく署名する
         let root = PackFixtures.temporary()

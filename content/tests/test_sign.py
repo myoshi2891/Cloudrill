@@ -13,7 +13,7 @@ from conftest import VALID
 from contentpack.build import build_pack
 from contentpack.sign import SigningError, sign_manifest
 from contentpack.testing import test_signing_key as signing_key
-from contentpack.verify import LOADED_FILES, VerificationError, verify_pack
+from contentpack.verify import VerificationError, verify_pack
 from sign_manifest import main
 
 
@@ -267,7 +267,8 @@ def _unlist(pack, path):
     (pack / "manifest.sig").write_bytes(base64.b64encode(signing_key("test-2026").sign(raw)))
 
 
-@pytest.mark.parametrize("path", LOADED_FILES)
+# LOADED_FILES から外しても確認が消えないよう、期待するパスを明示する
+@pytest.mark.parametrize("path", ["exam.json", "vendor.json", "questions/index.json", "exam-sets.json", "docs/index.json"])
 def test_unlisted_loaded_file_is_rejected(pack, path):
     _unlist(pack, path)
     with pytest.raises(VerificationError, match=f"file_missing: {path}"):
