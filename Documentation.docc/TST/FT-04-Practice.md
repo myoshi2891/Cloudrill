@@ -36,7 +36,7 @@
 | FT-04-11 | 複数選択の解答 | 複数選択の問題で、指定数より少なく・ちょうど・解答後にもう一度選ぶ | 指定数ちょうどのときだけ確定できる。解答のあとは選択を変えられない | 自動: `PracticeViewModelTests.multipleSelectionRequiresExactCountAndLocksAfterAnswer` | 現在 | 未実施 |
 | FT-04-12 | 保存中の操作 | 保存の途中で、確定や選択をもう一度行う | 2 回目の操作を無視する | 自動: `PracticeViewModelTests.duplicateSubmitAndSelectionAreIgnoredWhileSaving` | 現在 | 未実施 |
 | FT-04-13 | フラグ | 練習中にフラグを付け、次の練習で「フラグ付きのみ」を選ぶ | フラグが保存され、次の練習の絞り込みに使われる | 自動: `PracticeViewModelTests.flagsPersistAndCanFilterLaterSessions` | 現在 | 未実施 |
-| FT-04-14 | 練習の結果 | 10 問を解答して結果を開く | 解答した全問の正誤と、ドメイン別の集計を表示する | 自動: `PracticeViewModelTests.resultIncludesAllTenAnswersAndDomainBreakdown` | 現在 | 未実施 |
+| FT-04-14 | 練習の結果 | 10 問を解答して結果を開く | 解答した全問の正誤と、ドメイン別の集計を表示する。結果の画面に、解答した問題ごとの行(何問目か、正解・不正解の表示、問題文)が解答した数だけある | 自動: `PracticeViewModelTests.resultIncludesAllTenAnswersAndDomainBreakdown`(正答数・ドメイン別の集計・保存した解答の件数)。画面の行は自動(UI): `StartupTests.testPracticeFeedbackAndResultOffline`(`practice-answer-1`〜`practice-answer-10` があり、正誤の表示を含む) | 現在 | 未実施 |
 | FT-04-15 | ケースで練習(FR-CASE-03) | ケースの詳細から「ケースで練習」を選ぶ | そのケースで絞り込んだ条件設定へ進む | 自動: `LearnFeatureTests.practiceForCase` | 現在 | 未実施 |
 | FT-04-16 | 練習の途中での離脱 | 3 問を解答したところで、画面を閉じる | 解答済みの 3 問は履歴に残る。再び開いたときの扱い(続きから、または新しい練習)が仕様どおりである | 自動(追加) | 現在 | 未実施 |
 

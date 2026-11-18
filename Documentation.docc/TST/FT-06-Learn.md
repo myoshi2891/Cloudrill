@@ -34,7 +34,7 @@
 | FT-06-08 | 存在しないサブ項目 | 試験定義にないサブ項目の ID を指定して開く | 「見つかりません」と表示する | 自動: `LearnFeatureTests.unknownSubObjectiveIsNotFound` | 現在 | 未実施 |
 | FT-06-09 | ドキュメントの読み込みの失敗 | 本文の読み込みを失敗させる | 失敗を表示し、再試行できる | 自動: `LearnFeatureTests.docLoadFailureCanRetry` | 現在 | 未実施 |
 | FT-06-10 | ケースの一覧 | ケース一覧を開く。ケース機能が無効な試験で開く | 試験定義の順で表示する。無効な試験では読み込まない | 自動: `LearnFeatureTests.casesInDefinitionOrder`、`casesNotLoadedWhenDisabled` | 現在 | 未実施 |
-| FT-06-11 | ケースの詳細(FR-CASE-01) | ケースを開く | 要約を 4 区分(ビジネス要件・技術要件・既存環境・制約)で表示し、公式ページへのリンクを出す。全文は載せない | 自動: `LearnFeatureTests.detailShowsSummarySectionsAndOfficialLink` | 現在 | 未実施 |
+| FT-06-11 | ケースの詳細(FR-CASE-01) | ケースを開く | 概要・ビジネス要件・技術要件・既存環境の 4 区分で表示し(`CaseStudySections`)、公式ページへのリンクを出す。全文は載せない | 自動: `LearnFeatureTests.detailShowsSummarySectionsAndOfficialLink` | 現在 | 未実施 |
 | FT-06-12 | ケースの異常 | 存在しないケース ID を指定する。読み込みを失敗させる | 「見つかりません」または失敗を表示し、再試行できる | 自動: `LearnFeatureTests.unknownCaseIsNotFound`、`caseLoadFailureCanRetry` | 現在 | 未実施 |
 | FT-06-13 | 出典とライセンスの表示(FR-DOCS-06) | ライセンスが CC BY 4.0、Apache 2.0、リンクだけの出典 | CC BY 4.0 と Apache 2.0 は名称を表示し、リンクだけの出典には表示しない | 自動: `DesignSystemTests.referencesShowAttributionLicenseButLinkOnlyHasNoLabel` | 現在 | 未実施 |
 | FT-06-14 | 画像の表示 | パックに含まれる画像を参照する原稿を開く | 画像を表示する。読めない場合は代替テキストを出す | 自動(追加) | P4-S18 | 未実施 |
