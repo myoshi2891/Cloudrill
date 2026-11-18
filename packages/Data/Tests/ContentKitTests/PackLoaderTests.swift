@@ -117,13 +117,16 @@ struct PackLoaderTests {
         let domainFile = "questions/domain\(question.domain).json"
         let removed: Set = ["flashcards.json", doc.path, domainFile]
         manifest.files.removeAll { removed.contains($0.path) }
+        let spy = SpyFileReader()
         // Act
-        let content = try PackLoader().load(packAt: directory, manifest: manifest)
+        let content = try PackLoader(fileReader: spy).load(packAt: directory, manifest: manifest)
         // Assert: ファイルはディスクにあるが、manifest に無いので読まない
         await #expect(throws: ContentError.fileMissing("flashcards.json")) { try await content.flashcards() }
         await #expect(throws: ContentError.fileMissing(doc.path)) { try await content.docBody(for: doc) }
         await #expect(throws: ContentError.fileMissing(domainFile)) { try await content.questions(ids: [question.id]) }
+        // 対照: manifest にあるファイルは読める
         #expect(try await !content.caseStudies().isEmpty)
+        for path in removed { #expect(!spy.paths.contains { $0.hasSuffix("/" + path) }, "\(path) を読んだ") }
     }
     @Test func loadReadsExactlyLoadedFiles() throws {
         // Arrange

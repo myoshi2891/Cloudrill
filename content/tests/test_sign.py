@@ -271,8 +271,9 @@ def _unlist(pack, path):
 @pytest.mark.parametrize("path", ["exam.json", "vendor.json", "questions/index.json", "exam-sets.json", "docs/index.json"])
 def test_unlisted_loaded_file_is_rejected(pack, path):
     _unlist(pack, path)
-    with pytest.raises(VerificationError, match=f"file_missing: {path}"):
+    with pytest.raises(VerificationError) as error:
         verify(pack)
+    assert (error.value.code, error.value.detail) == ("file_missing", path)
 
 
 def test_extra_unlisted_file_is_accepted(pack):
