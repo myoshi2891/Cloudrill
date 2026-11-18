@@ -119,13 +119,15 @@ public struct PracticeView: View {
                 }
             }
             // 解答した全問の正誤(FR-PRAC-05)。解答の順は出題の順と同じ
+            // 問題 ID → 問題文の索引を 1 回だけ作る。ID が重複したら先頭を使う(first(where:) と同じ)
+            let stems = Dictionary(model.questions.map { ($0.id, $0.stem.ja) }, uniquingKeysWith: { first, _ in first })
             Section {
                 ForEach(Array(model.state.answers.enumerated()), id: \.offset) { offset, answer in
                     VStack(alignment: .leading, spacing: 8) {
                         Text(String(format: String(localized: "practice.answerRow", bundle: .module), offset + 1))
                             .font(.headline)
                         ResultBadge(isCorrect: answer.isCorrect)
-                        if let stem = model.questions.first(where: { $0.id == answer.questionID })?.stem.ja {
+                        if let stem = stems[answer.questionID] {
                             Text(stem).lineLimit(3)
                         }
                     }

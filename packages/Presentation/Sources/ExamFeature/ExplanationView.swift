@@ -14,7 +14,7 @@ public struct ExplanationView: View {
             if let question = model.question {
                 Section {
                     if model.isUnanswered { Text("review.unanswered", bundle: .module) }
-                    else { ResultBadge(isCorrect: model.isCorrect) }
+                    else { ResultBadge(isCorrect: model.isCorrect).accessibilityIdentifier("explanation-result") }
                     Text(question.stem.text(preferEnglish: model.preferEnglish))
                         .accessibilityIdentifier("explanation-stem")
                 }
