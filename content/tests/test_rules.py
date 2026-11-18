@@ -106,8 +106,19 @@ def test_link_check_retries_get_on_405_and_reports_timeout(config: GlobalConfig,
 
 
 def test_link_check_is_skipped_without_flag(config: GlobalConfig, tmp_path: Path) -> None:
+    # Arrange: 要求を数える transport を渡す
     root = materialize("CI-06-broken-link", tmp_path)
-    assert run(root, config) == []
+    requests: list[httpx.Request] = []
+
+    def counting(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        return link_handler(request)
+
+    # Act
+    issues = run(root, config, transport=httpx.MockTransport(counting))
+    # Assert: --check-links なしでは要求を 1 件も送らない
+    assert issues == []
+    assert requests == []
 
 
 def test_missing_required_file_is_reported(config: GlobalConfig, tmp_path: Path) -> None:

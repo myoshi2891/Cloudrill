@@ -139,9 +139,11 @@ def test_unknown_key(pack):
 
 
 def test_verified_key_id_must_match(pack):
+    # test-2026 で署名し、keyID は同じく信頼する test-next にする(署名を検証できた鍵と keyID が一致しない)
     rewrite(pack, keyID="test-next")
     with pytest.raises(VerificationError, match="signature_invalid"):
-        verify(pack)
+        verify_pack(pack, expected_exam_id="test-alpha", key_ring={
+            "test-2026": signing_key("test-2026").public_key(), "test-next": signing_key("test-next").public_key()})
 
 
 def test_key_rotation_tries_all_keys(pack):

@@ -115,14 +115,27 @@ struct PackVerifierTests {
         #expect(!manifest.files.contains { $0.path == "extra.json" })
         #expect(!reader.paths.contains { $0.hasSuffix("extra.json") })
     }
+    @Test func keyIDNamingAnotherTrustedKeyIsRejected() throws {
+        // Arrange: 鍵リングの test-2026 で署名し、manifest の keyID は同じく信頼する test-next にする
+        let root = PackFixtures.temporary()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let pack = try PackFixtures.copy(to: root)
+        try resign(pack, signer: "test-2026") { $0.keyID = "test-next" }
+        let verifier = try PackFixtures.verifier()
+        // Act / Assert: 署名を検証できた鍵と keyID が一致しないので拒否する
+        #expect(throws: PackVerificationError.signatureInvalid) {
+            try verifier.verify(packAt: pack, expectedExamID: "test-alpha", currentVersion: nil)
+        }
+    }
     /// manifest を書き換え、テスト鍵で署名し直す。鍵は contentpack.testing.test_signing_key と同じ導出で、ファイルに保存しない。
-    private func resign(_ pack: URL, _ edit: (inout Manifest) -> Void) throws {
+    /// `signer` を省略すると、manifest の keyID の鍵で署名する。
+    private func resign(_ pack: URL, signer: String? = nil, _ edit: (inout Manifest) -> Void) throws {
         var manifest = try ContentDecoder.make().decode(Manifest.self, from: Data(contentsOf: pack.appending(path: "manifest.json")))
         edit(&manifest)
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         let raw = try encoder.encode(manifest)
-        let seed = Data(SHA256.hash(data: Data("examprep-test-key:\(manifest.keyID)".utf8)))
+        let seed = Data(SHA256.hash(data: Data("examprep-test-key:\(signer ?? manifest.keyID)".utf8)))
         let key = try Curve25519.Signing.PrivateKey(rawRepresentation: seed)
         try raw.write(to: pack.appending(path: "manifest.json"))
         try key.signature(for: raw).base64EncodedData().write(to: pack.appending(path: "manifest.sig"))
