@@ -159,6 +159,9 @@ public enum DataDeletionScope: Equatable, Sendable {
         defer { isDeleting = false }
         let target: ExamID? = scope == .exam ? examID : nil
         do {
+            // 書き出したファイルは全試験のデータを含むので、試験を指定した削除でも消す。
+            // 消せなければ、学習データを消す前に失敗として扱う(SEC-04-08、SEC-04-09)
+            try removeExportFile()
             try await dataManagement.deleteAll(examID: target)
             try await reports.removeAll(examID: target)
         } catch {
@@ -167,5 +170,13 @@ public enum DataDeletionScope: Equatable, Sendable {
         }
         error = nil
         await onDeleted(target)
+    }
+
+    private func removeExportFile() throws {
+        guard let file = exportFile else { return }
+        if FileManager.default.fileExists(atPath: file.path(percentEncoded: false)) {
+            try FileManager.default.removeItem(at: file)
+        }
+        exportFile = nil
     }
 }

@@ -122,6 +122,25 @@ import StudyModels
         #expect(h.model.pendingDeletion == nil)
     }
 
+    @Test(arguments: [(DataDeletionScope.exam, ExamID?.some("test-alpha")), (.all, nil)])
+    func deleteRemovesOutstandingExport(scope: DataDeletionScope, expected: ExamID?) async throws {
+        // Arrange: 全試験を含む書き出しファイルが、共有の完了前で残っている
+        let h = harness(data: DataManagementSpy(exported: Data("{\"exams\":[\"test-alpha\",\"test-beta\"]}".utf8)))
+        defer { try? FileManager.default.removeItem(at: h.directory) }
+        try FileManager.default.createDirectory(at: h.directory, withIntermediateDirectories: true)
+        await h.model.exportData()
+        let file = try #require(h.model.exportFile)
+        // Act
+        await h.model.confirmDelete(scope)
+        // Assert: 書き出しファイルは残らない。学習データは指定した範囲だけを削除し、ほかの試験は対象にしない
+        #expect(!FileManager.default.fileExists(atPath: file.path(percentEncoded: false)))
+        #expect(h.model.exportFile == nil)
+        #expect(try FileManager.default.contentsOfDirectory(atPath: h.directory.path(percentEncoded: false)).isEmpty)
+        #expect(await h.data.deletedScopes == [expected])
+        #expect(await h.reports.removedScopes == [expected])
+        #expect(h.deleted.calls == [expected])
+    }
+
     @Test func deleteFailureDoesNotFinish() async throws {
         let h = harness(data: DataManagementSpy(failDelete: true))
         h.model.requestDelete(.all)
