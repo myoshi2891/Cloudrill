@@ -156,15 +156,16 @@ public enum DataDeletionScope: Equatable, Sendable {
         do {
             let data = try await dataManagement.export(examID: nil)
             let url = exportDirectory.appending(path: exportFileName())
-            // 名前が同じなら atomic な書き込みで置き換わる。違えば(日付が変わった)、前のファイルを先に消す
-            if let previous = exportFile, previous != url { try removeExportFile() }
             // 書き出しの読み取り中に削除が始まった(または終わった)なら、削除した学習データを含みうるので書かない。
-            // 確認と書き込みのあいだに await を挟まないので、MainActor 上の削除と入れ替わらない
+            // 古い書き出しはファイルも参照も変えずに終える。
+            // 確認から書き込みまで await を挟まないので、MainActor 上の削除と入れ替わらない
             guard ExportDeletionGuard.generation(exportDirectory) == generation,
                   !ExportDeletionGuard.isDeleting(exportDirectory) else {
                 self.error = String(localized: "settings.exportFailed", bundle: .module)
                 return
             }
+            // 名前が同じなら atomic な書き込みで置き換わる。違えば(日付が変わった)、前のファイルを先に消す
+            if let previous = exportFile, previous != url { try removeExportFile() }
             try data.write(to: url, options: .atomic)
             exportFile = url; error = nil
         } catch {
@@ -225,13 +226,23 @@ public enum DataDeletionScope: Equatable, Sendable {
         } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
             return
         }
-        for name in names where name.hasPrefix(Self.exportFilePrefix) && name.hasSuffix(".json") {
-            do {
-                try FileManager.default.removeItem(at: exportDirectory.appending(path: name))
-            } catch let error as CocoaError where error.code == .fileNoSuchFile {
-                // すでに消えている
-            }
+        for name in names where Self.isExportFileName(name) {
+            // removeItem はディレクトリを再帰的に消すので、ディレクトリを消せない unlink を使う
+            let path = exportDirectory.appending(path: name).path(percentEncoded: false)
+            guard unlink(path) != 0 else { continue }
+            let code = errno
+            // すでに消えている場合だけ無視する
+            guard code != ENOENT else { continue }
+            throw POSIXError(POSIXErrorCode(rawValue: code) ?? .EIO)
         }
+    }
+
+    /// `exportFileName()` が作る形(`cloudrill-export-YYYYMMDD.json`)だけを書き出しファイルとみなす。
+    private static func isExportFileName(_ name: String) -> Bool {
+        let suffix = ".json"
+        guard name.hasPrefix(exportFilePrefix), name.hasSuffix(suffix) else { return false }
+        let stamp = name.dropFirst(exportFilePrefix.count).dropLast(suffix.count)
+        return stamp.count == 8 && stamp.allSatisfy { $0.isASCII && $0.isNumber }
     }
 
     private func removeExportFile() throws {

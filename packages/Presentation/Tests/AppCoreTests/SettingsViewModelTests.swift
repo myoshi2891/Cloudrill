@@ -184,6 +184,29 @@ import StudyModels
         #expect(deleted.calls == [nil])
     }
 
+    @Test func exportStartedBeforeCompletedDeletionIsDiscarded() async throws {
+        // Arrange: 1 つ目のシートの書き出しを、学習データの読み取り中に止める
+        let earlier = harness(data: DataManagementSpy(exported: Data("{\"version\":1}".utf8)))
+        defer { try? FileManager.default.removeItem(at: earlier.directory) }
+        try FileManager.default.createDirectory(at: earlier.directory, withIntermediateDirectories: true)
+        await earlier.data.holdNextExport()
+        let export = Task { await earlier.model.exportData() }
+        while await !earlier.data.isExportHeld { await Task.yield() }
+        let current = SettingsViewModel(examID: "test-alpha", examName: "ALPHA", vendors: [], appVersion: "1.0.0",
+            settings: SettingsStore(), dataManagement: DataManagementSpy(), reports: ReportRemovalSpy(),
+            time: FixedTimeSource(SelectionFixtures.now), exportDirectory: earlier.directory,
+            timeZone: TimeZone(identifier: "UTC")!, onDeleted: { _ in })
+        // Act: 2 つ目のシートで削除を最後まで終えて(削除中ではない状態に戻って)から、書き出しを再開する
+        await current.confirmDelete(.all)
+        #expect(current.error == nil)
+        await earlier.data.resumeExport()
+        await export.value
+        // Assert: 世代が変わったので、削除前のデータを含みうるファイルを書かない
+        #expect(earlier.model.error == "データを書き出せませんでした。もう一度お試しください")
+        #expect(earlier.model.exportFile == nil)
+        #expect(try FileManager.default.contentsOfDirectory(atPath: earlier.directory.path(percentEncoded: false)).isEmpty)
+    }
+
     @Test func exportRemovalFailureStopsDeletionAndAllowsRetry() async throws {
         // Arrange: 書き出しファイルがあり、ディレクトリを読み取り専用にして削除を失敗させる
         let h = harness(data: DataManagementSpy(exported: Data("{\"version\":1}".utf8)))
@@ -267,9 +290,19 @@ private actor DataManagementSpy: DataManagementRepository {
     init(exported: Data = Data(), failExport: Bool = false, failDelete: Bool = false) {
         self.exported = exported; self.failExport = failExport; self.failDelete = failDelete
     }
+    private var holdExport = false
+    private var heldExport: CheckedContinuation<Void, Never>?
+    var isExportHeld: Bool { heldExport != nil }
     func setFailExport(_ value: Bool) { failExport = value }
     func watch(_ file: URL) { watched = file }
-    func export(examID: ExamID?) throws(PersistenceError) -> Data {
+    /// 次の export を、resumeExport() まで止める
+    func holdNextExport() { holdExport = true }
+    func resumeExport() { heldExport?.resume(); heldExport = nil }
+    func export(examID: ExamID?) async throws(PersistenceError) -> Data {
+        if holdExport {
+            holdExport = false
+            await withCheckedContinuation { heldExport = $0 }
+        }
         guard !failExport else { throw .corrupted("test") }
         exportedScopes.append(examID)
         return exported
