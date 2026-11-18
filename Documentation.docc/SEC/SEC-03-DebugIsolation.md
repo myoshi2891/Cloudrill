@@ -23,7 +23,7 @@
 | ID | 確認項目 | 確認方法 | 対象 | 時期 | 結果 |
 |---|---|---|---|---|---|
 | SEC-03-01 | `uiTesting`・`development` の構成と `UITestingConfiguration` が、Release ビルドに含まれない | `swift build --package-path packages/AppComposition -c release` が通る(`app-test.yml` の該当ステップ)。Release のバイナリに `-ui-testing`、`-store-path` の文字列が無いことを `strings` で確認する | AppEnvironment.swift、UITestingConfiguration.swift | 現在 | 未確認 |
-| SEC-03-02 | Release ビルドは、起動引数(`-ui-testing`、`-store-path`、`-fixed-now`、`-content-fixture`、`-network`)を無視する | `AppRootView` の `#else` の分岐が `arguments` を参照していないことを目視する。Release ビルドを引数つきで起動し、挙動が変わらないことを確認する | AppRootView.swift | リリース前 | 未確認 |
+| SEC-03-02 | Release ビルドは、起動引数(`-ui-testing`、`-store-path`、`-fixed-now`、`-content-fixture`、`-network`)を無視する | `AppRootView` の `#else` の分岐が `arguments` を参照していないことを目視する。起動の確認は、先に App Group(SEC-03-07)と本番のパック(SEC-03-04)を設定し、Release ビルドが引数なしで正常に起動する(起動の失敗の画面で止まらない)ことを確かめてから行う。そのうえで、引数なしと、列挙した引数つきで起動し、保存先・時刻・表示するコンテンツなどの挙動が変わらないことを比べる。起動に失敗する状態での比較は、引数が無視されたことの確認にならない | AppRootView.swift | リリース前 | 未確認 |
 | SEC-03-03 | `live` は、同梱パックに `development.json` があると起動を拒否する | AppComposition のテスト(`developmentContentNotAllowed` を期待するもの)が通る | AppEnvironment.swift 35 行目 | 現在 | 未確認 |
 | SEC-03-04 | Release 用の同梱パックに、`development.json`・`test-keys.json`・`test-alpha`・`test-beta` が無い | Release ビルドの `.app/Packs/` の一覧を確認する。同梱するのは本番の鍵で署名した `gcp-pca` だけであること | アプリのバンドル | リリース前 | 未確認 |
 | SEC-03-05 | 同梱パックを Release 用に差し替える手順があり、差し替え忘れをビルドまたは CI で検知できる | 手順書または CI のステップがあること。SEC-03-03 の起動拒否だけに頼らず、ビルド時に失敗させる | 未作成 | リリース前 | 未確認 |
