@@ -126,10 +126,13 @@ public enum DataDeletionScope: Equatable, Sendable {
         guard !isBusy else { return }
         isExporting = true
         defer { isExporting = false }
-        exportFile = nil
+        // 失敗しても前のファイルの参照は残す(削除の確定で消すため)。参照を外すのは、
+        // 前のファイルを消せたときか、新しいファイルの書き出しに成功したときだけ
         do {
             let data = try await dataManagement.export(examID: nil)
             let url = exportDirectory.appending(path: exportFileName())
+            // 名前が同じなら atomic な書き込みで置き換わる。違えば(日付が変わった)、前のファイルを先に消す
+            if let previous = exportFile, previous != url { try removeExportFile() }
             try data.write(to: url, options: .atomic)
             exportFile = url; error = nil
         } catch {

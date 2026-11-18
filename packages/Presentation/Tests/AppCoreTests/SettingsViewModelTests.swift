@@ -100,6 +100,24 @@ import StudyModels
         #expect(h.model.error == "データを書き出せませんでした。もう一度お試しください")
     }
 
+    @Test func failedReexportKeepsPreviousFileTracked() async throws {
+        // Arrange: 1 回目の書き出しに成功し、ファイルが残っている
+        let h = harness(data: DataManagementSpy(exported: Data("{\"version\":1}".utf8)))
+        defer { try? FileManager.default.removeItem(at: h.directory) }
+        try FileManager.default.createDirectory(at: h.directory, withIntermediateDirectories: true)
+        await h.model.exportData()
+        let file = try #require(h.model.exportFile)
+        // Act: 2 回目の書き出しが失敗する
+        await h.data.setFailExport(true)
+        await h.model.exportData()
+        // Assert: 前のファイルの参照が残り、削除の確定でファイルが消える
+        #expect(h.model.exportFile == file)
+        #expect(h.model.error == "データを書き出せませんでした。もう一度お試しください")
+        await h.model.confirmDelete(.exam)
+        #expect(!FileManager.default.fileExists(atPath: file.path(percentEncoded: false)))
+        #expect(h.model.exportFile == nil)
+    }
+
     @Test(arguments: [(DataDeletionScope.exam, ExamID?.some("test-alpha")), (.all, nil)])
     func deleteRequiresConfirmation(scope: DataDeletionScope, expected: ExamID?) async throws {
         // Arrange
@@ -184,13 +202,14 @@ private actor SettingsStore: SettingsRepository {
 
 private actor DataManagementSpy: DataManagementRepository {
     private let exported: Data
-    private let failExport: Bool
+    private var failExport: Bool
     private let failDelete: Bool
     private(set) var exportedScopes: [ExamID?] = []
     private(set) var deletedScopes: [ExamID?] = []
     init(exported: Data = Data(), failExport: Bool = false, failDelete: Bool = false) {
         self.exported = exported; self.failExport = failExport; self.failDelete = failDelete
     }
+    func setFailExport(_ value: Bool) { failExport = value }
     func export(examID: ExamID?) throws(PersistenceError) -> Data {
         guard !failExport else { throw .corrupted("test") }
         exportedScopes.append(examID)
