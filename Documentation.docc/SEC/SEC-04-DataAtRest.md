@@ -38,7 +38,7 @@
 - 保存先は 3 か所ある。学習履歴(`StudyHistory.store`)、誤り報告のキュー(`ReportQueue.store`)、パック(`Content/`)。Release では App Group の URL の下に置く。
 - Data Protection クラスを明示的に指定しているコードは見当たらない。entitlements ファイルもまだ無い。指定しなければ iOS の既定値(初回のロック解除まで保護)になるが、BDD 8.2 の指定どおりかは実機で確認する必要がある。
 - `isExcludedFromBackup` を設定しているコードは見当たらない。
-- エクスポートは、全試験のデータを平文の JSON にして `FileManager.default.temporaryDirectory` に書き、`ShareLink` に渡す。共有の完了後・画面を閉じたとき・次回の起動時に、書き出したファイルを削除する処理は見当たらない(SEC-04-06)。削除(全体・試験の指定の両方)は、学習データを消す前に、同じ画面で書き出したファイル(`exportFile`)を消す(2026-11-18 に追加)。消せなければ削除の失敗として扱う。前回の起動までに書き出し、残っているファイルは対象外である(SEC-04-08)。
+- エクスポートは、全試験のデータを平文の JSON にして `FileManager.default.temporaryDirectory` に書き、`ShareLink` に渡す。共有の完了後・画面を閉じたとき・次回の起動時に、書き出したファイルを削除する処理は見当たらない(SEC-04-06)。削除(全体・試験の指定の両方)の `confirmDelete` は、学習データを消す前に、同じ画面で書き出したファイル(`exportFile`)を消し、続けて `removeOutstandingExports` で書き出し先(`exportDirectory`)にある書き出しの形の名前(`cloudrill-export-YYYYMMDD.json`)のファイルをすべて消す。この一括削除は、前に開いたシートや前回までの起動で書き出し、残っているファイルも対象にする。消せなければ、学習データを消す前に削除の失敗として扱う(SEC-04-08、SEC-04-09)。ただし、削除を実行しない限りファイルは残るので、SEC-04-06 の削除のタイミングは未決のままである。
 - 削除は、学習履歴(`deleteAll`)と誤り報告のキュー(`removeAll`)の両方を呼んでいる。
 - 現在は `cloudKitContainer: nil` で、CloudKit との同期は無効である(SEC-12)。
 
