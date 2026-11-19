@@ -28,7 +28,7 @@
 | SEC-05-03 | 試験 ID・版・問題 ID など、ファイル名やパスに使う値を、パスを組み立てる前に形式で確認する | `PackStore.examPath`(試験 ID の正規表現)、`checkVersion`(SemVer)を目視する。問題 ID からパスを作る箇所を洗い出し、同じ確認があることを確認する | PackStore.swift、PackContent.swift | 現在 | 未確認 |
 | SEC-05-04 | 未知の列挙値・未知の形式のデータを、黙って無視せずにエラーにする | `FixtureDecodingTests` と `ContentIntegrityCheckerTests` が通る。未知の `QuestionKind` を含むパックが `failures` に入ること | DomainModels、ContentIntegrityChecker.swift | 現在 | 未確認 |
 | SEC-05-05 | 参照 URL と公式リンク(`Reference.url`、`officialURL`)が https だけである | `common.schema.json` の `HttpsURL` の正規表現と、それを使う Schema の一覧を確認する。`http://` と `javascript:` の値が CI-01 で拒否されること | common.schema.json、ReferenceLink.swift、CaseStudySections.swift | 現在 | 未確認 |
-| SEC-05-06 | Markdown の本文内のリンクも https だけである。それ以外のスキームは、検証ツールで拒否するか、アプリで開かない | `[x](javascript:alert(1))`、`[x](file:///etc/hosts)`、`[x](tel:110)` を含むドキュメントで、`validate.py` の結果と、アプリでタップしたときの挙動を記録する | MarkdownView.swift 82〜83 行目、検証ルール | 現在 | 未確認 |
+| SEC-05-06 | Markdown の本文内のリンクも https だけで、行き先は許可したホスト(公式ドキュメントなど、意図して載せる行き先)に限る。それ以外のスキームと、許可していないホストへの https のリンクは、検証ツールで拒否するか、アプリで開かない。許可したホストへの https のリンクは開ける | `[x](javascript:alert(1))`、`[x](file:///etc/hosts)`、`[x](tel:110)`、許可していないホストへの `[x](https://unexpected.example/)` を含むドキュメントと、許可したホストへの https のリンクを含むドキュメントで、`validate.py` の結果と、アプリでタップしたときの挙動を記録する。前の 4 つは拒否されるか開かれず、許可したホストへのリンクは開くこと | MarkdownView.swift 82〜83 行目、検証ルール | 現在 | 未確認 |
 | SEC-05-07 | Markdown の HTML を解釈しない。画像はパックの中の相対パスだけを解決し、外部の URL を取得しない | `MarkdownDocument` のテストで、`<script>` が文字列として出ること、`![](https://example.com/a.png)` と `![](../a.png)` の `path` が `nil` になることを確認する | MarkdownDocument.swift `packAssetPath` | 現在 | 未確認 |
 | SEC-05-08 | パック・ファイル・JSON の大きさに上限がある。上限を超えたら読み込みを中止する | 上限の定義を確認する。数百 MB のファイルを持つパックで、検証と読み込みがメモリを使い切らないこと | PackVerifier.swift、FileReading.swift | P5 | 未確認 |
 | SEC-05-09 | YAML を安全なローダーで読む。重複したキーをエラーにする | `loader.py` と `config.py` が `SafeLoader`(`CSafeLoader`)だけを使うこと、`yaml.load(` をローダーの指定なしで呼ぶ箇所が無いことを `grep` で確認する。`test_loader.py` が通る | loader.py、config.py | 現在 | 未確認 |
@@ -49,5 +49,5 @@
 
 | No. | 内容 | 決める時期 |
 |---|---|---|
-| 1 | 本文内のリンクのスキームを、検証ルール(CI)で拒否するか、アプリで開かないようにするか、両方か | P4-S18 まで |
+| 1 | 本文内のリンクのスキームと許可していないホストを、検証ルール(CI)で拒否するか、アプリで開かないようにするか、両方か。許可するホストの一覧を置く場所(`validation.yaml` とアプリの定数など) | P4-S18 まで |
 | 2 | パック・ファイルの大きさの上限値と、それを置く場所(`validation.yaml` とアプリの定数) | P5-S03 |
