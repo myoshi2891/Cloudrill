@@ -54,6 +54,10 @@ public struct PackVerifier: Sendable {
 
     private func checkFiles(_ manifest: Manifest, directory: URL) throws(PackVerificationError) {
         let root = directory.standardizedFileURL
+        // 署名済みの manifest でも、PackLoader が読むファイルが載っていなければ、そのファイルはハッシュの検証を受けない。
+        // 載っていないものは欠落として拒否する。manifest に載っていない余分なファイルは、読まれないので許容する。
+        let listed = Set(manifest.files.map(\.path))
+        if let unlisted = PackLoader.loadedFiles.first(where: { !listed.contains($0) }) { throw .fileMissing(unlisted) }
         for entry in manifest.files {
             let relative = entry.path
             let file = try checkPath(relative, root: root)

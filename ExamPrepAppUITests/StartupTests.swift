@@ -231,6 +231,8 @@ import XCTest
         let start = app.buttons["practice-start"]
         reveal(start, in: app)
         start.tap()
+        // 解答のたびに、解説の画面の正誤(選んだ選択肢と fixture の正解から決まる)を記録し、結果の行と突き合わせる
+        var outcomes: [String] = []
         for _ in 0..<10 {
             let choice = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "session-choice-")).firstMatch
             XCTAssertTrue(choice.waitForExistence(timeout: 5))
@@ -240,10 +242,25 @@ import XCTest
             submit.tap()
             XCTAssertTrue(app.staticTexts["explanation-stem"].waitForExistence(timeout: 5))
             XCTAssertTrue(app.staticTexts["explanation-rationale-a"].exists)
+            let badge = app.staticTexts["explanation-result"].firstMatch
+            XCTAssertTrue(badge.waitForExistence(timeout: 5))
+            XCTAssertTrue(["正解", "不正解"].contains(badge.label), badge.label)
+            outcomes.append(badge.label)
             app.buttons["practice-next"].tap()
         }
         XCTAssertTrue(app.staticTexts["practice-score"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["practice-score"].label.contains("/ 10 問正解"))
+        // 解答した全問に正誤の行があり、正誤が解説の画面と一致する(FT-04-14)。
+        // 「不正解」は「正解」を含むので、部分一致ではなく、結合したラベルの要素として完全一致で確かめる
+        XCTAssertEqual(outcomes.count, 10)
+        for (offset, expected) in outcomes.enumerated() {
+            let row = app.descendants(matching: .any)["practice-answer-\(offset + 1)"]
+            reveal(row, in: app)
+            XCTAssertTrue(row.waitForExistence(timeout: 5), "row \(offset + 1)")
+            let parts = row.label.components(separatedBy: ", ")
+            XCTAssertTrue(parts.contains(expected), "row \(offset + 1): \(row.label)")
+            XCTAssertFalse(parts.contains(expected == "正解" ? "不正解" : "正解"), "row \(offset + 1): \(row.label)")
+        }
         attachScreenshot(app, name: "Practice result")
     }
 

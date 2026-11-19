@@ -44,6 +44,23 @@ import QuestionSelector
         #expect(model.state.sections.first { $0.id == 2 }?.domain.tally.total == 1)
     }
 
+    @Test func answerStaysInDomainAfterSubObjectiveMovesAway() async throws {
+        // Arrange: ドメイン 1 で記録した "1.1" の解答。改版で "1.1" はドメイン 2 へ移った
+        var moved = try definition("test-alpha")
+        let index1 = try #require(moved.domains.firstIndex { $0.id == 1 })
+        let index2 = try #require(moved.domains.firstIndex { $0.id == 2 })
+        let sub = try #require(moved.domains[index1].subObjectives.first { $0.id == "1.1" })
+        moved.domains[index1].subObjectives.removeAll { $0.id == "1.1" }
+        moved.domains[index2].subObjectives.append(sub)
+        let answers = AnalyticsAnswers(["test-alpha": outcomes("1.1", correct: 1, wrong: 0)])
+        let model = AnalyticsViewModel(definition: moved, answers: answers)
+        // Act
+        await model.refresh()
+        // Assert: ドメイン 2 の "1.1" には出さず、ドメイン 1 の集計に残す
+        #expect(model.state.sections.first { $0.id == 2 }?.subObjectives.contains { $0.id == "1.1" } == false)
+        #expect(model.state.sections.first { $0.id == 1 }?.domain.tally == ScoreTally(correct: 1, total: 1))
+    }
+
     @Test func noAnswersDomain() async throws {
         // ドメイン 1 は全問不正解(0%)、ドメイン 2 は解答なし(—)
         let answers = AnalyticsAnswers(["test-alpha": outcomes("1.1", correct: 0, wrong: 2)])

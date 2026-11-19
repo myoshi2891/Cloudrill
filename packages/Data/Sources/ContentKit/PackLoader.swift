@@ -11,8 +11,13 @@ public struct PackLoader: Sendable {
         try PackFiles(root: directory, reader: reader).decode(Manifest.self, "manifest.json")
     }
 
+    /// `load` が読むファイル。`PackVerifier` は、これらが manifest に載っていて、ハッシュを検証済みであることを要求する。
+    /// `load` で読むファイルを変えたら、ここも合わせる。
+    static let loadedFiles = ["exam.json", "vendor.json", "questions/index.json", "exam-sets.json", "docs/index.json"]
+
     public func load(packAt directory: URL, manifest: Manifest) throws(ContentError) -> PackContent {
-        let files = PackFiles(root: directory, reader: reader)
+        // 遅延読み込み(問題本文・ドキュメント・機能別のファイル)も、manifest に載ったパスだけに限る。
+        let files = PackFiles(root: directory, reader: reader, listed: Set(manifest.files.map(\.path)))
         return try PackContent(
             definition: files.decode(ExamDefinition.self, "exam.json"),
             vendor: files.decode(Vendor.self, "vendor.json"), packVersion: manifest.packVersion,

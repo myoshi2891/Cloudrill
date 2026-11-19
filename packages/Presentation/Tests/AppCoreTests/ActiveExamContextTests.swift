@@ -50,14 +50,19 @@ import HomeFeature
         let initial = try SelectionFixtures.attempt(), attempts = SelectionAttempts(initial)
         let context = try make(settings: settings, attempts: attempts)
         await context.restore()
+        // ホーム以外の全タブに経路を積む(ホームには経路がない)
+        context.router.open(.deck("domain-1"))
+        context.router.open(.caseList)
+        context.router.open(.analyticsDomain(1))
         context.router.open(.examSession(attemptID: initial.id))
+        #expect(Tab.allCases.filter { !context.router.path(for: $0).isEmpty }.count == 4)
         await context.switchExam(to: "test-beta")
         #expect(context.state.examID == "test-beta")
         #expect(await attempts.current?.snapshot.state == .suspended)
         #expect(await attempts.current?.snapshot.timer?.deadline == initial.snapshot.timer?.deadline)
         let saved = await settings.value
         #expect(saved.currentExamID == "test-beta" && saved.displayLanguage == .en && saved.shuffleChoices)
-        #expect(context.router.path(for: .exam).isEmpty && context.router.selectedTab == .home)
+        #expect(Tab.allCases.allSatisfy { context.router.path(for: $0).isEmpty } && context.router.selectedTab == .home)
     }
     @Test(arguments: [false, true]) func failureKeepsActiveExamAndNavigation(failAttemptSave: Bool) async throws {
         let initial = try SelectionFixtures.attempt()

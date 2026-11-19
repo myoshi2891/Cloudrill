@@ -92,6 +92,54 @@ struct PackLoaderTests {
         entry.path = "../outside.md"
         await #expect(throws: ContentError.fileMissing(entry.path)) { try await content.docBody(for: entry) }
     }
+    @Test func symlinkIsRejectedAtRead() async throws {
+        // Arrange: 検証済みのパックを読み込んだあと、本文をパックの外へのシンボリックリンクに置き換える
+        let root = PackFixtures.temporary()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let pack = try PackFixtures.copy(to: root)
+        let manifest = try PackFixtures.verifier().verify(packAt: pack, expectedExamID: "test-alpha", currentVersion: nil)
+        let content = try PackLoader().load(packAt: pack, manifest: manifest)
+        let entry = try #require(content.docsIndex.first)
+        let outside = root.appending(path: "outside.md")
+        try Data("# outside".utf8).write(to: outside)
+        try FileManager.default.removeItem(at: pack.appending(path: entry.path))
+        try FileManager.default.createSymbolicLink(at: pack.appending(path: entry.path), withDestinationURL: outside)
+        // Act / Assert: 同梱パックは起動時に再検証しないので、読み込みの時点で拒否する
+        await #expect(throws: ContentError.storage("unsafe path: \(entry.path)")) { try await content.docBody(for: entry) }
+    }
+    @Test func unlistedLazyFilesAreRejected() async throws {
+        // Arrange: 検証済みの manifest から、遅延読み込みのファイルを外して読み込む
+        let directory = PackFixtures.valid()
+        var manifest = try PackFixtures.verifier().verify(packAt: directory, expectedExamID: "test-alpha", currentVersion: nil)
+        let probe = try PackLoader().load(packAt: directory, manifest: manifest)
+        let doc = try #require(probe.docsIndex.first)
+        let question = try #require(probe.questionIndex.first)
+        let domainFile = "questions/domain\(question.domain).json"
+        let removed: Set = ["flashcards.json", doc.path, domainFile]
+        manifest.files.removeAll { removed.contains($0.path) }
+        let spy = SpyFileReader()
+        // Act
+        let content = try PackLoader(fileReader: spy).load(packAt: directory, manifest: manifest)
+        // Assert: ファイルはディスクにあるが、manifest に無いので読まない
+        await #expect(throws: ContentError.fileMissing("flashcards.json")) { try await content.flashcards() }
+        await #expect(throws: ContentError.fileMissing(doc.path)) { try await content.docBody(for: doc) }
+        await #expect(throws: ContentError.fileMissing(domainFile)) { try await content.questions(ids: [question.id]) }
+        // 対照: manifest にあるファイルは読める
+        #expect(try await !content.caseStudies().isEmpty)
+        for path in removed { #expect(!spy.paths.contains { $0.hasSuffix("/" + path) }, "\(path) を読んだ") }
+    }
+    @Test func loadReadsExactlyLoadedFiles() throws {
+        // Arrange
+        let directory = PackFixtures.valid()
+        let manifest = try PackFixtures.verifier().verify(packAt: directory, expectedExamID: "test-alpha", currentVersion: nil)
+        let spy = SpyFileReader()
+        // Act
+        _ = try PackLoader(fileReader: spy).load(packAt: directory, manifest: manifest)
+        // Assert: load の読むファイルが変わったら、PackVerifier が要求する loadedFiles も合わせる
+        let prefix = directory.standardizedFileURL.path + "/"
+        let relative = spy.paths.map { $0.hasPrefix(prefix) ? String($0.dropFirst(prefix.count)) : $0 }
+        #expect(relative.sorted() == PackLoader.loadedFiles.sorted())
+    }
     @Test func loadAllQuestionsForExamSetUnderBudget() async throws {
         let content = try PackFixtures.content()
         let ids = try #require(content.examSets.first).questionIDs

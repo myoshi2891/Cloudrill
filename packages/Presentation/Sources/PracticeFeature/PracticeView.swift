@@ -3,6 +3,7 @@ import AppCore
 import DomainModels
 import QuestionSelector
 import ExamFeature
+import DesignSystem
 
 /// State is retained across tab changes; changing the active exam recreates this flow.
 public struct PracticeView: View {
@@ -117,6 +118,23 @@ public struct PracticeView: View {
                     } else { Text("practice.notAsked", bundle: .module) }
                 }
             }
+            // 解答した全問の正誤(FR-PRAC-05)。解答の順は出題の順と同じ
+            // 問題 ID → 問題文の索引を 1 回だけ作る。ID が重複したら先頭を使う(first(where:) と同じ)
+            let stems = Dictionary(model.questions.map { ($0.id, $0.stem.ja) }, uniquingKeysWith: { first, _ in first })
+            Section {
+                ForEach(Array(model.state.answers.enumerated()), id: \.offset) { offset, answer in
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(String(format: String(localized: "practice.answerRow", bundle: .module), offset + 1))
+                            .font(.headline)
+                        ResultBadge(isCorrect: answer.isCorrect)
+                        if let stem = stems[answer.questionID] {
+                            Text(stem).lineLimit(3)
+                        }
+                    }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier("practice-answer-\(offset + 1)")
+                }
+            } header: { Text("practice.answers", bundle: .module) }
         }
     }
 }
