@@ -51,5 +51,5 @@ choices:
     mistakeTags: [opsOverhead]
 references:
   - title: 顧客管理の暗号鍵(CMEK)
-    url: https://cloud.google.com/kms/docs/cmek
+    url: https://docs.cloud.google.com/kms/docs/cmek
     license: CC-BY-4.0

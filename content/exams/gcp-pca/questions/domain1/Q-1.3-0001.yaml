@@ -51,5 +51,5 @@ choices:
     mistakeTags: [requirementMismatch]
 references:
   - title: Spanner のインスタンス構成
-    url: https://cloud.google.com/spanner/docs/instance-configurations
+    url: https://docs.cloud.google.com/spanner/docs/instance-configurations
     license: CC-BY-4.0
