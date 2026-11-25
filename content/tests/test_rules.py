@@ -145,7 +145,7 @@ def test_link_check_dedupes_across_exams(config: GlobalConfig, tmp_path: Path) -
 
     def counting(request: httpx.Request) -> httpx.Response:
         if request.method == "HEAD":
-            heads.append(str(request.url))
+            heads.append(f"{request.headers['host']}{request.url.raw_path.decode()}")
         return link_handler(request)
 
     # Act
