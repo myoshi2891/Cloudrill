@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import socket
+import threading
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import httpx
 import pytest
@@ -65,6 +67,40 @@ def test_connects_to_checked_address_with_original_host(monkeypatch, address):
     assert sent[0].url.host == address
     assert sent[0].headers["host"] == "example.com"
     assert sent[0].extensions["sni_hostname"] == "example.com"
+
+
+def test_connection_is_not_reused_for_another_host(monkeypatch):
+    # Arrange: 同じ IP の別ホスト。keep-alive が有効な実際のプールを使う
+    peers = []
+
+    class Handler(BaseHTTPRequestHandler):
+        protocol_version = "HTTP/1.1"
+
+        def do_HEAD(self):
+            peers.append((self.headers["Host"], self.client_address))
+            self.send_response(200)
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+
+        def log_message(self, *args):
+            pass
+
+    resolve_to(monkeypatch, "127.0.0.1")
+    monkeypatch.setattr(public_transport, "is_public", lambda address: True)
+    with ThreadingHTTPServer(("127.0.0.1", 0), Handler) as server:
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        port = server.server_address[1]
+        hosts = [f"a.example:{port}", f"b.example:{port}", f"a.example:{port}"]
+        # Act
+        try:
+            with httpx.Client(transport=PublicOnlyTransport(httpx.HTTPTransport()), trust_env=False) as client:
+                for host in hosts:
+                    assert probe(client, f"http://{host}/", frozenset()) is None
+        finally:
+            server.shutdown()
+    # Assert: 要求ごとに別の接続になる
+    assert [host for host, _ in peers] == hosts
+    assert len({address for _, address in peers}) == len(hosts)
 
 
 def test_falls_back_to_next_address(monkeypatch):

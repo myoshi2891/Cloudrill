@@ -39,6 +39,7 @@ class PublicOnlyTransport(httpx.BaseTransport):
 
     確認後の再解決で別のアドレスに接続しないよう、URL のホストを IP に置き換える。
     Host ヘッダーと SNI(証明書の検証)には元のホスト名を使う。
+    プールは IP で接続を区別するので、別のホスト名で開いた接続を使わないよう、要求ごとに接続を閉じる。
     """
 
     def __init__(self, inner: httpx.BaseTransport) -> None:
@@ -54,12 +55,14 @@ class PublicOnlyTransport(httpx.BaseTransport):
         # 公開と非公開が混ざる名前も拒否する
         if not all(is_public(a) for a in addresses):
             raise NonPublicAddressError("公開されていないアドレスです", request=request)
+        headers = request.headers.copy()
+        headers["Connection"] = "close"
         failure: httpx.ConnectError | httpx.ConnectTimeout | None = None
         for address in addresses:
             pinned = httpx.Request(
                 request.method,
                 request.url.copy_with(host=address),
-                headers=request.headers,
+                headers=headers,
                 stream=request.stream,
                 extensions={**request.extensions, "sni_hostname": host},
             )

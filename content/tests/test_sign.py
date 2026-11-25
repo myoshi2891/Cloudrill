@@ -198,14 +198,19 @@ def test_unsafe_paths(pack, path):
         verify(pack)
 
 
-@pytest.mark.parametrize("directory", [False, True])
-def test_symlink_is_rejected(pack, tmp_path, directory):
-    path = pack / ("questions" if directory else "exam.json")
+@pytest.mark.parametrize("name", ["exam.json", "questions", "manifest.json", "manifest.sig"])
+def test_symlink_is_rejected(pack, tmp_path, name):
+    path = pack / name
     target = tmp_path / "outside"
     path.rename(target)
-    path.symlink_to(target, target_is_directory=directory)
+    path.symlink_to(target, target_is_directory=target.is_dir())
     with pytest.raises(VerificationError, match="unsafe_path"):
         verify(pack)
+
+
+def test_extra_unlisted_symlink_is_accepted(pack, tmp_path):
+    (pack / "extra.json").symlink_to(tmp_path / "outside")
+    verify(pack)
 
 
 def test_verification_order(pack):

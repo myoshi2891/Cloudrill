@@ -57,8 +57,11 @@ def check(ctx: GlobalContext) -> Iterator[Issue]:
     urls = collect_urls(ctx)
     if not urls:
         return
-    # 接続先を IP で指定するので、同じ IP の別ホストと TLS 接続を共有しないよう keep-alive を使わない
-    inner = ctx.transport or httpx.HTTPTransport(limits=httpx.Limits(max_keepalive_connections=0))
+    # 接続先を IP で指定するので、httpcore のプールは同じ IP の別ホストを区別しない。
+    # httpcore 1.0.9(uv.lock)の max_keepalive_connections=0 は、割り当ての前に idle の接続を掃除するだけで、
+    # 並行時には再利用を防ぎきれない。PublicOnlyTransport が全要求に Connection: close を付け、
+    # 接続を idle に戻さずに閉じることで、要求ごとに別の接続にする。
+    inner = ctx.transport or httpx.HTTPTransport()
     client = httpx.Client(
         timeout=cfg.link_timeout,
         follow_redirects=False,

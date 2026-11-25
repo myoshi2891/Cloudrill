@@ -27,6 +27,10 @@ class VerificationError(ValueError):
 
 
 def _check_signature(directory: Path, key_ring: Mapping[str, Ed25519PublicKey]) -> tuple[bytes, set[str]]:
+    # この2つは manifest の files に載らないので、_check_files ではなくここで確認する。
+    for name in ("manifest.json", "manifest.sig"):
+        if (directory / name).is_symlink():
+            raise VerificationError("unsafe_path", name)
     try:
         raw = (directory / "manifest.json").read_bytes()
     except OSError as error:
