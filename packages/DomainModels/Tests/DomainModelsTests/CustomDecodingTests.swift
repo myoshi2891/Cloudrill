@@ -46,6 +46,28 @@ struct CustomDecodingTests {
         #expect(multiple == #"{"count":2,"kind":"multiple"}"#)
     }
 
+    private static let invalidLinks = [
+        "http://example.com", "javascript:alert(1)", "file:///etc/hosts", "tel:110", "HTTPS://example.com",
+        "https:example.com", "https:///path", "//example.com", "example.com",
+    ]
+    private func reference(_ url: String) -> String { #"{"title":"出典","url":"\#(url)","license":"link-only"}"# }
+    private func caseStudy(_ url: String) -> String {
+        #"{"id":"c","name":{"ja":"名"},"summary":{"ja":"要約"},"businessRequirements":[],"technicalRequirements":[],"existingEnvironment":{"ja":"環境"},"officialURL":"\#(url)","requirementMappings":[]}"#
+    }
+
+    @Test("Reference.url と CaseStudy.officialURL: https を受け入れる")
+    func httpsLinks() throws {
+        let url = "https://example.com/a"
+        #expect(try decode(Reference.self, reference(url)).url.absoluteString == url)
+        #expect(try decode(CaseStudy.self, caseStudy(url)).officialURL.absoluteString == url)
+    }
+
+    @Test("Reference.url と CaseStudy.officialURL: https 以外はエラー", arguments: invalidLinks)
+    func nonHTTPSLinks(url: String) {
+        #expect(throws: DecodingError.self) { try decode(Reference.self, reference(url)) }
+        #expect(throws: DecodingError.self) { try decode(CaseStudy.self, caseStudy(url)) }
+    }
+
     @Test("Choice: mistakeTags の省略は空配列になる")
     func choiceWithoutMistakeTags() throws {
         let json = #"{"id":"a","text":{"ja":"案"},"isCorrect":true,"rationale":{"ja":"理由"}}"#

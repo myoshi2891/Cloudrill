@@ -50,6 +50,16 @@ public struct Reference: Codable, Hashable, Sendable {
     }
 }
 
+extension Reference {
+    /// `url` は SwiftUI の Link に渡すので、デコードの時点で https に限る。
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        title = try container.decode(String.self, forKey: .title)
+        url = try container.decodeHTTPSURL(forKey: .url)
+        license = try container.decode(License.self, forKey: .license)
+    }
+}
+
 /// コンテンツ JSON 用のデコーダ(日付は ISO 8601)。
 public enum ContentDecoder {
     public static func make() -> JSONDecoder {
@@ -60,6 +70,15 @@ public enum ContentDecoder {
 }
 
 extension KeyedDecodingContainer {
+    /// common.schema.json#/$defs/HttpsURL のうち、スキーム(小文字の https)とホストの有無を確認する。
+    func decodeHTTPSURL(forKey key: Key) throws -> URL {
+        let url = try decode(URL.self, forKey: key)
+        guard url.scheme == "https", let host = url.host(), !host.isEmpty else {
+            throw DecodingError.dataCorruptedError(forKey: key, in: self, debugDescription: "https の URL ではありません")
+        }
+        return url
+    }
+
     /// Schema で必須かつ null 可(`required` + `anyOf [..., null]`)の項目を読む。
     /// null なら nil、キーがなければ keyNotFound(合成の Decodable は Optional のキーの欠落を許してしまうため)。
     func decodeRequiredNullable<T: Decodable>(_ type: T.Type, forKey key: Key) throws -> T? {
