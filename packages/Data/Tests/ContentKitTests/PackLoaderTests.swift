@@ -107,6 +107,30 @@ struct PackLoaderTests {
         // Act / Assert: 同梱パックは起動時に再検証しないので、読み込みの時点で拒否する
         await #expect(throws: ContentError.storage("unsafe path: \(entry.path)")) { try await content.docBody(for: entry) }
     }
+    /// 検証済みのパックの複製で、JSON の中の https の URL を別の値に置き換える(load はハッシュを再計算しない)。
+    @Test(arguments: ["docs/index.json", "cases.json", "questions/domain1.json"], ["http://", "javascript://"])
+    func nonHTTPSLinkIsRejectedAtLoad(path: String, prefix: String) async throws {
+        // Arrange
+        let root = PackFixtures.temporary()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let pack = try PackFixtures.copy(to: root)
+        let manifest = try PackFixtures.verifier().verify(packAt: pack, expectedExamID: "test-alpha", currentVersion: nil)
+        let file = pack.appending(path: path)
+        let original = try String(contentsOf: file, encoding: .utf8)
+        #expect(original.contains("https://"))
+        try Data(original.replacingOccurrences(of: "https://", with: prefix).utf8).write(to: file)
+        // Act
+        do {
+            let content = try PackLoader().load(packAt: pack, manifest: manifest)
+            if path == "cases.json" { _ = try await content.caseStudies() }
+            else { _ = try await content.questions(ids: content.questionIndex.filter { $0.domain == 1 }.map(\.id)) }
+            Issue.record("accepted \(prefix) in \(path)")
+        } catch {
+            // Assert
+            guard case .undecodable(let failed, _) = error as? ContentError else { Issue.record("\(error)"); return }
+            #expect(failed == path)
+        }
+    }
     @Test func unlistedLazyFilesAreRejected() async throws {
         // Arrange: 検証済みの manifest から、遅延読み込みのファイルを外して読み込む
         let directory = PackFixtures.valid()

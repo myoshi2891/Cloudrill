@@ -34,6 +34,11 @@ public struct PackVerifier: Sendable {
     }
 
     private func checkSignature(_ directory: URL) throws(PackVerificationError) -> (Data, Set<String>) {
+        // この2つは manifest の files に載らないので、checkFiles ではなくここで確認する。
+        for name in ["manifest.json", "manifest.sig"]
+        where (try? directory.appending(path: name).resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink) == true {
+            throw .unsafePath(name)
+        }
         guard let raw = try? Data(contentsOf: directory.appending(path: "manifest.json")) else { throw .manifestMissing }
         guard let encoded = try? Data(contentsOf: directory.appending(path: "manifest.sig")) else { throw .signatureMissing }
         guard let signature = Data(base64Encoded: encoded), signature.count == 64,

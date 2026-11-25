@@ -40,7 +40,7 @@ struct PackVerifierTests {
     @Test func firstInstallAllowsAnyVersion() throws {
         #expect(try PackFixtures.verifier().verify(packAt: PackFixtures.valid(), expectedExamID: "test-alpha", currentVersion: nil).packVersion == "1.0.0")
     }
-    @Test(arguments: ["exam.json", "questions"])
+    @Test(arguments: ["exam.json", "questions", "manifest.json", "manifest.sig"])
     func symlinkIsRejected(path: String) throws {
         let root = PackFixtures.temporary()
         defer { try? FileManager.default.removeItem(at: root) }
@@ -55,6 +55,13 @@ struct PackVerifierTests {
         } catch {
             guard case .unsafePath = error else { Issue.record("\(error)"); return }
         }
+    }
+    @Test func extraUnlistedSymlinkIsAccepted() throws {
+        let root = PackFixtures.temporary()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let pack = try PackFixtures.copy(to: root)
+        try FileManager.default.createSymbolicLink(at: pack.appending(path: "extra.json"), withDestinationURL: root.appending(path: "outside"))
+        #expect(try PackFixtures.verifier().verify(packAt: pack, expectedExamID: "test-alpha", currentVersion: nil).packVersion == "1.0.0")
     }
     @Test func signatureCheckedBeforeDecode() throws {
         let root = PackFixtures.temporary()
