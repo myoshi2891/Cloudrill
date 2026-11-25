@@ -27,7 +27,7 @@
 |---|---|---|---|---|---|---|
 | E2E-07-01 | リポジトリのコンテンツの検証(AC-06) | `content/.venv/bin/python content/scripts/validate.py` を実行する | error が 0 件で、終了コードが 0 である | 自動: `test_cli.test_repository_content_has_no_errors`、CI の `content-validate.yml` | 現在 | 未実施 |
 | E2E-07-02 | 原稿から署名付きパックまで | fixture の原稿から、パックをビルドし、署名し、検証する | 検証に通るパックができる。同じ入力なら、同じバイト列になる | 自動: `test_build_pack.test_build_is_deterministic`、`test_sign.test_sign_and_verify`、`test_generated.test_packs_match_generator` | 現在 | 未実施 |
-| E2E-07-03 | パックからアプリの起動まで | 開発用の同梱パックで、アプリの構成を作る | 同梱パックがそろっていて署名の検証に通り、試験を読み込める | 自動: `AppEnvironmentTests.bundledPacksArePresentAndSignaturesVerify`、`uiTestingParsesArgumentsAndBootstrapsFixture` | 現在 | 未実施 |
+| E2E-07-03 | パックからアプリの起動まで | 開発用の同梱パックで、アプリの構成を作る | 期待する試験がカタログにあり、そのパックがそろっている。署名の検証に通り、試験を読み込める | 署名の検証と起動は 自動: `AppEnvironmentTests.bundledPacksArePresentAndSignaturesVerify`(カタログに載っている `available` の試験の `latestPackVersion` だけを検証する。カタログから試験が欠けていても成功する)、`uiTestingParsesArgumentsAndBootstrapsFixture`(`test-alpha` の 1.0.0 で起動する)。期待する試験とパックがそろっていることは自動(追加) | 現在 | 未実施 |
 | E2E-07-04 | 同梱パックの再生成 | `scripts/bundle_packs.sh --development --out <新しいディレクトリ>` を実行し、コミット済みの `ExamPrepApp/Resources/Packs` と比べる | 内容が一致する。既存の出力先を指定すると、上書きせずに失敗する | 手動 | 現在 | 未実施 |
 | E2E-07-05 | 問題の修正の流れ | 問題を 1 問直し、改訂番号と版を上げてビルドする | 問題のオブジェクトのうち、変わるのが直した 1 問だけで、その改訂番号が 1 つ上がる。ビルドの出力で、変わるファイルが、その問題を含むものと、索引・manifest だけである | 問題のオブジェクトの比較は 自動: `test_generated.test_revised_pack_changes_one_question`(生成済みの fixture のパックの問題を比べる。ビルドの出力のファイルは比べない)。2 つの版をビルドしてファイルを比べることは自動(追加) | 現在 | 未実施 |
 | E2E-07-06 | 検証の error での停止 | error のあるコンテンツで、パックをビルドする | ビルドが止まり、出力先に何も残らない | 自動: `test_build_pack.test_build_aborts_on_validation_error` | 現在 | 未実施 |
@@ -42,7 +42,8 @@
 
 ## 3. 既存のテストで覆われていない点
 
-- **経路の各区間**は、自動テストで確認している(E2E-07-01〜03、05、06)。**区間をつないだ全体**(原稿を直してから、アプリの画面に出るまで。E2E-07-09)を通す自動テストは見当たらない。
+- **E2E-07-03**: 期待する試験(`test-alpha`・`test-beta`)とそのパックがそろっていること。既存のテストはカタログの内容を基準にするので、試験の欠落と、最新でない同梱版(`test-alpha` の 1.0.0)の署名を確認しない。
+- **経路の各区間**は、自動テストで確認している(E2E-07-01〜03、05、06。E2E-07-03 のパックの完全性と、E2E-07-05 のビルドの出力の比較を除く)。**区間をつないだ全体**(原稿を直してから、アプリの画面に出るまで。E2E-07-09)を通す自動テストは見当たらない。
 - **E2E-07-04**: DDD-P4 に、52 ファイルの再生成が一致したという記録がある。コミット済みの同梱パックと、生成器の出力の一致を、CI で確認しているかは特定できなかった。
 - **E2E-07-08**: ワークフローの `paths` の設定は目視できるが、実際のプルリクエストでの動作と、リモートの CI の結果は未確認である(CLAUDE.md の記載)。
 - **E2E-07-10、11**: 本番のコンテンツがまだない(`content/catalog.yaml` の `gcp-pca` は `comingSoon`)。
