@@ -27,7 +27,7 @@
 | SEC-05-02 | `PackFiles.data` が、読み込みのたびにパック内のパスの各要素を確認し、シンボリックリンクを拒否する(同梱パックは起動時に `PackVerifier` を通らないため、検証済みであることを前提にしない)。既存の確認(先頭の `/`、`..`、パックの外への正規化)も保つ | `PackLoaderTests.symlinkIsRejectedAtRead`(読み込み後に本文をパックの外へのシンボリックリンクに置き換え、`unsafe path` で拒否される)と、`missingAndUndecodableFiles`・`rejectsForeignDocEntry` が成功すること | FileReading.swift | 現在 | 未確認 |
 | SEC-05-03 | 試験 ID・版・問題 ID など、ファイル名やパスに使う値を、パスを組み立てる前に形式で確認する | `PackStore.examPath`(試験 ID の正規表現)、`checkVersion`(SemVer)を目視する。問題 ID からパスを作る箇所を洗い出し、同じ確認があることを確認する | PackStore.swift、PackContent.swift | 現在 | 未確認 |
 | SEC-05-04 | 未知の列挙値・未知の形式のデータを、黙って無視せずにエラーにする | `FixtureDecodingTests` と `ContentIntegrityCheckerTests` が通る。未知の `QuestionKind` を含むパックが `failures` に入ること | DomainModels、ContentIntegrityChecker.swift | 現在 | 未確認 |
-| SEC-05-05 | 参照 URL と公式リンク(`Reference.url`、`officialURL`)が https だけである | `common.schema.json` の `HttpsURL` の正規表現と、それを使う Schema の一覧を確認する。`http://` と `javascript:` の値が CI-01 で拒否されること | common.schema.json、ReferenceLink.swift、CaseStudySections.swift | 現在 | 未確認 |
+| SEC-05-05 | 参照 URL と公式リンク(`Reference.url`、`officialURL`)が https だけである。CI の Schema 検証に加え、アプリもデコード時に https 以外を拒否し、SwiftUI の `Link` に渡さない | **CI**: `common.schema.json` の `HttpsURL` の正規表現と、それを使う Schema の一覧を確認する。`http://` と `javascript:` の値が CI-01 で拒否されること。**アプリ**: `Link` に URL を渡す箇所が `ReferenceLink` と `CaseStudySections` だけで、渡す値が `Reference.url` と `CaseStudy.officialURL` であること。両方の `init(from:)` が `decodeHTTPSURL` を使うことを目視する(問題・`docs/index.json`・`cases.json` のすべての読み込みが通る)。`CustomDecodingTests` の `httpsLinks`・`nonHTTPSLinks` と、`PackLoaderTests.nonHTTPSLinkIsRejectedAtLoad`(3 経路)が通る | common.schema.json、Common.swift、CaseStudy.swift、ReferenceLink.swift、CaseStudySections.swift | 現在 | 未確認 |
 | SEC-05-06 | Markdown の本文内のリンクも https だけで、行き先は許可したホスト(公式ドキュメントなど、意図して載せる行き先)に限る。それ以外のスキームと、許可していないホストへの https のリンクは、検証ツールで拒否するか、アプリで開かない。許可したホストへの https のリンクは開ける | `[x](javascript:alert(1))`、`[x](file:///etc/hosts)`、`[x](tel:110)`、許可していないホストへの `[x](https://unexpected.example/)` を含むドキュメントと、許可したホストへの https のリンクを含むドキュメントで、`validate.py` の結果と、アプリでタップしたときの挙動を記録する。前の 4 つは拒否されるか開かれず、許可したホストへのリンクは開くこと | MarkdownView.swift 82〜83 行目、検証ルール | 現在 | 未確認 |
 | SEC-05-07 | Markdown の HTML を解釈しない。画像はパックの中の相対パスだけを解決し、外部の URL を取得しない | `MarkdownDocument` のテストで、`<script>` が文字列として出ること、`![](https://example.com/a.png)` と `![](../a.png)` の `path` が `nil` になることを確認する | MarkdownDocument.swift `packAssetPath` | 現在 | 未確認 |
 | SEC-05-08 | パック・ファイル・JSON の大きさに上限がある。上限を超えたら読み込みを中止する | 上限の定義を確認する。数百 MB のファイルを持つパックで、検証と読み込みがメモリを使い切らないこと | PackVerifier.swift、FileReading.swift | P5 | 未確認 |
@@ -38,12 +38,12 @@
 
 - `PackFiles.data` は、先頭の `/`、`..` の要素、正規化後のパスがパックの外に出ることを確認する。2026-11-17 に、パスの各要素がシンボリックリンクでないことの確認を足した(`PackVerifier.checkPath` と同じ方法)。アプリの読み込み経路(`ExamCatalogService`、`ExamContentResolver`)は `PackVerifier` を通らないため、読み込み時の確認で守る。
 - `PackStore.examPath` は試験 ID を `\A[a-z0-9]+(?:-[a-z0-9]+)*\z` で確認し、パスの各要素がシンボリックリンクでないことを確認する。
-- `HttpsURL` は `^https://[^\s/$.?#][^\s]*$` である。`ReferenceLink` と `CaseStudySections` は、デコード済みの `URL` を SwiftUI の `Link` に渡す。
+- `HttpsURL` は `^https://[^\s/$.?#][^\s]*$` である。`ReferenceLink` と `CaseStudySections` は、デコード済みの `URL` を SwiftUI の `Link` に渡す。2026-11-26 に、`Reference.url` と `CaseStudy.officialURL` のデコード時に、スキーム(小文字の `https`)とホストの有無の確認を足した。
 - Markdown の本文内のインラインは、`AttributedString(markdown:)`(`inlineOnlyPreservingWhitespace`)で変換して `Text` に渡す。リンクのスキームを確認する処理は、アプリにも検証ルールにも見当たらない(SEC-05-06)。
 - HTML ブロックは解釈せず、元の文字列を段落として出す。
 - `packAssetPath` は、絶対パス、`\`、先頭の要素の `:`(スキームつき)、`..`、空の要素を拒否する。
 - YAML のローダーは `CSafeLoader`(無ければ `SafeLoader`)である。
-- リンク切れの確認は `httpx` を使い、タイムアウトと同時実行数を設定から読む。2026-11-25 に、リダイレクトをたどらず 3xx を報告する方式に決め、`PublicOnlyTransport` を足した。名前解決の結果がすべて公開アドレスの場合だけ、確認したアドレスに接続する(`Host` と SNI は元のホスト名)。環境変数のプロキシは使わない。転送される URL は、コンテンツ側で転送先に直す必要がある。
+- リンク切れの確認は `httpx` を使い、タイムアウトと同時実行数を設定から読む。2026-11-25 に、リダイレクトをたどらず 3xx を報告する方式に決め、`PublicOnlyTransport` を足した。名前解決の結果がすべて公開アドレスの場合だけ、確認したアドレスに接続する(`Host` と SNI は元のホスト名)。環境変数のプロキシは使わない。2026-11-26 に、すべての要求に `Connection: close` を付け、同じ IP の別ホストで開いた接続を再利用しないようにした。転送される URL は、コンテンツ側で転送先に直す必要がある。
 
 ## 4. 未決事項
 
