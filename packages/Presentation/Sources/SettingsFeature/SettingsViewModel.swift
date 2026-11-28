@@ -11,6 +11,25 @@ public enum DataDeletionScope: Equatable, Sendable {
     case all
 }
 
+/// 設定のシートは開くたびに ViewModel を作り直すので、書き出しと削除の調整はインスタンスをまたいで共有する。
+/// 削除を確定すると、書き出し先のディレクトリごとに世代を進める。書き出しは開始時の世代を覚え、
+/// 書き込みの直前(MainActor 上で同期的に)に世代と削除中かを確かめ、変わっていれば書き込まない。
+@MainActor enum ExportDeletionGuard {
+    private static var generations: [String: Int] = [:]
+    private static var deleting: [String: Int] = [:]
+    static func generation(_ directory: URL) -> Int { generations[key(directory), default: 0] }
+    static func isDeleting(_ directory: URL) -> Bool { deleting[key(directory), default: 0] > 0 }
+    static func beginDeletion(_ directory: URL) {
+        generations[key(directory), default: 0] += 1
+        deleting[key(directory), default: 0] += 1
+    }
+    static func endDeletion(_ directory: URL) {
+        generations[key(directory), default: 0] += 1
+        deleting[key(directory), default: 0] -= 1
+    }
+    private static func key(_ directory: URL) -> String { directory.standardizedFileURL.path(percentEncoded: false) }
+}
+
 /// 設定(SCR-002)。試験ごとの学習設定、問題の表示、データの書き出し・削除、アプリについて。
 @MainActor @Observable public final class SettingsViewModel {
     public static let newCardsRange = 0...100
@@ -124,12 +143,29 @@ public enum DataDeletionScope: Equatable, Sendable {
     /// 全試験の学習データを JSON ファイルに書き出す。View は共有シートに渡す。
     public func exportData() async {
         guard !isBusy else { return }
+        // 削除の途中(別のシートの ViewModel を含む)では書き出さない
+        guard !ExportDeletionGuard.isDeleting(exportDirectory) else {
+            error = String(localized: "settings.exportFailed", bundle: .module)
+            return
+        }
+        let generation = ExportDeletionGuard.generation(exportDirectory)
         isExporting = true
         defer { isExporting = false }
-        exportFile = nil
+        // 失敗しても前のファイルの参照は残す(削除の確定で消すため)。参照を外すのは、
+        // 前のファイルを消せたときか、新しいファイルの書き出しに成功したときだけ
         do {
             let data = try await dataManagement.export(examID: nil)
             let url = exportDirectory.appending(path: exportFileName())
+            // 書き出しの読み取り中に削除が始まった(または終わった)なら、削除した学習データを含みうるので書かない。
+            // 古い書き出しはファイルも参照も変えずに終える。
+            // 確認から書き込みまで await を挟まないので、MainActor 上の削除と入れ替わらない
+            guard ExportDeletionGuard.generation(exportDirectory) == generation,
+                  !ExportDeletionGuard.isDeleting(exportDirectory) else {
+                self.error = String(localized: "settings.exportFailed", bundle: .module)
+                return
+            }
+            // 名前が同じなら atomic な書き込みで置き換わる。違えば(日付が変わった)、前のファイルを先に消す
+            if let previous = exportFile, previous != url { try removeExportFile() }
             try data.write(to: url, options: .atomic)
             exportFile = url; error = nil
         } catch {
@@ -137,11 +173,13 @@ public enum DataDeletionScope: Equatable, Sendable {
         }
     }
 
+    private static let exportFilePrefix = "cloudrill-export-"
+
     private func exportFileName() -> String {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = timeZone
         let parts = calendar.dateComponents([.year, .month, .day], from: time.now())
-        return String(format: "cloudrill-export-%04d%02d%02d.json", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
+        return String(format: Self.exportFilePrefix + "%04d%02d%02d.json", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
     }
 
     public func requestDelete(_ scope: DataDeletionScope) {
@@ -156,9 +194,19 @@ public enum DataDeletionScope: Equatable, Sendable {
         guard !isBusy else { return }
         pendingDeletion = nil
         isDeleting = true
-        defer { isDeleting = false }
+        // 進行中の書き出し(前に開いたシートのものを含む)が、削除のあとにファイルを書かないようにする
+        ExportDeletionGuard.beginDeletion(exportDirectory)
+        defer {
+            ExportDeletionGuard.endDeletion(exportDirectory)
+            isDeleting = false
+        }
         let target: ExamID? = scope == .exam ? examID : nil
         do {
+            // 書き出したファイルは全試験のデータを含むので、試験を指定した削除でも消す。
+            // 前に開いたシートが書き出したファイルも、このインスタンスは参照を持たないので、名前の形で探して消す。
+            // 消せなければ、学習データを消す前に失敗として扱う(SEC-04-08、SEC-04-09)
+            try removeExportFile()
+            try removeOutstandingExports()
             try await dataManagement.deleteAll(examID: target)
             try await reports.removeAll(examID: target)
         } catch {
@@ -167,5 +215,45 @@ public enum DataDeletionScope: Equatable, Sendable {
         }
         error = nil
         await onDeleted(target)
+    }
+
+    /// 書き出し先にある、このアプリの書き出しファイル(`cloudrill-export-*.json`)をすべて消す。
+    /// ディレクトリやファイルが無いことは削除できた場合と同じに扱い、ほかの失敗は投げる。
+    private func removeOutstandingExports() throws {
+        let names: [String]
+        do {
+            names = try FileManager.default.contentsOfDirectory(atPath: exportDirectory.path(percentEncoded: false))
+        } catch let error as CocoaError where error.code == .fileReadNoSuchFile || error.code == .fileNoSuchFile {
+            return
+        }
+        for name in names where Self.isExportFileName(name) {
+            // removeItem はディレクトリを再帰的に消すので、ディレクトリを消せない unlink を使う
+            let path = exportDirectory.appending(path: name).path(percentEncoded: false)
+            guard unlink(path) != 0 else { continue }
+            let code = errno
+            // すでに消えている場合だけ無視する
+            guard code != ENOENT else { continue }
+            throw POSIXError(POSIXErrorCode(rawValue: code) ?? .EIO)
+        }
+    }
+
+    /// `exportFileName()` が作る形(`cloudrill-export-YYYYMMDD.json`)だけを書き出しファイルとみなす。
+    private static func isExportFileName(_ name: String) -> Bool {
+        let suffix = ".json"
+        guard name.hasPrefix(exportFilePrefix), name.hasSuffix(suffix) else { return false }
+        let stamp = name.dropFirst(exportFilePrefix.count).dropLast(suffix.count)
+        return stamp.count == 8 && stamp.allSatisfy { $0.isASCII && $0.isNumber }
+    }
+
+    private func removeExportFile() throws {
+        guard let file = exportFile else { return }
+        // 存在の確認と削除の間に状態が変わりうるので、削除を直接試す。
+        // 無視するのは「ファイルが無い」ことが確かな場合だけで、ほかの失敗は参照を残したまま投げる
+        do {
+            try FileManager.default.removeItem(at: file)
+        } catch let error as CocoaError where error.code == .fileNoSuchFile {
+            // すでに消えているので、削除できた場合と同じに扱う
+        }
+        exportFile = nil
     }
 }

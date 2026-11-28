@@ -14,6 +14,8 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 from contentvalidate.schemas import validator_for
 from .versions import version_key
 
+# Swift の PackLoader.loadedFiles と同じ。アプリが必ず読むファイルなので、manifest に載っていない(ハッシュを検証できない)パックを拒否する。
+LOADED_FILES = ("exam.json", "vendor.json", "questions/index.json", "exam-sets.json", "docs/index.json")
 
 class VerificationError(ValueError):
     """code は Swift の PackVerificationError の case に対応する snake_case。"""
@@ -25,6 +27,10 @@ class VerificationError(ValueError):
 
 
 def _check_signature(directory: Path, key_ring: Mapping[str, Ed25519PublicKey]) -> tuple[bytes, set[str]]:
+    # この2つは manifest の files に載らないので、_check_files ではなくここで確認する。
+    for name in ("manifest.json", "manifest.sig"):
+        if (directory / name).is_symlink():
+            raise VerificationError("unsafe_path", name)
     try:
         raw = (directory / "manifest.json").read_bytes()
     except OSError as error:
@@ -89,6 +95,10 @@ def _check_files(directory: Path, manifest: dict[str, Any]) -> None:
     validator = validator_for("manifest")
     root = directory.resolve()
     pattern = validator.schema["$defs"]["FileEntry"]["properties"]["path"]["pattern"]
+    # manifest に載っていない余分なファイルは、読まれないので許容する。
+    listed = {entry["path"] for entry in manifest["files"]}
+    if unlisted := next((path for path in LOADED_FILES if path not in listed), None):
+        raise VerificationError("file_missing", unlisted)
     for entry in manifest["files"]:
         relative = entry["path"]
         path = root / relative

@@ -51,5 +51,5 @@ choices:
     mistakeTags: [opsOverhead]
 references:
   - title: Cloud Storage に Terraform の状態を保存する
-    url: https://cloud.google.com/docs/terraform/resource-management/store-state
+    url: https://docs.cloud.google.com/docs/terraform/resource-management/store-state
     license: CC-BY-4.0

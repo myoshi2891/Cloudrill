@@ -181,7 +181,7 @@ tests/                    pytest と fixture(valid-json/ は Swift テストが�
 | CI-03 | 単一選択問題の正解位置(元の並び順)A〜D がそれぞれ 20〜30% | complete は error、draft は warning | `answerPosition.*`、`statistics.draftMinSample` |
 | CI-04 | 最長の選択肢(`ja` の文字数)が正解である問題の割合が 35% 以下 | complete は error、draft は warning | `longestChoice.*`、`statistics.draftMinSample` |
 | CI-05 | 全選択肢に `rationale.ja` があり、空白だけでない | error | — |
-| CI-06 | 参照 URL(`references[].url`、`officialURL`)のリンク切れ。`--check-links` を指定したときだけ実行する。HEAD を送り、405 なら GET で再試行する | warning | `links.*` |
+| CI-06 | 参照 URL(`references[].url`、`officialURL`)のリンク切れ。`--check-links` を指定したときだけ実行する。HEAD を送り、405 なら GET で再試行する。公開されていないアドレスの宛先には送らない。リダイレクトはたどらず報告するので、URL を転送先に直す | warning | `links.*` |
 | CI-07 | 試験内での問題 ID・カード ID・ドリル ID・ケース ID・ツリー ID の重複(試験が異なれば同じ ID でもよい) | error | — |
 | CI-07 | `stem.ja` の文字 3-gram の Jaccard 係数が 0.8 を超える組 | warning | `similarity.*` |
 | CI-08 | multiple の問題で `type.count` と正解数が一致する | error | — |

@@ -17,6 +17,8 @@
 "practice.progress" = "問 %d / %d";
 "practice.score" = "%d / %d 問正解";
 "practice.notAsked" = "出題なし";
+"practice.answers" = "解答した問題";
+"practice.answerRow" = "%d 問目";
 "practice.empty" = "該当する問題がありません";
 "practice.loadFailed" = "問題を読み込めませんでした。もう一度開始してください。";
 "practice.saveFailed" = "保存できませんでした。もう一度操作してください。";

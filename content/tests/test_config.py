@@ -74,9 +74,10 @@ def test_exam_config_merges_nested_mapping(tmp_path: Path) -> None:
 
 
 def test_exam_config_replaces_list(tmp_path: Path) -> None:
-    exam_dir = _exam_dir(tmp_path, {"links": {"retryWithGetOn": [405, 403]}})
+    # 全体は [405]。試験側の [403] で置き換わり、405 は残らない(和集合にしない)
+    exam_dir = _exam_dir(tmp_path, {"links": {"retryWithGetOn": [403]}})
     config = load_exam_config(_global(tmp_path), exam_dir)
-    assert config.thresholds.link_retry_get_on == frozenset({405, 403})
+    assert config.thresholds.link_retry_get_on == frozenset({403})
 
 
 def test_exam_config_without_exam_set_policy(tmp_path: Path) -> None:

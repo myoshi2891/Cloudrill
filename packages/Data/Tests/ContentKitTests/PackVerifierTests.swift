@@ -1,3 +1,4 @@
+import CryptoKit
 import Foundation
 import Testing
 import DomainModels
@@ -39,7 +40,7 @@ struct PackVerifierTests {
     @Test func firstInstallAllowsAnyVersion() throws {
         #expect(try PackFixtures.verifier().verify(packAt: PackFixtures.valid(), expectedExamID: "test-alpha", currentVersion: nil).packVersion == "1.0.0")
     }
-    @Test(arguments: ["exam.json", "questions"])
+    @Test(arguments: ["exam.json", "questions", "manifest.json", "manifest.sig"])
     func symlinkIsRejected(path: String) throws {
         let root = PackFixtures.temporary()
         defer { try? FileManager.default.removeItem(at: root) }
@@ -55,6 +56,13 @@ struct PackVerifierTests {
             guard case .unsafePath = error else { Issue.record("\(error)"); return }
         }
     }
+    @Test func extraUnlistedSymlinkIsAccepted() throws {
+        let root = PackFixtures.temporary()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let pack = try PackFixtures.copy(to: root)
+        try FileManager.default.createSymbolicLink(at: pack.appending(path: "extra.json"), withDestinationURL: root.appending(path: "outside"))
+        #expect(try PackFixtures.verifier().verify(packAt: pack, expectedExamID: "test-alpha", currentVersion: nil).packVersion == "1.0.0")
+    }
     @Test func signatureCheckedBeforeDecode() throws {
         let root = PackFixtures.temporary()
         defer { try? FileManager.default.removeItem(at: root) }
@@ -64,6 +72,81 @@ struct PackVerifierTests {
         #expect(throws: PackVerificationError.signatureInvalid) {
             try verifier.verify(packAt: pack, expectedExamID: "test-alpha", currentVersion: nil)
         }
+    }
+    @Test func resignedManifestStillVerifies() throws {
+        // Arrange: 書き換えなしで署名し直す(以降のテストの前提の確認)
+        let root = PackFixtures.temporary()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let pack = try PackFixtures.copy(to: root)
+        try resign(pack) { _ in }
+        // Act / Assert
+        #expect(try PackFixtures.verifier().verify(packAt: pack, expectedExamID: "test-alpha", currentVersion: nil).packVersion == "1.0.0")
+    }
+    // PackLoader.loadedFiles から外しても確認が消えないよう、期待するパスを明示する
+    @Test(arguments: ["exam.json", "vendor.json", "questions/index.json", "exam-sets.json", "docs/index.json"])
+    func unlistedLoadedFileIsRejected(path: String) throws {
+        // Arrange: PackLoader が読むファイルを manifest から外し、正しく署名する
+        let root = PackFixtures.temporary()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let pack = try PackFixtures.copy(to: root)
+        try resign(pack) { $0.files.removeAll { $0.path == path } }
+        // Act / Assert
+        let verifier = try PackFixtures.verifier()
+        #expect(throws: PackVerificationError.fileMissing(path)) {
+            try verifier.verify(packAt: pack, expectedExamID: "test-alpha", currentVersion: nil)
+        }
+    }
+    @Test func modifiedUnlistedLoadedFileIsRejected() throws {
+        // Arrange: manifest から外した exam.json を書き換える(ハッシュの検証を逃れる経路)
+        let root = PackFixtures.temporary()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let pack = try PackFixtures.copy(to: root)
+        try resign(pack) { $0.files.removeAll { $0.path == "exam.json" } }
+        try Data("{}".utf8).write(to: pack.appending(path: "exam.json"))
+        // Act / Assert
+        let verifier = try PackFixtures.verifier()
+        #expect(throws: PackVerificationError.fileMissing("exam.json")) {
+            try verifier.verify(packAt: pack, expectedExamID: "test-alpha", currentVersion: nil)
+        }
+    }
+    @Test func extraUnlistedFileIsAccepted() throws {
+        // Arrange: manifest に載っていない余分なファイル。PackLoader は読まないので許容する
+        let root = PackFixtures.temporary()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let pack = try PackFixtures.copy(to: root)
+        try Data("{}".utf8).write(to: pack.appending(path: "extra.json"))
+        // Act
+        let manifest = try PackFixtures.verifier().verify(packAt: pack, expectedExamID: "test-alpha", currentVersion: nil)
+        let reader = SpyFileReader()
+        _ = try PackLoader(fileReader: reader).load(packAt: pack, manifest: manifest)
+        // Assert
+        #expect(!manifest.files.contains { $0.path == "extra.json" })
+        #expect(!reader.paths.contains { $0.hasSuffix("extra.json") })
+    }
+    @Test func keyIDNamingAnotherTrustedKeyIsRejected() throws {
+        // Arrange: 鍵リングの test-2026 で署名し、manifest の keyID は同じく信頼する test-next にする
+        let root = PackFixtures.temporary()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let pack = try PackFixtures.copy(to: root)
+        try resign(pack, signer: "test-2026") { $0.keyID = "test-next" }
+        let verifier = try PackFixtures.verifier()
+        // Act / Assert: 署名を検証できた鍵と keyID が一致しないので拒否する
+        #expect(throws: PackVerificationError.signatureInvalid) {
+            try verifier.verify(packAt: pack, expectedExamID: "test-alpha", currentVersion: nil)
+        }
+    }
+    /// manifest を書き換え、テスト鍵で署名し直す。鍵は contentpack.testing.test_signing_key と同じ導出で、ファイルに保存しない。
+    /// `signer` を省略すると、manifest の keyID の鍵で署名する。
+    private func resign(_ pack: URL, signer: String? = nil, _ edit: (inout Manifest) -> Void) throws {
+        var manifest = try ContentDecoder.make().decode(Manifest.self, from: Data(contentsOf: pack.appending(path: "manifest.json")))
+        edit(&manifest)
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let raw = try encoder.encode(manifest)
+        let seed = Data(SHA256.hash(data: Data("examprep-test-key:\(signer ?? manifest.keyID)".utf8)))
+        let key = try Curve25519.Signing.PrivateKey(rawRepresentation: seed)
+        try raw.write(to: pack.appending(path: "manifest.json"))
+        try key.signature(for: raw).base64EncodedData().write(to: pack.appending(path: "manifest.sig"))
     }
     @Test(arguments: ["manifest.json", "manifest.sig"])
     func missingMetadata(path: String) throws {

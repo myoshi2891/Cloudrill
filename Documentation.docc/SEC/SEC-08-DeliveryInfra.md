@@ -1,0 +1,52 @@
+# SEC-08 配信基盤とクラウドの権限
+
+| 項目 | 内容 |
+|---|---|
+| 文書バージョン | 0.1(初版ドラフト) |
+| 作成日 | 2026-11-17 |
+| 上位文書 | [セキュリティ確認項目書(索引)](../SEC.md) |
+| 対応要件 | NFR-05、NFR-10、AC-05、BDD 7.1、BDD 8.5、[DDD-P5](../DDD/DDD-P5-Delivery.md) 3.1・P5-S01・P5-S02・P5-S07・P5-S08 |
+| 対象 | P5 で作る `.github/workflows/content-release.yml`、`infra/`(または手順書)、Google Cloud のプロジェクト(Cloud Storage、Cloud CDN、Secret Manager、Workload Identity 連携、Cloud Run、Firestore) |
+
+---
+
+## 1. 守るものと想定する脅威
+
+守るものは、配信用のバケット、署名鍵、リリースの経路である。
+
+- リリース用のワークフローやサービスアカウントを、想定外のブランチ・フォーク・リポジトリから使われる。
+- バケットに直接書き込まれる、または公開の設定を変えられる。
+- ステージングの設定や鍵が、本番で使われる。
+
+この確認項目書の項目は、配信基盤がまだ無いため、すべて P5 以降に確認する。
+
+## 2. 確認項目
+
+| ID | 確認項目 | 確認方法 | 対象 | 時期 | 結果 |
+|---|---|---|---|---|---|
+| SEC-08-01 | 配信用のバケットは公開アクセスを禁止し、均一なバケットレベルのアクセスにする。読めるのは CDN のバックエンドだけである | `gcloud storage buckets describe` で `publicAccessPrevention: enforced` と `uniformBucketLevelAccess` を確認する。バケットの URL に直接アクセスして 403 になること。あわせて、実効の読み取り権限を確認する。バケットの IAM ポリシーと、プロジェクト・フォルダ・組織から継承するロール(`storage.objects.get` を含むもの。`roles/storage.objectViewer`・`roles/viewer`・`roles/owner`・`roles/editor`・`roles/storage.admin` など)を含めて、オブジェクトを読めるプリンシパルが CDN のバックエンド(とリリース用のサービスアカウント)だけであること(Policy Analyzer の `gcloud asset analyze-iam-policy --permissions=storage.objects.get` などで確認する) | P5-S07 | P5 | 未確認 |
+| SEC-08-02 | バケットに書き込めるのは、リリース用のサービスアカウントだけである | バケットの IAM ポリシーだけでなく、実効の書き込み権限を確認する。プロジェクト・フォルダ・組織の各レベルから継承するロール(`storage.objects.create`・`storage.objects.delete` を含むもの。`roles/owner`・`roles/editor`・`roles/storage.admin` など)を含めて、書き込めるプリンシパルがリリース用のサービスアカウントだけであること(Policy Analyzer の `gcloud asset analyze-iam-policy` などで確認する)。あわせて、バケットの IAM ポリシーに `allUsers`、`allAuthenticatedUsers`、不要な人のアカウントが無いこと。さらに、リリース用のサービスアカウントになりすませる主体も、実質的に書き込める主体として確認する。Policy Analyzer は既定ではなりすましを経由したアクセスを展開しないので、バケットの分析に `--analyze-service-account-impersonation` を付けるか、リリース用のサービスアカウントに対して `iam.serviceAccounts.getAccessToken`・`iam.serviceAccounts.signJwt`・`iam.serviceAccounts.signBlob`・`iam.serviceAccountKeys.create` を持つ主体を、プロジェクト・フォルダ・組織から継承するポリシーとロールを含めて分析する(例: `gcloud asset analyze-iam-policy --organization=<組織 ID> --full-resource-name=<サービスアカウント> --permissions=iam.serviceAccounts.getAccessToken,iam.serviceAccounts.signJwt,iam.serviceAccounts.signBlob,iam.serviceAccountKeys.create`)。これらの主体が承認されたもの(リリースのワークフローの Workload Identity 連携など)だけであること。SEC-02-01 と同じ確認を共有してよい | P5-S07 | P5 | 未確認 |
+| SEC-08-03 | 公開済みの版(`packs/<examID>/<ver>/`)を上書き・削除できない、または上書きを検知できる | 同じ版をもう一度リリースして失敗すること。加えて、ワークフローを通さない直接の変更を確かめる。この確認は、利用者に届くオブジェクトでは行わない。確認専用の版(ステージングのバケット、または本番と同じ保持ポリシー・権限を適用した、カタログに載せない確認用の版)を公開済みと同じ手順で置き、そのオブジェクトを `gcloud storage cp` で上書きし、`gcloud storage rm` で削除しようとして、保持ポリシー(ロック)・権限で拒否されるか、Cloud Audit Logs の書き込みログからのアラートで検知されること。ステージングでの確認は本番の設定の確認にならないので、本番については別に確かめる。本番のバケットで Cloud Storage の `DATA_WRITE` の監査ログが実際に有効であること(プロジェクト・フォルダ・組織の監査ログの設定を含む)と、そのログに対するアラートのポリシーと通知先を確認する。または、本番のバケットに、カタログに載せず利用者に届かない確認専用のオブジェクトを置き、それに対して上書き・削除を試す。どちらの場合も、利用者に届くオブジェクトは変更しない。オブジェクトのバージョニングは復元の手段であって、防止・検知にはならないので、それだけでは適合としない | P5-S01 | P5 | 未確認 |
+| SEC-08-04 | CDN は HTTPS だけで配信する。HTTP は HTTPS へ転送するか、拒否する | `curl -I http://…` と `https://…` の応答を確認する。TLS の最小バージョンのポリシーを確認する | P5-S07 | P5 | 未確認 |
+| SEC-08-05 | Workload Identity 連携の条件が、このリポジトリと、リリースのタグ(`content/<examID>/vX.Y.Z`)に限定されている | プロバイダーの属性の条件(`assertion.repository`、`assertion.ref`)を確認する。別のブランチと、フォークからの実行で認証が失敗すること | P5-S07 | P5 | 未確認 |
+| SEC-08-06 | リリース用のサービスアカウントの権限が、対象のバケットへの書き込みと、署名鍵の読み取りだけである | サービスアカウントに付いたロールの一覧を確認する。プロジェクト単位の広いロール(`Editor`、`Owner`、`Storage Admin`)が無いこと | P5-S01 手順 5 | P5 | 未確認 |
+| SEC-08-07 | リリースのワークフローの `permissions` が `contents: read` と `id-token: write` だけである。サービスアカウントの鍵ファイル(JSON)を使わない | `content-release.yml` を目視する。リポジトリのシークレットに、サービスアカウントの鍵が無いこと | P5-S01 | P5 | 未確認 |
+| SEC-08-08 | リリースのタグを作れる人が限られている。タグの保護ルールがある | GitHub のタグの保護(ルールセット)と、本番用の Environment の承認者を確認する | GitHub の設定 | リリース前 | 未確認 |
+| SEC-08-09 | ステージングと本番で、プロジェクト(またはバケット・鍵・サービスアカウント)が分かれている。ステージングの鍵で署名したパックを、本番のアプリが受け入れない | 両環境のリソースの一覧を比べる。ステージングのパックを本番のアプリに読ませ、`signatureInvalid` になること | P5-S07、SEC-02-02 | リリース前 | 未確認 |
+| SEC-08-10 | ステージングで、改ざんしたパックがインストールされないことを確認する(AC-05 の後半) | P5-S08 の手順 3 の記録 | P5-S08 | P5 | 未確認 |
+
+## 3. 事前調査で把握した現状
+
+- 配信基盤、`content-release.yml`、`infra/` はまだ無い(BDD 10 章に「未実装」とある)。
+- 設計(DDD-P5 P5-S07)では、バケットは公開アクセスを無効にして CDN 経由でだけ読めるようにし、署名鍵は Secret Manager に置いて、リリース用のサービスアカウントだけが読む。
+- 設計(DDD-P5 P5-S01 手順 5)では、ワークフローの `permissions` を `contents: read` と `id-token: write` だけにする。
+- キャッシュは、`catalog.json` が 5 分、`packs/**` が 1 年である。誤ったパックを公開した場合、同じ版を差し替えても利用者に届かないので、新しい版を出す運用になる。
+
+## 4. 未決事項
+
+| No. | 内容 | 決める時期 |
+|---|---|---|
+| 1 | Terraform を使うか、手順書にするか(DDD 8 章)。権限の確認方法がこれで変わる | P5 の着手前 |
+| 2 | 公開済みの版の上書きを防ぐ方法(SEC-08-03) | P5-S01 |
+| 3 | 誤ったパックを公開したときの取り下げの手順(カタログを前の版へ戻せるか。アプリは `notNewer` で版戻しを拒否するため、修正版を新しい番号で出す必要がある) | P5-S02 |
+| 4 | 監査ログ(Secret Manager へのアクセス、バケットの設定変更)を残す範囲と、アラートの条件 | リリース前 |

@@ -60,5 +60,5 @@ choices:
     mistakeTags: [compliance, requirementMismatch]
 references:
   - title: Dedicated Interconnect の概要
-    url: https://cloud.google.com/network-connectivity/docs/interconnect/concepts/dedicated-overview
+    url: https://docs.cloud.google.com/network-connectivity/docs/interconnect/concepts/dedicated-overview
     license: CC-BY-4.0

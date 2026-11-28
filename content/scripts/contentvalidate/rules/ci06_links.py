@@ -10,6 +10,7 @@ import httpx
 
 from ..context import GlobalContext, Rule, walk
 from ..model import Issue, JsonPath, Kind, Severity, SourceDoc
+from ..public_transport import NonPublicAddressError, PublicOnlyTransport
 
 RULE_ID = "CI-06"
 # URL を持つフィールド名
@@ -29,14 +30,18 @@ def collect_urls(ctx: GlobalContext) -> dict[str, list[tuple[SourceDoc, JsonPath
 
 
 def probe(client: httpx.Client, url: str, retry_get_on: frozenset[int]) -> str | None:
-    """問題があれば理由を返す。HEAD を送り、指定ステータスなら GET で再試行する。"""
+    """問題があれば理由を返す。HEAD を送り、指定ステータスなら GET で再試行する。リダイレクトはたどらず報告する。"""
     try:
         response = client.head(url)
         if response.status_code in retry_get_on:
             with client.stream("GET", url) as streamed:
                 response = streamed
+        if 300 <= response.status_code < 400:
+            return f"HTTP {response.status_code}: リダイレクト"
         if response.status_code >= 400:
             return f"HTTP {response.status_code}"
+    except NonPublicAddressError as e:
+        return str(e)
     except httpx.TimeoutException:
         return "タイムアウト"
     except httpx.HTTPError as e:
@@ -52,11 +57,17 @@ def check(ctx: GlobalContext) -> Iterator[Issue]:
     urls = collect_urls(ctx)
     if not urls:
         return
+    # 接続先を IP で指定するので、httpcore のプールは同じ IP の別ホストを区別しない。
+    # httpcore 1.0.9(uv.lock)の max_keepalive_connections=0 は、割り当ての前に idle の接続を掃除するだけで、
+    # 並行時には再利用を防ぎきれない。PublicOnlyTransport が全要求に Connection: close を付け、
+    # 接続を idle に戻さずに閉じることで、要求ごとに別の接続にする。
+    inner = ctx.transport or httpx.HTTPTransport()
     client = httpx.Client(
         timeout=cfg.link_timeout,
-        follow_redirects=True,
+        follow_redirects=False,
+        trust_env=False,  # プロキシの環境変数で宛先の確認を迂回させない
         headers={"User-Agent": cfg.link_user_agent},
-        transport=ctx.transport,
+        transport=PublicOnlyTransport(inner),
     )
     with client, ThreadPoolExecutor(max_workers=max(1, cfg.link_concurrency)) as pool:
         ordered = sorted(urls)

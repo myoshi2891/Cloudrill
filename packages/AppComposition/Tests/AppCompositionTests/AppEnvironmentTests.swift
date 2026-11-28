@@ -23,6 +23,9 @@ import DesignSystem
             "-advance-on-launch", "7200", "-content-fixture", "test-alpha", "-store-in-memory", "-network", "offline"],
             packsRoot: Self.packs, workingDirectory: root)
         #expect(environment.dependencies.time.now() == ISO8601DateFormatter().date(from: "2026-11-01T11:00:00Z"))
+        // 乱数の seed も固定される(出題順・選択肢の並びを UI テストで再現するため)
+        #expect(environment.dependencies.seedProvider() == 42)
+        #expect(environment.dependencies.seedProvider() == 42)
         #expect(environment.isInMemory)
         #expect(environment.activeExam.state.examID == "test-alpha")
         #expect(environment.activeExam.content?.packVersion == "1.0.0")
@@ -281,6 +284,7 @@ import DesignSystem
         ["-fixed-now", "bad"], ["-store-in-memory", "-store-path", "/tmp/history"],
         ["-advance-on-launch", "nan"], ["-advance-on-launch", "-1"], ["-content-fixture", "../escape"],
         ["-store-path", "relative"], ["-network", "online"], ["-fixed-now"], ["-unknown"],
+        ["-network", "offline", "-network", "offline"], ["-store-in-memory", "-store-in-memory"],
     ]) func invalidArgumentsAreRejected(arguments: [String]) {
         #expect(throws: UITestingConfigurationError.self) { try UITestingConfiguration(arguments: ["-ui-testing"] + arguments) }
     }

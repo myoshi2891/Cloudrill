@@ -74,13 +74,48 @@ private struct BlockView: View {
     }
 }
 
+/// 本文内のリンクの許可方針(SEC-05-06)。https で、許可したホストへのリンクだけを開ける。
+/// 許可するホストの一覧は未決(SEC-05 未決事項 1)のため、既定は空で、すべてのリンクを開かない。
+public struct MarkdownLinkPolicy: Sendable, Equatable {
+    public let allowedHosts: Set<String>
+    public init(allowedHosts: Set<String>) { self.allowedHosts = Set(allowedHosts.map { $0.lowercased() }) }
+    public static let denyAll = MarkdownLinkPolicy(allowedHosts: [])
+
+    public func permits(_ url: URL) -> Bool {
+        guard url.scheme?.lowercased() == "https", let host = url.host()?.lowercased(), !host.isEmpty else { return false }
+        return allowedHosts.contains(host)
+    }
+
+    /// 許可しないリンクの属性を外す。文字列はそのまま残し、タップしても開かない
+    public func sanitized(_ attributed: AttributedString) -> AttributedString {
+        var result = attributed
+        for (link, range) in attributed.runs[\.link] {
+            guard let link, !permits(link) else { continue }
+            result[range].link = nil
+        }
+        return result
+    }
+}
+
+private struct MarkdownLinkPolicyKey: EnvironmentKey {
+    static let defaultValue = MarkdownLinkPolicy.denyAll
+}
+
+extension EnvironmentValues {
+    public var markdownLinkPolicy: MarkdownLinkPolicy {
+        get { self[MarkdownLinkPolicyKey.self] }
+        set { self[MarkdownLinkPolicyKey.self] = newValue }
+    }
+}
+
 /// インラインの Markdown(強調・リンク・コード)。解釈できなければ元の文字列を出す
 private struct InlineText: View {
+    @Environment(\.markdownLinkPolicy) private var linkPolicy
     private let source: String
     init(_ source: String) { self.source = source }
     var body: Text {
         let options = AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlineOnlyPreservingWhitespace)
-        if let attributed = try? AttributedString(markdown: source, options: options) { return Text(attributed) }
+        if let attributed = try? AttributedString(markdown: source, options: options) { return Text(linkPolicy.sanitized(attributed)) }
         return Text(source)
     }
 }

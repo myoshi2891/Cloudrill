@@ -51,5 +51,5 @@ choices:
     mistakeTags: [requirementMismatch]
 references:
   - title: 稼働時間チェックの作成
-    url: https://cloud.google.com/monitoring/uptime-checks
+    url: https://docs.cloud.google.com/monitoring/uptime-checks
     license: CC-BY-4.0

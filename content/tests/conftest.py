@@ -10,6 +10,7 @@ import httpx
 import pytest
 import yaml
 
+from contentvalidate import public_transport
 from contentvalidate.config import GlobalConfig, load_config
 
 CONTENT_ROOT = Path(__file__).resolve().parents[1]
@@ -60,7 +61,7 @@ def copy_exam(root: Path, exam_id: str, source: str = "test-alpha") -> Path:
 
 def link_handler(request: httpx.Request) -> httpx.Response:
     """リンク確認用のモック。ネットワークには出ない。"""
-    host = request.url.host
+    host = request.headers["host"]  # URL のホストは確認済みの IP に置き換わっている
     if host == "broken.invalid":
         return httpx.Response(404)
     if host == "head-405.invalid":
@@ -68,6 +69,12 @@ def link_handler(request: httpx.Request) -> httpx.Response:
     if host == "timeout.invalid":
         raise httpx.ConnectTimeout("timed out", request=request)
     return httpx.Response(200)
+
+
+@pytest.fixture(autouse=True)
+def fake_resolution(monkeypatch: pytest.MonkeyPatch) -> None:
+    """CI-06 の名前解決を差し替える(テストで DNS に問い合わせない)。"""
+    monkeypatch.setattr(public_transport, "resolve_host", lambda host, port: ["93.184.216.34"])
 
 
 @pytest.fixture(scope="session")

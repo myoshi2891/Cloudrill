@@ -139,9 +139,11 @@ def test_unknown_key(pack):
 
 
 def test_verified_key_id_must_match(pack):
+    # test-2026 で署名し、keyID は同じく信頼する test-next にする(署名を検証できた鍵と keyID が一致しない)
     rewrite(pack, keyID="test-next")
     with pytest.raises(VerificationError, match="signature_invalid"):
-        verify(pack)
+        verify_pack(pack, expected_exam_id="test-alpha", key_ring={
+            "test-2026": signing_key("test-2026").public_key(), "test-next": signing_key("test-next").public_key()})
 
 
 def test_key_rotation_tries_all_keys(pack):
@@ -196,14 +198,19 @@ def test_unsafe_paths(pack, path):
         verify(pack)
 
 
-@pytest.mark.parametrize("directory", [False, True])
-def test_symlink_is_rejected(pack, tmp_path, directory):
-    path = pack / ("questions" if directory else "exam.json")
+@pytest.mark.parametrize("name", ["exam.json", "questions", "manifest.json", "manifest.sig"])
+def test_symlink_is_rejected(pack, tmp_path, name):
+    path = pack / name
     target = tmp_path / "outside"
     path.rename(target)
-    path.symlink_to(target, target_is_directory=directory)
+    path.symlink_to(target, target_is_directory=target.is_dir())
     with pytest.raises(VerificationError, match="unsafe_path"):
         verify(pack)
+
+
+def test_extra_unlisted_symlink_is_accepted(pack, tmp_path):
+    (pack / "extra.json").symlink_to(tmp_path / "outside")
+    verify(pack)
 
 
 def test_verification_order(pack):
@@ -255,3 +262,25 @@ def test_sign_rejects_invalid_semver(pack, field):
     with pytest.raises(SigningError):
         sign_manifest(path, "test-2026", signing_key("test-2026"))
     assert (pack / "manifest.sig").read_bytes() == before
+
+
+def _unlist(pack, path):
+    manifest = json.loads((pack / "manifest.json").read_bytes())
+    manifest["files"] = [entry for entry in manifest["files"] if entry["path"] != path]
+    raw = json.dumps(manifest).encode()
+    (pack / "manifest.json").write_bytes(raw)
+    (pack / "manifest.sig").write_bytes(base64.b64encode(signing_key("test-2026").sign(raw)))
+
+
+# LOADED_FILES から外しても確認が消えないよう、期待するパスを明示する
+@pytest.mark.parametrize("path", ["exam.json", "vendor.json", "questions/index.json", "exam-sets.json", "docs/index.json"])
+def test_unlisted_loaded_file_is_rejected(pack, path):
+    _unlist(pack, path)
+    with pytest.raises(VerificationError) as error:
+        verify(pack)
+    assert (error.value.code, error.value.detail) == ("file_missing", path)
+
+
+def test_extra_unlisted_file_is_accepted(pack):
+    (pack / "extra.json").write_text("{}", encoding="utf-8")
+    assert verify(pack)
