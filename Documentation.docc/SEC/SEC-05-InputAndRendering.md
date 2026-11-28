@@ -39,7 +39,7 @@
 - `PackFiles.data` は、先頭の `/`、`..` の要素、正規化後のパスがパックの外に出ることを確認する。2026-11-17 に、パスの各要素がシンボリックリンクでないことの確認を足した(`PackVerifier.checkPath` と同じ方法)。アプリの読み込み経路(`ExamCatalogService`、`ExamContentResolver`)は `PackVerifier` を通らないため、読み込み時の確認で守る。
 - `PackStore.examPath` は試験 ID を `\A[a-z0-9]+(?:-[a-z0-9]+)*\z` で確認し、パスの各要素がシンボリックリンクでないことを確認する。
 - `HttpsURL` は `^https://[^\s/$.?#][^\s]*$` である。`ReferenceLink` と `CaseStudySections` は、デコード済みの `URL` を SwiftUI の `Link` に渡す。2026-11-26 に、`Reference.url` と `CaseStudy.officialURL` のデコード時に、スキーム(小文字の `https`)とホストの有無の確認を足した。
-- Markdown の本文内のインラインは、`AttributedString(markdown:)`(`inlineOnlyPreservingWhitespace`)で変換して `Text` に渡す。リンクのスキームを確認する処理は、アプリにも検証ルールにも見当たらない(SEC-05-06)。
+- Markdown の本文内のインラインは、`AttributedString(markdown:)`(`inlineOnlyPreservingWhitespace`)で変換して `Text` に渡す。2026-11-28 に、アプリ側に `MarkdownLinkPolicy` を足した。`Text` に渡す前に、https 以外のスキームと許可していないホストのリンクの属性を外す(文字列は残し、タップしても開かない)。許可するホストは環境値 `markdownLinkPolicy` で渡し、一覧が未決(未決事項 1)のため、既定はすべて拒否する。検証ルールでの確認はまだない(SEC-05-06)。
 - HTML ブロックは解釈せず、元の文字列を段落として出す。
 - `packAssetPath` は、絶対パス、`\`、先頭の要素の `:`(スキームつき)、`..`、空の要素を拒否する。
 - YAML のローダーは `CSafeLoader`(無ければ `SafeLoader`)である。
